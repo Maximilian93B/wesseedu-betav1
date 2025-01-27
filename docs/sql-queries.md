@@ -16,22 +16,101 @@ CREATE TABLE users (
 
 -- **Companies Table**
 
+-- Main Companies Table
 CREATE TABLE companies (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique identifier for the company
-    name TEXT NOT NULL,                            -- Name of the company
-    street_address TEXT NOT NULL,                  -- Street address of the company
-    city TEXT NOT NULL,                            -- City of the company
-    state TEXT NOT NULL,                           -- State/Province of the company
-    country TEXT NOT NULL,                         -- Country of the company
-    postal_code TEXT NOT NULL,                     -- Postal code of the company
-    industry TEXT NOT NULL,                        -- Industry of the company
-    funding_goal NUMERIC(15, 2) NOT NULL,          -- Company's funding goal
-    is_verified BOOLEAN DEFAULT FALSE,            -- Email verification status
-    created_at TIMESTAMP DEFAULT NOW(),            -- When the company was created
-    updated_at TIMESTAMP DEFAULT NOW(),            -- Last update time
-    pitch_deck_url TEXT,                           -- URL to the company's pitch deck
-    financial_statement_url TEXT,                 -- URL to the company's financial statement
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  
+  -- Basic Info
+  name TEXT NOT NULL,
+  logo_url TEXT,
+  website_url TEXT,
+  industry TEXT NOT NULL,
+  location TEXT NOT NULL,
+  year_founded INTEGER NOT NULL,
+  
+  -- Company Content
+  mission_statement TEXT NOT NULL,
+  company_description TEXT NOT NULL,
+  problem_statement TEXT NOT NULL,
+  solution_description TEXT NOT NULL,
+  target_market TEXT NOT NULL,
+  competitive_advantage TEXT NOT NULL,
+  
+  -- Team
+  team_members JSONB,
+  
+  -- Financial Summary
+  funding_stage TEXT NOT NULL,
+  funding_goal NUMERIC NOT NULL,
+  current_funding NUMERIC DEFAULT 0,
+  pre_money_valuation NUMERIC NOT NULL,
+  equity_available NUMERIC NOT NULL,
+  
+  -- ESG & Impact
+  esg_score NUMERIC(3,1),
+  sdg_alignment TEXT[],
+  sustainability_impact TEXT,
+  
+  -- Admin Fields
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+  is_active BOOLEAN DEFAULT true,
+  is_verified BOOLEAN DEFAULT false,
+  
+  -- Constraints
+  CONSTRAINT valid_funding_stage CHECK (
+    funding_stage IN ('pre-seed', 'seed', 'series_a', 'series_b', 'series_c', 'growth')
+  ),
+  CONSTRAINT valid_equity CHECK (equity_available >= 0 AND equity_available <= 100),
+  CONSTRAINT valid_year CHECK (year_founded >= 2000 AND year_founded <= EXTRACT(YEAR FROM CURRENT_DATE))
+);
+
+-- Company Documents
+CREATE TABLE company_documents (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  document_type TEXT NOT NULL,
+  file_url TEXT NOT NULL,
+  file_name TEXT NOT NULL,
+  uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+  
+  CONSTRAINT valid_document_type CHECK (
+    document_type IN (
+      'pitch_deck',
+      'financial_report',
+      'company_profile',
+      'additional_documents'
+    )
+  )
+);
+
+-- Detailed Financials
+CREATE TABLE company_financials (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  
+  -- Key Metrics
+  revenue_ttm NUMERIC NOT NULL,
+  revenue_growth NUMERIC NOT NULL,
+  gross_margin NUMERIC NOT NULL,
+  burn_rate NUMERIC NOT NULL,
+  runway_months INTEGER NOT NULL,
+  
+  -- Market Data
+  market_size NUMERIC NOT NULL,
+  market_growth_rate NUMERIC NOT NULL,
+  
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+-- User Follows
+CREATE TABLE user_follows (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+  UNIQUE(user_id, company_id)
 );
 
 
