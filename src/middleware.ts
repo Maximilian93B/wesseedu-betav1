@@ -1,6 +1,8 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import authConfig from '../config/auth.config'
+import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 
 
 // Rate limiting configuration
@@ -79,23 +81,21 @@ function checkRateLimit(ip: string): boolean {
 // Middleware function to handle authentication
 export async function middleware(req: NextRequest) {
   try {
-    // Skip middleware in development for API routes
-    if (process.env.NODE_ENV === 'development' && req.nextUrl.pathname.startsWith('/api')) {
-      return NextResponse.next()
+    // Skip auth checks completely in development when auth is disabled
+    if (!authConfig.isAuthEnabled) {
+      return NextResponse.next();
     }
 
-    // Check rate limiting
+    // Your existing middleware code...
     const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
     if (!checkRateLimit(ip)) {
       throw new Error('Too many requests')
     }
-
-    // Initialize Supabase client
+    
+    // Rest of your existing middleware code...
     const supabase = createMiddlewareClient({ req, res: NextResponse.next() })
     
-    // Refresh session if it exists
     const { data: { session }, error } = await supabase.auth.getSession()
-    // Handle session errors
     if (error) {
       console.error('Session error:', error)
       return getErrorRedirect(error, req)
@@ -134,4 +134,20 @@ export const config = {
     '/notifications/:path*',
     '/api/:path*'
   ]
+}
+
+export function withAuth(handler: NextApiHandler) {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
+    // Skip auth check if disabled
+    if (!authConfig.isAuthEnabled) {
+      // Optionally inject a dev user context
+      req.user = {
+        email: authConfig.devBypassEmail || 'dev@example.com',
+        role: 'ADMIN'
+      };
+      return handler(req, res);
+    }
+
+    // ... existing auth logic ...
+  };
 }
