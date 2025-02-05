@@ -1,28 +1,43 @@
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import type { Database } from '@/lib/supabase/types'
 
-// GET /api/companies
-export async function GET(request: Request) {
+// GET /api/companies - Enhanced with marketplace functionality
+export async function GET() {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
-    
-    // Get query parameters
-    const { searchParams } = new URL(request.url)
-    const page = parseInt(searchParams.get('page') ?? '1')
-    const limit = parseInt(searchParams.get('limit') ?? '10')
-    
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient<Database>({ 
+      cookies: () => cookieStore 
+    })
+
+    // Check authentication
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { data, error } = await supabase
       .from('companies')
       .select('*')
-      .range((page - 1) * limit, page * limit - 1)
+      .eq('is_active', true)
 
-    if (error) throw error
+    if (error) {
+      console.error('Database error:', error)
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      )
+    }
 
-    return NextResponse.json(data)
-  } catch (error) {
+    return NextResponse.json({ companies: data })
+  } catch (err) {
+    console.error('API Error:', err)
     return NextResponse.json(
-      { error: 'Internal Server Error' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
@@ -34,19 +49,28 @@ export async function POST(request: Request) {
     const supabase = createRouteHandlerClient({ cookies })
     const json = await request.json()
 
-    const { data, error } = await supabase
+    const { data, error: supabaseError } = await supabase
       .from('companies')
       .insert(json)
       .select()
       .single()
 
-    if (error) throw error
+    if (supabaseError) throw supabaseError
 
     return NextResponse.json(data)
   } catch (error) {
+    console.error('Database error:', error)
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      )
+    }
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
     )
+
+
   }
 }

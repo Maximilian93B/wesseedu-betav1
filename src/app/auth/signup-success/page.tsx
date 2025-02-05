@@ -26,7 +26,7 @@ export default function VerifyEmailPage() {
         </div>
 
         <div className="text-sm text-muted-foreground space-y-2">
-          <p className="font-medium">Haven't received the email?</p>
+          <p className="font-medium">Haven&apos;t received the email?</p>
           <ul className="list-disc list-inside space-y-1">
             <li>Check your spam folder</li>
             <li>Make sure the email address is correct</li>

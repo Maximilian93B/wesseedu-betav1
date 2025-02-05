@@ -42,7 +42,7 @@ export async function GET(request: Request) {
     }
 
     // Redirect to user dashboard
-    return NextResponse.redirect(new URL('/dashboard/user-dashboard', request.url))
+    return NextResponse.redirect(new URL('/user-dashboard', request.url))
   } catch (error) {
     console.error('Verification error:', error)
     return NextResponse.redirect(new URL('/auth/error', request.url))

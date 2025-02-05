@@ -1,6 +1,4 @@
 import { GeistSans } from 'geist/font/sans'
-import { createClient } from '@/lib/supabase/client'
-import { cookies } from 'next/headers'
 import { Toaster } from '@/components/ui/toaster'
 import { cn } from '@/lib/utils'
 import '@/app/globals.css'
@@ -17,21 +15,22 @@ export const metadata = {
   },
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = cookies()
-  const supabase = createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-
   return (
     <html 
       lang="en" 
       className={cn('antialiased', GeistSans.className)}
     >
       <body className="min-h-screen bg-background antialiased">
+        {process.env.NODE_ENV === 'development' && (
+          <div className="bg-yellow-400 text-black text-center py-1">
+            Development Mode - Auth Checks Disabled
+          </div>
+        )}
         <div className="relative flex min-h-screen flex-col">
           <main className="flex-1">
             {children}

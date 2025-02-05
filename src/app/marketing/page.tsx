@@ -1,13 +1,5 @@
-import { CompanyService } from "@/lib/services/companyService";
-
-async function getCompanies() {
-  try {
-    return await CompanyService.getCompanies();
-  } catch (error) {
-    console.error('Error fetching companies:', error);
-    return [];
-  }
-}
+import Image from 'next/image'
+import Link from 'next/link'
 
 export default function MarketingPage() {
   return (
@@ -20,21 +12,21 @@ export default function MarketingPage() {
               Welcome to the Future of Investment
             </h1>
             <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Access exclusive investment opportunities in carefully vetted startups and growing companies
+              Access exclusive investment opportunities in carefully vetted startups
             </p>
             <div className="space-x-4">
-              <a 
-                href="/companies" 
+              <Link 
+                href="/marketing/marketplace" 
                 className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
               >
                 Enter Marketplace
-              </a>
-              <a 
+              </Link>
+              <Link 
                 href="/register" 
                 className="inline-block border border-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
                 Sign Up
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -51,7 +43,7 @@ export default function MarketingPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2">Curated Opportunities</h3>
-              <p className="text-gray-600">Access pre-vetted investment opportunities across various industries and stages</p>
+              <p className="text-gray-600">Access pre-vetted investment opportunities across various industries</p>
             </div>
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -60,7 +52,7 @@ export default function MarketingPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2">Verified Companies</h3>
-              <p className="text-gray-600">Every company undergoes thorough due diligence and verification process</p>
+              <p className="text-gray-600">Every company undergoes thorough due diligence</p>
             </div>
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -69,7 +61,7 @@ export default function MarketingPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold mb-2">Market Insights</h3>
-              <p className="text-gray-600">Get detailed analytics and market trends to make informed decisions</p>
+              <p className="text-gray-600">Get detailed analytics and market trends</p>
             </div>
           </div>
         </div>
@@ -78,7 +70,7 @@ export default function MarketingPage() {
       {/* Marketplace Preview */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">What's Inside Our Marketplace</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Inside Our Marketplace</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <ul className="space-y-4">
@@ -86,32 +78,28 @@ export default function MarketingPage() {
                   <svg className="w-6 h-6 text-green-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="ml-3">Diverse range of investment opportunities across multiple sectors</span>
+                  <span className="ml-3">Diverse range of investment opportunities</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-green-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="ml-3">Detailed company profiles with financial metrics and growth potential</span>
+                  <span className="ml-3">Detailed company profiles with metrics</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="w-6 h-6 text-green-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="ml-3">Advanced filtering and search capabilities</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-6 h-6 text-green-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="ml-3">Real-time updates on company performance and milestones</span>
+                  <span className="ml-3">Advanced filtering capabilities</span>
                 </li>
               </ul>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-lg">
-              <img 
-                src="/marketplace-preview.jpg" 
-                alt="Marketplace Preview" 
+              <Image
+                src="/marketplace-preview.jpg"
+                alt="Marketplace Preview"
+                width={500}
+                height={300}
                 className="rounded-lg"
               />
             </div>
@@ -124,14 +112,14 @@ export default function MarketingPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Explore Investment Opportunities?</h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of investors who are already discovering and investing in promising companies
+            Join thousands of investors discovering promising companies
           </p>
-          <a 
-            href="/companies" 
+          <Link 
+            href="/marketing/marketplace" 
             className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
           >
             Enter Marketplace
-          </a>
+          </Link>
         </div>
       </section>
     </div>

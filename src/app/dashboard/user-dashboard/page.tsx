@@ -45,7 +45,7 @@ export default function DashboardPage() {
     }
 
     fetchUserData()
-  }, [])
+  }, [supabase])
 
   if (loading) return <div>Loading...</div>
 

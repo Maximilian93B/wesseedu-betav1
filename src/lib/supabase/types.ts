@@ -225,3 +225,41 @@ export interface Database {
     }
   }
 }
+
+// Main company type representing the marketplace listing
+export interface MarketplaceCompany {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  industry: string;
+  // Strict typing for funding stages
+  funding_stage: 'pre-seed' | 'seed' | 'series_a' | 'series_b' | 'series_c' | 'growth';
+  funding_goal: number;
+  current_funding: number;
+  esg_score: number;
+  sdg_alignment: string[];
+  mission_statement: string;
+  company_description: string;
+  follower_count: number;
+  is_followed: boolean;
+  is_favorited: boolean;
+}
+
+// Filter options for the marketplace
+export interface MarketplaceFilters {
+  search?: string;              // Text search
+  industry?: string[];          // Multiple industry selection
+  funding_stage?: string[];     // Multiple funding stage selection
+  min_esg?: number;            // Minimum ESG score filter
+  sort_by?: 'newest' | 'funding' | 'esg';  // Sort options
+  page?: number;               // Current page
+  limit?: number;              // Items per page
+}
+
+// Pagination metadata
+export interface PaginationData {
+  total: number;    // Total number of companies
+  pages: number;    // Total number of pages
+  current: number;  // Current page number
+  limit: number;    // Items per page
+}
