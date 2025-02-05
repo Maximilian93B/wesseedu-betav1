@@ -40,3 +40,31 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+.vim/
+
+# Local development
+*.log
+.local/
+
+# Optional: if you're using JetBrains IDEs
+.idea/
+*.iml
+
+# Optional: if you're using Storybook
+storybook-static/
+
+# Optional: if you're generating sitemap
+public/sitemap*.xml
+public/robots.txt
+
+# Optional: if you're using PWA
+public/sw.js
+public/workbox-*.js
+public/worker-*.js

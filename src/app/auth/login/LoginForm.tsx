@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from "@/components/ui/button"
@@ -16,8 +16,33 @@ export default function LoginForm() {
   const router = useRouter()
   const { toast } = useToast()
 
+  const searchParams = new URLSearchParams(window.location.search)
+  const error = searchParams.get('error')
+  const redirectedFrom = searchParams.get('redirectedFrom')
+
+  useEffect(() => {
+    // Check if user is locked out
+    const lockoutUntil = localStorage.getItem('loginLockoutUntil')
+    if (lockoutUntil && Number(lockoutUntil) > Date.now()) {
+      setLoading(true)
+      const remainingTime = Math.ceil((Number(lockoutUntil) - Date.now()) / 1000 / 60)
+      toast({
+        title: "Account Locked",
+        description: `Too many login attempts. Please try again in ${remainingTime} minutes.`,
+        variant: "destructive",
+      })
+    }
+  }, [toast])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Check lockout
+    const lockoutUntil = localStorage.getItem('loginLockoutUntil')
+    if (lockoutUntil && Number(lockoutUntil) > Date.now()) {
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -27,7 +52,12 @@ export default function LoginForm() {
         password,
       })
 
-      if (error) throw error
+      if (error) {
+        throw error
+      }
+
+      // Reset attempts on successful login
+      localStorage.removeItem('loginLockoutUntil')
 
       // Refresh the page to update server-side session
       router.refresh()
@@ -49,6 +79,11 @@ export default function LoginForm() {
       <CardHeader>
         <CardTitle>Login</CardTitle>
         <CardDescription>Enter your credentials to access your account</CardDescription>
+        {error === 'unauthorized' && (
+          <div className="mt-2 text-sm text-red-500">
+            Please log in to access {redirectedFrom || 'this page'}
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>

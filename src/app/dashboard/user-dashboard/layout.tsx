@@ -12,26 +12,31 @@ import {
   LogOut,
   User
 } from "lucide-react";
+import { redirect } from 'next/navigation';
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient({ 
-    cookies: () => cookieStore
-  })
-  
-  const { data: { session } } = await supabase.auth.getSession();
-  const { data: userData } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', session?.user?.id)
-    .single();
+  const supabase = createServerComponentClient({ cookies })
+  const { data: { session } } = await supabase.auth.getSession()
 
-  const isInvestor = userData?.user_type === 'investor';
-  const isCompany = userData?.user_type === 'company';
+  if (!session) {
+    redirect('/auth/signin')
+  }
+
+  const { data: user } = await supabase
+    .from('users')
+    .select('user_type, first_name')
+    .eq('id', session.user.id)
+    .single()
+
+  const userType = user?.user_type
+  
+  if (!userType) {
+    redirect('/auth/signin')
+  }
 
   const navigationItems = [
     {
@@ -50,13 +55,13 @@ export default async function DashboardLayout({
       href: "/user-dashboard/companies",
       icon: <Building2 className="mr-2 h-4 w-4" />,
       label: "Companies",
-      show: isInvestor
+      show: userType === 'investor'
     },
     {
       href: "/user-dashboard/favorites",
       icon: <Heart className="mr-2 h-4 w-4" />,
       label: "Favorites",
-      show: isInvestor
+      show: userType === 'investor'
     },
     {
       href: "/user-dashboard/notifications",
@@ -114,7 +119,7 @@ export default async function DashboardLayout({
         <header className="sticky top-0 z-30 border-b bg-background">
           <div className="flex h-16 items-center px-6">
             <h2 className="text-lg font-semibold">
-              {userData?.first_name ? `Welcome, ${userData.first_name}` : 'Dashboard'}
+              {user?.first_name ? `Welcome, ${user.first_name}` : 'Dashboard'}
             </h2>
             <div className="ml-auto flex items-center space-x-4">
               {/* We'll add profile menu and notifications here later */}

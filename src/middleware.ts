@@ -1,110 +1,137 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export const config = {
-  matcher: [
-    '/user-dashboard/:path*',
-    '/company-dashboard/:path*',
-    '/company-registration/:path*',
-    '/companies/:path*',
-    '/favorites/:path*',
-    '/profile/:path*',
-    '/settings/:path*',
-    '/notifications/:path*'
-  ]
+
+// Rate limiting configuration
+const rateLimit = {
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  current: new Map<string, { count: number; resetTime: number }>()
 }
 
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+// Helper function to check protected routes
+function isProtectedRoute(pathname: string): boolean {
+  const protectedPaths = [
+    '/dashboard',
+    '/user-dashboard',
+    '/company-dashboard',
+    '/profile',
+    '/settings',
+    '/company-registration',
+    '/marketplace',
+    '/favorites',
+    '/notifications',
+    '/api'
+  ]
 
-  // Initialize Supabase client with new SSR approach
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
+  // Public paths
+  const publicPaths = [
+    '/auth/signin',
+    '/auth/signup',
+    '/auth/callback',
+    '/auth/reset-password'
+  ]
+
+  // Check if the pathname starts with any of the public paths
+  if (publicPaths.some(path => pathname.startsWith(path))) {
+    return false
+  }
+    // Check if the pathname starts with any of the protected paths
+    return protectedPaths.some(path => pathname.startsWith(path))
+  }
+
+
+
+
+// Helper function for error redirects
+function getErrorRedirect(error: Error, req: NextRequest): NextResponse {
+  const baseUrl = new URL('/auth/signin', req.url)
+  baseUrl.searchParams.set('error', error.message)
+  baseUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname)
+  return NextResponse.redirect(baseUrl)
+}
+
+// Rate limiting function
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const record = rateLimit.current.get(ip)
+
+  if (!record) {
+    rateLimit.current.set(ip, { count: 1, resetTime: now + rateLimit.windowMs })
+    return true
+  }
+
+  if (now > record.resetTime) {
+    record.count = 1
+    record.resetTime = now + rateLimit.windowMs
+    return true
+  }
+
+  if (record.count >= rateLimit.max) {
+    return false
+  }
+
+  record.count++
+  return true
+}
+
+// Middleware function to handle authentication
+export async function middleware(req: NextRequest) {
+  try {
+    // Skip middleware in development for API routes
+    if (process.env.NODE_ENV === 'development' && req.nextUrl.pathname.startsWith('/api')) {
+      return NextResponse.next()
     }
-  )
 
-  const { pathname } = request.nextUrl
-   
-  // Check authentication
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) {
-    const redirectUrl = new URL('/login', request.url)
-    redirectUrl.searchParams.set('redirectedFrom', pathname)
-    redirectUrl.searchParams.set('error', 'unauthorized')
-    return NextResponse.redirect(redirectUrl)
-  }
-
-  // Handle database errors
-  const { data: userData, error } = await supabase
-    .from('users')
-    .select('user_type, id')
-    .eq('id', session.user.id)
-    .single()
-
-  if (error) {
-    return NextResponse.redirect(new URL('/error?type=database', request.url))
-  }
-
-  // Define access patterns
-  type RouteAccess = {
-    [key: string]: string[]
-  }
-
-  const routeAccess: RouteAccess = {
-    '/user-dashboard': ['investor'],
-    '/company-dashboard': ['company'],
-    '/companies': ['investor'],
-    '/favorites': ['investor'],
-    '/company-registration': ['company']
-  }
-
-  // Check route permissions
-  for (const [route, allowedTypes] of Object.entries(routeAccess)) {
-    if (pathname.startsWith(route) && !allowedTypes.includes(userData?.user_type)) {
-      // Redirect to appropriate dashboard
-      const dashboardRoute = userData?.user_type === 'company' 
-        ? '/company-dashboard' 
-        : '/user-dashboard'
-      return NextResponse.redirect(new URL(dashboardRoute, request.url))
+    // Check rate limiting
+    const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+    if (!checkRateLimit(ip)) {
+      throw new Error('Too many requests')
     }
-  }
 
-  // Protect user-specific routes
-  if (['/profile', '/settings', '/notifications'].some(route => pathname.startsWith(route))) {
-    const pathUserId = pathname.split('/')[2]
-    if (pathUserId && pathUserId !== userData?.id) {
-      return NextResponse.redirect(new URL('/unauthorized', request.url))
+    // Initialize Supabase client
+    const supabase = createMiddlewareClient({ req, res: NextResponse.next() })
+    
+    // Refresh session if it exists
+    const { data: { session }, error } = await supabase.auth.getSession()
+    // Handle session errors
+    if (error) {
+      console.error('Session error:', error)
+      return getErrorRedirect(error, req)
     }
+    // Check protected routes
+
+    if (isProtectedRoute(req.nextUrl.pathname)) {
+      if (!session) {
+        return getErrorRedirect(new Error('unauthorized'), req)
+      }
+    }
+    // Continue to the next middleware
+    const response = NextResponse.next()
+    response.headers.set('X-Frame-Options', 'DENY')
+    response.headers.set('X-Content-Type-Options', 'nosniff')
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    return response
+  } catch (error) {
+    console.error('Middleware Error:', error)
+    return getErrorRedirect(error as Error, req)
   }
+}
 
-  // Add cache headers to response
-  response.headers.set('Cache-Control', 's-maxage=1, stale-while-revalidate')
-
-  return response
-} 
+// Middleware configuration
+export const config = {
+  matcher: [
+    '/dashboard/:path*',
+    '/user-dashboard/:path*',
+    '/company-dashboard/:path*',
+    '/profile/:path*',
+    '/settings/:path*',
+    '/company-registration/:path*',
+    '/marketplace/:path*',
+    '/favorites/:path*',
+    '/notifications/:path*',
+    '/api/:path*'
+  ]
+}

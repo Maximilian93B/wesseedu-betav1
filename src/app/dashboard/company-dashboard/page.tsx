@@ -56,7 +56,7 @@ export default function CompanyDashboard() {
     }
 
     fetchCompanyData()
-  }, [])
+  }, [supabase])
 
   if (loading) return <div>Loading...</div>
 
