@@ -43,9 +43,7 @@ export default function ProfileCreationPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          id: user.id,
-          email: user.email || '',
+        body: JSON.stringify({ 
           name: `${firstName} ${lastName}`,
           user_type: 'investor', // Default user type
           user_tier: 'root', // Default user tier

@@ -6,12 +6,18 @@ import Image from 'next/image';
 interface Company {
   id: string;
   name: string;
-  company_description: string;
-  industry: string;
-  funding_goal: number;
-  current_funding: number;
+  description: string;
   mission_statement: string;
-  logo_url: string | null;
+  financials: {
+    annual_revenue: number;
+    funding_raised: number;
+    burn_rate: number;
+  };
+  pitch_deck_url: string;
+  sustainability_data: {
+    [key: string]: number;
+  };
+  score: number;
 }
 
 export default function MarketplacePage() {
@@ -25,11 +31,18 @@ export default function MarketplacePage() {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       
-      const response = await fetch(`/api/marketing/companies?${params}`);
+      const response = await fetch(`/api/companies?${params}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
-      setCompanies(data.companies);
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      setCompanies(data.companies || []);
     } catch (error) {
       console.error('Error fetching companies:', error);
+      setCompanies([]);
     } finally {
       setLoading(false);
     }
@@ -88,35 +101,32 @@ export default function MarketplacePage() {
                 >
                   <div className="p-6">
                     <div className="flex items-center space-x-4 mb-4">
-                      {company.logo_url ? (
-                        <Image
-                          src={company.logo_url}
-                          alt={`${company.name} logo`}
-                          width={48}
-                          height={48}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                          <span className="text-xl font-bold text-gray-500">
-                            {company.name.charAt(0)}
-                          </span>
-                        </div>
-                      )}
+                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                        <span className="text-xl font-bold text-gray-500">
+                          {company.name.charAt(0)}
+                        </span>
+                      </div>
                       <h3 className="text-xl font-semibold text-gray-900">
                         {company.name}
                       </h3>
                     </div>
-                    <p className="text-sm text-gray-500 mb-2">{company.industry}</p>
+                    <div className="mb-2 flex items-center">
+                      <span className="text-sm px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                        Score: {company.score}
+                      </span>
+                    </div>
                     <p className="text-gray-600 mb-4 line-clamp-3">
-                      {company.mission_statement}
+                      {company.description}
+                    </p>
+                    <p className="text-sm text-gray-500 mb-4 italic">
+                      "{company.mission_statement}"
                     </p>
                     <div className="mt-4 flex items-center justify-between">
                       <span className="text-sm font-medium text-blue-600">
-                        Seeking: ${company.funding_goal?.toLocaleString()}
+                        Funding Raised: ${company.financials.funding_raised.toLocaleString()}
                       </span>
                       <Link
-                        href={`/marketing/companies/${company.id}`}
+                        href={`/companies/${company.id}`}
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
                         View Details

@@ -61,10 +61,8 @@ export async function middleware(request: NextRequest) {
   // -- Protected Routes --
   // For all non-public routes, a session must exist.
   if (!session) {
-    // Redirect to login if not authenticated.
-    const loginUrl = new URL('/auth/login', request.url);
-    loginUrl.searchParams.set('redirected', 'true');
-    return NextResponse.redirect(loginUrl);
+    // Use rewrite instead of redirect to avoid flash
+    return NextResponse.rewrite(new URL('/unauthorized', request.url));
   }
 
   // -- Admin Routes --
@@ -72,8 +70,8 @@ export async function middleware(request: NextRequest) {
   if (ADMIN_ROUTES.some((route) => pathname.startsWith(route))) {
     // Assuming your Supabase session has user metadata with a "user_type" field.
     if (session.user.user_metadata.user_type !== 'admin') {
-      // Redirect non-admin users to an unauthorized page.
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
+      // Use rewrite instead of redirect to avoid flash
+      return NextResponse.rewrite(new URL('/unauthorized', request.url));
     }
   }
 

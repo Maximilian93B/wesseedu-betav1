@@ -1,87 +1,87 @@
 'use client';
+
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 
 interface Company {
   id: string;
   name: string;
-  logo_url: string;
-  website_url: string;
-  industry: string;
-  location: string;
-  year_founded: number;
+  description: string;
   mission_statement: string;
-  company_description: string;
-  problem_statement: string;
-  solution_description: string;
-  target_market: string;
-  competitive_advantage: string;
-  funding_stage: string;
-  funding_goal: number;
-  current_funding: number;
-  pre_money_valuation: number;
-  equity_available: number;
-  team_members: Array<{
-    name: string;
-    role: string;
-    bio: string;
-  }>;
+  financials: {
+    annual_revenue: number;
+    funding_raised: number;
+    burn_rate: number;
+  };
+  pitch_deck_url: string;
+  sustainability_data: {
+    [key: string]: number;
+  };
+  score: number;
 }
 
-export default function CompanyPage() {
+export default function CompanyDetailPage() {
   const params = useParams();
-  const companyId = params?.id as string;
+  const companyId = params?.companyId as string;
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
-
     const fetchCompany = async () => {
       try {
-        if (!companyId) {
-          throw new Error('Company ID is required');
-        }
-
         setLoading(true);
-        const response = await fetch(`/api/marketing/companies/${companyId}`);
+        setError(null); // Reset error state
+        const response = await fetch(`/api/companies/${companyId}`);
         
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to load company');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
 
-        // Only update state if component is still mounted
-        if (isMounted) {
-          setCompany(data.company);
-          setError(null);
-        }
+        setCompany(data);
       } catch (err) {
-        // Only update state if component is still mounted
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Failed to load company');
-          setCompany(null);
-        }
+        console.error('Error fetching company:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load company');
       } finally {
-        // Only update state if component is still mounted
-        if (isMounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
-    fetchCompany();
-
-    // Cleanup function to prevent memory leaks
-    return () => {
-      isMounted = false;
-    };
+    if (companyId) {
+      fetchCompany();
+    }
   }, [companyId]);
+
+  const handlePitchDeckDownload = async () => {
+    if (!company) return;
+    
+    setIsDownloading(true);
+    try {
+      const response = await fetch(`/api/companies/${company.id}/pitch-deck`);
+      if (!response.ok) {
+        throw new Error('Failed to get download URL');
+      }
+      
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      window.open(data.url, '_blank');
+    } catch (error) {
+      console.error('Error downloading pitch deck:', error);
+      alert('Failed to download pitch deck. Please try again later.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -97,10 +97,10 @@ export default function CompanyPage() {
         <div className="text-center">
           <div className="text-red-500 mb-4">{error || 'Company not found'}</div>
           <Link 
-            href="/marketing/marketplace"
+            href="/companies"
             className="text-blue-600 hover:text-blue-500"
           >
-            Return to Marketplace
+            Return to Companies
           </Link>
         </div>
       </div>
@@ -110,40 +110,28 @@ export default function CompanyPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back to Marketplace Link */}
+        {/* Back to Companies Link */}
         <Link 
-          href="/marketing/marketplace"
+          href="/companies"
           className="inline-flex items-center text-blue-600 mb-8 hover:text-blue-500"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Back to Marketplace
+          Back to Companies
         </Link>
 
         {/* Company Header */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
           <div className="flex items-center space-x-6">
-            <Image
-              src={company.logo_url}
-              alt={`${company.name} logo`}
-              width={100}
-              height={100}
-              className="rounded-full"
-            />
+            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+              <span className="text-3xl font-bold text-gray-500">
+                {company.name.charAt(0)}
+              </span>
+            </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{company.name}</h1>
-              <p className="text-gray-500">{company.industry} • {company.location}</p>
-              {company.website_url && (
-                <a 
-                  href={company.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-500 mt-2 inline-block"
-                >
-                  Visit Website
-                </a>
-              )}
+              <p className="text-gray-500 mt-2">Sustainability Score: {company.score}</p>
             </div>
           </div>
         </div>
@@ -154,7 +142,7 @@ export default function CompanyPage() {
           <div className="space-y-8">
             <section className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">About</h2>
-              <p className="text-gray-600 mb-4">{company.company_description}</p>
+              <p className="text-gray-600 mb-4">{company.description}</p>
               <div className="border-t pt-4">
                 <h3 className="font-medium mb-2">Mission Statement</h3>
                 <p className="text-gray-600">{company.mission_statement}</p>
@@ -162,26 +150,14 @@ export default function CompanyPage() {
             </section>
 
             <section className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Problem & Solution</h2>
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Problem</h3>
-                <p className="text-gray-600">{company.problem_statement}</p>
-              </div>
-              <div className="border-t pt-4">
-                <h3 className="font-medium mb-2">Solution</h3>
-                <p className="text-gray-600">{company.solution_description}</p>
-              </div>
-            </section>
-
-            <section className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Market & Advantage</h2>
-              <div className="mb-4">
-                <h3 className="font-medium mb-2">Target Market</h3>
-                <p className="text-gray-600">{company.target_market}</p>
-              </div>
-              <div className="border-t pt-4">
-                <h3 className="font-medium mb-2">Competitive Advantage</h3>
-                <p className="text-gray-600">{company.competitive_advantage}</p>
+              <h2 className="text-xl font-semibold mb-4">Sustainability Metrics</h2>
+              <div className="space-y-4">
+                {Object.entries(company.sustainability_data).map(([key, value]) => (
+                  <div key={key} className="flex justify-between items-center">
+                    <span className="text-gray-600 capitalize">{key.replace(/_/g, ' ')}</span>
+                    <span className="font-medium">{value}</span>
+                  </div>
+                ))}
               </div>
             </section>
           </div>
@@ -189,50 +165,50 @@ export default function CompanyPage() {
           {/* Right Column */}
           <div className="space-y-8">
             <section className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Investment Details</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm text-gray-500">Funding Stage</h3>
-                  <p className="font-medium">{company.funding_stage}</p>
+              <h2 className="text-xl font-semibold mb-4">Financial Overview</h2>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Annual Revenue</span>
+                  <span className="font-medium">${company.financials.annual_revenue.toLocaleString()}</span>
                 </div>
-                <div>
-                  <h3 className="text-sm text-gray-500">Funding Goal</h3>
-                  <p className="font-medium">${company.funding_goal.toLocaleString()}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Funding Raised</span>
+                  <span className="font-medium">${company.financials.funding_raised.toLocaleString()}</span>
                 </div>
-                <div>
-                  <h3 className="text-sm text-gray-500">Current Funding</h3>
-                  <p className="font-medium">${company.current_funding.toLocaleString()}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm text-gray-500">Equity Available</h3>
-                  <p className="font-medium">{company.equity_available}%</p>
-                </div>
-                <div>
-                  <h3 className="text-sm text-gray-500">Pre-money Valuation</h3>
-                  <p className="font-medium">${company.pre_money_valuation.toLocaleString()}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm text-gray-500">Year Founded</h3>
-                  <p className="font-medium">{company.year_founded}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Monthly Burn Rate</span>
+                  <span className="font-medium">${company.financials.burn_rate.toLocaleString()}</span>
                 </div>
               </div>
             </section>
 
-            <section className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Team</h2>
-              <div className="space-y-4">
-                {company.team_members.map((member, index) => (
-                  <div key={index} className="border-b last:border-b-0 pb-4 last:pb-0">
-                    <h3 className="font-medium">{member.name}</h3>
-                    <p className="text-gray-500 text-sm">{member.role}</p>
-                    <p className="text-gray-600 mt-1">{member.bio}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
+            {company.pitch_deck_url && (
+              <section className="bg-white rounded-lg shadow p-6">
+                <h2 className="text-xl font-semibold mb-4">Resources</h2>
+                <button 
+                  onClick={handlePitchDeckDownload}
+                  disabled={isDownloading}
+                  className={`text-blue-600 hover:text-blue-500 flex items-center ${
+                    isDownloading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isDownloading ? (
+                    <span>Downloading...</span>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                      </svg>
+                      Download Pitch Deck
+                    </>
+                  )}
+                </button>
+              </section>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}
