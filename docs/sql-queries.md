@@ -1,187 +1,161 @@
--- **Users Table**
+User profile Table
 
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique identifier for the user
-    email TEXT NOT NULL UNIQUE,                    -- Email address of the user
-    phone TEXT,                                    -- Phone number of the user (optional)
-    first_name TEXT NOT NULL,                      -- User's first name
-    last_name TEXT NOT NULL,                       -- User's last name
-    user_type TEXT NOT NULL,                       -- Type of user (e.g., "Admin", "Regular")
-    tier_id INTEGER DEFAULT 1,                     -- Tier linked to the user (default: Free)
-    is_verified BOOLEAN DEFAULT FALSE,             -- Email verification status
-    created_at TIMESTAMP DEFAULT NOW(),            -- When the user was created
-    updated_at TIMESTAMP DEFAULT NOW(),            -- Last update time
-    CONSTRAINT fk_tier_id FOREIGN KEY (tier_id) REFERENCES tiering(id) ON DELETE SET DEFAULT
+create table public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  name text,
+  email text,
+  user_type user_type_enum not null default 'investor',
+  user_tier user_tier_enum not null default 'root',  -- Default tier can be set as needed
+  created_at timestamp with time zone default timezone('utc', now()),
+  updated_at timestamp with time zone default timezone('utc', now())
 );
 
--- **Companies Table**
+create type user_tier_enum as enum ('root', 'thrive', 'impact');
+create type user_type_enum as enum ('admin', 'investor', 'company');
 
--- Main Companies Table
-CREATE TABLE companies (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  
-  -- Basic Info
-  name TEXT NOT NULL,
-  logo_url TEXT,
-  website_url TEXT,
-  industry TEXT NOT NULL,
-  location TEXT NOT NULL,
-  year_founded INTEGER NOT NULL,
-  
-  -- Company Content
-  mission_statement TEXT NOT NULL,
-  company_description TEXT NOT NULL,
-  problem_statement TEXT NOT NULL,
-  solution_description TEXT NOT NULL,
-  target_market TEXT NOT NULL,
-  competitive_advantage TEXT NOT NULL,
-  
-  -- Team
-  team_members JSONB,
-  
-  -- Financial Summary
-  funding_stage TEXT NOT NULL,
-  funding_goal NUMERIC NOT NULL,
-  current_funding NUMERIC DEFAULT 0,
-  pre_money_valuation NUMERIC NOT NULL,
-  equity_available NUMERIC NOT NULL,
-  
-  -- ESG & Impact
-  esg_score NUMERIC(3,1),
-  sdg_alignment TEXT[],
-  sustainability_impact TEXT,
-  
-  -- Admin Fields
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-  is_active BOOLEAN DEFAULT true,
-  is_verified BOOLEAN DEFAULT false,
-  
-  -- Constraints
-  CONSTRAINT valid_funding_stage CHECK (
-    funding_stage IN ('pre-seed', 'seed', 'series_a', 'series_b', 'series_c', 'growth')
-  ),
-  CONSTRAINT valid_equity CHECK (equity_available >= 0 AND equity_available <= 100),
-  CONSTRAINT valid_year CHECK (year_founded >= 2000 AND year_founded <= EXTRACT(YEAR FROM CURRENT_DATE))
-);
 
--- Company Documents
-CREATE TABLE company_documents (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-  document_type TEXT NOT NULL,
-  file_url TEXT NOT NULL,
-  file_name TEXT NOT NULL,
-  uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-  
-  CONSTRAINT valid_document_type CHECK (
-    document_type IN (
-      'pitch_deck',
-      'financial_report',
-      'company_profile',
-      'additional_documents'
-    )
-  )
-);
+Company Table
 
--- Detailed Financials
-CREATE TABLE company_financials (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-  
-  -- Key Metrics
-  revenue_ttm NUMERIC NOT NULL,
-  revenue_growth NUMERIC NOT NULL,
-  gross_margin NUMERIC NOT NULL,
-  burn_rate NUMERIC NOT NULL,
-  runway_months INTEGER NOT NULL,
-  
-  -- Market Data
-  market_size NUMERIC NOT NULL,
-  market_growth_rate NUMERIC NOT NULL,
-  
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
-);
-
--- User Follows
-CREATE TABLE user_follows (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
-  UNIQUE(user_id, company_id)
+create table public.companies (
+  id uuid primary key default uuid_generate_v4(),
+  name text not null,
+  description text,
+  mission_statement text,
+  financials jsonb,
+  pitch_deck_url text,
+  sustainability_data jsonb,
+  score numeric(5,2) default 0.00,
+  created_at timestamp with time zone default timezone('utc', now()),
+  updated_at timestamp with time zone default timezone('utc', now()),
+  created_by uuid references public.profiles(id) on delete set null
 );
 
 
--- **Favorites Table**
+Company Saved Table
 
-CREATE TABLE favorites (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique identifier for the favorite
-    user_id UUID NOT NULL,                         -- Links the favorite to the user
-    company_id UUID NOT NULL,                      -- Links the favorite to the company
-    created_at TIMESTAMP DEFAULT NOW(),            -- Timestamp for when the favorite was added
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_company_id FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
-    CONSTRAINT unique_user_company UNIQUE (user_id, company_id) -- Ensure no duplicates
+create table public.company_saves (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references public.profiles(id) on delete set null,
+  company_id uuid references public.companies(id) on delete set null,
+  created_at timestamp with time zone default timezone('utc', now())
 );
 
 
--- **Notifications Table**
+create unique index unique_saved_company on public.company_saves 
+(user_id, company_id);
 
-CREATE TABLE notifications (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique identifier for the notification
-    user_id UUID NOT NULL,                         -- Links the notification to the user
-    company_id UUID,                               -- Links the notification to the company (optional)
-    title TEXT NOT NULL,                           -- Title of the notification
-    content TEXT NOT NULL,                         -- Detailed content of the notification
-    type TEXT DEFAULT 'Info',                      -- Category/type of the notification
-    read BOOLEAN DEFAULT FALSE,                    -- Indicates if the notification has been read
-    created_at TIMESTAMP DEFAULT NOW(),            -- Timestamp for when the notification was created
-    updated_at TIMESTAMP DEFAULT NOW(),            -- Last update time
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_company_id FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+
+// Funding Applications Table
+
+create table public.funding_applications (
+  id uuid primary key default uuid_generate_v4(),
+  applicant_id uuid not null references public.profiles(id) on delete cascade,
+  company_id uuid not null references public.companies(id) on delete cascade,
+  funding_amount numeric not null,
+  status application_status not null default 'pending',
+  message text,
+  created_at timestamp with time zone default timezone('utc', now()),
+  updated_at timestamp with time zone default timezone('utc', now())
+);
+
+create type application_status as enum ('pending', 'approved', 'rejected');
+
+
+Policies 
+
+// Profiles Table Policies
+
+alter table public.profiles enable row level security;
+
+create policy "Allow users to view their own profile" on public.profiles
+for select
+using ( id = auth.uid() );
+
+create policy "Allow users to insert their own profile" on public.profiles
+for insert
+with check ( id = auth.uid() );
+
+create policy "Allow user or admin to update profile" on public.profiles
+for update
+using (
+  id = auth.uid() OR
+  current_setting('request.jwt.claims.user_type', true) = 'admin'
+)
+with check (
+  id = auth.uid() OR
+  current_setting('request.jwt.claims.user_type', true) = 'admin'
 );
 
 
--- **Updates Table**
+create policy "Allow users to delete their own profile" on public.profiles
+for delete
+using ( id = auth.uid() );
 
-CREATE TABLE updates (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Unique identifier for the update
-    company_id UUID REFERENCES companies(id) ON DELETE CASCADE, -- Link to the company
-    title TEXT NOT NULL,                            -- Title of the update
-    description TEXT NOT NULL,                      -- Detailed description of the update
-    created_at TIMESTAMP DEFAULT NOW()              -- When the update was created
+
+// Companies Table Policies
+
+alter table public.companies enable row level security;
+
+create policy "Public select on companies" on public.companies
+for select
+using ( true );
+
+create policy "Allow company owners to insert companies" on public.companies
+for insert
+with check ( created_by = auth.uid() );
+
+
+create policy "Allow company owners to delete their own companies" on public.companies
+for delete
+using ( created_by = auth.uid() );
+
+
+// Company Saves Table Policies
+
+alter table public.company_saves enable row level security;
+
+create policy "Allow user to select their saved companies" on public.company_saves
+for select
+using ( user_id = auth.uid() );
+
+
+create policy "Allow user to insert their saved companies" on public.company_saves
+for insert
+with check ( user_id = auth.uid() );
+
+
+create policy "Allow user to delete their saved companies" on public.company_saves
+for delete
+using ( user_id = auth.uid() );
+
+
+// Funding Applications Table Policies
+
+alter table public.funding_applications enable row level security;
+
+create policy "Allow user to select their funding applications" on public.funding_applications
+for select
+using ( applicant_id = auth.uid() );
+
+create policy "Allow user to insert funding applications" on public.funding_applications
+for insert
+with check ( applicant_id = auth.uid() );
+
+
+create policy "Allow user or admin to delete saved companies" on public.company_saves
+for delete
+using (
+  user_id = auth.uid() OR
+  current_setting('request.jwt.claims.user_type', true) = 'admin'
 );
 
 
+create policy "Allow applicant to delete their pending funding application" on public.funding_applications
+for delete
+using ( applicant_id = auth.uid() and status = 'pending' );
+  
 
-id
+// Admin 
 
-No description
-
-uuid	uuid	
-company_id
-
-No description
-
-uuid	uuid	
-title
-
-No description
-
-text	text	
-content
-
-No description
-
-text	text	
-created_at
-
-No description
-
-timestamp without time zone	timestamp
-
-
-
+( <ownership_condition> OR current_setting('request.jwt.claims.user_type', true) = 'admin' )
 

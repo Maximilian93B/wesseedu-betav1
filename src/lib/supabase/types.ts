@@ -41,31 +41,21 @@ export interface Database {
           industry: string
           location: string
           year_founded: number
-          
-          // Company Content
           mission_statement: string
           company_description: string
           problem_statement: string
           solution_description: string
           target_market: string
           competitive_advantage: string
-          
-          // Team
           team_members: Json
-          
-          // Financial Summary
           funding_stage: string
           funding_goal: number
           current_funding: number
           pre_money_valuation: number
           equity_available: number
-          
-          // ESG Data
           esg_score: number | null
           sdg_alignment: string[] | null
           sustainability_impact: string | null
-          
-          // Admin Fields
           created_at: string
           updated_at: string
           is_active: boolean
@@ -232,7 +222,6 @@ export interface MarketplaceCompany {
   name: string;
   logo_url: string | null;
   industry: string;
-  // Strict typing for funding stages
   funding_stage: 'pre-seed' | 'seed' | 'series_a' | 'series_b' | 'series_c' | 'growth';
   funding_goal: number;
   current_funding: number;
@@ -247,19 +236,19 @@ export interface MarketplaceCompany {
 
 // Filter options for the marketplace
 export interface MarketplaceFilters {
-  search?: string;              // Text search
-  industry?: string[];          // Multiple industry selection
-  funding_stage?: string[];     // Multiple funding stage selection
-  min_esg?: number;            // Minimum ESG score filter
-  sort_by?: 'newest' | 'funding' | 'esg';  // Sort options
-  page?: number;               // Current page
-  limit?: number;              // Items per page
+  search?: string;
+  industry?: string[];
+  funding_stage?: string[];
+  min_esg?: number;
+  sort_by?: 'newest' | 'funding' | 'esg';
+  page?: number;
+  limit?: number;
 }
 
 // Pagination metadata
 export interface PaginationData {
-  total: number;    // Total number of companies
-  pages: number;    // Total number of pages
-  current: number;  // Current page number
-  limit: number;    // Items per page
+  total: number;
+  pages: number;
+  current: number;
+  limit: number;
 }

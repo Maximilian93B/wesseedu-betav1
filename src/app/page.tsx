@@ -19,7 +19,7 @@ export default function Home() {
             Browse Companies
           </Link>
           <Link 
-            href="/auth/signin" 
+            href="/auth/signup" 
             className="inline-block border border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors"
           >
             Get Started

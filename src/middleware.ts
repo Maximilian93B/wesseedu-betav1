@@ -1,153 +1,91 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import authConfig from '../config/auth.config'
-import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
+// middleware.ts
 
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
-// Rate limiting configuration
-const rateLimit = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  current: new Map<string, { count: number; resetTime: number }>()
+/**
+ * Define your public routes that do not require authentication.
+ */
+const PUBLIC_ROUTES = [
+  '/auth/login',
+  '/auth/signup',
+  '/auth/callback',
+  '/',           // Home page
+  '/about',
+  '/contact',
+  '/marketing'
+];
+
+/**
+ * Define any routes that are for admin users only.
+ * For instance, any route that starts with "/admin".
+ */
+const ADMIN_ROUTES = ['/admin'];
+
+/**
+ * The middleware function inspects every request.
+ */
+export async function middleware(request: NextRequest) {
+  const response = NextResponse.next()
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          response.cookies.set({ name, value, ...options })
+        },
+        remove(name: string, options: CookieOptions) {
+          response.cookies.set({ name, value: '', ...options, maxAge: 0 })
+        },
+      },
+    }
+  )
+
+  const { data: { session } } = await supabase.auth.getSession()
+
+  // Extract the pathname from the request URL.
+  const { pathname } = request.nextUrl;
+
+  // -- Public Routes --
+  // If the request is for a public route, continue without session check.
+  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
+  // -- Protected Routes --
+  // For all non-public routes, a session must exist.
+  if (!session) {
+    // Redirect to login if not authenticated.
+    const loginUrl = new URL('/auth/login', request.url);
+    loginUrl.searchParams.set('redirected', 'true');
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // -- Admin Routes --
+  // If the request is for an admin-only route, check if the user is an admin.
+  if (ADMIN_ROUTES.some((route) => pathname.startsWith(route))) {
+    // Assuming your Supabase session has user metadata with a "user_type" field.
+    if (session.user.user_metadata.user_type !== 'admin') {
+      // Redirect non-admin users to an unauthorized page.
+      return NextResponse.redirect(new URL('/unauthorized', request.url));
+    }
+  }
+
+  // (Optional) -- Add additional middleware logic here (e.g., rate limiting, security headers, etc.)
+
+  // If all checks pass, continue to the requested route.
+  return NextResponse.next();
 }
 
-// Helper function to check protected routes
-function isProtectedRoute(pathname: string): boolean {
-  const protectedPaths = [
-    '/dashboard',
-    '/user-dashboard',
-    '/company-dashboard',
-    '/profile',
-    '/settings',
-    '/company-registration',
-    '/marketplace',
-    '/favorites',
-    '/notifications',
-    '/api'
-  ]
-
-  // Public paths
-  const publicPaths = [
-    '/auth/signin',
-    '/auth/signup',
-    '/auth/callback',
-    '/auth/reset-password'
-  ]
-
-  // Check if the pathname starts with any of the public paths
-  if (publicPaths.some(path => pathname.startsWith(path))) {
-    return false
-  }
-    // Check if the pathname starts with any of the protected paths
-    return protectedPaths.some(path => pathname.startsWith(path))
-  }
-
-
-
-
-// Helper function for error redirects
-function getErrorRedirect(error: Error, req: NextRequest): NextResponse {
-  const baseUrl = new URL('/auth/signin', req.url)
-  baseUrl.searchParams.set('error', error.message)
-  baseUrl.searchParams.set('redirectedFrom', req.nextUrl.pathname)
-  return NextResponse.redirect(baseUrl)
-}
-
-// Rate limiting function
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now()
-  const record = rateLimit.current.get(ip)
-
-  if (!record) {
-    rateLimit.current.set(ip, { count: 1, resetTime: now + rateLimit.windowMs })
-    return true
-  }
-
-  if (now > record.resetTime) {
-    record.count = 1
-    record.resetTime = now + rateLimit.windowMs
-    return true
-  }
-
-  if (record.count >= rateLimit.max) {
-    return false
-  }
-
-  record.count++
-  return true
-}
-
-// Middleware function to handle authentication
-export async function middleware(req: NextRequest) {
-  try {
-    // Skip auth checks completely in development when auth is disabled
-    if (!authConfig.isAuthEnabled) {
-      return NextResponse.next();
-    }
-
-    // Your existing middleware code...
-    const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-    if (!checkRateLimit(ip)) {
-      throw new Error('Too many requests')
-    }
-    
-    // Rest of your existing middleware code...
-    const supabase = createMiddlewareClient({ req, res: NextResponse.next() })
-    
-    const { data: { session }, error } = await supabase.auth.getSession()
-    if (error) {
-      console.error('Session error:', error)
-      return getErrorRedirect(error, req)
-    }
-    // Check protected routes
-
-    if (isProtectedRoute(req.nextUrl.pathname)) {
-      if (!session) {
-        return getErrorRedirect(new Error('unauthorized'), req)
-      }
-    }
-    // Continue to the next middleware
-    const response = NextResponse.next()
-    response.headers.set('X-Frame-Options', 'DENY')
-    response.headers.set('X-Content-Type-Options', 'nosniff')
-    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
-    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-    return response
-  } catch (error) {
-    console.error('Middleware Error:', error)
-    return getErrorRedirect(error as Error, req)
-  }
-}
-
-// Middleware configuration
+/**
+ * Use the matcher configuration to ignore static files and favicon.
+ */
 export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/user-dashboard/:path*',
-    '/company-dashboard/:path*',
-    '/profile/:path*',
-    '/settings/:path*',
-    '/company-registration/:path*',
-    '/marketplace/:path*',
-    '/favorites/:path*',
-    '/notifications/:path*',
-    '/api/:path*'
-  ]
-}
-
-export function withAuth(handler: NextApiHandler) {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
-    // Skip auth check if disabled
-    if (!authConfig.isAuthEnabled) {
-      // Optionally inject a dev user context
-      req.user = {
-        email: authConfig.devBypassEmail || 'dev@example.com',
-        role: 'ADMIN'
-      };
-      return handler(req, res);
-    }
-
-    // ... existing auth logic ...
-  };
-}
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+};
