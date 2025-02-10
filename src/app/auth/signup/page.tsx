@@ -20,24 +20,32 @@ export default function SignupPage() {
     setInfoMsg('');
 
     try {
-      // Attempt to sign up the user via Supabase Auth.
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) {
-        console.error('Signup error:', error);
-        setErrorMsg(`Signup failed: ${error.message}`);
-        return;
+      // Send the request to your API route instead of direct Supabase call
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          firstName,
+          lastName,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.details || 'Signup failed');
       }
 
-      // If data.user exists, then signup was initiated.
-      if (data && data.user) {
-        // Redirect to profile creation page
-        router.push('/auth/confirmation'); // Redirect to the profile creation page
-      }
-
+      setInfoMsg(data.message);
+      router.push('/auth/confirmation');
 
     } catch (err: any) {
       console.error('Unexpected signup error:', err);
-      setErrorMsg('An unexpected error occurred. Please try again later.');
+      setErrorMsg(err.message || 'An unexpected error occurred. Please try again later.');
     }
   };
 

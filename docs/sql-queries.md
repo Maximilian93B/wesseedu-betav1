@@ -44,7 +44,7 @@ create table public.company_saves (
 create unique index unique_saved_company on public.company_saves 
 (user_id, company_id);
 
-
+ 
 // Funding Applications Table
 
 create table public.funding_applications (

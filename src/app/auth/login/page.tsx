@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const supabase = useSupabaseClient();
@@ -14,11 +15,40 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setErrorMsg(error.message);
-    } else {
-      router.push('/dashboard');
+    setErrorMsg('');
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMsg(data.error || 'Login failed');
+        return;
+      }
+
+      // Check if the email exists in profiles
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', email)  // Match by email instead of id
+        .single();
+
+      if (!profile) {
+        router.push('/auth/profile-create');
+      } else {
+        router.push('/dashboard');
+      }
+
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrorMsg('An unexpected error occurred');
     }
   };
 
@@ -43,6 +73,14 @@ export default function LoginPage() {
         />
         <button type="submit">Log In</button>
       </form>
+   
+   <div>
+    <p>Don't have an account? <Link href="/auth/signup">Sign up</Link></p>
+   </div>
+   
+   
     </div>
+
+   
   );
 }

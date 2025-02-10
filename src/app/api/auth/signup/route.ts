@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   try {
     const { email, password, firstName, lastName } = await request.json()
 
-    // Use the client–side signUp method to create the user
+    // Use the client-side signUp method to create the user
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -21,7 +21,9 @@ export async function POST(request: Request) {
         data: {
           first_name: firstName,
           last_name: lastName
-        }
+        },
+        // Set the redirect URL directly to profile creation
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/profile-create`
       }
     })
 
@@ -33,21 +35,13 @@ export async function POST(request: Request) {
       )
     }
 
-    // Set the redirect URL for after email verification
-    const { data: updateData, error: updateError } = await supabase.auth.updateUser({
-      data: {
-        email_confirm_redirect_url: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirmation`
-      }
+    // Remove the updateUser call since we're handling redirect in signUp options
+
+    return NextResponse.json({ 
+      user: data.user, 
+      session: data.session,
+      message: 'Please check your email to verify your account.'
     })
-
-    console.log('updateData', updateData)
-
-    if (updateError) {
-      console.error('Error setting redirect URL:', updateError)
-    }
-
-    // The verification email will be sent automatically
-    return NextResponse.json({ user: data.user, session: data.session })
   } catch (error) {
     console.error('Signup Error:', error)
     return NextResponse.json(
