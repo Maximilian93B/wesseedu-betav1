@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import SaveCompanyButton from "@/components/SaveCompanyButton";
 
 interface Company {
   id: string;
@@ -45,7 +46,7 @@ export default function CompanyDetailPage() {
           throw new Error(data.error);
         }
 
-        setCompany(data);
+        setCompany(data.company);
       } catch (err) {
         console.error('Error fetching company:', err);
         setError(err instanceof Error ? err.message : 'Failed to load company');
@@ -66,18 +67,15 @@ export default function CompanyDetailPage() {
     try {
       const response = await fetch(`/api/companies/${company.id}/pitch-deck`);
       if (!response.ok) {
-        throw new Error('Failed to get download URL');
+        const errorResponse = await response.json();
+        throw new Error(errorResponse.error || 'Failed to get download URL');
       }
       
       const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
       window.open(data.url, '_blank');
     } catch (error) {
-      console.error('Error downloading pitch deck:', error);
-      alert('Failed to download pitch deck. Please try again later.');
+      console.error('Error during pitch deck download:', error);
+      alert(`Error: ${(error as Error).message}`);
     } finally {
       setIsDownloading(false);
     }
@@ -123,16 +121,23 @@ export default function CompanyDetailPage() {
 
         {/* Company Header */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-3xl font-bold text-gray-500">
-                {company.name.charAt(0)}
-              </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                <span className="text-3xl font-bold text-gray-500">
+                  {company.name.charAt(0)}
+                </span>
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">{company.name}</h1>
+                <p className="text-gray-500 mt-2">Sustainability Score: {company.score}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">{company.name}</h1>
-              <p className="text-gray-500 mt-2">Sustainability Score: {company.score}</p>
-            </div>
+            <SaveCompanyButton 
+              companyId={company.id}
+              size="default"
+              variant="default"
+            />
           </div>
         </div>
 

@@ -6,13 +6,21 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function GET(
-  _request: Request,
-  context: { params: { companyId: string } }
-) {
-  try {
-    const companyId = await Promise.resolve(context.params.companyId);
+type RouteParams = {
+  params: Promise<{
+    companyId: string;
+  }>;
+};
 
+export async function GET(request: Request, context: RouteParams) {
+  const params = await context.params;
+  const companyId = params.companyId;
+
+  if (!companyId) {
+    return NextResponse.json({ error: 'Company ID is required' }, { status: 400 });
+  }
+
+  try {
     const { data: company, error } = await supabase
       .from('companies')
       .select('*')
@@ -20,25 +28,18 @@ export async function GET(
       .single();
 
     if (error) {
-      return NextResponse.json(
-        { error: 'Failed to fetch company' },
-        { status: 500 }
-      );
+      console.error('Supabase error:', error);
+      return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
     if (!company) {
-      return NextResponse.json(
-        { error: 'Company not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
 
-    return NextResponse.json(company);
+    
+    return NextResponse.json({ company });
   } catch (error) {
-    console.error('Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Server error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -26,6 +26,12 @@ export const createClient = (request: NextRequest) => {
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
+          supabaseResponse.cookies.set('sb-auth-token', 'true', {
+            path: '/',
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax'
+          })
         },
       },
     },

@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import SaveCompanyButton from "@/components/SaveCompanyButton";
 
 interface Company {
   id: string;
@@ -100,15 +101,22 @@ export default function MarketplacePage() {
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
                 >
                   <div className="p-6">
-                    <div className="flex items-center space-x-4 mb-4">
-                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                        <span className="text-xl font-bold text-gray-500">
-                          {company.name.charAt(0)}
-                        </span>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="text-xl font-bold text-gray-500">
+                            {company.name.charAt(0)}
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900">
+                          {company.name}
+                        </h3>
                       </div>
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        {company.name}
-                      </h3>
+                      <SaveCompanyButton 
+                        companyId={company.id} 
+                        size="icon"
+                        variant="ghost" 
+                      />
                     </div>
                     <div className="mb-2 flex items-center">
                       <span className="text-sm px-2 py-1 bg-green-100 text-green-800 rounded-full">

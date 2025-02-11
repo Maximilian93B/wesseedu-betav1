@@ -6,16 +6,15 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function GET(_request: Request, context: { params: { companyId: string } }) {
-  // Await the dynamic parameter directly
-  const companyId = await Promise.resolve(context.params.companyId);
+export async function GET(_request: Request, context: { params: Promise<{ companyId: string }> }) {
+  const { companyId } = await context.params;
   console.log('Company ID:', companyId);
 
   try {
-    // Fetch company details including the pitch deck URL
+    // Fetch the company's pitch deck URL from the database
     const { data: company, error: companyError } = await supabase
       .from('companies')
-      .select('id, pitch_deck_url')
+      .select('pitch_deck_url')
       .eq('id', companyId)
       .single();
 
@@ -27,33 +26,45 @@ export async function GET(_request: Request, context: { params: { companyId: str
       return NextResponse.json({ error: 'No pitch deck available' }, { status: 404 });
     }
 
-  
-    
-   
-    const bucketName = process.env.NEXT_PUBLIC_STORAGE_BUCKET; // should be "weSeedU-pitch-decks"
-    const splitToken = `/storage/v1/object/sign/${bucketName}/`;
-    const parts = company.pitch_deck_url.split(splitToken);
+    console.log('Stored pitch deck URL:', company.pitch_deck_url);
 
-    if (parts.length < 2) {
-      return NextResponse.json({ error: 'Invalid pitch deck URL format' }, { status: 400 });
+    // Get the storage URL from environment variables
+    let storageUrl = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL || '';
+    // Remove '/s3' if it appears on the end of the storage URL so that it matches
+    // the pattern of the signed URL (which uses /object/sign/…)
+    if (storageUrl.endsWith('/s3')) {
+      storageUrl = storageUrl.replace('/s3', '');
     }
 
-    // Remove any query parameters
-    const filePathWithQuery = parts[1];
-    const filePath = filePathWithQuery.split('?')[0];
+    const bucketName = process.env.NEXT_PUBLIC_STORAGE_BUCKET;
+
+    let filePath = '';
+    // Check for a signed URL format
+    if (company.pitch_deck_url.includes(`/object/sign/${bucketName}/`)) {
+      const splitToken = `${storageUrl}/object/sign/${bucketName}/`;
+      const parts = company.pitch_deck_url.split(splitToken);
+
+      if (parts.length < 2) {
+        return NextResponse.json({ error: 'Invalid pitch deck URL format' }, { status: 400 });
+      }
+      // Remove any query parameters from the file path.
+      filePath = parts[1].split('?')[0];
+    }
+  
     console.log('Extracted file path:', filePath);
 
-    // Generate a signed URL valid for 3600 seconds (1 hour)
+    // Generate a new signed URL valid for 3600 seconds (1 hour)
     const { data: signedUrl, error: storageError } = await supabase
       .storage
       .from(bucketName!)
       .createSignedUrl(filePath, 3600);
 
     if (storageError || !signedUrl) {
-      console.error('Storage error details:', storageError);
+      console.error('Storage error:', storageError);
       return NextResponse.json({ error: 'File not found in storage' }, { status: 404 });
     }
 
+    // Return the generated signed URL so the client can download the PDF
     return NextResponse.json({ url: signedUrl.signedUrl });
   } catch (error) {
     console.error('Server error:', error);

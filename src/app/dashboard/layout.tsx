@@ -50,27 +50,27 @@ export default async function DashboardLayout({
 
     const navigationItems = [
       {
-        href: "/user-dashboard",
+        href: "/dashboard",
         icon: <LayoutDashboard className="mr-2 h-4 w-4" />,
         label: "Overview",
         show: true
       },
       {
-        href: "/user-dashboard/profile",
+        href: "/dashboard/profile",
         icon: <User className="mr-2 h-4 w-4" />,
         label: "Profile",
         show: true
       },
       {
-        href: "/user-dashboard/companies",
+        href: "/dashboard/companies",
         icon: <Building2 className="mr-2 h-4 w-4" />,
         label: "Companies",
         show: userType === 'investor'
       },
       {
-        href: "/user-dashboard/favorites",
+        href: "/dashboard/saved",
         icon: <Heart className="mr-2 h-4 w-4" />,
-        label: "Favorites",
+        label: "Saved Companies",
         show: userType === 'investor'
       },
       {
