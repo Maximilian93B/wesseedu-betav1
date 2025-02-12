@@ -61,6 +61,21 @@ Users can bookmark or “save” companies for future reference. A dedicated fea
 #### Personalized Dashboard:
 Each user has a dashboard showing their profile, saved companies, and funding application statuses.
 
+## User Profile
+
+### User Profile:
+name text,
+  email text,
+  user_type user_type_enum not null default 'investor',
+  user_tier user_tier_enum not null default 'root',  -- Default tier can be set as needed
+  created_at timestamp with time zone default timezone('utc', now()),
+  updated_at timestamp with time zone default timezone('utc', now())
+Users can update their profile information, including:
+
+## Profile Features - TO DO's
+
+
+
 ### Administrative Tools
 
 #### Admin Dashboard & Management:

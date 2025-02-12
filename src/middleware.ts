@@ -1,8 +1,6 @@
-// middleware.ts
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { NextResponse, NextRequest } from 'next/server';
 
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
 
 /**
  * Define your public routes that do not require authentication.
@@ -32,60 +30,51 @@ const protectedPaths = [
   '/dashboard',
   '/profile',
   // Add other protected routes here
-]
+];
 
 /**
  * The middleware function inspects every request.
  */
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
 
-  // Check auth session
-  const { data: { session }, error } = await supabase.auth.getSession()
+  // ✅ Create Supabase middleware client correctly
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req, res });
+
+
+  // ✅ Get session once (instead of calling createMiddlewareClient twice)
+  const { data: { session } } = await supabase.auth.getSession();
 
   // Get the pathname of the request
-  const { pathname } = req.nextUrl
+  const { pathname } = req.nextUrl;
 
-  // Check if the current path should be protected
-  const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
+  
+  
+  // ✅ Check if the current path should be protected
+  const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path));
 
   if (isProtectedPath && !session) {
     // Redirect to login if accessing protected route without session
-    const redirectUrl = new URL('/auth/login', req.url)
-    // Add the original URL as a query parameter to redirect back after login
-    redirectUrl.searchParams.set('redirectTo', pathname)
-    return NextResponse.redirect(redirectUrl)
+    const redirectUrl = new URL('/auth/login', req.url);
+    redirectUrl.searchParams.set('redirectTo', pathname); // Store original URL for redirecting back
+    return NextResponse.redirect(redirectUrl);
   }
 
-  // -- Public Routes --
-  // If the request is for a public route, continue without session check.
+  // ✅ Allow public routes without requiring authentication
   const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
   if (isPublicRoute) {
     return NextResponse.next();
   }
 
-  // -- Protected Routes --
-  // For all non-public routes, a session must exist.
-  if (!session) {
-    // Use rewrite instead of redirect to avoid flash
-    return NextResponse.rewrite(new URL('/unauthorized', req.url));
-  }
-
-  // -- Admin Routes --
-  // If the request is for an admin-only route, check if the user is an admin.
+  // ✅ Handle Admin Routes
   if (ADMIN_ROUTES.some((route) => pathname.startsWith(route))) {
-    // Assuming your Supabase session has user metadata with a "user_type" field.
-    if (session.user.user_metadata.user_type !== 'admin') {
-      // Use rewrite instead of redirect to avoid flash
+    if (!session || session.user.user_metadata.user_type !== 'admin') {
       return NextResponse.rewrite(new URL('/unauthorized', req.url));
     }
   }
 
-  // (Optional) -- Add additional middleware logic here (e.g., rate limiting, security headers, etc.)
-
-  // If all checks pass, continue to the requested route.
-  return res
+  // ✅ If all checks pass, continue to the requested route
+  return res;
 }
 
 /**

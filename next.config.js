@@ -1,7 +1,5 @@
-import type { NextConfig } from "next";
-
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
       {
@@ -19,13 +17,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-declare module 'next' {
-  interface NextApiRequest {
-    user?: {
-      email: string;
-      role: string;
-    }
-  }
-}
-
-export default nextConfig;
+module.exports = nextConfig; 

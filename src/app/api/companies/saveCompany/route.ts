@@ -5,6 +5,11 @@ import { cookies } from 'next/headers'
 // ... existing GET function ...
 
 export async function POST(request: Request) {
+  const cookieStore = cookies()
+  const supabase = createRouteHandlerClient({ 
+    cookies: () => cookieStore 
+  })
+
   try {
     const { companyId } = await request.json()
     
@@ -12,11 +17,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Company ID is required' }, { status: 400 })
     }
 
-    // Pass the cookies function directly—do not await it—
-    // so that Supabase's helper calls it internally as needed.
-    const supabase = createRouteHandlerClient({ cookies })
-
-    // This now works because supabase.auth is available.
     const { data: { session }, error: authError } = await supabase.auth.getSession()
     
     if (authError || !session) {
@@ -53,6 +53,11 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const cookieStore = cookies()
+  const supabase = createRouteHandlerClient({ 
+    cookies: () => cookieStore 
+  })
+
   try {
     const { searchParams } = new URL(request.url)
     const companyId = searchParams.get('companyId')
@@ -61,10 +66,6 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Company ID is required' }, { status: 400 })
     }
 
-    // Pass the cookies function directly
-    const supabase = createRouteHandlerClient({ cookies })
-
-    // Get the current user's session
     const { data: { session }, error: authError } = await supabase.auth.getSession()
     
     if (authError || !session) {
