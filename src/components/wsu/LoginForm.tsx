@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from '@/hooks/use-toast'
 
 export default function LoginForm() {
   const [email, setEmail] = useState('')
@@ -47,7 +47,7 @@ export default function LoginForm() {
       toast({
         title: "Login Failed",
         description: error instanceof Error ? error.message : 'An unexpected error occurred',
-        variant: "destructive",
+        variant: "destructive"
       })
     } finally {
       setLoading(false)

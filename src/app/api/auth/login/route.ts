@@ -39,11 +39,17 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       user: authData.user,
       hasProfile: !!profile,
       profile: profile,
     });
+
+    // Add redirect URL to the response
+    response.headers.set('Location', '/dashboard');
+    response.headers.set('status', '301');
+
+    return response;
 
   } catch (error) {
     console.error('Login error:', error);

@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Building2, ExternalLink } from "lucide-react";
 
+export const dynamic = 'force-dynamic'
+
 interface SavedCompany {
   id: string;
   companies: {

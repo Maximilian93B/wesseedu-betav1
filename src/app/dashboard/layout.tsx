@@ -15,6 +15,10 @@ import {
 import { redirect } from 'next/navigation';
 import authConfig from '@/config/auth.config'
 
+
+export const dynamic = 'force-dynamic'
+
+
 export default async function DashboardLayout({
   children,
 }: {

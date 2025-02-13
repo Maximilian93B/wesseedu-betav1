@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
-// ... existing GET function ...
+
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
   const cookieStore = cookies()

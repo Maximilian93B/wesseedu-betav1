@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { supabaseClient } from '@/lib/supabase/supabaseClient';
 
+export const dynamic = 'force-dynamic'
+
 export default function DashboardPage() {
   const user = useUser();
   const router = useRouter();
