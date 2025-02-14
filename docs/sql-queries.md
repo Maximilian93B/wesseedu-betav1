@@ -5,7 +5,10 @@ create table public.profiles (
   name text,
   email text,
   user_type user_type_enum not null default 'investor',
-  user_tier user_tier_enum not null default 'root',  -- Default tier can be set as needed
+  user_tier user_tier_enum not null default 'root',
+  total_investments numeric(15,2) default 0.00,  -- For tracking total investment amount
+  previous_month_investments numeric(15,2) default 0.00,  -- For calculating month-over-month change
+  impact_score numeric(3,1) default 0.0,  -- For storing impact score (e.g., 8.7)
   created_at timestamp with time zone default timezone('utc', now()),
   updated_at timestamp with time zone default timezone('utc', now())
 );
@@ -25,6 +28,7 @@ create table public.companies (
   pitch_deck_url text,
   sustainability_data jsonb,
   score numeric(5,2) default 0.00,
+  community_members integer default 0,  -- New column for tracking community members
   created_at timestamp with time zone default timezone('utc', now()),
   updated_at timestamp with time zone default timezone('utc', now()),
   created_by uuid references public.profiles(id) on delete set null

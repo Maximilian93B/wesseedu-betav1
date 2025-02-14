@@ -14,7 +14,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { id, email, name, user_type, user_tier, sustainable_investment_tags } = await request.json()
+    const { id, email, name, user_type, user_tier, sustainable_investment_tags, total_investments, previous_month_investments, impact_score } = await request.json()
 
     // Insert the profile into the profiles table
     const { error } = await supabaseAdmin.from('profiles').insert([
@@ -25,6 +25,9 @@ export async function POST(request: Request) {
         user_type,
         user_tier,
         sustainable_investment_tags,
+        total_investments,
+        previous_month_investments,
+        impact_score,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },

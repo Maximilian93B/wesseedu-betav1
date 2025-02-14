@@ -24,6 +24,7 @@ interface Company {
     [key: string]: number
   }
   score: number
+  community_members: number
 }
 
 export default function MarketplacePage() {
@@ -104,6 +105,9 @@ export default function MarketplacePage() {
               <CardContent>
                 <Badge variant="secondary" className="mb-2">
                   Score: {company.score}
+                </Badge>
+                <Badge variant="secondary" className="mb-2">
+                  Community Members: {company.community_members}
                 </Badge>
                 <CardDescription className="line-clamp-3 mb-4">{company.description}</CardDescription>
                 <p className="text-sm text-muted-foreground italic mb-4">"{company.mission_statement}"</p>

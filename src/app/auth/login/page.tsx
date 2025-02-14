@@ -45,18 +45,19 @@ export default function LoginPage() {
         .eq("email", email)
         .single()
 
-      if (!profile) {
-        router.push("/auth/profile-create")
-      } else {
-        router.push("/dashboard")
+        if (!profile) {
+          router.push("/auth/profile-create")
+        } else {
+          // Redirect to Home page
+          router.push("/auth/Home")
+        }
+      } catch (error) {
+        console.error("Login error:", error)
+        setErrorMsg(error instanceof Error ? error.message : "An unexpected error occurred")
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error) {
-      console.error("Login error:", error)
-      setErrorMsg(error instanceof Error ? error.message : "An unexpected error occurred")
-    } finally {
-      setIsLoading(false)
     }
-  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">

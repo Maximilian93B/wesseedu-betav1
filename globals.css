@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 4%;
+    --foreground: 0 0% 98%;
+    --card: 222 47% 4%;
+    --card-foreground: 0 0% 98%;
+    --popover: 222 47% 4%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 168 100% 39%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 222 47% 11%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 222 47% 11%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 222 47% 11%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 222 47% 11%;
+    --input: 222 47% 11%;
+    --ring: 168 100% 39%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222 47% 4%;
+    --foreground: 0 0% 98%;
+    --card: 222 47% 4%;
+    --card-foreground: 0 0% 98%;
+    --popover: 222 47% 4%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 168 100% 39%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 222 47% 11%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 222 47% 11%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 222 47% 11%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 222 47% 11%;
+    --input: 222 47% 11%;
+    --ring: 168 100% 39%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom styles for WeSeedU */
+@layer utilities {
+  .bg-gradient-primary {
+    @apply bg-gradient-to-r from-teal-600 via-blue-600 to-purple-600;
+  }
+
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500;
+  }
+}
+
+/* Additional global styles */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+

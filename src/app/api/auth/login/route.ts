@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     });
 
     // Attempt to sign in
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -21,6 +21,16 @@ export async function POST(request: Request) {
     if (authError) {
       return NextResponse.json(
         { error: authError.message },
+        { status: 401 }
+      );
+    }
+
+    // Get authenticated user data securely
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'Authentication failed' },
         { status: 401 }
       );
     }
@@ -40,14 +50,15 @@ export async function POST(request: Request) {
     }
 
     const response = NextResponse.json({
-      user: authData.user,
+      user,
       hasProfile: !!profile,
       profile: profile,
     });
 
-    // Add redirect URL to the response
-    response.headers.set('Location', '/dashboard');
+    // redirect URL to /home
+    response.headers.set('Location', '/Home');
     response.headers.set('status', '301');
+
 
     return response;
 

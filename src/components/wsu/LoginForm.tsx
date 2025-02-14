@@ -36,9 +36,8 @@ export default function LoginForm() {
         .select('user_type')
         .single()
 
-      // Redirect based on user type
-      const returnUrl = searchParams.get('returnUrl') || 
-        userData?.user_type === 'admin' ? '/auth/admin' : '/dashboard'
+   // Redirect to Home by default, or use returnUrl if specified
+      const returnUrl = searchParams.get('returnUrl') || '/auth/Home'
       
       router.push(returnUrl)
       router.refresh()
