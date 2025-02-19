@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BarChart, Users, TrendingUp, Leaf } from "lucide-react"
-import { NewsSection } from "@/components/NewsSection"
+import { NewsSection } from "@/components/wsu/dashboard/NewsSection"
 
 export const dynamic = "force-dynamic"
 

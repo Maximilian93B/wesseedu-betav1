@@ -24,12 +24,12 @@ export function KeyFeatures() {
   ]
 
   return (
-    <div className="container mx-auto px-4 py-24">
-      <div className="text-center mb-16 space-y-4">
-        <div className="inline-block glass-effect px-3 py-1 text-sm text-teal-500">
-          Our Features
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <div className="text-center space-y-6 mb-20">
+        <div className="inline-flex items-center space-x-2 bg-teal-500/10 border border-teal-500/20 px-4 py-1.5 rounded-full">
+          <span className="text-sm font-medium text-teal-400">Our Features</span>
         </div>
-        <h2 className="text-4xl font-bold text-gradient-primary">
+        <h2 className="text-3xl md:text-4xl font-bold text-gradient-primary max-w-2xl mx-auto">
           Why Choose WeSeedU
         </h2>
       </div>
@@ -38,13 +38,18 @@ export function KeyFeatures() {
         {features.map((feature, index) => (
           <Card 
             key={index} 
-            className="glass-effect border-white/10 hover-glow transition-all duration-300"
+            className="glass-effect border border-white/10 hover:border-teal-500/20 
+              transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/5 group"
           >
-            <CardHeader>
-              <CardTitle className="text-white text-xl">{feature.title}</CardTitle>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl text-white group-hover:text-teal-400 
+                transition-colors duration-300"
+              >
+                {feature.title}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <CardDescription className="text-gray-400 text-sm leading-relaxed">
+              <CardDescription className="text-gray-400 text-base leading-relaxed">
                 {feature.description}
               </CardDescription>
             </CardContent>

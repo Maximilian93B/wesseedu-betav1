@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import SaveCompanyButton from "@/components/company/SaveCompanyButton"
 import { ArrowLeft, Download, Building2, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
+
 interface Company {
   id: string
   name: string
@@ -25,6 +27,7 @@ interface Company {
   }
   score: number
   community_members: number
+  image_url: string
 }
 
 export default function CompanyDetailPage() {
@@ -116,99 +119,128 @@ export default function CompanyDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <Button asChild variant="ghost" className="mb-6">
-        <Link href="/companies">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Companies
-        </Link>
-      </Button>
+    <div className="space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex items-center justify-between">
+        <Button asChild variant="ghost" className="hover:bg-muted/50">
+          <Link href="/companies">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Companies
+          </Link>
+        </Button>
+        <SaveCompanyButton companyId={company.id} size="default" variant="outline" />
+      </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
-                <Building2 className="h-8 w-8 text-muted-foreground" />
-              </div>
+      <Card className="border-2 shadow-sm">
+        <CardHeader className="pb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex items-center space-x-8">
+              {company.image_url ? (
+                <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-muted">
+                  <Image
+                    src={company.image_url}
+                    alt={`${company.name} logo`}
+                    fill
+                    className="object-cover"
+                    sizes="96px"
+                    priority
+                  />
+                </div>
+              ) : (
+                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Building2 className="h-12 w-12 text-primary" />
+                </div>
+              )}
               <div>
-                <CardTitle>{company.name}</CardTitle>
-                <CardDescription>Sustainability Score: {company.score}</CardDescription>
+                <CardTitle className="text-4xl font-bold mb-4">{company.name}</CardTitle>
+                <div className="flex items-center space-x-4">
+                  <Badge variant="secondary" className="text-sm px-4 py-1.5 gap-2">
+                    <Users className="h-4 w-4" />
+                    {company.community_members.toLocaleString()} Members
+                  </Badge>
+                  <Badge variant="default" className="text-sm px-4 py-1.5">
+                    Score: {company.score}/100
+                  </Badge>
+                </div>
               </div>
             </div>
-            <SaveCompanyButton companyId={company.id} size="default" variant="outline" />
           </div>
         </CardHeader>
-        <CardContent>
-          <Badge variant="secondary" className="mb-2 text-sm px-2 py-1 gap-2">
-            <Users className="h-4 w-4" />
-            Community Members: {company.community_members}
-          </Badge>  
-        </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>About</CardTitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <Card className="border-2 hover:border-primary/50 transition-colors shadow-sm">
+          <CardHeader className="pb-6">
+            <CardTitle className="text-2xl flex items-center gap-3">
+              About
+              <div className="h-1.5 w-12 bg-primary rounded-full" />
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="mb-4">{company.description}</p>
-            <h3 className="font-semibold mb-2">Mission Statement</h3>
-            <p>{company.mission_statement}</p>
+          <CardContent className="space-y-8">
+            <p className="text-muted-foreground leading-relaxed text-lg">{company.description}</p>
+            <div>
+              <h3 className="font-semibold mb-4 text-xl">Mission Statement</h3>
+              <p className="text-muted-foreground italic leading-relaxed text-lg">{company.mission_statement}</p>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-2 hover:border-primary/50 transition-colors">
           <CardHeader>
-            <CardTitle>Sustainability Metrics</CardTitle>
+            <CardTitle className="text-xl flex items-center gap-2">
+              Sustainability Metrics
+              <div className="h-1 w-10 bg-primary rounded-full" />
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-4">
               {Object.entries(company.sustainability_data).map(([key, value]) => (
-                <div key={key} className="flex justify-between items-center">
+                <div key={key} className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
                   <span className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}</span>
-                  <span className="font-medium">{value}</span>
+                  <span className="font-medium text-primary">{value}</span>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-2 hover:border-primary/50 transition-colors">
           <CardHeader>
-            <CardTitle>Financial Overview</CardTitle>
+            <CardTitle className="text-xl flex items-center gap-2">
+              Financial Overview
+              <div className="h-1 w-10 bg-primary rounded-full" />
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Annual Revenue</span>
-                <span className="font-medium">${company.financials.annual_revenue.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Funding Raised</span>
-                <span className="font-medium">${company.financials.funding_raised.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Monthly Burn Rate</span>
-                <span className="font-medium">${company.financials.burn_rate.toLocaleString()}</span>
-              </div>
+            <div className="space-y-4">
+              {Object.entries(company.financials).map(([key, value]) => (
+                <div key={key} className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
+                  <span className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}</span>
+                  <span className="font-medium text-primary">${value.toLocaleString()}</span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
         {company.pitch_deck_url && (
-          <Card>
+          <Card className="border-2 hover:border-primary/50 transition-colors">
             <CardHeader>
-              <CardTitle>Resources</CardTitle>
+              <CardTitle className="text-xl flex items-center gap-2">
+                Resources
+                <div className="h-1 w-10 bg-primary rounded-full" />
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <Button onClick={handlePitchDeckDownload} disabled={isDownloading}>
+              <Button 
+                onClick={handlePitchDeckDownload} 
+                disabled={isDownloading}
+                className="w-full justify-center py-6 text-lg"
+              >
                 {isDownloading ? (
                   <span>Downloading...</span>
                 ) : (
                   <>
-                    <Download className="mr-2 h-4 w-4" />
+                    <Download className="mr-2 h-5 w-5" />
                     Download Pitch Deck
                   </>
                 )}

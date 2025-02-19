@@ -1,6 +1,6 @@
 "use client"
 
-import { Sidebar } from "@/components/Sidebar"
+import { Sidebar } from "@/components/wsu/dashboard/Sidebar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu, Bell } from "lucide-react"

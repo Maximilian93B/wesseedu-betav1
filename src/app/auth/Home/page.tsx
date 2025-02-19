@@ -5,14 +5,18 @@ import { useRouter } from "next/navigation"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Leaf, TrendingUp, Users, BarChart } from "lucide-react"
+import { Leaf, TrendingUp, Users, BarChart, Search, Bookmark } from "lucide-react"
 import Link from "next/link"
+import { NewsSection } from "@/components/wsu/dashboard/NewsSection"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 
 export default function HomePage() {
   const router = useRouter()
   const supabase = createClientComponentClient()
+  const supabaseClient = useSupabaseClient()
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<any[]>([])
 
   useEffect(() => {
     const checkUser = async () => {
@@ -25,6 +29,42 @@ export default function HomePage() {
     checkUser()
   }, [supabase.auth])
 
+  useEffect(() => {
+    if (user) {
+      fetchUserStats()
+    }
+  }, [user])
+
+  const fetchUserStats = async () => {
+    try {
+      const { data: profileData, error } = await supabaseClient
+        .from("profiles")
+        .select(`
+          total_investments,
+          impact_score
+        `)
+        .eq("id", user?.id)
+        .single()
+
+      if (error) throw error
+
+      setStats([
+        {
+          title: "Your Investment",
+          value: `$${profileData.total_investments.toLocaleString()}`,
+          icon: <TrendingUp className="h-10 w-10 text-green-600" />,
+        },
+        {
+          title: "Impact Score",
+          value: `${profileData.impact_score}/10`,
+          icon: <BarChart className="h-10 w-10 text-blue-600" />,
+        },
+      ])
+    } catch (error) {
+      console.error("Error fetching stats:", error)
+    }
+  }
+
   const signOut = async () => {
     await supabase.auth.signOut()
     router.push("/")
@@ -32,7 +72,7 @@ export default function HomePage() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen bg-white">Loading...</div>
+    return <div className="flex items-center justify-center min-h-screen bg-white text-gray-900">Loading...</div>
   }
 
   if (!user) {
@@ -48,13 +88,13 @@ export default function HomePage() {
           <span className="ml-2 text-lg font-bold text-gray-900">WeSeedU</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-sm font-medium text-gray-700 hover:text-blue-600" href="/dashboard">
+          <Link className="text-sm font-medium text-gray-700 hover:text-blue-600" href="/auth/dashboard">
             Dashboard
           </Link>
           <Link className="text-sm font-medium text-gray-700 hover:text-blue-600" href="/companies">
             Companies
           </Link>
-          <Link className="text-sm font-medium text-gray-700 hover:text-blue-600" href="/profile">
+          <Link className="text-sm font-medium text-gray-700 hover:text-blue-600" href="/auth/profile">
             Profile
           </Link>
           <button onClick={signOut} className="text-sm font-medium text-gray-700 hover:text-blue-600">
@@ -63,71 +103,101 @@ export default function HomePage() {
         </nav>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32">
+        <section className="w-full py-8 md:py-12 lg:py-16">
           <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-4 text-center">
-              <div className="space-y-2">
+            <div className="flex flex-col items-center space-y-6">
+              <div className="space-y-3">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-gray-900">
                   Welcome back to WeSeedU
                 </h1>
-                <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl">
+                <p className="mx-auto max-w-[700px] text-black  text-xl">
                   Your gateway to sustainable investments. Make an impact while growing your portfolio.
                 </p>
               </div>
-              <div className="space-x-4">
-                <Button asChild className="bg-blue-600 text-white hover:bg-blue-700">
-                  <Link href="/auth/dashboard">Go to Dashboard</Link>
+
+              {user && stats.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mt-8 text-black">
+                  {stats.map((stat, index) => (
+                    <Card key={index} className="bg-white border border-gray-200 shadow-sm hover:scale-105 transition-transform cursor-pointer">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between">
+                          {stat.icon}
+                          <CardTitle className="text-xl text-black">{stat.title}</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-2">
+                        <p className="text-3xl font-bold text-black">{stat.value}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-md">
+                <Button 
+                  onClick={() => router.push('/companies')} 
+                  className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  <Search className="w-4 h-4 mr-2" />
+                  Find Companies
                 </Button>
-                <Button asChild variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-50">
-                  <Link href="/auth/companies">Explore Companies</Link>
+                <Button 
+                  onClick={() => router.push('/dashboard/saved')} 
+                  variant="outline" 
+                  className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                >
+                  <Bookmark className="w-4 h-4 mr-2" />
+                  Saved Companies
                 </Button>
               </div>
             </div>
           </div>
         </section>
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-50">
+        <section className="w-full py-10 bg-gray-50">
+          <div className="container px-4 md:px-6 max-w-5xl mx-auto">
+            <NewsSection />
+          </div>
+        </section>
+        <section className="w-full py-12 md:py-16 lg:py-20">
           <div className="container px-4 md:px-6">
-            <div className="grid gap-6 items-center">
-              <div className="flex flex-col justify-center space-y-8 text-center">
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-gray-900">
-                    Invest in a Sustainable Future
-                  </h2>
-                  <p className="max-w-[600px] text-gray-600 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mx-auto">
-                    Discover innovative companies that are making a difference. Your investments can help shape a better
-                    world.
-                  </p>
-                </div>
+            <div className="flex flex-col items-center space-y-6 mb-12">
+              <div className="space-y-3 text-center">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-gray-900">
+                  Invest in a Sustainable Future
+                </h2>
+                <p className="max-w-[600px] text-gray-600 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mx-auto">
+                  Discover innovative companies that are making a difference. Your investments can help shape a better world.
+                </p>
               </div>
-              <div className="mx-auto grid max-w-5xl items-center gap-6 lg:grid-cols-3 lg:gap-12">
-                <Card className="bg-white border border-gray-200 shadow-sm">
-                  <CardHeader>
-                    <TrendingUp className="h-10 w-10 text-green-600" />
-                    <CardTitle className="text-gray-900">Sustainable Growth</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-gray-600">
-                    Invest in companies with proven track records of sustainable practices and growth potential.
-                  </CardContent>
-                </Card>
-                <Card className="bg-white border border-gray-200 shadow-sm">
-                  <CardHeader>
-                    <Users className="h-10 w-10 text-blue-600" />
-                    <CardTitle className="text-gray-900">Community Impact</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-gray-600">
-                    Support businesses that prioritize social responsibility and community development.
-                  </CardContent>
-                </Card>
-                <Card className="bg-white border border-gray-200 shadow-sm">
-                  <CardHeader>
-                    <BarChart className="h-10 w-10 text-blue-600" />
-                    <CardTitle className="text-gray-900">Transparent Metrics</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-gray-600">
-                    Access clear, data-driven insights on the environmental and social impact of your investments.
-                  </CardContent>
-                </Card>
-              </div>
+            </div>
+            <div className="mx-auto grid max-w-5xl items-center gap-8 lg:grid-cols-3">
+              <Card className="bg-white border border-gray-200 shadow-sm">
+                <CardHeader>
+                  <TrendingUp className="h-10 w-10 text-green-600" />
+                  <CardTitle className="text-gray-900">Sustainable Growth</CardTitle>
+                </CardHeader>
+                <CardContent className="text-gray-600">
+                  Invest in companies with proven track records of sustainable practices and growth potential.
+                </CardContent>
+              </Card>
+              <Card className="bg-white border border-gray-200 shadow-sm">
+                <CardHeader>
+                  <Users className="h-10 w-10 text-blue-600" />
+                  <CardTitle className="text-gray-900">Community Impact</CardTitle>
+                </CardHeader>
+                <CardContent className="text-gray-600">
+                  Support businesses that prioritize social responsibility and community development.
+                </CardContent>
+              </Card>
+              <Card className="bg-white border border-gray-200 shadow-sm">
+                <CardHeader>
+                  <BarChart className="h-10 w-10 text-blue-600" />
+                  <CardTitle className="text-gray-900">Transparent Metrics</CardTitle>
+                </CardHeader>
+                <CardContent className="text-gray-600">
+                  Access clear, data-driven insights on the environmental and social impact of your investments.
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
