@@ -1,14 +1,15 @@
 # WeSeedU Platform Documentation
 
 ## Mission & Overview
-WeSeedU is a specialized platform connecting investors with vetted, sustainable companies that drive impactful innovation. Our platform uniquely collaborates with the Global Sustainability Fund (GSF) and the United Nations (UN) to ensure listed companies align with global sustainability goals while demonstrating exceptional growth potential.
+WeSeedU is a comprehensive sustainable investment platform that empowers retail and active investors to discover, evaluate, and invest in companies that are not only financially promising but also committed to sustainable development. Through a blend of public marketplace features, user-specific functionalities, and robust administrative oversight, the platform ensures a secure, data-driven, and user-friendly experience—all while fostering a community dedicated to sustainable innovation.
 
 ## Platform Differentiators
-- Rigorous vetting process (WeSeedU, GSF, UN)
+- Rigorous vetting process (WeSeedU, GSF, UN, KPMG, EY, PwC ,Deloitte)
 - Focus on sustainable development
 - Success-fee based model
 - ESG-driven company scoring
 - Pre-public investment opportunities
+
 
 ## Success Fee Structure
 - 2% for funding < $500,000
@@ -16,136 +17,167 @@ WeSeedU is a specialized platform connecting investors with vetted, sustainable 
 - 5% for funding > $1,000,000
 * Fees only charged upon successful funding
 
-## User Tiers
+## Core Features 
 
-### 1. Root Access (Free Tier)
-- **Target**: Retail Investors
-- **Features**:
-  - Basic platform access
-  - Limited company profiles
-  - General market insights
-  - Basic sustainability metrics
+### User Accounts & Tiering
 
-### 2. Thrive Member (Paid Annual)
-- **Target**: Active Retail Investors
-- **Features**:
-  - In-depth company profiles
-  - WeSeedU sustainability scoring
-  - Advanced analytics tools
-  - News and company updates
-  - Priority platform features
+#### Account Management & Authentication:
+Secure user sign-up, login, and profile management using Supabase Auth and custom profiles.
 
-### 3. Impact Member (Awarded Annual)
-- **Target**: Top Contributing Investors
-- **Features**:
-  - Exclusive access
-  - Recognition for sustainable contributions
-  - Premium platform features
-  - Special investment opportunities
+#### User Tiers:
+Three distinct tiers are available:
 
-## Core Features
+#### Root: Free, basic access for retail investors.
 
-### Company Vetting & Scoring
-- Sustainability criteria alignment
-- UN SDG progress measurement
-- ESG scoring system
-- Financial viability assessment
+#### Thrive: Paid annual membership offering in-depth company profiles, advanced analytics, and priority features.
 
-### For Companies
-- Zero upfront costs
-- Access to mission-aligned investors
-- Sustainability verification
-- Funding campaign management
-- Progress tracking against SDGs
+#### Impact: Awarded to top contributing investors with exclusive access and premium features.
 
-### For Investors
-- Pre-vetted sustainable opportunities
-- Early access to pre-public companies
-- ESG scoring transparency
-- Impact measurement tools
-- SDG alignment tracking
+### Company Listings & Marketplace
 
-## Technical Implementation Priorities
+#### Public Directory:
 
-### 1. Authentication & Verification - 2024/12/27
-- User signup/login ✅
-- Email verification ✅
-- Role-based access (investor/company) ✅
-- Basic middleware protection ✅ 
+A marketplace where all users can browse companies seeking funding, view basic financial and mission information, and see an ESG-driven sustainability score.
 
-## 2. Investor Profile Management
-### Phase 1: Discovery
-- Company listing page
-- Search and filter functionality
-- Company detail views
-- Favorite/bookmark system
+#### Company Detail Pages:
+Each company has a dedicated page with:
+Detailed financials and mission statements.
+A downloadable pitch deck (stored and managed via Supabase Storage).
+An overall sustainability score based on pre-defined criteria.
 
-### Phase 2: Investment Tools
-- Due diligence checklist
-- Investment tracking
-- Document access management
-- Communication system
+### Investment & Funding Applications
 
+#### Pre-IPO Opportunities:
+Investors can access exclusive pre-IPO investment opportunities in sustainable companies.
 
-### 3. Company Profile Management
-#### Phase 1: Basic Profile
-- Company dashboard layout
-- Profile completion workflow
-- Basic company information management
-- Document upload system (pitch deck, financials)
-#### Phase 2: Sustainability Metrics
-- ESG criteria input forms
-- SDG alignment selection
-- Impact metrics tracking
-- Verification status handling
+#### Funding Application:
+Companies can apply for funding through WeSeedU. Investors can submit funding applications, and companies receive feedback through a tracked application process.
 
+### User-Specific Actions
 
-## 4. Admin Profile Management
-### Phase 1: Basic Admin
-- Admin dashboard
-- Company verification workflow
-- User management
-- Basic platform metrics
+#### Saved Companies:
+Users can bookmark or “save” companies for future reference. A dedicated feature lets users manage their saved companies through CRUD (create, read, update, delete) operations.
 
-### Phase 2: Advanced Features
-- ESG score validation
-- Success fee tracking
-- Reporting tools
-- Compliance monitoring
+#### Personalized Dashboard:
+Each user has a dashboard showing their profile, saved companies, and funding application statuses.
 
-## Platform Features
-### Phase 1: Core Features
-- Notification system
-- Updates/news feed
-- Basic analytics
-- Document management
+## User Profile
 
-### Phase 2: Advanced Features
-- Real-time updates
-- Advanced analytics
-- Integration with external ESG data
-- Automated reporting
+### User Profile:
+name text,
+  email text,
+  user_type user_type_enum not null default 'investor',
+  user_tier user_tier_enum not null default 'root',  -- Default tier can be set as needed
+  created_at timestamp with time zone default timezone('utc', now()),
+  updated_at timestamp with time zone default timezone('utc', now())
+Users can update their profile information, including:
+
+## Profile Features - TO DO's
 
 
 
-## 5. Subscription Management
-### Phase 1: Basic
-- Tier management
-- Payment integration
-- Basic subscription handling
+### Administrative Tools
 
-### Phase 2: Advanced
-- Success fee calculation
-- Automated billing
-- Payment reporting
-- Financial compliance
+#### Admin Dashboard & Management:
+An admin section empowers designated administrators to:
+Manage user accounts and assign roles.
+Oversee company listings, ensuring quality and compliance.
+Review and process funding applications.
+
+#### Admin Overrides in Policies:
+
+Enhanced row-level security (RLS) policies ensure that admins can override standard restrictions for maintenance and oversight purposes.
+
+### Security, Performance, and Scalability
+
+#### Robust Security & RLS: 
+Row-Level Security policies, along with middleware-based rate limiting and session management, ensure that data access is secure and only available to authorized users.
+
+#### Scalable Architecture:
+Built with Next.js, TypeScript, and Supabase, the platform is designed to scale—supporting future enhancements and additional features without compromising performance.
 
 
 
- ## Completed Features
+## Project Structure
 
-### Authentication & Verification - 2024/12/27
-- User signup/login ✅
-- Email verification ✅
-- Role-based access (investor/company) ✅
-- Basic middleware protection ✅ 
+my-project/
+├── app/
+│   ├── layout.tsx                   // Global layout, wraps the entire application (includes providers, Navbar, Footer, etc.)
+│   ├── page.tsx                     // Home page (public)
+│   ├── auth/                        // Authentication pages and endpoints
+│   │   ├── login/
+│   │   │   └── page.tsx             // Login page (public)
+│   │   ├── signup/
+│   │   │   └── page.tsx             // Sign-up page (public)
+│   │   ├── callback/
+│   │   │   └── route.ts             // OAuth callback (if using external providers)
+│   │   └── auth-error/
+│   │       └── page.tsx             // Auth error page
+│   ├── dashboard/                   // Protected user dashboard area
+│   │   ├── layout.tsx               // Dashboard layout, enforces auth for logged-in users
+│   │   ├── page.tsx                 // Main dashboard overview (saved companies, funding application statuses, etc.)
+│   │   └── profile/
+│   │       └── page.tsx             // User profile management (CRUD 
+│   ├── companies/                   // Public company listings (marketplace)
+│   │   ├── page.tsx                 // Marketplace page: list all companies with scores, etc.
+│   │   └── [companyId]/            // Dynamic route for each company’s detail page
+│   │       ├── page.tsx             // Detailed company page (financials, mission, pitch deck download, score)
+│   │       └── pitch-deck/
+│   │           └── route.ts         // API route for serving/downloading the pitch deck file
+│   ├── apply/                       // Funding application routes
+│   │   └── [companyId]/            // Funding application page per company
+│   │       └── page.tsx             // Form to apply for funding
+│   ├── admin/                       // **Admin area (restricted to admin users)**
+│   │   ├── layout.tsx               // Admin layout: includes authentication checks and admin sidebar
+│   │   ├── page.tsx                 // Main admin dashboard overview (stats, notifications, etc.)
+│   │   ├── users/                   // Admin management for users
+│   │   │   ├── page.tsx             // List and manage users (view, edit roles, etc.)
+│   │   │   └── [userId]/            // Detailed admin view for a specific user
+│   │   │       └── page.tsx         // User details and administrative actions
+│   │   ├── companies/               // Admin management for companies
+│   │   │   ├── page.tsx             // List and manage companies (update details, remove inappropriate listings, etc.)
+│   │   │   └── [companyId]/         // Detailed admin view for a specific company
+│   │   │       └── page.tsx         // Company details with admin controls
+│   │   └── funding/                 // Admin management for funding applications
+│   │       ├── page.tsx             // List all funding applications, with filtering and bulk actions
+│   │       └── [applicationId]/     // Detailed admin view for a specific funding application
+│   │           └── page.tsx         // Funding application details and admin actions (approve, reject, etc.)
+│   └── api/                         // Backend API routes
+│       ├── auth/                    // Auth-related endpoints (signup, login, etc.)
+│       │   ├── signup/
+│       │   │   └── route.ts         // Server-side sign-up endpoint
+│       │   └── profile/
+│       │       └── route.ts         // CRUD operations for user profiles
+│       ├── companies/               // API endpoints for company data (public and admin actions)
+│       │   └── route.ts             // Fetch companies, create/update companies (with RLS and admin overrides)
+│       ├── apply/                   // API endpoints for funding applications
+│    ss   │   └── [companyId]/         // Funding application endpoint for a company
+│       │       └── route.ts         // Submit/update funding application
+│       └── admin/                   // **Admin-specific API endpoints**
+│           ├── users/
+│           │   └── route.ts         // Bulk or administrative actions on users
+│           ├── companies/
+│           │   └── route.ts         // Administrative operations on companies (bypass certain restrictions)
+│           └── funding/
+│               └── route.ts         // Administrative operations on funding applications
+├── components/                      // Reusable UI components
+│   ├── Navbar.tsx                   // Navigation bar component (visible on public and protected pages)
+│   ├── Footer.tsx                   // Footer component
+│   ├── CompanyCard.tsx              // Component for company listing cards
+│   ├── CompanyDetail.tsx            // Component to display company details
+│   ├── UserProfileForm.tsx          // Form for user profile management
+│   ├── FundingApplicationForm.tsx   // Form for funding applications
+│   └── AdminSidebar.tsx             // **Admin sidebar** navigation component (used in admin layout)
+├── lib/                             // Library utilities and helper functionsw
+│   ├── supabaseClient.ts            // Client-side Supabase client initialization
+│   ├── cookieManager.ts             // Helpers to create/update cookies/sessions
+│   └── apiHelpers.ts               // Shared functions for API requests, error handling, etc.
+├── config/                          // Configuration files
+│   ├── auth.config.ts               // Authentication configuration (flags, dev bypass, etc.)
+│   └── supabase.config.ts           // Additional Supabase configuration settings (if needed)
+├── middleware.ts                    // Global middleware (rate limiting, session checks, route protection, etc.)
+├── .env.local                       // Environment variables (Supabase URL, keys, etc.)
+├── package.json                     // Project dependencies and scripts
+├── tsconfig.json                    // TypeScript configuration
+└── vercel.json                      // (Optional) Vercel deployment configuration
+

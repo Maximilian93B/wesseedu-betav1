@@ -1,76 +1,42 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import type { Database } from '@/lib/supabase/types'
 
-// GET /api/companies - Enhanced with marketplace functionality
-export async function GET() {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export const dynamic = 'force-dynamic'
+
+export async function GET(request: Request) {
   try {
-    const cookieStore = cookies()
-    const supabase = createRouteHandlerClient<Database>({ 
-      cookies: () => cookieStore 
-    })
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search')
 
-    // Check authentication
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const { data, error } = await supabase
+    let query = supabase
       .from('companies')
       .select('*')
-      .eq('is_active', true)
+      .order('score', { ascending: false })
+
+    // Add search functionality if search term is provided
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%,mission_statement.ilike.%${search}%`)
+    }
+
+    const { data: companies, error } = await query
 
     if (error) {
-      console.error('Database error:', error)
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      )
+      console.error('Supabase error:', error)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
-    return NextResponse.json({ companies: data })
-  } catch (err) {
-    console.error('API Error:', err)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
+    if (!companies) {
+      return NextResponse.json({ companies: [] })
+    }
 
-// POST /api/companies
-export async function POST(request: Request) {
-  try {
-    const supabase = createRouteHandlerClient({ cookies })
-    const json = await request.json()
-
-    const { data, error: supabaseError } = await supabase
-      .from('companies')
-      .insert(json)
-      .select()
-      .single()
-
-    if (supabaseError) throw supabaseError
-
-    return NextResponse.json(data)
+    return NextResponse.json({ companies })
   } catch (error) {
-    console.error('Database error:', error)
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      )
-    }
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    )
-
-
+    console.error('Server error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
