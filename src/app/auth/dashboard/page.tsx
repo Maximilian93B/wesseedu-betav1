@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BarChart, Users, TrendingUp, Leaf } from "lucide-react"
+import { NewsSection } from "@/components/NewsSection"
 
 export const dynamic = "force-dynamic"
 
@@ -194,6 +195,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <NewsSection />
 
       <div className="flex justify-between">
         <Button onClick={() => router.push("/companies")} className="bg-blue-600 text-white hover:bg-blue-700">

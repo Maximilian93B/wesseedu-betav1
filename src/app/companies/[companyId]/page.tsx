@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import SaveCompanyButton from "@/components/company/SaveCompanyButton"
-import { ArrowLeft, Download, Building2 } from "lucide-react"
+import { ArrowLeft, Download, Building2, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 interface Company {
   id: string
@@ -143,7 +143,7 @@ export default function CompanyDetailPage() {
           <Badge variant="secondary" className="mb-2 text-sm px-2 py-1 gap-2">
             <Users className="h-4 w-4" />
             Community Members: {company.community_members}
-          </Badge>
+          </Badge>  
         </CardContent>
       </Card>
 

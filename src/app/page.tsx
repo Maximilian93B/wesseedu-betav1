@@ -1,3 +1,5 @@
+'use client'
+
 import { HeroSection } from "@/components/wsu/HeroSection"
 import { KeyFeatures } from "@/components/wsu/KeyFeatures"
 import { Partners } from "@/components/wsu/Partners"
@@ -8,7 +10,6 @@ import Link from "next/link"
 export default function LandingPage() {
   return (
     <div className="relative">
- 
       {/* Add a subtle gradient overlay */}
       <div className="fixed inset-0 bg-gradient-to-b from-[#020714] via-[#0A1A3B]/95 to-[#020714] pointer-events-none" />
       <div className="relative">

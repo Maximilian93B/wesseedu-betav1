@@ -9,6 +9,7 @@ const nextConfig = {
         pathname: '/api/**',
       },
     ],
+    domains: ['images.unsplash.com'],
   },
   experimental: {
     serverActions: {
