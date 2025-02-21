@@ -25,7 +25,7 @@ export function KeyFeatures() {
                 WeSeedU
               </span>
             </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+            <p className="text-white max-w-2xl mx-auto text-lg">
               Experience the future of impact investing with our innovative platform
             </p>
           </div>
@@ -51,7 +51,7 @@ export function KeyFeatures() {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500"> Investment </span>
                   Journey
                 </h3>
-                <p className="text-gray-400 text-lg leading-relaxed">
+                <p className="text-white text-lg leading-relaxed">
                   Our intuitive dashboard provides real-time insights into your impact investments, allowing you to
                   track performance, sustainability metrics, and potential opportunities all in one place.
                 </p>
@@ -65,13 +65,13 @@ export function KeyFeatures() {
                     { title: "Smart recommendations", desc: "AI-powered insights" },
                     { title: "Due diligence", desc: "WeSeedU does the heavy lifting  for you" }
                   ].map((item) => (
-                    <li key={item.title} className="flex items-start space-x-3 text-gray-400">
+                    <li key={item.title} className="flex items-start space-x-3 text-white">
                       <svg className="w-5 h-5 text-teal-500 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <div className="space-y-1">
                         <span className="block text-white font-medium">{item.title}</span>
-                        <span className="block text-sm text-gray-500">{item.desc}</span>
+                        <span className="block text-sm text-white">{item.desc}</span>
                       </div>
                     </li>
                   ))}
@@ -120,7 +120,7 @@ export function KeyFeatures() {
               <div className="relative h-full rounded-2xl overflow-hidden border-2 border-blue-500/20 bg-gray-900/90 backdrop-blur-sm flex items-start justify-center">
                 <div className="relative w-full h-full">
                   <Image
-                    src="/placeholder.svg?height=1080&width=1920"
+                    src="/images/Screenshot 2025-02-21 121434.png"
                     alt="WeSeedU Marketplace"
                     fill
                     priority
@@ -150,7 +150,7 @@ export function KeyFeatures() {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-500"> Impactful </span>
                   Opportunities
                 </h3>
-                <p className="text-gray-400 text-lg leading-relaxed">
+                <p className="text-white text-lg leading-relaxed">
                   Explore our curated marketplace of sustainable startups and projects, each thoroughly vetted
                   and aligned with UN Sustainable Development Goals for maximum social impact.
                 </p>
@@ -170,7 +170,7 @@ export function KeyFeatures() {
                       </svg>
                       <div className="space-y-1">
                         <span className="block text-white font-medium">{item.title}</span>
-                        <span className="block text-sm text-gray-500">{item.desc}</span>
+                        <span className="block text-sm text-white">{item.desc}</span>
                       </div>
                     </li>
                   ))}

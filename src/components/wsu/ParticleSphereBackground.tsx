@@ -3,6 +3,7 @@ import { useRef, useMemo } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import * as THREE from "three"
 import { OrbitControls } from "@react-three/drei"
+import { MilkyWayBackground } from "./MilkyWay"
 
 export function ParticleSphere() {
   const points = useRef<THREE.Points>(null)
@@ -34,36 +35,30 @@ export function ParticleSphere() {
       const theta = THREE.MathUtils.randFloatSpread(360)
       const phi = THREE.MathUtils.randFloatSpread(180)
 
-      // Convert to lat/lng for easier continent checking
       const lat = phi
       const lng = theta
 
-      // Check if point is in any continent
       const isContinent = continents.some(
-        cont =>
-          lat >= cont.lat[0] &&
-          lat <= cont.lat[1] &&
-          lng >= cont.lng[0] &&
-          lng <= cont.lng[1]
+        (cont) => lat >= cont.lat[0] && lat <= cont.lat[1] && lng >= cont.lng[0] && lng <= cont.lng[1],
       )
 
       p.setFromSphericalCoords(
         radius,
-        THREE.MathUtils.degToRad(90 - phi), // Convert to proper spherical coordinates
-        THREE.MathUtils.degToRad(theta)
+        THREE.MathUtils.degToRad(90 - phi),
+        THREE.MathUtils.degToRad(theta),
       )
 
       positions[i] = p.x
       positions[i + 1] = p.y
       positions[i + 2] = p.z
 
-      // Color based on whether point is on continent or ocean
+      // Updated Color Scheme
       if (isContinent) {
-        // Green for land
-        color.setHSL(0.3 + Math.random() * 0.1, 0.8, 0.5 + Math.random() * 0.3)
+        // Teal for land
+        color.setHSL(0.5, 0.8, 0.5 + Math.random() * 0.3)
       } else {
-        // Blue for water
-        color.setHSL(0.6 + Math.random() * 0.1, 0.8, 0.6 + Math.random() * 0.3)
+        // Purple for water
+        color.setHSL(0.75, 0.6, 0.4 + Math.random() * 0.3)
       }
 
       colors[i] = color.r
@@ -81,7 +76,7 @@ export function ParticleSphere() {
   })
 
   return (
-    <points ref={points} position={[2, 0, 0]}>
+    <points ref={points} position={[0, 0, 0]}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
@@ -96,25 +91,26 @@ export function ParticleSphere() {
           itemSize={3}
         />
       </bufferGeometry>
-      <pointsMaterial
-        size={0.02}
-        vertexColors
-        sizeAttenuation={true}
-        depthWrite={false}
-        transparent
-        opacity={0.8}
-      />
+      <pointsMaterial size={0.03} vertexColors sizeAttenuation={true} depthWrite={false} transparent opacity={1} />
     </points>
   )
 }
 
 export default function ParticleSphereBackground() {
   return (
-    <div className="absolute inset-0">
-      <Canvas camera={{ position: [0, 0, 5], fov: 60 }} style={{ width: "100%", height: "100%" }}>
-        <ambientLight intensity={0.5} />
-        <directionalLight color="#14B8A6" position={[5, 5, 5]} intensity={0.5} />
-        <ParticleSphere />
+    <div className="fixed inset-0">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#020714] via-[#0A1A3B]/95 to-[#020714] pointer-events-none" />
+      <Canvas
+        camera={{ position: [15, 10, 20], fov: 60 }}
+        style={{ width: "100%", height: "100%" }}
+        gl={{ alpha: true }}
+      >
+        <ambientLight intensity={0.1} />
+        <directionalLight color="#FFFFFF" position={[5, 5, 5]} intensity={0.2} />
+        <group position={[12, 4, 0]}>
+          <MilkyWayBackground />
+          <ParticleSphere />
+        </group>
         <OrbitControls enableZoom={false} enablePan={false} />
       </Canvas>
     </div>

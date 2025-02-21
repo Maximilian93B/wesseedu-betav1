@@ -7,12 +7,12 @@ export function Partners() {
     const partners = [
       {
         name: "United Nations",
-        logo: "/placeholder.svg",
+        logo: "/images/Flag_of_the_United_Nations.svg",
         description: "Working together for global sustainability goals",
       },
       {
         name: "Global Sustainability Fund",
-        logo: "/placeholder.svg?height=40&width=120",
+        logo: "/images/logo-gsf.svg",
         description: "Pioneering sustainable investment strategies",
       },
       {

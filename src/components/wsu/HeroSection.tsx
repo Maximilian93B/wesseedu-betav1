@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import ParticleSphereBackground from "./ParticleSphereBackground"
+import { motion } from "framer-motion"
 
 export function HeroSection() {
   return (
@@ -10,17 +11,26 @@ export function HeroSection() {
       <ParticleSphereBackground />
       <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
         <div className="max-w-4xl space-y-8 py-20 mt-20">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight bg-clip-text group 
-            inline-flex items-center px-6 py-3 rounded-full 
-            bg-gradient-to-r from-black/40 to-black/20 
-            backdrop-blur-sm border border-white/10 
-            hover:border-white/20 hover:from-black/50 hover:to-black/30 
-            hover:scale-105 hover:shadow-lg hover:shadow-teal-500/20
-            transform transition-all duration-500 ease-out">
-            <span className="bg-gradient-to-r from-teal-400 via-teal-300 to-teal-400 text-transparent bg-clip-text group-hover:animate-gradient bg-[length:200%_auto] inline-block">We</span>
-            <span className="bg-gradient-to-r from-white via-gray-200 to-white text-transparent bg-clip-text group-hover:animate-gradient bg-[length:200%_auto] inline-block">Seed</span>
-            <span className="bg-gradient-to-r from-teal-400 via-purple-400 to-teal-400 text-transparent bg-clip-text group-hover:animate-gradient bg-[length:200%_auto] inline-block">U</span>
-          </h2>
+        <motion.h2
+          className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight 
+                     inline-flex items-center px-6 py-3 rounded-full 
+                     bg-[#0A1A3B]/30 backdrop-blur-sm
+                     border border-[#14B8A6]/20 
+                     hover:border-[#14B8A6]/40 hover:bg-[#0A1A3B]/40 
+                     transform transition-all duration-700 ease-out
+                     shadow-lg shadow-[#14B8A6]/10 hover:shadow-[#14B8A6]/20"
+          whileHover={{ scale: 1.02 }}
+        >
+          <span className="bg-gradient-to-r from-[#14B8A6]/80 via-[#14B8A6]/60 to-[#14B8A6]/80 text-transparent bg-clip-text group-hover:animate-gradient bg-[length:200%_auto] inline-block">
+            We
+          </span>
+          <span className="bg-gradient-to-r from-white/80 via-white/60 to-white/80 text-transparent bg-clip-text group-hover:animate-gradient bg-[length:200%_auto] inline-block">
+            Seed
+          </span>
+          <span className="bg-gradient-to-r from-[#14B8A6]/80 via-[#A78BFA]/60 to-[#14B8A6]/80 text-transparent bg-clip-text group-hover:animate-gradient bg-[length:200%_auto] inline-block">
+            U
+          </span>
+        </motion.h2>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight">
             Pioneering the Future of{" "}

@@ -8,24 +8,24 @@ export function VettingProcess() {
   const steps = [
     {
       icon: <Shield className="h-12 w-12 text-teal-400" />,
-      title: "Professional Due Diligence",
+      title: "Due Diligence",
       description:
-        "Comprehensive financial and operational assessment conducted by leading accounting firms like KPMG, Deloitte, EY, or PwC.",
+        "Comprehensive financial and operational assessment by leading accounting firms to verify business fundamentals.",
     },
     {
       icon: <BarChart2 className="h-12 w-12 text-teal-400" />,
-      title: "Performance Verification",
-      description: "Detailed analysis of business metrics, market potential, and financial statements verified by certified professionals.",
+      title: "Performance Analysis",
+      description: "In-depth evaluation of business metrics, growth potential, and financial health by industry experts.",
     },
     {
       icon: <FileCheck className="h-12 w-12 text-teal-400" />,
-      title: "Compliance & Legal Review",
-      description: "Thorough examination of regulatory compliance, corporate governance, and legal standing by industry experts.",
+      title: "Compliance Review",
+      description: "Thorough verification of regulatory compliance and corporate governance to ensure operational integrity.",
     },
     {
       icon: <CheckCircle className="h-12 w-12 text-teal-400" />,
       title: "Quality Assurance",
-      description: "Only companies that pass rigorous Big Four accounting firm standards and due diligence are listed on our platform.",
+      description: "Final verification ensuring all listed opportunities meet our rigorous standards for transparency and potential.",
     },
   ]
 
@@ -39,15 +39,15 @@ export function VettingProcess() {
           className="space-y-6 lg:space-y-8 text-center"
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.2] tracking-tight mx-auto max-w-4xl">
-            Professional Vetting by{" "}
+            Rigorous Vetting by{" "}
             <span className="bg-gradient-to-r from-teal-400 via-blue-400 to-teal-400 text-transparent bg-clip-text animate-flow">
-              Big Four Accounting Firms
+              Industry Experts
             </span>
           </h2>
 
-          <p className="text-lg lg:text-xl text-gray-300 mx-auto max-w-3xl leading-relaxed">
-            Every investment opportunity on WeSeedU undergoes a thorough vetting process conducted by one of the Big Four accounting firms. 
-            This ensures you're investing in legitimate businesses with verified potential and transparent financials.
+          <p className="text-lg lg:text-xl text-white mx-auto max-w-3xl leading-relaxed">
+            Every investment opportunity on WeSeedU undergoes comprehensive verification by leading industry experts.
+            We ensure transparency and potential in every listing through our thorough evaluation process.
           </p>
         </motion.div>
 
@@ -85,7 +85,7 @@ export function VettingProcess() {
                   </div>
 
                   <div className="mt-4 flex-1 flex items-center">
-                    <p className="text-sm text-gray-300/90 leading-relaxed text-center">{step.description}</p>
+                    <p className="text-sm text-white leading-relaxed text-center">{step.description}</p>
                   </div>
                 </CardContent>
               </Card>

@@ -5,7 +5,7 @@ import { KeyFeatures } from "@/components/wsu/KeyFeatures"
 import { Partners } from "@/components/wsu/Partners"
 import { VettingProcess } from "@/components/wsu/VettingProcess"
 import { ImpactSection } from "@/components/wsu/ImpactSection"
-import { Footer } from "@/components/wsu/Footer"
+
 export default function LandingPage() {
   return (
     <div className="relative">
@@ -16,7 +16,6 @@ export default function LandingPage() {
         <KeyFeatures />
         <VettingProcess />
         <ImpactSection />
-        <Footer />
       </div>
     </div>
   )
