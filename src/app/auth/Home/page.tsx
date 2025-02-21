@@ -106,27 +106,39 @@ export default function HomePage() {
         <section className="w-full py-8 md:py-12 lg:py-16">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-6">
-              <div className="space-y-3">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-gray-900">
-                  Welcome back to WeSeedU
+              <div className="space-y-3 text-center">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+                  <span className="bg-gradient-to-r from-blue-600 via-teal-500 to-emerald-400 
+                    text-transparent bg-clip-text animate-gradient">
+                    Welcome back to WeSeedU
+                  </span>
                 </h1>
-                <p className="mx-auto max-w-[700px] text-black  text-xl">
+                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl font-light leading-relaxed">
                   Your gateway to sustainable investments. Make an impact while growing your portfolio.
                 </p>
               </div>
 
               {user && stats.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mt-8 text-black">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mt-8">
                   {stats.map((stat, index) => (
-                    <Card key={index} className="bg-white border border-gray-200 shadow-sm hover:scale-105 transition-transform cursor-pointer">
+                    <Card 
+                      key={index} 
+                      className="bg-white/50 backdrop-blur-sm border border-gray-100 
+                        shadow-[0_2px_10px_-3px_rgba(6,182,212,0.1)] 
+                        hover:shadow-[0_10px_20px_-3px_rgba(6,182,212,0.15)] 
+                        hover:scale-105 transition-all duration-300 cursor-pointer"
+                    >
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
                           {stat.icon}
-                          <CardTitle className="text-xl text-black">{stat.title}</CardTitle>
+                          <CardTitle className="text-xl font-medium text-gray-700">{stat.title}</CardTitle>
                         </div>
                       </CardHeader>
                       <CardContent className="pt-2">
-                        <p className="text-3xl font-bold text-black">{stat.value}</p>
+                        <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-teal-500 
+                          text-transparent bg-clip-text">
+                          {stat.value}
+                        </p>
                       </CardContent>
                     </Card>
                   ))}
@@ -136,7 +148,8 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-md">
                 <Button 
                   onClick={() => router.push('/companies')} 
-                  className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-teal-500 text-white 
+                    hover:opacity-90 transition-opacity shadow-md hover:shadow-lg"
                 >
                   <Search className="w-4 h-4 mr-2" />
                   Find Companies
@@ -144,7 +157,8 @@ export default function HomePage() {
                 <Button 
                   onClick={() => router.push('/dashboard/saved')} 
                   variant="outline" 
-                  className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                  className="flex-1 border-2 border-gray-200 text-gray-700 hover:bg-gray-50 
+                    transition-colors shadow-sm"
                 >
                   <Bookmark className="w-4 h-4 mr-2" />
                   Saved Companies

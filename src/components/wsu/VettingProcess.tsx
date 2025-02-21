@@ -1,98 +1,96 @@
+"use client"
+
 import { Shield, CheckCircle, BarChart2, FileCheck } from "lucide-react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { motion } from "framer-motion"
 
 export function VettingProcess() {
   const steps = [
     {
-      icon: <Shield className="h-12 w-12 text-teal-500" />,
+      icon: <Shield className="h-12 w-12 text-teal-400" />,
       title: "Professional Due Diligence",
       description:
-        "Rigorous financial and operational assessment conducted by KPMG, one of the Big Four accounting firms.",
+        "Comprehensive financial and operational assessment conducted by leading accounting firms like KPMG, Deloitte, EY, or PwC.",
     },
     {
-      icon: <BarChart2 className="h-12 w-12 text-teal-500" />,
-      title: "Performance Metrics",
-      description: "Comprehensive analysis of financial health, growth potential, and market positioning.",
+      icon: <BarChart2 className="h-12 w-12 text-teal-400" />,
+      title: "Performance Verification",
+      description: "Detailed analysis of business metrics, market potential, and financial statements verified by certified professionals.",
     },
     {
-      icon: <FileCheck className="h-12 w-12 text-teal-500" />,
-      title: "Compliance Verification",
-      description: "Thorough review of regulatory compliance, governance structures, and sustainability practices.",
+      icon: <FileCheck className="h-12 w-12 text-teal-400" />,
+      title: "Compliance & Legal Review",
+      description: "Thorough examination of regulatory compliance, corporate governance, and legal standing by industry experts.",
     },
     {
-      icon: <CheckCircle className="h-12 w-12 text-teal-500" />,
+      icon: <CheckCircle className="h-12 w-12 text-teal-400" />,
       title: "Quality Assurance",
-      description: "Only companies meeting our stringent criteria and KPMG's professional standards are listed.",
+      description: "Only companies that pass rigorous Big Four accounting firm standards and due diligence are listed on our platform.",
     },
   ]
 
   return (
-    <section className="w-full py-24 bg-gradient-to-b from-gray-900 to-gray-800">
-      <div className="container px-4 md:px-6 max-w-7xl mx-auto">
-        <div className="flex flex-col items-center justify-center space-y-6 text-center mb-16">
-          <div className="inline-flex items-center space-x-2 bg-teal-500/10 border border-teal-500/20 
-            px-4 py-1.5 rounded-full"
-          >
-            <span className="text-sm font-medium text-teal-400">Professional Vetting Process</span>
-          </div>
-          
-          <h2 className="text-3xl md:text-4xl font-bold text-gradient-primary max-w-2xl">
-            Vetted by KPMG for Your Peace of Mind
+    <section className="relative py-24 md:py-32">
+      <div className="container relative mx-auto px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="space-y-6 lg:space-y-8 text-center"
+        >
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.2] tracking-tight mx-auto max-w-4xl">
+            Professional Vetting by{" "}
+            <span className="bg-gradient-to-r from-teal-400 via-blue-400 to-teal-400 text-transparent bg-clip-text animate-flow">
+              Big Four Accounting Firms
+            </span>
           </h2>
-          
-          <p className="max-w-2xl text-base md:text-lg text-gray-400 leading-relaxed">
-            Every company listed on WeSeedU undergoes a thorough vetting process conducted by KPMG, ensuring the
-            highest standards of due diligence and professional assessment.
-          </p>
-        </div>
 
-        <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <p className="text-lg lg:text-xl text-gray-300 mx-auto max-w-3xl leading-relaxed">
+            Every investment opportunity on WeSeedU undergoes a thorough vetting process conducted by one of the Big Four accounting firms. 
+            This ensures you're investing in legitimate businesses with verified potential and transparent financials.
+          </p>
+        </motion.div>
+
+        <div className="mt-16 grid gap-6 lg:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, index) => (
-            <Card 
-              key={index} 
-              className="glass-effect border border-white/10 hover:border-teal-500/20 
-                transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/5 group"
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <CardHeader className="space-y-4">
-                <div className="flex items-center justify-center">
-                  <div className="p-2 rounded-lg bg-teal-500/10 group-hover:bg-teal-500/20 
-                    transition-colors duration-300"
-                  >
-                    {step.icon}
-                  </div>
-                </div>
-                <CardTitle className="text-xl text-white group-hover:text-teal-400 
-                  transition-colors duration-300"
-                >
-                  {step.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-gray-400 text-base leading-relaxed">
-                  {step.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              <Card className="group relative overflow-hidden bg-white/5 backdrop-blur-sm 
+                border border-white/10 hover:border-teal-500/30 
+                transition-all duration-300 hover:bg-white/10 h-full"
+              >
+                <CardContent className="flex flex-col h-full p-5 lg:p-6">
+                  <div className="space-y-4">
+                    <motion.div
+                      className="flex items-center justify-center"
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    >
+                      <div className="p-3 rounded-xl bg-teal-500/10 group-hover:bg-teal-500/20 
+                        transition-colors duration-300"
+                      >
+                        {step.icon}
+                      </div>
+                    </motion.div>
 
-        <div className="mt-20 flex flex-col items-center justify-center space-y-6 text-center">
-          <div className="inline-flex items-center justify-center space-x-3 rounded-full 
-            border border-white/10 bg-white/5 px-6 py-3 hover:bg-white/10 
-            transition-colors duration-300"
-          >
-            <img 
-              src="/placeholder.svg?height=40&width=120" 
-              alt="KPMG Logo" 
-              className="h-8 w-auto opacity-80 hover:opacity-100 transition-opacity duration-300" 
-            />
-            <span className="text-sm font-medium text-gray-400">Official Vetting Partner</span>
-          </div>
-          
-          <p className="max-w-[600px] text-sm text-gray-500 leading-relaxed">
-            KPMG's involvement provides an additional layer of security and professionalism to our vetting process,
-            helping you make informed investment decisions.
-          </p>
+                    <h3 className="text-lg text-white group-hover:text-teal-400 
+                      transition-colors duration-300 text-center font-semibold"
+                    >
+                      {step.title}
+                    </h3>
+                  </div>
+
+                  <div className="mt-4 flex-1 flex items-center">
+                    <p className="text-sm text-gray-300/90 leading-relaxed text-center">{step.description}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>

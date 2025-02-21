@@ -4,12 +4,9 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'ui-avatars.com',
-        port: '',
-        pathname: '/api/**',
+        hostname: '**',
       },
     ],
-    domains: ['images.unsplash.com'],
   },
   experimental: {
     serverActions: {
