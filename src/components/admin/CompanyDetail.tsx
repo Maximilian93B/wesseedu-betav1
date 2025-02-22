@@ -54,41 +54,42 @@ export default function CompanyDetail({ company }: { company: Company }) {
 
     if (!error) {
       setIsEditing(false)
-      // Show success message
     }
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-black border-2 border-emerald-500/20 rounded-lg shadow-lg p-6">
       {isEditing ? (
         <form onSubmit={handleSubmit}>
-          {/* Add form fields */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-white">
                 Company Name
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                className="mt-1 block w-full rounded-md bg-black border-emerald-500/20 
+                  text-white focus:border-emerald-500 focus:ring-emerald-500"
               />
             </div>
-            {/* Add more form fields */}
+            {/* Add more form fields with similar styling */}
           </div>
           
           <div className="mt-4 flex justify-end space-x-2">
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 border rounded-md"
+              className="px-4 py-2 border border-emerald-500/20 text-emerald-400 
+                rounded-md hover:bg-emerald-950/30 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md"
+              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 
+                text-white rounded-md transition-colors"
             >
               Save Changes
             </button>
@@ -96,17 +97,17 @@ export default function CompanyDetail({ company }: { company: Company }) {
         </form>
       ) : (
         <div>
-          {/* Display company details */}
           <div className="flex justify-between items-start">
-            <h2 className="text-xl font-bold">{company.name}</h2>
+            <h2 className="text-xl font-bold text-white">{company.name}</h2>
             <button
               onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-gray-100 rounded-md"
+              className="px-4 py-2 bg-emerald-950/30 text-emerald-400 
+                rounded-md hover:bg-emerald-950/50 transition-colors"
             >
               Edit
             </button>
           </div>
-          {/* Display more company details */}
+          {/* Display more company details with appropriate text colors */}
         </div>
       )}
     </div>

@@ -82,26 +82,23 @@ export function KeyFeatures() {
               <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-blue-500 rounded-2xl blur-[40px] group-hover:blur-[60px] opacity-40 group-hover:opacity-60 transition-all duration-500"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-blue-500 rounded-2xl blur-[20px] group-hover:blur-[30px] opacity-30 group-hover:opacity-40 transition-all duration-500 delay-100"></div>
               
-              <div className="relative h-full rounded-2xl overflow-hidden border-2 border-teal-500/20 bg-gray-900/90 backdrop-blur-sm flex items-start justify-center">
-                <div className="relative w-full h-full">
+              <div className="relative h-full rounded-2xl overflow-hidden border-2 border-emerald-500/20 bg-gray-900/90 backdrop-blur-sm">
+                <div className="relative w-full h-full flex items-center justify-center">
                   <Image
                     src="/images/Screenshot 2025-02-21 121434.png"
                     alt="WeSeedU Dashboard"
-                    fill
                     priority
+                    fill
                     sizes="(max-width: 768px) 100vw, 50vw"
                     quality={90}
                     style={{ 
                       objectFit: 'cover',
-                      objectPosition: 'center top',
+                      objectPosition: 'center',
                       backgroundColor: 'rgb(17, 24, 39)'
                     }}
                     className="transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent flex items-end p-6">
-                  <p className="text-white text-xl font-bold">Interactive Dashboard</p>
-                </div>
+                </div>      
               </div>
             </div>
           </motion.div>
@@ -120,7 +117,7 @@ export function KeyFeatures() {
               <div className="relative h-full rounded-2xl overflow-hidden border-2 border-blue-500/20 bg-gray-900/90 backdrop-blur-sm flex items-start justify-center">
                 <div className="relative w-full h-full">
                   <Image
-                    src="/images/Screenshot 2025-02-21 121434.png"
+                    src="/images/Screenshot 2025-02-21 200935.png"
                     alt="WeSeedU Marketplace"
                     fill
                     priority
@@ -134,9 +131,7 @@ export function KeyFeatures() {
                     className="transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent flex items-end p-6">
-                  <p className="text-white text-xl font-bold">Innovative Marketplace</p>
-                </div>
+            
               </div>
             </div>
             <div className="space-y-8 px-2">

@@ -4,17 +4,20 @@ import { useState, useContext } from 'react';
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { SavedCompaniesContext } from "@/context/SavedCompaniesContext";
+import { cn } from "@/lib/utils";
 
 interface SaveCompanyButtonProps {
   companyId: string;
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
+  className?: string;
 }
 
 export default function SaveCompanyButton({
   companyId,
-  variant = "outline",
-  size = "default"
+  variant = "ghost",
+  size = "icon",
+  className
 }: SaveCompanyButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { savedCompanyIds, addSavedCompany, removeSavedCompany } = useContext(SavedCompaniesContext);
@@ -60,19 +63,19 @@ export default function SaveCompanyButton({
       size={size}
       onClick={handleToggleSave}
       disabled={isLoading}
-      className="gap-2"
-    >
-      {isSaved ? (
-        <>
-          <Heart className="h-4 w-4 fill-current" />
-          {size !== "icon" && "Saved"}
-        </>
-      ) : (
-        <>
-          <Heart className="h-4 w-4" />
-          {size !== "icon" && "Save"}
-        </>
+      className={cn(
+        "hover:bg-transparent transition-colors duration-200",
+        isSaved ? "text-emerald-400" : "text-gray-500 hover:text-emerald-400",
+        isLoading && "opacity-50 cursor-not-allowed",
+        className
       )}
+    >
+      <Heart 
+        className={cn(
+          "h-5 w-5 transition-all duration-300",
+          isSaved && "fill-emerald-400 scale-110"
+        )} 
+      />
     </Button>
   );
 } 
