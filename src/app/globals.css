@@ -108,3 +108,17 @@ html {
   background: var(--muted-foreground);
 }
 
+@keyframes flow {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-flow {
+  animation: flow 8s linear infinite;
+  background-size: 200% auto;
+}
+

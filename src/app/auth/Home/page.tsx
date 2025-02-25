@@ -5,10 +5,17 @@ import { useRouter } from "next/navigation"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Leaf, TrendingUp, Users, BarChart, Search, Bookmark } from "lucide-react"
-import Link from "next/link"
+import {  TrendingUp,  BarChart, Search, Bookmark } from "lucide-react"
 import { NewsSection } from "@/components/wsu/dashboard/NewsSection"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { SidebarAds } from "@/components/advertising/SidebarAds"
+import { AnimatePresence } from "framer-motion"
+import { DashboardView } from "@/components/wsu/dashboard/DashboardView"
+import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
+import CompaniesView from "@/components/company/CompaniesView"
+import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
+import { SavedCompaniesView } from "@/components/wsu/dashboard/SavedCompaniesView"
+
 
 export default function HomePage() {
   const router = useRouter()
@@ -17,6 +24,8 @@ export default function HomePage() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<any[]>([])
+  const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'companies' | 'company-details' | 'saved'>('home')
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
 
   useEffect(() => {
     const checkUser = async () => {
@@ -52,12 +61,12 @@ export default function HomePage() {
         {
           title: "Your Investment",
           value: `$${profileData.total_investments.toLocaleString()}`,
-          icon: <TrendingUp className="h-10 w-10 text-green-600" />,
+          icon: <TrendingUp className="h-10 w-10 text-emerald-400" />,
         },
         {
           title: "Impact Score",
           value: `${profileData.impact_score}/10`,
-          icon: <BarChart className="h-10 w-10 text-blue-600" />,
+          icon: <BarChart className="h-10 w-10 text-emerald-400" />,
         },
       ])
     } catch (error) {
@@ -71,8 +80,13 @@ export default function HomePage() {
     router.refresh() // Force a router refresh to update the session state
   }
 
+  const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved') => {
+    setCurrentView(view)
+    setSelectedCompanyId(null)
+  }
+
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen bg-white text-gray-900">Loading...</div>
+    return <div className="flex items-center justify-center min-h-screen bg-black text-gray-400">Loading...</div>
   }
 
   if (!user) {
@@ -81,139 +95,165 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <header className="px-4 lg:px-6 h-14 flex items-center border-b border-gray-200">
-        <Link className="flex items-center justify-center" href="/home">
-          <Leaf className="h-6 w-6 text-green-600" />
-          <span className="ml-2 text-lg font-bold text-gray-900">WeSeedU</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-sm font-medium text-gray-700 hover:text-blue-600" href="/auth/dashboard">
-            Dashboard
-          </Link>
-          <Link className="text-sm font-medium text-gray-700 hover:text-blue-600" href="/companies">
-            Companies
-          </Link>
-          <Link className="text-sm font-medium text-gray-700 hover:text-blue-600" href="/auth/profile">
-            Profile
-          </Link>
-          <button onClick={signOut} className="text-sm font-medium text-gray-700 hover:text-blue-600">
-            Sign Out
-          </button>
-        </nav>
-      </header>
-      <main className="flex-1">
-        <section className="w-full py-8 md:py-12 lg:py-16">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-6">
-              <div className="space-y-3">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-gray-900">
-                  Welcome back to WeSeedU
-                </h1>
-                <p className="mx-auto max-w-[700px] text-black  text-xl">
-                  Your gateway to sustainable investments. Make an impact while growing your portfolio.
-                </p>
-              </div>
+    <div className="flex flex-col min-h-screen bg-black relative overflow-hidden">
+      <HomePageNav
+        currentView={currentView}
+        onNavigate={handleNavigation}
+        onSignOut={signOut}
+      />
+      
+      {/* Background glows */}
+      <div className="absolute left-[10%] top-0 w-[900px] h-[900px] 
+        bg-emerald-500/5 blur-[150px] rounded-full 
+        pointer-events-none"></div>
+      
+      <div className="absolute right-[5%] bottom-0 w-[800px] h-[800px] 
+        bg-emerald-500/5 blur-[130px] rounded-full 
+        pointer-events-none"></div>
 
+      <div className="absolute left-[40%] top-[40%] w-[600px] h-[600px] 
+        bg-emerald-400/3 blur-[100px] rounded-full 
+        pointer-events-none"></div>
+
+      {/* Main layout with sidebars */}
+      <div className="flex flex-1 relative">
+        {/* Left Sidebar - Ads */}
+        <SidebarAds />
+        
+        {/* Main Content - centered between sidebars */}
+        <main className="flex-1 ml-80 mr-80 relative"> {/* Added relative positioning */}
+          {/* Home content */}
+          <div className={currentView === 'home' ? 'block' : 'hidden'}>
+            <div className="max-w-5xl mx-auto px-4 py-8">
+              {/* Welcome Section */}
+              <section className="mb-12">
+                <div className="space-y-4 text-center">
+                  <span className="inline-block text-emerald-400 text-sm font-medium tracking-wider uppercase 
+                    bg-emerald-400/10 px-4 py-1 rounded-full border border-emerald-400/20">
+                    Welcome Back
+                  </span>
+                  <h1 className="relative">
+                    <span className="absolute -inset-1 blur-2xl bg-gradient-to-r from-emerald-400/20 
+                      via-white/5 to-emerald-400/20 animate-pulse"></span>
+                    <span className="relative text-4xl md:text-5xl lg:text-6xl font-bold 
+                      bg-gradient-to-r from-zinc-200 via-white to-zinc-300 bg-clip-text 
+                      text-transparent tracking-tight leading-tight">
+                      Your Gateway to <br className="hidden sm:block" />
+                      <span className="text-emerald-400">Sustainable</span> Investments
+                    </span>
+                  </h1>
+                  <p className="max-w-2xl mx-auto text-zinc-400 text-lg md:text-xl leading-relaxed font-light">
+                    Make an impact while growing your portfolio with our 
+                    <span className="text-emerald-400 font-normal"> innovative platform</span>
+                  </p>
+                </div>
+              </section>
+
+              {/* Stats Grid */}
               {user && stats.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mt-8 text-black">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                   {stats.map((stat, index) => (
-                    <Card key={index} className="bg-white border border-gray-200 shadow-sm hover:scale-105 transition-transform cursor-pointer">
+                    <Card 
+                      key={index} 
+                      className="bg-[#0A0A0A] border-2 border-white/5 hover:border-white/10 
+                        rounded-xl overflow-hidden transition-all duration-300
+                        shadow-[0_0_15px_-3px_rgba(255,255,255,0.05)] 
+                        hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.1)]"
+                    >
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
-                          {stat.icon}
-                          <CardTitle className="text-xl text-black">{stat.title}</CardTitle>
+                          <div className="text-emerald-400">{stat.icon}</div>
+                          <CardTitle className="text-xl font-medium text-white">{stat.title}</CardTitle>
                         </div>
                       </CardHeader>
                       <CardContent className="pt-2">
-                        <p className="text-3xl font-bold text-black">{stat.value}</p>
+                        <p className="text-3xl font-bold text-emerald-400">
+                          {stat.value}
+                        </p>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-md">
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <Button 
-                  onClick={() => router.push('/companies')} 
-                  className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={() => {
+                    handleNavigation('companies')
+                  }}
+                  className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white 
+                    transition-colors shadow-md hover:shadow-emerald-500/25"
                 >
                   <Search className="w-4 h-4 mr-2" />
                   Find Companies
                 </Button>
                 <Button 
-                  onClick={() => router.push('/dashboard/saved')} 
+                  onClick={() => {
+                    handleNavigation('dashboard')
+                  }}
                   variant="outline" 
-                  className="flex-1 border-blue-600 text-blue-600 hover:bg-blue-50"
+                  className="flex-1 border-2 border-white/5 hover:border-white/10 text-emerald-400 
+                    hover:bg-white/5 transition-colors"
                 >
                   <Bookmark className="w-4 h-4 mr-2" />
-                  Saved Companies
+                  View Dashboard
                 </Button>
               </div>
-            </div>
-          </div>
-        </section>
-        <section className="w-full py-10 bg-gray-50">
-          <div className="container px-4 md:px-6 max-w-5xl mx-auto">
-            <NewsSection />
-          </div>
-        </section>
-        <section className="w-full py-12 md:py-16 lg:py-20">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-6 mb-12">
-              <div className="space-y-3 text-center">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-gray-900">
-                  Invest in a Sustainable Future
-                </h2>
-                <p className="max-w-[600px] text-gray-600 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed mx-auto">
-                  Discover innovative companies that are making a difference. Your investments can help shape a better world.
-                </p>
+
+              {/* Features List */}
+              <div className="flex flex-wrap justify-center gap-4 text-sm text-zinc-400">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                  <span>Verified Companies</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                  <span>Impact Tracking</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                  <span>Sustainable Growth</span>
+                </div>
               </div>
             </div>
-            <div className="mx-auto grid max-w-5xl items-center gap-8 lg:grid-cols-3">
-              <Card className="bg-white border border-gray-200 shadow-sm">
-                <CardHeader>
-                  <TrendingUp className="h-10 w-10 text-green-600" />
-                  <CardTitle className="text-gray-900">Sustainable Growth</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-600">
-                  Invest in companies with proven track records of sustainable practices and growth potential.
-                </CardContent>
-              </Card>
-              <Card className="bg-white border border-gray-200 shadow-sm">
-                <CardHeader>
-                  <Users className="h-10 w-10 text-blue-600" />
-                  <CardTitle className="text-gray-900">Community Impact</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-600">
-                  Support businesses that prioritize social responsibility and community development.
-                </CardContent>
-              </Card>
-              <Card className="bg-white border border-gray-200 shadow-sm">
-                <CardHeader>
-                  <BarChart className="h-10 w-10 text-blue-600" />
-                  <CardTitle className="text-gray-900">Transparent Metrics</CardTitle>
-                </CardHeader>
-                <CardContent className="text-gray-600">
-                  Access clear, data-driven insights on the environmental and social impact of your investments.
-                </CardContent>
-              </Card>
-            </div>
           </div>
-        </section>
-      </main>
-      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-gray-200">
-        <p className="text-xs text-gray-600">© 2023 WeSeedU. All rights reserved.</p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs text-gray-600 hover:text-blue-600" href="#">
-            Terms of Service
-          </Link>
-          <Link className="text-xs text-gray-600 hover:text-blue-600" href="#">
-            Privacy
-          </Link>
-        </nav>
-      </footer>
+
+          {/* Dashboard overlay */}
+          <AnimatePresence mode="wait">
+            {currentView === 'dashboard' && <DashboardView user={user} />}
+          </AnimatePresence>
+
+          {/* Companies overlay */}
+          {currentView === 'companies' && (
+            <CompaniesView 
+              onCompanySelect={(id) => {
+                setSelectedCompanyId(id)
+                setCurrentView('company-details')
+              }}
+            />
+          )}
+
+          {/* Company details overlay */}
+          {currentView === 'company-details' && selectedCompanyId && (
+            <CompanyDetailsView
+              companyId={selectedCompanyId}
+              onClose={() => {
+                setCurrentView('companies')
+                setSelectedCompanyId(null)
+              }}
+            />
+          )}
+
+          {/* Saved companies overlay */}
+          {currentView === 'saved' && (
+            <SavedCompaniesView />
+          )}
+        </main>
+
+        {/* Right Sidebar - News */}
+        <NewsSection />
+      </div>
     </div>
   )
 }
-

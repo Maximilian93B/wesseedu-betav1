@@ -21,6 +21,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     await login({ email, password, onSuccess })
   }
 
+  // Add a unique identifier for this instance
+  const formId = Math.random().toString(36).substr(2, 9);
+
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
@@ -31,9 +34,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor={`email-${formId}`}>Email</Label>
               <Input
-                id="email"
+                id={`email-${formId}`}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -41,9 +44,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor={`password-${formId}`}>Password</Label>
               <Input
-                id="password"
+                id={`password-${formId}`}
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
