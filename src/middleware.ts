@@ -1,6 +1,7 @@
 import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 import { NextResponse, type NextRequest } from "next/server"
 
+// Routes that don't require authentication
 const PUBLIC_ROUTES = [
   "/",
   "/index",
@@ -8,61 +9,58 @@ const PUBLIC_ROUTES = [
   "/contact",
   "/marketing",
   "/unauthorized",
-]
-
-const AUTH_ROUTES = [
   "/auth/login",
   "/auth/signup",
   "/auth/callback",
   "/auth/confirmation",
-  "/auth/profile-create",
+  "/auth/verification",
+  "/auth/reset-password",
 ]
 
 const ADMIN_ROUTES = ["/admin"]
 
-const PROTECTED_ROUTES = [
-  "/auth/home",
-  "/auth/profile",
-  "/profile",
-  "/companies",
-]
-
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
-  const { data: { session } } = await supabase.auth.getSession()
+  
+  // Use getUser() instead of getSession() for better security
+  const { data: { user }, error } = await supabase.auth.getUser()
+  
   const { pathname } = req.nextUrl
 
-  // Add pathname to headers for layout navigation visibility
-  res.headers.set('x-pathname', pathname)
-
-  // Handle public routes
+  // Store the current URL in a cookie for layouts to access
+  res.cookies.set('next-url', pathname)
+  
+  // Handle public routes - always allow access
   if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
     return res
   }
 
-  // Handle auth routes
-  if (AUTH_ROUTES.some(route => pathname.startsWith(route))) {
-    if (session) {
-      // Redirect logged-in users away from auth pages
-      return NextResponse.redirect(new URL('/auth/dashboard', req.url))
+  // For onboarding route
+  if (pathname.startsWith('/onboarding')) {
+    // Allow access if this is part of email verification flow
+    const isEmailVerification = req.nextUrl.searchParams.has('type') && 
+                               req.nextUrl.searchParams.get('type') === 'signup'
+    
+    if (!user && !isEmailVerification) {
+      return NextResponse.redirect(new URL('/auth/login', req.url))
     }
     return res
   }
 
-  // Handle protected routes
-  if (PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
-    if (!session) {
-      const redirectUrl = new URL("/auth/login", req.url)
-      redirectUrl.searchParams.set("redirectTo", pathname)
-      return NextResponse.redirect(redirectUrl)
-    }
-    return res
+  // For all other routes, require authentication
+  if (!user) {
+    const redirectUrl = new URL('/auth/login', req.url)
+    redirectUrl.searchParams.set('redirectTo', pathname)
+    return NextResponse.redirect(redirectUrl)
   }
+
+  // We don't check for onboarding completion in middleware
+  // Let the page components handle that logic to avoid conflicts
 
   // Handle admin routes
   if (ADMIN_ROUTES.some(route => pathname.startsWith(route))) {
-    if (session?.user.user_metadata.user_type !== "admin") {
+    if (user.user_metadata.user_type !== "admin") {
       return NextResponse.redirect(new URL("/unauthorized", req.url))
     }
   }

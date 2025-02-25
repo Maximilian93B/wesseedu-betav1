@@ -32,14 +32,14 @@ export function useLogin() {
         throw new Error(typeof data.error === 'string' ? data.error : 'Login failed')
       }
 
-      onSuccess?.()
-
-      if (!data.hasProfile) {
-        router.push('/auth/profile-create')
-      } else {
-        const returnUrl = searchParams.get('returnUrl') || '/auth/Home'
-        router.push(returnUrl)
+      if (onSuccess) {
+        onSuccess()
       }
+
+      const redirectUrl = data.redirectUrl || searchParams.get('returnUrl') || '/auth/home'
+      
+      console.log("Redirecting to:", redirectUrl)
+      router.push(redirectUrl)
       router.refresh()
       
       return data

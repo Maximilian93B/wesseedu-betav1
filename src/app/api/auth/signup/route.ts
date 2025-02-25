@@ -1,54 +1,70 @@
 // app/api/auth/signup/route.ts
 
-import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
-
-// Initialize the Supabase client using your public anon key
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
+import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
-  try {
-    const { email, password, firstName, lastName } = await request.json()
+  const requestUrl = new URL(request.url)
+  const formData = await request.json()
+  const { email, password, firstName, lastName } = formData
+  const supabase = createRouteHandlerClient({ cookies })
 
-    // Use the client-side signUp method to create the user
+  try {
+    // Validate inputs
+    if (!email || !password || !firstName || !lastName) {
+      return NextResponse.json(
+        { error: "Missing required fields", details: "All fields are required" },
+        { status: 400 }
+      )
+    }
+
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .single()
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User already exists", details: "An account with this email already exists" },
+        { status: 400 }
+      )
+    }
+
+    // Sign up the user
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           first_name: firstName,
-          last_name: lastName
+          last_name: lastName,
+          onboarding_completed: false,
+          onboarding_step: 1
         },
-        // Set the redirect URL directly to profile creation
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/profile-create`
+        // Redirect directly to onboarding after email confirmation
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/onboarding`
       }
     })
 
     if (error) {
-      console.error('Error signing up:', error)
+      console.error("Signup error:", error)
       return NextResponse.json(
-        { error: 'Failed to sign up user', details: error.message },
-        { status: 400 }
+        { error: "Signup failed", details: error.message },
+        { status: 500 }
       )
     }
 
-    // Remove the updateUser call since we're handling redirect in signUp options
-
-    return NextResponse.json({ 
-      user: data.user, 
-      session: data.session,
-      message: 'Please check your email to verify your account.'
+    return NextResponse.json({
+      message: "Please check your email for a confirmation link to complete your registration.",
+      user: data.user
     })
-  } catch (error) {
-    console.error('Signup Error:', error)
+  } catch (err) {
+    console.error("Unexpected signup error:", err)
     return NextResponse.json(
-      {
-        error: 'Signup failed',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: "Unexpected error", details: "An unexpected error occurred during signup" },
       { status: 500 }
     )
   }

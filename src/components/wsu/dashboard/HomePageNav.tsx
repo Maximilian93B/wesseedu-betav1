@@ -1,4 +1,4 @@
-"use client"
+
 
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Leaf } from "lucide-react"
@@ -21,7 +21,7 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
             onClick={() => onNavigate('home')}
             className="mr-4 hover:bg-white/5 text-zinc-400 hover:text-emerald-400"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
         ) : (
@@ -37,7 +37,7 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
       <nav className="ml-auto flex gap-4 sm:gap-6">
         <Button
           variant="ghost"
-          onClick={() => onNavigate('home')}
+          onClick={ () => onNavigate('home')}
           className={`text-sm font-medium ${
             currentView === 'home' ? 'text-emerald-400' : 'text-zinc-400'
           } hover:text-emerald-400 transition-colors`}

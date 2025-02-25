@@ -25,20 +25,29 @@ export async function POST(request: Request) {
         user_type,
         user_tier,
         sustainable_investment_tags,
-        total_investments,
-        previous_month_investments,
-        impact_score,
+        total_investments: total_investments || 0,
+        previous_month_investments: previous_month_investments || 0,
+        impact_score: impact_score || 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
     ])
-
     if (error) {
       console.error('Profile creation error:', error)
       return NextResponse.json(
         { error: 'Profile creation failed', details: error.message },
         { status: 400 }
       )
+    }
+
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      id,
+      { user_metadata: { onboarding_completed: true } }
+    )
+
+    if (updateError) {
+      console.error('User metadata update error:', updateError)
+      // Continue anyway since the profile was created successfully
     }
 
     return NextResponse.json({ success: true, message: 'Profile created successfully' })

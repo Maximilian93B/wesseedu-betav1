@@ -244,18 +244,6 @@ export function DashboardView({ user }: DashboardViewProps) {
           </CardContent>
         </Card>
       </div>
-
-    
-
-      <div className="flex justify-between">
-        <Button
-          onClick={() => router.push("/companies")}
-          className="bg-emerald-500 text-white hover:bg-emerald-400 transition-colors duration-200"
-        >
-          Explore Sustainable Companies
-        </Button>
-
-      </div>
     </div>
   )
 }
