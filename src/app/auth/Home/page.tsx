@@ -5,10 +5,17 @@ import { useRouter } from "next/navigation"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Leaf, TrendingUp, Users, BarChart, Search, Bookmark } from "lucide-react"
-import Link from "next/link"
+import {  TrendingUp,  BarChart, Search, Bookmark } from "lucide-react"
 import { NewsSection } from "@/components/wsu/dashboard/NewsSection"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
+import { SidebarAds } from "@/components/advertising/SidebarAds"
+import { AnimatePresence } from "framer-motion"
+import { DashboardView } from "@/components/wsu/dashboard/DashboardView"
+import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
+import CompaniesView from "@/components/company/CompaniesView"
+import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
+import { SavedCompaniesView } from "@/components/wsu/dashboard/SavedCompaniesView"
+
 
 export default function HomePage() {
   const router = useRouter()
@@ -17,6 +24,8 @@ export default function HomePage() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<any[]>([])
+  const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'companies' | 'company-details' | 'saved'>('home')
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
 
   useEffect(() => {
     const checkUser = async () => {
@@ -71,6 +80,11 @@ export default function HomePage() {
     router.refresh() // Force a router refresh to update the session state
   }
 
+  const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved') => {
+    setCurrentView(view)
+    setSelectedCompanyId(null)
+  }
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen bg-black text-gray-400">Loading...</div>
   }
@@ -81,59 +95,63 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-800 to-zinc-900">
-      <header className="px-4 lg:px-6 h-14 flex items-center border-b border-white/5">
-        <Link className="flex items-center justify-center group" href="/home">
-          <Leaf className="h-6 w-6 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
-          <span className="ml-2 text-lg font-bold bg-gradient-to-r from-zinc-200 to-white bg-clip-text text-transparent">
-            WeSeedU
-          </span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-sm font-medium text-zinc-400 hover:text-emerald-400 transition-colors" href="/auth/dashboard">
-            Dashboard
-          </Link>
-          <Link className="text-sm font-medium text-zinc-400 hover:text-emerald-400 transition-colors" href="/companies">
-            Companies
-          </Link>
-          <Link className="text-sm font-medium text-zinc-400 hover:text-emerald-400 transition-colors" href="/auth/profile">
-            Profile
-          </Link>
-          <button onClick={signOut} className="text-sm font-medium text-zinc-400 hover:text-emerald-400 transition-colors">
-            Sign Out
-          </button>
-        </nav>
-      </header>
+    <div className="flex flex-col min-h-screen bg-black relative overflow-hidden">
+      <HomePageNav
+        currentView={currentView}
+        onNavigate={handleNavigation}
+        onSignOut={signOut}
+      />
+      
+      {/* Background glows */}
+      <div className="absolute left-[10%] top-0 w-[900px] h-[900px] 
+        bg-emerald-500/5 blur-[150px] rounded-full 
+        pointer-events-none"></div>
+      
+      <div className="absolute right-[5%] bottom-0 w-[800px] h-[800px] 
+        bg-emerald-500/5 blur-[130px] rounded-full 
+        pointer-events-none"></div>
 
-      <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-8">
-              <div className="space-y-4 text-center">
-                <span className="inline-block text-emerald-400 text-sm font-medium tracking-wider uppercase 
-                  bg-emerald-400/10 px-4 py-1 rounded-full border border-emerald-400/20">
-                  Welcome Back
-                </span>
+      <div className="absolute left-[40%] top-[40%] w-[600px] h-[600px] 
+        bg-emerald-400/3 blur-[100px] rounded-full 
+        pointer-events-none"></div>
 
-                <h1 className="relative">
-                  <span className="absolute -inset-1 blur-2xl bg-gradient-to-r from-emerald-400/20 
-                    via-white/5 to-emerald-400/20 animate-pulse"></span>
-                  <span className="relative text-4xl md:text-5xl lg:text-6xl font-bold 
-                    bg-gradient-to-r from-zinc-200 via-white to-zinc-300 bg-clip-text 
-                    text-transparent tracking-tight leading-tight">
-                    Your Gateway to <br className="hidden sm:block" />
-                    <span className="text-emerald-400">Sustainable</span> Investments
+      {/* Main layout with sidebars */}
+      <div className="flex flex-1 relative">
+        {/* Left Sidebar - Ads */}
+        <SidebarAds />
+        
+        {/* Main Content - centered between sidebars */}
+        <main className="flex-1 ml-80 mr-80 relative"> {/* Added relative positioning */}
+          {/* Home content */}
+          <div className={currentView === 'home' ? 'block' : 'hidden'}>
+            <div className="max-w-5xl mx-auto px-4 py-8">
+              {/* Welcome Section */}
+              <section className="mb-12">
+                <div className="space-y-4 text-center">
+                  <span className="inline-block text-emerald-400 text-sm font-medium tracking-wider uppercase 
+                    bg-emerald-400/10 px-4 py-1 rounded-full border border-emerald-400/20">
+                    Welcome Back
                   </span>
-                </h1>
+                  <h1 className="relative">
+                    <span className="absolute -inset-1 blur-2xl bg-gradient-to-r from-emerald-400/20 
+                      via-white/5 to-emerald-400/20 animate-pulse"></span>
+                    <span className="relative text-4xl md:text-5xl lg:text-6xl font-bold 
+                      bg-gradient-to-r from-zinc-200 via-white to-zinc-300 bg-clip-text 
+                      text-transparent tracking-tight leading-tight">
+                      Your Gateway to <br className="hidden sm:block" />
+                      <span className="text-emerald-400">Sustainable</span> Investments
+                    </span>
+                  </h1>
+                  <p className="max-w-2xl mx-auto text-zinc-400 text-lg md:text-xl leading-relaxed font-light">
+                    Make an impact while growing your portfolio with our 
+                    <span className="text-emerald-400 font-normal"> innovative platform</span>
+                  </p>
+                </div>
+              </section>
 
-                <p className="max-w-2xl mx-auto text-zinc-400 text-lg md:text-xl leading-relaxed font-light">
-                  Make an impact while growing your portfolio with our 
-                  <span className="text-emerald-400 font-normal"> innovative platform</span>
-                </p>
-              </div>
-
+              {/* Stats Grid */}
               {user && stats.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mt-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                   {stats.map((stat, index) => (
                     <Card 
                       key={index} 
@@ -158,9 +176,12 @@ export default function HomePage() {
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-md">
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <Button 
-                  onClick={() => router.push('/companies')} 
+                  onClick={() => {
+                    handleNavigation('companies')
+                  }}
                   className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white 
                     transition-colors shadow-md hover:shadow-emerald-500/25"
                 >
@@ -168,16 +189,19 @@ export default function HomePage() {
                   Find Companies
                 </Button>
                 <Button 
-                  onClick={() => router.push('/dashboard/saved')} 
+                  onClick={() => {
+                    handleNavigation('dashboard')
+                  }}
                   variant="outline" 
                   className="flex-1 border-2 border-white/5 hover:border-white/10 text-emerald-400 
                     hover:bg-white/5 transition-colors"
                 >
                   <Bookmark className="w-4 h-4 mr-2" />
-                  Saved Companies
+                  View Dashboard
                 </Button>
               </div>
 
+              {/* Features List */}
               <div className="flex flex-wrap justify-center gap-4 text-sm text-zinc-400">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
@@ -194,14 +218,42 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </section>
 
-        <section className="w-full py-12">
-          <div className="container px-4 md:px-6 max-w-5xl mx-auto">
-            <NewsSection />
-          </div>
-        </section>
-      </main>
+          {/* Dashboard overlay */}
+          <AnimatePresence mode="wait">
+            {currentView === 'dashboard' && <DashboardView user={user} />}
+          </AnimatePresence>
+
+          {/* Companies overlay */}
+          {currentView === 'companies' && (
+            <CompaniesView 
+              onCompanySelect={(id) => {
+                setSelectedCompanyId(id)
+                setCurrentView('company-details')
+              }}
+            />
+          )}
+
+          {/* Company details overlay */}
+          {currentView === 'company-details' && selectedCompanyId && (
+            <CompanyDetailsView
+              companyId={selectedCompanyId}
+              onClose={() => {
+                setCurrentView('companies')
+                setSelectedCompanyId(null)
+              }}
+            />
+          )}
+
+          {/* Saved companies overlay */}
+          {currentView === 'saved' && (
+            <SavedCompaniesView />
+          )}
+        </main>
+
+        {/* Right Sidebar - News */}
+        <NewsSection />
+      </div>
     </div>
   )
 }

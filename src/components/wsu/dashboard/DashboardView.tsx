@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BarChart, Users, TrendingUp, Leaf, Globe } from "lucide-react"
-import { NewsSection } from "@/components/wsu/dashboard/NewsSection"
 import { motion } from "framer-motion"
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
 
@@ -37,25 +36,15 @@ const sampleInvestmentData: InvestmentData[] = [
   { month: "Jul", amount: 3600 },
 ]
 
-export default function DashboardPage() {
+interface DashboardViewProps {
+  user: any  // You can make this more specific based on your user type
+}
+
+export function DashboardView({ user }: DashboardViewProps) {
   const router = useRouter()
   const supabase = useSupabaseClient()
-  const [user, setUser] = useState<any>(null)
   const [stats, setStats] = useState<DashboardStat[]>([])
   const [savedCompanies, setSavedCompanies] = useState<any[]>([])
-
-  useEffect(() => {
-    const getAuthUser = async () => {
-      const { data: { user: authUser }, error } = await supabase.auth.getUser()
-      if (error || !authUser) {
-        router.push("/auth/login")
-        return
-      }
-      setUser(authUser)
-    }
-
-    getAuthUser()
-  }, [supabase.auth, router])
 
   useEffect(() => {
     if (user) {
@@ -256,7 +245,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <NewsSection />
+    
 
       <div className="flex justify-between">
         <Button

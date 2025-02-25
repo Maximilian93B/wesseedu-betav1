@@ -25,9 +25,10 @@ interface CompanyCardProps {
     score: number
     community_members: number
   }
+  onCompanySelect: (id: string) => void
 }
 
-export function CompanyCard({ company }: CompanyCardProps) {
+export function CompanyCard({ company, onCompanySelect }: CompanyCardProps) {
   return (
     <Card className="group relative bg-[#0A0A0A] hover:bg-[#111111] border-2 
       border-white/5 hover:border-white/10 rounded-xl overflow-hidden transition-all 
@@ -83,12 +84,12 @@ export function CompanyCard({ company }: CompanyCardProps) {
             </span>
           </div>
           <Button 
-            asChild
             size="sm"
+            onClick={() => onCompanySelect(company.id)}
             className="bg-emerald-500 hover:bg-emerald-400 text-white 
               transition-colors shadow-sm hover:shadow-emerald-500/25"
           >
-            <Link href={`/companies/${company.id}`}>View</Link>
+            View Details
           </Button>
         </div>
       </CardContent>
