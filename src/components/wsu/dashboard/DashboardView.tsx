@@ -375,7 +375,6 @@ export function DashboardView({ user }: DashboardViewProps) {
           </CardContent>
         </Card>
       </div>
-<<<<<<< HEAD
 
       {/* New Investments and Watchlist Section */}
       <div className="grid gap-6 md:grid-cols-2">
@@ -408,8 +407,6 @@ export function DashboardView({ user }: DashboardViewProps) {
           Explore Sustainable Companies
         </Button>
       </div>
-=======
->>>>>>> a47a78bfd7a56499cdb0752c8c49f1c28cf56a50
     </div>
   );
 }

@@ -40,27 +40,11 @@ export async function POST(request: Request) {
       console.error("Profile fetch error:", profileError)
     }
 
-<<<<<<< HEAD
-    const response = NextResponse.json({
-      user,
-      hasProfile: !!profile,
-      profile: profile,
-    });
-
-    // redirect URL to /home
-    response.headers.set('Location', '/home');
-    response.headers.set('status', '301');
-
-
-    return response;
-
-=======
     // Return response with appropriate redirect URL
     return NextResponse.json({ 
       success: true,
       redirectUrl: redirectUrl
     })
->>>>>>> a47a78bfd7a56499cdb0752c8c49f1c28cf56a50
   } catch (error) {
     console.error("Login error:", error)
     return NextResponse.json(

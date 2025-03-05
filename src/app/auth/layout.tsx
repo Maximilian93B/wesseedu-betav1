@@ -2,30 +2,13 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
-<<<<<<< HEAD
-=======
-// Helper function to check if path should show navigation
-const shouldShowNavigation = (pathname: string) => {
-  // List of paths that should not show navigation
-  const noNavPaths = [
-    '/auth/dashboard',
-    '/auth/profile',
-    '/auth/saved',
-    '/auth/settings'
-  ]
-  
-  return !noNavPaths.some(path => pathname.startsWith(path))
-}
-
-// Paths that don't require authentication
-const publicPaths = [
+const IS_PUBLIC_PATHS = [
   '/auth/login',
   '/auth/signup',
   '/',
   '/auth/reset-password'
 ]
 
->>>>>>> a47a78bfd7a56499cdb0752c8c49f1c28cf56a50
 export default async function AuthLayout({
   children,
 }: {
@@ -41,7 +24,7 @@ export default async function AuthLayout({
   const currentPath = pathname || '/'
   
   // Check if the current path is a public path
-  const isPublicPath = publicPaths.some(path => 
+  const isPublicPath = IS_PUBLIC_PATHS.some(path => 
     currentPath.startsWith(path)
   )
 
