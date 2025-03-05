@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, BarChart, Search, Bookmark } from "lucide-react"
@@ -11,42 +11,89 @@ import { DashboardView } from "@/components/wsu/dashboard/DashboardView"
 import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
 import CompaniesView from "@/components/company/CompaniesView"
 import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
-import { WatchlistView } from "@/components/wsu/dashboard/WatchlistView"
+import { WatchlistView, useWatchlist } from "@/components/wsu/dashboard/WatchlistView"
 import { AuthProvider, useAuth } from "@/context/AuthContext"
+import { useToast } from "@/hooks/use-toast"
 
 function HomePageContent() {
   const { user, profile, loading, signOut } = useAuth()
   const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'companies' | 'company-details' | 'saved'>('home')
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
+  const [localLoading, setLocalLoading] = useState(true)
+  const { toast } = useToast()
+  
+  // Use the shared watchlist hook to avoid duplicate data fetching
+  const { watchlistCompanies, loading: watchlistLoading } = useWatchlist()
+
+  // Add a timeout to ensure we don't get stuck in loading state
+  useEffect(() => {
+    // Set a timeout to force loading to false after 5 seconds
+    const timeoutId = setTimeout(() => {
+      if (localLoading) {
+        console.warn('HomePage: Loading timeout reached, forcing loading to false')
+        setLocalLoading(false)
+        
+        // Show a toast to inform the user
+        toast({
+          title: "Loading timeout",
+          description: "Some data might not be available. Please refresh if needed.",
+          variant: "default"
+        })
+      }
+    }, 5000)
+
+    // If auth loading completes, update local loading state
+    if (!loading) {
+      setLocalLoading(false)
+      clearTimeout(timeoutId)
+    }
+
+    return () => clearTimeout(timeoutId)
+  }, [loading, localLoading, toast])
 
   const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved') => {
     setCurrentView(view)
     setSelectedCompanyId(null)
   }
 
-  if (loading) {
-    return <div className="flex items-center justify-center min-h-screen bg-black text-gray-400">Loading...</div>
+  // Show loading state with a better UI
+  if (localLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-gray-400">
+        <div className="w-12 h-12 border-t-2 border-emerald-500 rounded-full animate-spin mb-4"></div>
+        <p>Loading your dashboard...</p>
+      </div>
+    )
   }
 
+  // If no user after loading completes, show login message
   if (!user) {
-    return <div className="flex items-center justify-center min-h-screen bg-black text-gray-400">
-      Redirecting to login...
-    </div>
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-gray-400">
+        <p className="mb-4">You need to be logged in to view this page</p>
+        <Button 
+          onClick={() => window.location.href = '/auth/login'}
+          className="bg-emerald-500 hover:bg-emerald-400 text-white"
+        >
+          Go to Login
+        </Button>
+      </div>
+    )
   }
 
-  // Prepare stats from profile data
-  const stats = profile ? [
+  // Prepare stats from profile data with default values if data is missing
+  const stats = [
     {
       title: "Your Investment",
-      value: `$${profile.total_investments?.toLocaleString() || '0'}`,
+      value: `$${profile?.total_investments?.toLocaleString() || '0'}`,
       icon: <TrendingUp className="h-10 w-10 text-emerald-400" />,
     },
     {
       title: "Impact Score",
-      value: `${profile.impact_score || '0'}/10`,
+      value: `${profile?.impact_score || '0'}/10`,
       icon: <BarChart className="h-10 w-10 text-emerald-400" />,
     },
-  ] : [];
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-black relative overflow-hidden">
@@ -106,85 +153,61 @@ function HomePageContent() {
                 </div>
               </section>
 
-              {/* Stats Grid */}
-              {stats.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+              {/* Stats Cards */}
+              <section className="mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {stats.map((stat, index) => (
-                    <Card 
-                      key={index} 
-                      className="bg-[#0A0A0A] border-2 border-white/5 hover:border-white/10 
-                        rounded-xl overflow-hidden transition-all duration-300
-                        shadow-[0_0_15px_-3px_rgba(255,255,255,0.05)] 
-                        hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.1)]"
-                    >
+                    <Card key={index} className="bg-zinc-900/50 border-2 border-white/5 hover:border-emerald-500/20 
+                      transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5">
                       <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <div className="text-emerald-400">{stat.icon}</div>
-                          <CardTitle className="text-xl font-medium text-white">{stat.title}</CardTitle>
-                        </div>
+                        <CardTitle className="text-zinc-400 text-sm font-normal">{stat.title}</CardTitle>
                       </CardHeader>
-                      <CardContent className="pt-2">
-                        <p className="text-3xl font-bold text-emerald-400">
-                          {stat.value}
-                        </p>
+                      <CardContent className="flex items-center justify-between">
+                        <span className="text-2xl font-bold text-white">{stat.value}</span>
+                        {stat.icon}
                       </CardContent>
                     </Card>
                   ))}
                 </div>
-              )}
+              </section>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-12">
-                <Button 
-                  onClick={() => {
-                    setCurrentView('companies')
-                  }}
-                  className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white 
-                    transition-colors shadow-md hover:shadow-emerald-500/25"
-                >
-                  <Search className="w-4 h-4 mr-2" />
-                  Find Companies
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setCurrentView('dashboard')
-                  }}
-                  variant="outline" 
-                  className="flex-1 border-2 border-white/5 hover:border-white/10 text-emerald-400 
-                    hover:bg-white/5 transition-colors"
-                >
-                  <Bookmark className="w-4 h-4 mr-2" />
-                  View Dashboard
-                </Button>
-              </div>
-
-              {/* Features List */}
-              <div className="flex flex-wrap justify-center gap-4 text-sm text-zinc-400">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                  <span>Verified Companies</span>
+              {/* Quick Actions */}
+              <section className="mb-12">
+                <h2 className="text-xl font-semibold text-white mb-6">Quick Actions</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Button 
+                    onClick={() => handleNavigation('companies')}
+                    className="flex items-center justify-center gap-3 h-16 bg-zinc-900/50 border-2 border-white/5 
+                      hover:border-emerald-500/20 hover:bg-zinc-900 transition-all duration-300 
+                      hover:shadow-lg hover:shadow-emerald-500/5"
+                  >
+                    <Search className="h-5 w-5 text-emerald-400" />
+                    <span className="text-white">Explore Companies</span>
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => handleNavigation('saved')}
+                    className="flex items-center justify-center gap-3 h-16 bg-zinc-900/50 border-2 border-white/5 
+                      hover:border-emerald-500/20 hover:bg-zinc-900 transition-all duration-300 
+                      hover:shadow-lg hover:shadow-emerald-500/5"
+                  >
+                    <Bookmark className="h-5 w-5 text-emerald-400" />
+                    <span className="text-white">View Watchlist</span>
+                  </Button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                  <span>Impact Tracking</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                  <span>Sustainable Growth</span>
-                </div>
-              </div>
+              </section>
             </div>
           </div>
 
           {/* Dashboard overlay */}
-          <AnimatePresence mode="wait">
-            {currentView === 'dashboard' && <DashboardView user={user} />}
-          </AnimatePresence>
+          {currentView === 'dashboard' && (
+            <DashboardView user={user} />
+          )}
 
           {/* Companies overlay */}
           {currentView === 'companies' && (
             <CompaniesView 
-              onCompanySelect={(id) => {
+              onCompanySelect={(id: string) => {
                 setSelectedCompanyId(id)
                 setCurrentView('company-details')
               }}
@@ -193,7 +216,7 @@ function HomePageContent() {
 
           {/* Company details overlay */}
           {currentView === 'company-details' && selectedCompanyId && (
-            <CompanyDetailsView
+            <CompanyDetailsView 
               companyId={selectedCompanyId}
               onClose={() => {
                 setSelectedCompanyId(null)
@@ -204,7 +227,10 @@ function HomePageContent() {
 
           {/* Watchlist overlay (previously SavedCompaniesView) */}
           {currentView === 'saved' && (
-            <WatchlistView />
+            <WatchlistView 
+              externalData={watchlistCompanies}
+              externalLoading={watchlistLoading}
+            />
           )}
         </main>
 

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { BarChart, Users, TrendingUp, Leaf, Globe } from "lucide-react"
 import { motion } from "framer-motion"
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
-import { WatchlistView } from "./WatchlistView"
+import { WatchlistView, useWatchlist } from "./WatchlistView"
 import UserInvestments from "./UserInvestments"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
@@ -35,13 +35,21 @@ interface DashboardViewProps {
 
 export function DashboardView({ user }: DashboardViewProps) {
   const router = useRouter()
-  const { profile: authProfile } = useAuth()
+  const { profile: authProfile, loading: authLoading } = useAuth()
   const { toast } = useToast()
   const [stats, setStats] = useState<DashboardStat[]>([])
-  const [savedCompanies, setSavedCompanies] = useState<any[]>([])
   const [investmentData, setInvestmentData] = useState<InvestmentData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [savedCompanies, setSavedCompanies] = useState<any[]>([])
+  const [profileData, setProfileData] = useState<any>(null)
+  
+  // Use the shared watchlist hook to avoid duplicate data fetching
+  const { 
+    watchlistCompanies, 
+    loading: watchlistLoading,
+    fetchWatchlistCompanies
+  } = useWatchlist()
 
   // Set default stats even before loading
   useEffect(() => {
@@ -78,6 +86,12 @@ export function DashboardView({ user }: DashboardViewProps) {
   }, [authProfile]);
 
   useEffect(() => {
+    // Don't try to load data if auth is still loading
+    if (authLoading) {
+      console.log("DashboardView: Auth is still loading, waiting...");
+      return;
+    }
+    
     if (user) {
       console.log("DashboardView: User detected, loading data");
       const loadData = async () => {
@@ -116,12 +130,19 @@ export function DashboardView({ user }: DashboardViewProps) {
       console.log("DashboardView: No user, skipping data load");
       setLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchProfileData = async () => {
     console.log("DashboardView: Fetching profile data from API");
     try {
-      const { data, error } = await fetchWithAuth('/api/auth/profile');
+      const { data, error } = await fetchWithAuth('/api/auth/profile', {
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       
       if (error) {
         console.error("Error fetching profile data:", error);
@@ -133,6 +154,28 @@ export function DashboardView({ user }: DashboardViewProps) {
       }
       
       console.log("DashboardView: Profile data fetched successfully", data);
+      setProfileData(data);
+      
+      // Process saved companies data
+      if (data.savedCompanies && data.savedCompanies.length > 0) {
+        console.log(`DashboardView: Found ${data.savedCompanies.length} saved companies`);
+        
+        // Transform the data to match the WatchlistCompany interface
+        const transformedCompanies = data.savedCompanies.map((item: any) => ({
+          id: item.id,
+          company_id: item.company_id,
+          companies: item.companies
+        }));
+        
+        console.log("DashboardView: Transformed saved companies data", transformedCompanies);
+        setSavedCompanies(transformedCompanies);
+        
+        // Also refresh the watchlist data to ensure consistency
+        fetchWatchlistCompanies();
+      } else {
+        console.log("DashboardView: No saved companies found");
+        setSavedCompanies([]);
+      }
       
       // Process investments to create chart data
       if (data.investments && data.investments.length > 0) {
@@ -184,9 +227,6 @@ export function DashboardView({ user }: DashboardViewProps) {
         ]);
       }
       
-      // Set saved companies
-      setSavedCompanies(data.savedCompanies || []);
-      
       // Update stats
       setStats([
         {
@@ -225,7 +265,7 @@ export function DashboardView({ user }: DashboardViewProps) {
   };
 
   // Show a more informative loading state
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4">
         <div className="h-10 w-10 animate-spin">
@@ -346,32 +386,20 @@ export function DashboardView({ user }: DashboardViewProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/dashboard/saved")}
+              onClick={() => router.push("/auth/home")}
               className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50"
             >
               View All
             </Button>
           </CardHeader>
           <CardContent>
-            {savedCompanies.length === 0 ? (
-              <p className="text-sm text-gray-400">No saved companies yet</p>
-            ) : (
-              <ul className="space-y-4">
-                {savedCompanies.map((saved) => (
-                  <li key={saved.id} className="flex items-center justify-between bg-black/50 border border-emerald-500/20 p-3 rounded-lg">
-                    <span className="text-sm text-white">{saved.companies.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push(`/companies/${saved.companies.id}`)}
-                      className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50"
-                    >
-                      View
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <WatchlistView 
+              externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
+              externalLoading={loading}
+              isPreview={true}
+              maxItems={3}
+              onViewAll={() => router.push("/auth/home")}
+            />
           </CardContent>
         </Card>
       </div>
@@ -384,18 +412,6 @@ export function DashboardView({ user }: DashboardViewProps) {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <UserInvestments />
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <Card className="bg-black border-emerald-500/20 border-2 shadow-lg hover:border-emerald-400/40 transition-all duration-200">
-            <CardContent className="p-0">
-              <WatchlistView />
-            </CardContent>
-          </Card>
         </motion.div>
       </div>
 

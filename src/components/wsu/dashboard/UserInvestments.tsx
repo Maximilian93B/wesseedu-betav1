@@ -93,7 +93,11 @@ const UserInvestments = () => {
       if (user) {
         fetchInvestments();
         fetchCompanies();
-      } else if (!user) {
+      } else {
+        // Set not loading and empty data when no user
+        setIsLoading(false);
+        setInvestments([]);
+        setTotalInvested(0);
         // Redirect to login if not authenticated
         router.push('/auth/signin');
       }
@@ -101,7 +105,12 @@ const UserInvestments = () => {
   }, [authLoading, user, router]);
 
   const fetchInvestments = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setIsLoading(false);
+      setInvestments([]);
+      setTotalInvested(0);
+      return;
+    }
     
     try {
       setIsLoading(true);
@@ -110,7 +119,10 @@ const UserInvestments = () => {
       const response = await fetchWithAuth('/api/auth/profile');
       
       if (!response.data) {
-        throw new Error("Failed to fetch profile data");
+        console.warn("UserInvestments: No profile data returned");
+        setInvestments([]);
+        setTotalInvested(0);
+        return;
       }
       
       console.log("UserInvestments: Profile data fetched successfully", response.data);
@@ -139,6 +151,9 @@ const UserInvestments = () => {
         description: "Failed to load investments. Please try again.",
         variant: "destructive"
       });
+      // Set empty data on error
+      setInvestments([]);
+      setTotalInvested(0);
     } finally {
       setIsLoading(false);
     }

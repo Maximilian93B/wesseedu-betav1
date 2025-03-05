@@ -1,10 +1,10 @@
 "use client"
 
-import { HeroSection } from "@/components/wsu/HeroSection"
-import { KeyFeatures } from "@/components/wsu/KeyFeatures"
-import { Partners } from "@/components/wsu/Partners"
-import { VettingProcess } from "@/components/wsu/VettingProcess"
-import { ImpactSection } from "@/components/wsu/ImpactSection"
+import { HeroSection } from "@/components/wsu/Marketing/HeroSection"
+import { KeyFeatures } from "@/components/wsu/Marketing/KeyFeatures"
+import { Partners } from "@/components/wsu/Marketing/Partners"
+import { VettingProcess } from "@/components/wsu/Marketing/VettingProcess"
+import { ImpactSection } from "@/components/wsu/Marketing/ImpactSection"
 
 export default function LandingPage() {
   return (

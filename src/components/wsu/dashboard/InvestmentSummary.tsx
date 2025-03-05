@@ -37,6 +37,14 @@ const InvestmentSummary = () => {
       }, 10000);
       
       return () => clearTimeout(timeoutId);
+    } else if (!authLoading && !user) {
+      // Handle case when authentication is complete but no user is found
+      console.log("InvestmentSummary: No authenticated user found");
+      setIsLoading(false);
+      setStats({
+        totalInvested: 0,
+        investmentCount: 0
+      });
     }
   }, [authLoading, user]);
 

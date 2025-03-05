@@ -8,52 +8,81 @@ import { cn } from "@/lib/utils";
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { useWatchlist } from "@/components/wsu/dashboard/WatchlistView";
+import { useRouter } from "next/navigation";
 
 interface SaveCompanyButtonProps {
   companyId: string;
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
+  onSaveChange?: (isSaved: boolean) => void;
 }
 
 export default function SaveCompanyButton({
   companyId,
   variant = "ghost",
   size = "icon",
-  className
+  className,
+  onSaveChange
 }: SaveCompanyButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const { savedCompanyIds, addSavedCompany, removeSavedCompany } = useContext(SavedCompaniesContext);
+  const { savedCompanyIds, addSavedCompany, removeSavedCompany, refreshSavedCompanies } = useContext(SavedCompaniesContext);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  
+  // Create a new instance of useWatchlist to ensure we have access to the methods
+  const { fetchWatchlistCompanies } = useWatchlist();
   
   // Check if the company is saved on component mount and when savedCompanyIds changes
   useEffect(() => {
     // This effect should only run when the component mounts or when savedCompanyIds changes
     const saved = savedCompanyIds.includes(companyId);
     setIsSaved(saved);
-    console.log(`SaveCompanyButton: Company ${companyId} is ${saved ? 'saved' : 'not saved'}`);
+    console.log(`SaveCompanyButton: Company ${companyId} is ${saved ? 'saved' : 'not saved'} (savedCompanyIds: ${JSON.stringify(savedCompanyIds)})`);
   }, [savedCompanyIds, companyId]);
 
   const handleToggleSave = async () => {
+    // Don't allow saving if auth is still loading
+    if (authLoading) {
+      console.log("SaveCompanyButton: Auth is still loading, please wait");
+      toast({
+        title: "Please wait",
+        description: "Authentication is still in progress",
+        variant: "default"
+      });
+      return;
+    }
+    
     if (!user) {
+      console.log("SaveCompanyButton: No user, redirecting to sign in");
       toast({
         title: "Authentication required",
         description: "Please sign in to save companies",
         variant: "destructive"
       });
+      router.push("/auth/signin");
       return;
     }
     
+    console.log(`SaveCompanyButton: Starting toggle save for company ${companyId}, current state: ${isSaved ? 'saved' : 'not saved'}`);
     setIsLoading(true);
+    
     try {
       if (isSaved) {
         console.log(`SaveCompanyButton: Removing company ${companyId} from watchlist`);
         const response = await fetchWithAuth('/api/protected/watchlist/remove', {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+          },
           body: JSON.stringify({ companyId }),
         });
+        
+        console.log(`SaveCompanyButton: Remove response:`, response);
         
         if (response.error) {
           throw new Error(response.error.toString());
@@ -61,28 +90,80 @@ export default function SaveCompanyButton({
         
         removeSavedCompany(companyId);
         setIsSaved(false);
+        
+        // Notify parent component if callback provided
+        if (onSaveChange) {
+          onSaveChange(false);
+        }
+        
         toast({
           title: "Success",
           description: "Company removed from watchlist",
         });
+        
       } else {
         console.log(`SaveCompanyButton: Adding company ${companyId} to watchlist`);
+        
+        // Log the exact payload being sent
+        const payload = { companyId };
+        console.log('SaveCompanyButton: Add payload:', payload);
+        
         const response = await fetchWithAuth('/api/protected/watchlist/add', {
           method: 'POST',
-          body: JSON.stringify({ companyId }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+          },
+          body: JSON.stringify(payload),
         });
+        
+        console.log(`SaveCompanyButton: Add response:`, response);
         
         if (response.error) {
           throw new Error(response.error.toString());
         }
         
+        console.log(`SaveCompanyButton: Successfully added company ${companyId} to watchlist`);
         addSavedCompany(companyId);
         setIsSaved(true);
+        
+        // Notify parent component if callback provided
+        if (onSaveChange) {
+          onSaveChange(true);
+        }
+        
         toast({
           title: "Success",
           description: "Company added to watchlist",
         });
       }
+      
+      // Always refresh both data sources after a successful operation
+      console.log("SaveCompanyButton: Refreshing watchlist data");
+      
+      // Add a small delay to ensure the database has time to update
+      setTimeout(async () => {
+        try {
+          console.log("SaveCompanyButton: Starting data refresh after delay");
+          
+          // First refresh the context data
+          await refreshSavedCompanies();
+          console.log("SaveCompanyButton: Context data refreshed");
+          
+          // Then refresh the watchlist data
+          await fetchWatchlistCompanies();
+          console.log("SaveCompanyButton: Watchlist data refreshed");
+          
+          // Force a refresh of the current page to ensure all components update
+          router.refresh();
+          console.log("SaveCompanyButton: Page refreshed");
+          
+          console.log("SaveCompanyButton: All data refreshed successfully");
+        } catch (refreshError) {
+          console.error("Error refreshing watchlist data:", refreshError);
+        }
+      }, 1000); // Increased delay to 1 second
+      
     } catch (error) {
       console.error('Error toggling save:', error);
       toast({
@@ -100,11 +181,11 @@ export default function SaveCompanyButton({
       variant={variant}
       size={size}
       onClick={handleToggleSave}
-      disabled={isLoading}
+      disabled={isLoading || authLoading}
       className={cn(
         "hover:bg-transparent transition-colors duration-200",
         isSaved ? "text-emerald-400" : "text-gray-500 hover:text-emerald-400",
-        isLoading && "opacity-50 cursor-not-allowed",
+        (isLoading || authLoading) && "opacity-50 cursor-not-allowed",
         className
       )}
     >
