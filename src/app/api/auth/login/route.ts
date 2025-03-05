@@ -1,54 +1,46 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
+import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
-  try {
-    const cookieStore = cookies();
-    const { email, password } = await request.json();
-    
-    // Create supabase client with await
-    const supabase = createRouteHandlerClient({ 
-      cookies: () => cookieStore 
-    });
+  const formData = await request.json()
+  const { email, password } = formData
+  const supabase = createRouteHandlerClient({ cookies })
 
-    // Attempt to sign in
-    const { error: authError } = await supabase.auth.signInWithPassword({
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-    });
+    })
 
-    if (authError) {
+    if (error) {
       return NextResponse.json(
-        { error: authError.message },
-        { status: 401 }
-      );
+        { error: error.message },
+        { status: 400 }
+      )
     }
 
-    // Get authenticated user data securely
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'Authentication failed' },
-        { status: 401 }
-      );
-    }
-
-    // Check for user profile
+    // Check if user has a profile
     const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('email', email)
-      .single();
+      .from("profiles")
+      .select("*")
+      .eq("id", data.user.id)
+      .single()
 
-    if (profileError && profileError.code !== 'PGRST116') {
-      return NextResponse.json(
-        { error: 'Error checking profile status' },
-        { status: 500 }
-      );
+    // Determine if user needs onboarding
+    let redirectUrl = '/auth/home'
+
+    // If profile doesn't exist (PGRST116 is the "not found" error code)
+    if (profileError && profileError.code === 'PGRST116') {
+      // User needs onboarding
+      redirectUrl = '/onboarding'
+      console.log("User needs onboarding, redirecting")
+    } else if (profileError) {
+      // Some other error occurred
+      console.error("Profile fetch error:", profileError)
     }
 
+<<<<<<< HEAD
     const response = NextResponse.json({
       user,
       hasProfile: !!profile,
@@ -62,11 +54,18 @@ export async function POST(request: Request) {
 
     return response;
 
+=======
+    // Return response with appropriate redirect URL
+    return NextResponse.json({ 
+      success: true,
+      redirectUrl: redirectUrl
+    })
+>>>>>>> a47a78bfd7a56499cdb0752c8c49f1c28cf56a50
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "An unexpected error occurred" },
       { status: 500 }
-    );
+    )
   }
-} 
+}

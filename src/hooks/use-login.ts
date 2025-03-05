@@ -32,6 +32,7 @@ export function useLogin() {
         throw new Error(typeof data.error === 'string' ? data.error : 'Login failed')
       }
 
+<<<<<<< HEAD
       onSuccess?.()
 
       if (!data.hasProfile) {
@@ -39,7 +40,16 @@ export function useLogin() {
       } else {
         const returnUrl = searchParams.get('returnUrl') || '/auth/home'
         router.push(returnUrl)
+=======
+      if (onSuccess) {
+        onSuccess()
+>>>>>>> a47a78bfd7a56499cdb0752c8c49f1c28cf56a50
       }
+
+      const redirectUrl = data.redirectUrl || searchParams.get('returnUrl') || '/auth/home'
+      
+      console.log("Redirecting to:", redirectUrl)
+      router.push(redirectUrl)
       router.refresh()
       
       return data

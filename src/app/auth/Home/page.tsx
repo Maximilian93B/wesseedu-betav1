@@ -10,19 +10,97 @@ import { AnimatePresence } from "framer-motion"
 import { DashboardView } from "@/components/wsu/dashboard/DashboardView"
 import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
 import CompaniesView from "@/components/company/CompaniesView"
+<<<<<<< HEAD
 import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
 import { WatchlistView } from "@/components/wsu/dashboard/WatchlistView"
 import { AuthProvider, useAuth } from "@/context/AuthContext"
+=======
+import ClientCompanyDetailsView from "@/components/company/ClientCompanyDetailsView"
+import { SavedCompaniesView } from "@/components/wsu/dashboard/SavedCompaniesView"
+>>>>>>> a47a78bfd7a56499cdb0752c8c49f1c28cf56a50
 
 function HomePageContent() {
   const { user, profile, loading, signOut } = useAuth()
   const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'companies' | 'company-details' | 'saved'>('home')
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
 
+<<<<<<< HEAD
   const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved') => {
     setCurrentView(view)
     setSelectedCompanyId(null)
   }
+=======
+  useEffect(() => {
+    const checkUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      setUser(user)
+      setLoading(false)
+    }
+    checkUser()
+  }, [supabase.auth])
+
+  useEffect(() => {
+    if (user) {
+      fetchUserStats()
+    }
+  }, [user])
+
+  const fetchUserStats = async () => {
+    try {
+      const { data: profileData, error } = await supabaseClient
+        .from("profiles")
+        .select(`
+          total_investments,
+          impact_score
+        `)
+        .eq("id", user?.id)
+        .single()
+
+      if (error) throw error
+
+      setStats([
+        {
+          title: "Your Investment",
+          value: `$${profileData.total_investments.toLocaleString()}`,
+          icon: <TrendingUp className="h-10 w-10 text-emerald-400" />,
+        },
+        {
+          title: "Impact Score",
+          value: `${profileData.impact_score}/10`,
+          icon: <BarChart className="h-10 w-10 text-emerald-400" />,
+        },
+      ])
+    } catch (error) {
+      console.error("Error fetching stats:", error)
+    }
+  }
+
+  const signOut = async () => {
+    await supabase.auth.signOut()
+    router.push("/")
+    router.refresh() // Force a router refresh to update the session state
+  }
+
+  // Add event listener for navigation
+  useEffect(() => {
+    const handleNavigation = (event: CustomEvent) => {
+      if (event.detail.view) {
+        setCurrentView(event.detail.view)
+        if (event.detail.view !== 'company-details') {
+          setSelectedCompanyId(null)
+        }
+      }
+    }
+    
+    window.addEventListener('navigate', handleNavigation as EventListener)
+    
+    return () => {
+      window.removeEventListener('navigate', handleNavigation as EventListener)
+    }
+  }, [])
+>>>>>>> a47a78bfd7a56499cdb0752c8c49f1c28cf56a50
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen bg-black text-gray-400">Loading...</div>
@@ -52,7 +130,10 @@ function HomePageContent() {
     <div className="flex flex-col min-h-screen bg-black relative overflow-hidden">
       <HomePageNav
         currentView={currentView}
-        onNavigate={handleNavigation}
+        onNavigate={(view) => {
+          setCurrentView(view)
+          setSelectedCompanyId(null)
+        }}
         onSignOut={signOut}
       />
       
@@ -134,7 +215,7 @@ function HomePageContent() {
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
                 <Button 
                   onClick={() => {
-                    handleNavigation('companies')
+                    setCurrentView('companies')
                   }}
                   className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white 
                     transition-colors shadow-md hover:shadow-emerald-500/25"
@@ -144,7 +225,7 @@ function HomePageContent() {
                 </Button>
                 <Button 
                   onClick={() => {
-                    handleNavigation('dashboard')
+                    setCurrentView('dashboard')
                   }}
                   variant="outline" 
                   className="flex-1 border-2 border-white/5 hover:border-white/10 text-emerald-400 
@@ -190,12 +271,8 @@ function HomePageContent() {
 
           {/* Company details overlay */}
           {currentView === 'company-details' && selectedCompanyId && (
-            <CompanyDetailsView
+            <ClientCompanyDetailsView
               companyId={selectedCompanyId}
-              onClose={() => {
-                setCurrentView('companies')
-                setSelectedCompanyId(null)
-              }}
             />
           )}
 
