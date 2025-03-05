@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     });
 
     // redirect URL to /home
-    response.headers.set('Location', '/Home');
+    response.headers.set('Location', '/home');
     response.headers.set('status', '301');
 
 

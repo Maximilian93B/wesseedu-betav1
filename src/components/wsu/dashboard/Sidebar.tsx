@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { BarChart, Users, Building2, LogOut, Zap, User } from "lucide-react"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/use-auth"
 
 const routes = [
   {
@@ -33,12 +33,11 @@ const routes = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const supabase = useSupabaseClient()
   const router = useRouter()
+  const { signOut } = useAuth()
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/auth/login")
+    await signOut()
   }
 
   return (

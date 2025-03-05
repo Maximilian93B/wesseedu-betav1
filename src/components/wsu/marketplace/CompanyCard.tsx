@@ -14,16 +14,16 @@ interface CompanyCardProps {
     description: string
     mission_statement: string
     image_url?: string
-    financials: {
+    financials?: {
       annual_revenue: number
       funding_raised: number
       burn_rate: number
     }
-    sustainability_data: {
+    sustainability_data?: {
       [key: string]: number
     }
     score: number
-    community_members: number
+    community_members?: number
   }
   onCompanySelect: (id: string) => void
 }
@@ -69,18 +69,18 @@ export function CompanyCard({ company, onCompanySelect }: CompanyCardProps) {
         </div>
 
         <CardDescription className="text-sm text-gray-400 line-clamp-2">
-          {company.description}
+          {company.description || company.mission_statement || "No description available"}
         </CardDescription>
 
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 text-emerald-400">
               <Users className="w-4 h-4" />
-              {company.community_members}
+              {company.community_members || 0}
             </span>
             <span className="flex items-center gap-1.5 text-emerald-400">
               <BarChart className="w-4 h-4" />
-              {company.score}/10
+              {company.score || 0}/10
             </span>
           </div>
           <Button 

@@ -5,23 +5,25 @@ import { Zap } from "lucide-react"
 import { CompanyCard } from "@/components/wsu/marketplace/CompanyCard"
 import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
 import { motion, AnimatePresence } from "framer-motion"
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
+import { useToast } from "@/hooks/use-toast"
 
 interface Company {
   id: string
   name: string
   description: string
   mission_statement: string
-  financials: {
+  financials?: {
     annual_revenue: number
     funding_raised: number
     burn_rate: number
   }
-  pitch_deck_url: string
-  sustainability_data: {
+  pitch_deck_url?: string
+  sustainability_data?: {
     [key: string]: number
   }
   score: number
-  community_members: number
+  community_members?: number
 }
 
 interface CompaniesViewProps {
@@ -32,26 +34,70 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
+  const [fetchAttempted, setFetchAttempted] = useState(false)
+  const { toast } = useToast()
 
-  const fetchCompanies = useCallback(async () => {
-    setLoading(true)
+  const fetchCompanies = async () => {
+    if (fetchAttempted) return;
+    
+    setLoading(true);
+    setFetchAttempted(true);
+    
     try {
-      const response = await fetch('/api/companies')
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-      const data = await response.json()
-      if (data.error) throw new Error(data.error)
-      setCompanies(data.companies || [])
+      console.log("CompaniesView: Fetching companies data")
+      const response = await fetchWithAuth('/api/companies')
+      
+      if (response.error) {
+        console.error("Error in companies response:", response.error)
+        throw new Error(response.error.toString())
+      }
+      
+      if (!response.data) {
+        console.warn("No companies data returned from API")
+        setCompanies([])
+        return
+      }
+      
+      console.log(`CompaniesView: Successfully fetched ${response.data.length} companies`)
+      
+      const formattedCompanies = response.data.map((company: any) => ({
+        id: company.id,
+        name: company.name,
+        description: company.description || "",
+        mission_statement: company.mission_statement || "",
+        score: company.score || 0,
+        image_url: company.image_url || null,
+        financials: company.financials || {
+          annual_revenue: 0,
+          funding_raised: 0,
+          burn_rate: 0
+        },
+        sustainability_data: company.sustainability_data || {},
+        community_members: company.community_members || 0
+      }))
+      
+      setCompanies(formattedCompanies)
     } catch (error) {
       console.error("Error fetching companies:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load companies. Please try again.",
+        variant: "destructive"
+      })
       setCompanies([])
     } finally {
       setLoading(false)
     }
-  }, [])
+  }
 
   useEffect(() => {
     fetchCompanies()
-  }, [fetchCompanies])
+  }, [])
+
+  const handleRetryFetch = () => {
+    setFetchAttempted(false)
+    fetchCompanies()
+  }
 
   return (
     <motion.div
@@ -140,6 +186,16 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                     <div className="w-12 h-12 border-4 border-emerald-400 rounded-full 
                       animate-spin absolute top-0 left-0 border-t-transparent"></div>
                   </div>
+                </div>
+              ) : companies.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-96">
+                  <p className="text-zinc-400 text-xl mb-4">No companies found</p>
+                  <button 
+                    onClick={handleRetryFetch}
+                    className="px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors"
+                  >
+                    Retry
+                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -1,42 +1,51 @@
-import { createClient } from '@supabase/supabase-js'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
+  const supabase = createRouteHandlerClient({ cookies })
+
   try {
+    console.log('Fetching companies from database')
+    
+    // Get search parameter if it exists
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
-
+    
+    // Fetch all companies with more fields
     let query = supabase
       .from('companies')
-      .select('*')
-      .order('score', { ascending: false })
-
+      .select('id, name, description, mission_statement, score, image_url, community_members, sustainability_data')
+    
     // Add search functionality if search term is provided
     if (search) {
+      console.log(`Searching for companies matching: ${search}`)
       query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%,mission_statement.ilike.%${search}%`)
     }
-
-    const { data: companies, error } = await query
+    
+    // Order by score descending
+    query = query.order('score', { ascending: false })
+    
+    const { data, error } = await query
 
     if (error) {
-      console.error('Supabase error:', error)
-      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+      console.error('Error fetching companies:', error)
+      throw error
     }
 
-    if (!companies) {
-      return NextResponse.json({ companies: [] })
+    if (!data || data.length === 0) {
+      console.log('No companies found in database')
+      return NextResponse.json([])
     }
 
-    return NextResponse.json({ companies })
+    console.log(`Successfully fetched ${data.length} companies`)
+    
+    // Return the data directly, not wrapped in a 'companies' object
+    return NextResponse.json(data)
   } catch (error) {
-    console.error('Server error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('Error fetching companies:', error)
+    return NextResponse.json({ error: 'Failed to fetch companies' }, { status: 500 })
   }
 }

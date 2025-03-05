@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { ExternalLink, Bookmark } from "lucide-react"
 import { motion } from "framer-motion"
+import { useAuth } from "@/hooks/use-auth"
 
 export const dynamic = "force-dynamic"
 
@@ -26,16 +27,25 @@ export function SavedCompaniesView() {
   const [savedCompanies, setSavedCompanies] = useState<SavedCompany[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = useSupabaseClient()
+  const { user } = useAuth()
 
   useEffect(() => {
-    fetchSavedCompanies()
-  }, [])
+    if (user) {
+      fetchSavedCompanies()
+    }
+  }, [user])
 
   const fetchSavedCompanies = async () => {
+    if (!user?.id) return
+    
     try {
-      const { data, error } = await supabase.from("company_saves").select("*, companies(*)")
+      const { data, error } = await supabase
+        .from("company_saves")
+        .select("*, companies(*)")
+        .eq("user_id", user.id)
+        
       if (error) throw error
-      setSavedCompanies(data)
+      setSavedCompanies(data || [])
     } catch (error) {
       console.error("Error fetching saved companies:", error)
     } finally {
@@ -44,8 +54,15 @@ export function SavedCompaniesView() {
   }
 
   const handleUnsave = async (companyId: string) => {
+    if (!user?.id) return
+    
     try {
-      const { error } = await supabase.from("company_saves").delete().eq("company_id", companyId)
+      const { error } = await supabase
+        .from("company_saves")
+        .delete()
+        .eq("company_id", companyId)
+        .eq("user_id", user.id)
+        
       if (error) throw error
       fetchSavedCompanies()
     } catch (error) {

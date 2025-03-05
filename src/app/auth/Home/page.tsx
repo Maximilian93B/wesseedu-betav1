@@ -1,84 +1,23 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {  TrendingUp,  BarChart, Search, Bookmark } from "lucide-react"
+import { TrendingUp, BarChart, Search, Bookmark } from "lucide-react"
 import { NewsSection } from "@/components/wsu/dashboard/NewsSection"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { SidebarAds } from "@/components/advertising/SidebarAds"
 import { AnimatePresence } from "framer-motion"
 import { DashboardView } from "@/components/wsu/dashboard/DashboardView"
 import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
 import CompaniesView from "@/components/company/CompaniesView"
 import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
-import { SavedCompaniesView } from "@/components/wsu/dashboard/SavedCompaniesView"
+import { WatchlistView } from "@/components/wsu/dashboard/WatchlistView"
+import { AuthProvider, useAuth } from "@/context/AuthContext"
 
-
-export default function HomePage() {
-  const router = useRouter()
-  const supabase = createClientComponentClient()
-  const supabaseClient = useSupabaseClient()
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState<any[]>([])
+function HomePageContent() {
+  const { user, profile, loading, signOut } = useAuth()
   const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'companies' | 'company-details' | 'saved'>('home')
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setUser(user)
-      setLoading(false)
-    }
-    checkUser()
-  }, [supabase.auth])
-
-  useEffect(() => {
-    if (user) {
-      fetchUserStats()
-    }
-  }, [user])
-
-  const fetchUserStats = async () => {
-    try {
-      const { data: profileData, error } = await supabaseClient
-        .from("profiles")
-        .select(`
-          total_investments,
-          impact_score
-        `)
-        .eq("id", user?.id)
-        .single()
-
-      if (error) throw error
-
-      setStats([
-        {
-          title: "Your Investment",
-          value: `$${profileData.total_investments.toLocaleString()}`,
-          icon: <TrendingUp className="h-10 w-10 text-emerald-400" />,
-        },
-        {
-          title: "Impact Score",
-          value: `${profileData.impact_score}/10`,
-          icon: <BarChart className="h-10 w-10 text-emerald-400" />,
-        },
-      ])
-    } catch (error) {
-      console.error("Error fetching stats:", error)
-    }
-  }
-
-  const signOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/")
-    router.refresh() // Force a router refresh to update the session state
-  }
 
   const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved') => {
     setCurrentView(view)
@@ -90,9 +29,24 @@ export default function HomePage() {
   }
 
   if (!user) {
-    router.push("/auth/signin")
-    return null
+    return <div className="flex items-center justify-center min-h-screen bg-black text-gray-400">
+      Redirecting to login...
+    </div>
   }
+
+  // Prepare stats from profile data
+  const stats = profile ? [
+    {
+      title: "Your Investment",
+      value: `$${profile.total_investments?.toLocaleString() || '0'}`,
+      icon: <TrendingUp className="h-10 w-10 text-emerald-400" />,
+    },
+    {
+      title: "Impact Score",
+      value: `${profile.impact_score || '0'}/10`,
+      icon: <BarChart className="h-10 w-10 text-emerald-400" />,
+    },
+  ] : [];
 
   return (
     <div className="flex flex-col min-h-screen bg-black relative overflow-hidden">
@@ -121,7 +75,7 @@ export default function HomePage() {
         <SidebarAds />
         
         {/* Main Content - centered between sidebars */}
-        <main className="flex-1 ml-80 mr-80 relative"> {/* Added relative positioning */}
+        <main className="flex-1 ml-80 mr-80 relative">
           {/* Home content */}
           <div className={currentView === 'home' ? 'block' : 'hidden'}>
             <div className="max-w-5xl mx-auto px-4 py-8">
@@ -150,7 +104,7 @@ export default function HomePage() {
               </section>
 
               {/* Stats Grid */}
-              {user && stats.length > 0 && (
+              {stats.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                   {stats.map((stat, index) => (
                     <Card 
@@ -245,9 +199,9 @@ export default function HomePage() {
             />
           )}
 
-          {/* Saved companies overlay */}
+          {/* Watchlist overlay (previously SavedCompaniesView) */}
           {currentView === 'saved' && (
-            <SavedCompaniesView />
+            <WatchlistView />
           )}
         </main>
 
@@ -255,5 +209,13 @@ export default function HomePage() {
         <NewsSection />
       </div>
     </div>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <AuthProvider>
+      <HomePageContent />
+    </AuthProvider>
   )
 }
