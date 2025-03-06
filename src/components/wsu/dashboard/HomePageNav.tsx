@@ -1,5 +1,3 @@
-
-
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Leaf } from "lucide-react"
 import Link from "next/link"
@@ -14,12 +12,12 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
   return (
     <header className="px-4 lg:px-6 h-14 flex items-center border-b border-emerald-400/5 
       bg-black/50 backdrop-blur-sm relative z-10">
-      <div className="flex items-center">
+      <div className="flex-shrink-0">
         {currentView !== 'home' ? (
           <Button
             variant="ghost"
             onClick={() => onNavigate('home')}
-            className="mr-4 hover:bg-white/5 text-zinc-400 hover:text-emerald-400"
+            className="hover:bg-white/5 text-zinc-400 hover:text-emerald-400"
           >
               <ArrowLeft className="h-4 w-4 mr-2" />
             Back
@@ -34,7 +32,7 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
         )}
       </div>
 
-      <nav className="ml-auto flex gap-4 sm:gap-6">
+      <nav className="flex-grow flex justify-center gap-4 sm:gap-6">
         <Button
           variant="ghost"
           onClick={ () => onNavigate('home')}
@@ -73,6 +71,9 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
         >
           Saved
         </Button>
+      </nav>
+
+      <div className="flex-shrink-0">
         <Button
           variant="ghost"
           onClick={onSignOut}
@@ -80,7 +81,7 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
         >
           Sign Out
         </Button>
-      </nav>
+      </div>
     </header>
   )
 }
