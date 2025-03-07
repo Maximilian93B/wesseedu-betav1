@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
 import { useRef, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { ScrollReveal } from "@/components/ui/scroll-reveal"
 
 export function Partners() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -66,7 +67,11 @@ export function Partners() {
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* Header section */}
-        <div className="mb-24 md:mb-32">
+        <ScrollReveal
+          className="mb-24 md:mb-32"
+          animation="fade-up"
+          duration={0.7}
+        >
           <div className="flex flex-col items-start max-w-2xl">
             <div className="inline-flex items-center space-x-2 bg-white/5 rounded-full px-4 py-1.5 mb-10 text-xs text-teal-400 font-medium">
               <span>Our Global Partners</span>
@@ -85,7 +90,7 @@ export function Partners() {
               our vision.
             </p>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Partners grid section */}
         <div className="relative">
@@ -99,12 +104,14 @@ export function Partners() {
             offsetY3={offsetY3}
           />
 
-          {/* Mobile layout - Extracted to a separate component */}
-          <MobilePartnersScroll 
-            partners={partners} 
-            activeIndex={activeIndex}
-            setActiveIndex={setActiveIndex}
-          />
+          {/* Mobile layout - Scrollable cards */}
+          <div className="md:hidden">
+            <MobilePartnersScroll 
+              partners={partners} 
+              activeIndex={activeIndex}
+              setActiveIndex={setActiveIndex}
+            />
+          </div>
         </div>
 
         {/* CTA section */}
@@ -127,7 +134,6 @@ export function Partners() {
   )
 }
 
-// New component for desktop layout
 interface PartnersGridProps {
   partners: PartnerType[];
   activeIndex: number | null;
@@ -137,7 +143,6 @@ interface PartnersGridProps {
   offsetY3: MotionValue<number>;
 }
 
-// Define the partner type for better type safety
 interface PartnerType {
   name: string;
   logo: string;
@@ -154,94 +159,61 @@ function DesktopPartnersGrid({
   offsetY3
 }: PartnersGridProps) {
   return (
-    <div className="hidden md:grid grid-cols-12 gap-x-8 gap-y-24">
-      {/* First row */}
-      <motion.div
-        className="col-span-4 col-start-1"
-        style={{ y: offsetY1 }}
-        whileHover={{ y: -8 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <PartnerCard partner={partners[0]} index={0} isActive={activeIndex === 0} onHover={setActiveIndex} />
-      </motion.div>
-
-      <motion.div
-        className="col-span-4 col-start-5 mt-12"
-        style={{ y: offsetY2 }}
-        whileHover={{ y: -8 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <PartnerCard partner={partners[1]} index={1} isActive={activeIndex === 1} onHover={setActiveIndex} />
-      </motion.div>
-
-      <motion.div
-        className="col-span-4 col-start-9"
-        style={{ y: offsetY3 }}
-        whileHover={{ y: -8 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <PartnerCard partner={partners[2]} index={2} isActive={activeIndex === 2} onHover={setActiveIndex} />
-      </motion.div>
-
-      {/* Second row */}
-      <motion.div
-        className="col-span-4 col-start-1"
-        style={{ y: offsetY3 }}
-        whileHover={{ y: -8 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <PartnerCard partner={partners[3]} index={3} isActive={activeIndex === 3} onHover={setActiveIndex} />
-      </motion.div>
-
-      <motion.div
-        className="col-span-4 col-start-5 mt-12"
-        style={{ y: offsetY1 }}
-        whileHover={{ y: -8 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <PartnerCard partner={partners[4]} index={4} isActive={activeIndex === 4} onHover={setActiveIndex} />
-      </motion.div>
-
-      <motion.div
-        className="col-span-4 col-start-9"
-        style={{ y: offsetY2 }}
-        whileHover={{ y: -8 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-      >
-        <PartnerCard partner={partners[5]} index={5} isActive={activeIndex === 5} onHover={setActiveIndex} />
-      </motion.div>
+    <div className="hidden md:grid grid-cols-3 gap-6 lg:gap-8">
+      {partners.map((partner, index) => {
+        // Determine which parallax effect to use based on index
+        const yOffset = index % 3 === 0 ? offsetY1 : index % 3 === 1 ? offsetY2 : offsetY3;
+        
+        return (
+          <ScrollReveal
+            key={partner.name}
+            className="h-full"
+            animation="fade-up"
+            delay={index * 0.1}
+            duration={0.7}
+          >
+            <motion.div style={{ y: yOffset }}>
+              <PartnerCard 
+                partner={partner} 
+                index={index} 
+                isActive={activeIndex === index}
+                onHover={setActiveIndex}
+              />
+            </motion.div>
+          </ScrollReveal>
+        );
+      })}
     </div>
-  )
+  );
 }
 
-// New component for mobile layout
 function MobilePartnersScroll({ 
   partners, 
   activeIndex, 
   setActiveIndex 
 }: Omit<PartnersGridProps, 'offsetY1' | 'offsetY2' | 'offsetY3'>) {
   return (
-    <div className="md:hidden -mx-6 px-6 pb-12">
-      <div className="flex overflow-x-auto space-x-6 snap-x snap-mandatory hide-scrollbar py-4">
-        {partners.map((partner, index) => (
-          <div 
-            key={partner.name} 
-            className="snap-center flex-shrink-0 w-[80%] first:ml-0 last:mr-6"
-          >
-            <PartnerCard
-              partner={partner}
-              index={index}
-              isActive={activeIndex === index}
-              onHover={setActiveIndex}
-            />
-          </div>
-        ))}
-      </div>
+    <div className="flex overflow-x-auto pb-8 -mx-6 px-6 space-x-5 snap-x snap-mandatory scrollbar-hide">
+      {partners.map((partner, index) => (
+        <ScrollReveal
+          key={partner.name}
+          className="flex-shrink-0 w-[85%] snap-center"
+          animation="fade-up"
+          delay={index * 0.1}
+          duration={0.7}
+        >
+          <PartnerCard 
+            partner={partner} 
+            index={index} 
+            isActive={activeIndex === index}
+            onHover={setActiveIndex}
+          />
+        </ScrollReveal>
+      ))}
     </div>
-  )
+  );
 }
 
-// Improved Partner Card Component
 interface PartnerCardProps {
   partner: PartnerType;
   index: number;

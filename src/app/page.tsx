@@ -6,6 +6,8 @@ import { Partners } from "@/components/wsu/Marketing/Partners"
 import { VettingProcess } from "@/components/wsu/Marketing/VettingProcess"
 import { ImpactSection } from "@/components/wsu/Marketing/ImpactSection"
 import { ProblemSolutionFlow } from "@/components/wsu/Marketing/ProblemSolutionFlow"
+import { ScrollSection } from "@/components/ui/scroll-section"
+import { ScrollReveal } from "@/components/ui/scroll-reveal"
 import dynamic from 'next/dynamic'
 import { memo } from 'react'
 
@@ -33,25 +35,55 @@ export default function LandingPage() {
       <BeamsBackground intensity="medium">
         <main className="relative overflow-x-hidden">
           <div className="relative z-10">
+            {/* Hero Section - No scroll animation to ensure immediate visibility */}
             <section className="min-h-screen flex items-center mt-10">
               <MemoizedHeroSection />
             </section>
-            <section className="min-h-screen py-16">
+            
+            {/* Partners Section */}
+            <ScrollReveal 
+              className="min-h-screen py-16 w-full" 
+              animation="fade-in"
+              threshold={0.1}
+            >
               <MemoizedPartners />
-            </section>
-            <section className="min-h-screen py-16">
+            </ScrollReveal>
+            
+            {/* Problem Solution Flow */}
+            <ScrollReveal 
+              className="min-h-screen py-16 w-full" 
+              animation="fade-in"
+              threshold={0.1}
+            >
               <MemoizedProblemSolutionFlow />
-            </section>
+            </ScrollReveal>
         
-            <section className="min-h-screen py-16">
+            {/* Key Features */}
+            <ScrollReveal 
+              className="min-h-screen py-16 w-full" 
+              animation="fade-in"
+              threshold={0.1}
+            >
               <MemoizedKeyFeatures />
-            </section>
-            <section className="min-h-screen py-16">
+            </ScrollReveal>
+            
+            {/* Vetting Process */}
+            <ScrollReveal 
+              className="min-h-screen py-16 w-full" 
+              animation="fade-in"
+              threshold={0.1}
+            >
               <MemoizedVettingProcess />
-            </section>
-            <section className="min-h-screen py-16">
+            </ScrollReveal>
+            
+            {/* Impact Section */}
+            <ScrollReveal 
+              className="min-h-screen py-16 w-full" 
+              animation="fade-in"
+              threshold={0.1}
+            >
               <MemoizedImpactSection />
-            </section>
+            </ScrollReveal>
           </div>
         </main>
       </BeamsBackground>
