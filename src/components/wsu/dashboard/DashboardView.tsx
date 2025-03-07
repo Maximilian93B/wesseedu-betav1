@@ -13,6 +13,7 @@ import UserInvestments from "./UserInvestments"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
+import { CACHE_KEYS, CACHE_EXPIRY, getCachedData, setCachedData } from "@/lib/utils/cacheUtils"
 
 export const dynamic = "force-dynamic"
 
@@ -29,6 +30,20 @@ interface InvestmentData {
   amount: number
 }
 
+interface ProfileData {
+  profile: any;
+  investments: any[];
+  savedCompanies: Array<{
+    id: string;
+    company_id: string;
+    companies: any;
+  }>;
+  stats: {
+    companiesCount: number;
+    usersCount: number;
+  };
+}
+
 interface DashboardViewProps {
   user: any  // You can make this more specific based on your user type
 }
@@ -42,12 +57,12 @@ export function DashboardView({ user }: DashboardViewProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [savedCompanies, setSavedCompanies] = useState<any[]>([])
-  const [profileData, setProfileData] = useState<any>(null)
+  const [profileData, setProfileData] = useState<ProfileData | null>(null)
+  const [watchlistCompanies, setWatchlistCompanies] = useState<any[]>([])
+  const [watchlistLoading, setWatchlistLoading] = useState(false)
   
   // Use the shared watchlist hook to avoid duplicate data fetching
   const { 
-    watchlistCompanies, 
-    loading: watchlistLoading,
     fetchWatchlistCompanies
   } = useWatchlist()
 
@@ -86,7 +101,6 @@ export function DashboardView({ user }: DashboardViewProps) {
   }, [authProfile]);
 
   useEffect(() => {
-    // Don't try to load data if auth is still loading
     if (authLoading) {
       console.log("DashboardView: Auth is still loading, waiting...");
       return;
@@ -133,14 +147,44 @@ export function DashboardView({ user }: DashboardViewProps) {
   }, [user, authLoading]);
 
   const fetchProfileData = async () => {
+    console.log("DashboardView: Checking for cached profile data");
+    
+    // Check if we have cached data using the utility function with proper typing
+    const cachedData = getCachedData<ProfileData>(CACHE_KEYS.PROFILE_DATA, CACHE_EXPIRY.PROFILE_DATA);
+    
+    if (cachedData) {
+      console.log("DashboardView: Using cached profile data");
+      setProfileData(cachedData);
+      
+      // Process saved companies data from cache
+      if (cachedData.savedCompanies && cachedData.savedCompanies.length > 0) {
+        console.log(`DashboardView: Using ${cachedData.savedCompanies.length} saved companies from cache`);
+        
+        // Transform the data to match the WatchlistCompany interface
+        const transformedCompanies = cachedData.savedCompanies.map((item: any) => ({
+          id: item.id,
+          company_id: item.company_id,
+          companies: item.companies
+        }));
+        
+        setSavedCompanies(transformedCompanies);
+        
+        // Also refresh the watchlist data to ensure consistency
+        fetchWatchlistCompanies();
+      } else {
+        console.log("DashboardView: No saved companies in cache");
+        setSavedCompanies([]);
+      }
+      
+      return;
+    }
+    
+    // If no valid cache exists, fetch fresh data
     console.log("DashboardView: Fetching profile data from API");
     try {
       const { data, error } = await fetchWithAuth('/api/auth/profile', {
-        cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
         }
       });
       
@@ -154,6 +198,10 @@ export function DashboardView({ user }: DashboardViewProps) {
       }
       
       console.log("DashboardView: Profile data fetched successfully", data);
+      
+      // Cache the fresh data using the utility function
+      setCachedData(CACHE_KEYS.PROFILE_DATA, data);
+      
       setProfileData(data);
       
       // Process saved companies data
@@ -260,7 +308,7 @@ export function DashboardView({ user }: DashboardViewProps) {
       ]);
     } catch (error) {
       console.error("Error in fetchProfileData:", error);
-      // Don't rethrow - we want to continue even if this fails
+      throw error;
     }
   };
 

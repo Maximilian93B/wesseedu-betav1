@@ -10,6 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useWatchlist } from "@/components/wsu/dashboard/WatchlistView";
 import { useRouter } from "next/navigation";
+import { invalidateProfileCache } from "@/lib/utils/cacheUtils";
+
+// Define the cache key to match the one in DashboardView
+const PROFILE_CACHE_KEY = 'dashboard_profile_data';
 
 interface SaveCompanyButtonProps {
   companyId: string;
@@ -44,6 +48,12 @@ export default function SaveCompanyButton({
     console.log(`SaveCompanyButton: Company ${companyId} is ${saved ? 'saved' : 'not saved'} (savedCompanyIds: ${JSON.stringify(savedCompanyIds)})`);
   }, [savedCompanyIds, companyId]);
 
+  // Function to invalidate the profile cache
+  const invalidateProfileCache = () => {
+    console.log("SaveCompanyButton: Invalidating profile cache");
+    localStorage.removeItem(PROFILE_CACHE_KEY);
+  };
+
   const handleToggleSave = async () => {
     // Don't allow saving if auth is still loading
     if (authLoading) {
@@ -71,6 +81,9 @@ export default function SaveCompanyButton({
     setIsLoading(true);
     
     try {
+      // Invalidate the profile cache before making any changes
+      invalidateProfileCache();
+      
       if (isSaved) {
         console.log(`SaveCompanyButton: Removing company ${companyId} from watchlist`);
         const response = await fetchWithAuth('/api/protected/watchlist/remove', {

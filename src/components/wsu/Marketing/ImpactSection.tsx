@@ -2,10 +2,7 @@ import Link from "next/link"
 
 export function ImpactSection() {
   return (
-    <section className="relative py-24 md:py-32 bg-[#020714]">
-      {/* Background gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#020714] via-[#0A1A3B]/95 to-[#020714] pointer-events-none" />
-      
+    <section className="relative py-24 md:py-32">
       <div className="container relative px-4 md:px-6">
         <div className="grid gap-10 px-10 md:gap-16 lg:grid-cols-2">
           <div className="space-y-4">

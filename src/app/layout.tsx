@@ -2,9 +2,10 @@ import type { Metadata } from "next"
 import SupabaseProviders from "./providers"
 import { Navigation } from "@/components/wsu/Nav"
 import "./globals.css"
-import type React from "react" // Import React
+import React from "react"
 import { headers } from 'next/headers'
 import { Footer } from "@/components/wsu/Marketing/Footer"
+import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
   title: "WeSeedU - Sustainable Investment Platform",
@@ -56,22 +57,23 @@ export default function RootLayout({
   
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         <SupabaseProviders>
-          <div className="relative flex min-h-screen flex-col">
-            {/* Only show Navigation if NOT on any auth page */}
-            {!isAuthPage && (
-              <div className="relative z-10">
-                <Navigation />
-              </div>
-            )}
-            <main className="flex-1 relative z-0">{children}</main>
-            {/* Only show Footer if NOT on any auth page */}
-            {!isAuthPage && <Footer />}
-          </div>
+       
+            <div className="relative flex min-h-screen flex-col">
+              {/* Only show Navigation if NOT on any auth page */}
+              {!isAuthPage && (
+                <div className="relative z-10">
+                  <Navigation />
+                </div>
+              )}
+              <main className="flex-1 relative z-0">{children}</main>
+              {/* Only show Footer if NOT on any auth page */}
+              {!isAuthPage && <Footer />}
+            </div>
+       
         </SupabaseProviders>
       </body>
     </html>
   )
 }
-

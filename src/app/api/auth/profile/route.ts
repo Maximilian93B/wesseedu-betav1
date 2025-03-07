@@ -115,7 +115,15 @@ export async function GET() {
     }
 
     console.log('Profile API: Successfully compiled all data')
-    return NextResponse.json(responseData)
+    
+    // Create a response with appropriate cache headers
+    // We'll use Cache-Control: private to ensure the response is only cached for this user
+    // max-age=300 sets the cache to expire after 5 minutes (300 seconds)
+    // stale-while-revalidate=60 allows using stale data for 1 minute while fetching fresh data
+    const response = NextResponse.json(responseData);
+    response.headers.set('Cache-Control', 'private, max-age=300, stale-while-revalidate=60');
+    
+    return response;
   } catch (error) {
     console.error('Error fetching profile data:', error)
     return NextResponse.json({ error: 'Failed to fetch profile data' }, { status: 500 })

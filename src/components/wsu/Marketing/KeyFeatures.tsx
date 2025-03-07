@@ -5,12 +5,13 @@ import { motion } from "framer-motion"
 
 export function KeyFeatures() {
   return (
-    <section className="relative py-24 md:py-32">
+    <section className="relative py-24 md:py-32 z-20">
       <div className="container relative mx-auto px-6 max-w-6xl">
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
           className="text-center space-y-8 mb-24"
         >
@@ -36,7 +37,8 @@ export function KeyFeatures() {
           {/* Dashboard Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
             className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center"
           >
@@ -84,7 +86,8 @@ export function KeyFeatures() {
               {/* Background Image - Analytics Dashboard */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 0.6, x: 0 }}
+                whileInView={{ opacity: 0.6, x: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="absolute right-0 top-40 w-[85%] h-[500px]"
               >
@@ -103,7 +106,8 @@ export function KeyFeatures() {
               {/* Middle Image - Portfolio View */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 0.8, x: 0 }}
+                whileInView={{ opacity: 0.8, x: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="absolute left-0 top-20 w-[88%] h-[500px]"
               >
@@ -122,7 +126,8 @@ export function KeyFeatures() {
               {/* Front Image - Main Dashboard */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.6 }}
                 className="absolute left-10 top-0 w-[92%] h-[500px]"
               >
@@ -143,9 +148,10 @@ export function KeyFeatures() {
           {/* Marketplace Section */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center relative lg:-left-24"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center relative"
           >
             <div className="relative h-[600px] p-[1px] group">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-teal-500 rounded-2xl blur-[40px] group-hover:blur-[60px] opacity-40 group-hover:opacity-60 transition-all duration-500"></div>

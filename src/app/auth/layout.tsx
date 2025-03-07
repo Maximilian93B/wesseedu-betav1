@@ -30,7 +30,7 @@ export default async function AuthLayout({
 
   // If user is not logged in and trying to access a protected route
   if (!session && !isPublicPath) {
-    redirect("/auth/signup")
+    redirect("/auth/login")
   }
   
   // Don't redirect from onboarding page if the user is logged in
@@ -40,7 +40,7 @@ export default async function AuthLayout({
       currentPath !== '/onboarding' && 
       !(session.user.user_metadata?.onboarding_completed)) {
     // Check if user has a profile
-    const { data: profile, error } = await supabase
+    const { error } = await supabase
       .from("profiles")
       .select("id")
       .eq("id", session.user.id)
