@@ -1,20 +1,19 @@
 "use client"
 
 import { HeroSection } from "@/components/wsu/Marketing/HeroSection"
+import { PartnersAndVetting } from "@/components/wsu/Marketing/PartnersAndVetting"
+import { ProblemSolutionFlow } from "@/components/wsu/Marketing/ProblemSolutionFlow"
 import { KeyFeatures } from "@/components/wsu/Marketing/KeyFeatures"
 import { ImpactSection } from "@/components/wsu/Marketing/ImpactSection"
-import { ProblemSolutionFlow } from "@/components/wsu/Marketing/ProblemSolutionFlow"
-import { ScrollReveal } from "@/components/ui/scroll-reveal"
-import { PartnersAndVetting } from "@/components/wsu/Marketing/PartnersAndVetting"
-import { memo } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 
-// Memoize individual sections to prevent unnecessary re-renders
-const MemoizedHeroSection = memo(HeroSection)
-const MemoizedProblemSolutionFlow = memo(ProblemSolutionFlow)
-const MemoizedPartnersandVetting = memo(PartnersAndVetting)
-const MemoizedKeyFeatures = memo(KeyFeatures)
-const MemoizedImpactSection = memo(ImpactSection)
+// Simple loading component
+const SectionLoader = () => (
+  <div className="w-full h-[50vh] flex items-center justify-center">
+    <div className="animate-pulse bg-gray-800/20 rounded-lg w-full max-w-4xl h-64"></div>
+  </div>
+)
 
 // Import CosmicBeamsBackground with no SSR
 const CosmicBeamsBackground = dynamic(
@@ -23,59 +22,64 @@ const CosmicBeamsBackground = dynamic(
 )
 
 export default function LandingPage() {
+  // State to track if component is mounted
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Ensure component is mounted before rendering dynamic content
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
   return (
-    <>
+    <div className="relative min-h-screen w-full overflow-x-hidden">
       {/* Static placeholder that will be visible during SSR */}
-      <div className="fixed inset-0 bg-black -z-10" />
+      <div className="fixed inset-0 bg-black -z-20" />
       
-      {/* Client-only CosmicBeamsBackground */}
-      <CosmicBeamsBackground intensity="medium">
-        <main className="relative overflow-x-hidden">
-          <div className="relative z-10">
-            {/* Hero Section - No scroll animation to ensure immediate visibility */}
-            <section className="min-h-screen flex items-center mt-10">
-              <MemoizedHeroSection />
-            </section>
-              
-            {/* Partners and Vetting Section */}
-            <ScrollReveal
-               className="min-h-screen py-16 w-full" 
-              animation="fade-in"
-              threshold={0.1}
-            >
-              <MemoizedPartnersandVetting />
-            </ScrollReveal>
+      {/* Background with conditional rendering based on mount state */}
+      {isMounted && (
+        <div className="absolute inset-0 w-full h-full">
+          <CosmicBeamsBackground intensity="medium">
+            {/* This div is intentionally empty - it just holds the background */}
+          </CosmicBeamsBackground>
+        </div>
+      )}
 
-            {/* Problem Solution Flow */}
-            <ScrollReveal 
-              className="min-h-screen py-16 w-full" 
-              animation="fade-in"
-              threshold={0.1}
-            >
-              <MemoizedProblemSolutionFlow />
-            </ScrollReveal>
-        
-            {/* Key Features */}
-            <ScrollReveal 
-              className="min-h-screen py-16 w-full" 
-              animation="fade-in"
-              threshold={0.1}
-            >
-              <MemoizedKeyFeatures />
-            </ScrollReveal>
+      {/* Content container with higher z-index */}
+      <main className="relative z-10 w-full mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <section className="min-h-screen flex items-center justify-center pt-16">
+          <HeroSection />
+        </section>
+          
+        {/* Partners and Vetting Section */}
+        <Suspense fallback={<SectionLoader />}>
+          <section className="py-20 md:py-32 flex justify-center">
+            <PartnersAndVetting />
+          </section>
+        </Suspense>
 
+        {/* Problem Solution Flow */}
+        <Suspense fallback={<SectionLoader />}>
+          <section className="py-20 md:py-32 flex justify-center">
+            <ProblemSolutionFlow />
+          </section>
+        </Suspense>
+    
+        {/* Key Features */}
+        <Suspense fallback={<SectionLoader />}>
+          <section className="py-20 md:py-32 flex justify-center">
+            <KeyFeatures />
+          </section>
+        </Suspense>
 
-            {/* Impact Section */}
-            <ScrollReveal 
-              className="min-h-screen py-16 w-full" 
-              animation="fade-in"
-              threshold={0.1}
-            >
-              <MemoizedImpactSection />
-            </ScrollReveal>
-          </div>
-        </main>
-      </CosmicBeamsBackground>
-    </>
+        {/* Impact Section */}
+        <Suspense fallback={<SectionLoader />}>
+          <section className="py-20 md:py-32 flex justify-center">
+            <ImpactSection />
+          </section>
+        </Suspense>
+      </main>
+    </div>
   )
 }

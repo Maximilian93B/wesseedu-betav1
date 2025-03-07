@@ -86,7 +86,7 @@ export function Navigation() {
   return (
     <nav 
       ref={navRef}
-      className="w-full z-50 backdrop-blur-[2px] bg-black/5 relative"
+      className="w-full z-50 backdrop-blur-sm bg-black/20 relative border-b border-emerald-500/10 sticky top-0"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => {
         setIsHovering(false);
@@ -106,8 +106,8 @@ export function Navigation() {
       />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex items-center justify-between h-20">
-          <div className="flex items-center">
+        <div className="flex items-center justify-between md:justify-center h-20 relative">
+          <div className="flex items-center md:absolute md:left-0">
             <Link href="/" className="flex items-center group">
               <Zap className="w-8 h-8 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
               <div ref={logoRef} className="ml-2 text-xl font-bold flex">
@@ -127,20 +127,23 @@ export function Navigation() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            <Button variant="ghost" className="text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30" asChild>
+          <div className="hidden md:flex items-center space-x-4">
+            <Button variant="ghost" className="text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30 transition-all duration-300" asChild>
               <Link href="/mobile-first-weSeedU">The Platform</Link>
             </Button>
-            <Button variant="ghost" className="text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30" asChild>
+            <Button variant="ghost" className="text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30 transition-all duration-300" asChild>
               <Link href="/solutions">Solutions</Link>
             </Button>
-            <Button variant="ghost" className="text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30" asChild>
+            <Button variant="ghost" className="text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30 transition-all duration-300" asChild>
               <Link href="/about">About</Link>
             </Button>
-            <Button variant="ghost" className="text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30" asChild>
+            <Button variant="ghost" className="text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30 transition-all duration-300" asChild>
               <Link href="/contact">Contact</Link>
             </Button>
-            
+          </div>
+          
+          {/* Login button - positioned to the right on desktop */}
+          <div className="hidden md:block md:absolute md:right-0">
             {loginDialog}
           </div>
 
@@ -159,21 +162,23 @@ export function Navigation() {
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-black/50 backdrop-blur-sm">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            <Button variant="ghost" className="w-full text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30" asChild>
+        <div className="md:hidden bg-black/80 backdrop-blur-md border-t border-emerald-500/10">
+          <div className="px-4 pt-2 pb-3 space-y-2">
+            <Button variant="ghost" className="w-full text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30 justify-start" asChild>
               <Link href="/mobile-first-weSeedU">The Platform</Link>
             </Button>
-            <Button variant="ghost" className="w-full text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30" asChild>
+            <Button variant="ghost" className="w-full text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30 justify-start" asChild>
               <Link href="/solutions">Solutions</Link>
             </Button>
-            <Button variant="ghost" className="w-full text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30" asChild>
+            <Button variant="ghost" className="w-full text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30 justify-start" asChild>
               <Link href="/about">About</Link>
             </Button>
-            <Button variant="ghost" className="w-full text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30" asChild>
+            <Button variant="ghost" className="w-full text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30 justify-start" asChild>
               <Link href="/contact">Contact</Link>
             </Button>
-            {loginDialog}
+            <div className="pt-2">
+              {loginDialog}
+            </div>
           </div>
         </div>
       )}
