@@ -195,7 +195,7 @@ export function HeroSection() {
             />
           </div>
           <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-3xl md:max-w-4xl">
-            WeSeedU connects investors with vetted sustainable startups, making impact investing accessible, transparent, and aligned with UN Sustainable Development Goals.
+           The Worlds best dedicated platform for sustainable startups.
           </p>
         </div>
 
