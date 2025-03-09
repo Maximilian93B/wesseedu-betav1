@@ -64,7 +64,7 @@ export default function RootLayout({
               {/* Only show Navigation if NOT on any auth page */}
               {!isAuthPage && (
                 <div className="relative z-10">
-                  <Navigation />
+                 
                 </div>
               )}
               <main className="flex-1 relative z-0">{children}</main>

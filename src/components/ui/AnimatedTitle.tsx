@@ -1,196 +1,227 @@
 import React, { useMemo } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface AnimatedTitleProps {
-  words?: string[];
-  colors?: string[];
-  text?: string;
-  highlightWords?: string[];
-  highlightClassName?: string;
+  text: string;
   className?: string;
-  staggerDelay?: number;
-  highlightIndex?: number;
-  animationStyle?: "slide" | "fade" | "bounce" | "wave";
-  letterSpacing?: string;
   delay?: number;
+  color?: string;
+  revealType?: "fade" | "slide" | "scale" | "blur" | "stagger" | "wave" | "3d" | "bright" | "glow" | "weseedu-vibrant" | "weseedu-clear" | "crystal";
 }
 
-export function AnimatedTitle({ 
-  words, 
-  colors, 
+export function AnimatedTitle({
   text,
-  highlightWords = [],
-  highlightClassName = "text-teal-500",
-  className = "", 
-  staggerDelay = 0.2,
-  highlightIndex = -1,
-  animationStyle = "slide",
-  letterSpacing = "normal",
-  delay = 0
+  className = "",
+  delay = 0,
+  color = "white",
+  revealType = "stagger"
 }: AnimatedTitleProps) {
-  const shouldReduceMotion = useReducedMotion();
+  const characters = useMemo(() => text.split(""), [text]);
   
-  // Debug props
-  console.log('AnimatedTitle props:', { 
-    words, 
-    text, 
-    highlightWords, 
-    processedWordsLength: text ? text.split(' ').length : words?.length || 0 
-  });
-  
-  // Process text-based API if provided
-  const processedWords = useMemo(() => {
-    // If words array is provided, use it directly
-    if (words && words.length > 0) {
-      console.log('Using provided words array:', words);
-      return words;
-    }
-    
-    // If text is provided, split it into words
-    if (text) {
-      const splitWords = text.split(' ');
-      console.log('Split text into words:', splitWords);
-      return splitWords;
-    }
-    
-    // Default empty array if neither is provided
-    console.warn('No words or text provided to AnimatedTitle');
-    return [];
-  }, [words, text]);
-  
-  // Process colors for each word
-  const processedColors = useMemo(() => {
-    // If colors array is provided, ensure it matches the length of processedWords
-    if (colors && colors.length > 0) {
-      console.log('Using provided colors array:', colors);
-      // Make sure colors array matches the length of words array
-      return colors.length >= processedWords.length 
-        ? colors.slice(0, processedWords.length) // Trim extra colors
-        : [...colors, ...Array(processedWords.length - colors.length).fill('')]; // Add empty colors
-    }
-    
-    // Create colors array based on highlightWords
-    const generatedColors = processedWords.map(word => {
-      // Case-insensitive comparison for better matching
-      const normalizedWord = word.replace(/[.,!?;:'"()]/g, ''); // Remove punctuation
-      const isHighlighted = highlightWords.some(hw => 
-        hw.toLowerCase() === normalizedWord.toLowerCase()
-      );
-      
-      return isHighlighted ? highlightClassName : '';
-    });
-    
-    console.log('Generated colors based on highlightWords:', generatedColors);
-    return generatedColors;
-  }, [colors, processedWords, highlightWords, highlightClassName]);
-
-  // Animation variants for the container - simplified for better performance
-  const containerVariants = useMemo(() => ({
+  // Container animation - simplified
+  const container = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: shouldReduceMotion ? staggerDelay / 2 : staggerDelay,
+        staggerChildren: 0.06,
         delayChildren: delay,
-      },
-    },
-  }), [staggerDelay, shouldReduceMotion, delay]);
-
-  // Simplified animation variants for better performance
-  const animationVariants = useMemo(() => {
-    // Simplified animations for reduced motion
-    if (shouldReduceMotion) {
-      return {
-        hidden: { opacity: 0 },
-        visible: (i: number) => ({ 
-          opacity: 1,
-          transition: {
-            duration: 0.3,
-            ease: "easeOut",
-            delay: i * 0.05,
-          }
-        }),
-      };
+        ease: [0.22, 1, 0.36, 1]
+      }
     }
-    
-    // Simplified animations for normal motion based on style
-    switch (animationStyle) {
-      case "bounce":
-        return {
-          hidden: { y: 20, opacity: 0 },
-          visible: (i: number) => ({ 
-            y: 0, 
-            opacity: 1,
-            transition: {
-              type: "spring",
-              stiffness: 80,
-              damping: 12,
-              delay: i * 0.1,
-            }
-          }),
-        };
+  };
+  
+  // Character animation variants - simplified to avoid filter issues
+  const getCharacterVariant = () => {
+    switch (revealType) {
       case "fade":
         return {
           hidden: { opacity: 0 },
-          visible: (i: number) => ({ 
-            opacity: 1,
-            transition: {
-              duration: 0.5,
-              ease: "easeOut",
-              delay: i * 0.1,
-            }
-          }),
+          visible: { 
+            opacity: 1, 
+            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+          }
+        };
+      case "slide":
+        return {
+          hidden: { opacity: 0, y: 30 },
+          visible: { 
+            opacity: 1, 
+            y: 0, 
+            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+          }
+        };
+      case "scale":
+        return {
+          hidden: { opacity: 0, scale: 0.5 },
+          visible: { 
+            opacity: 1, 
+            scale: 1, 
+            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+          }
+        };
+      case "blur":
+        // Replaced blur with opacity for safer animation
+        return {
+          hidden: { opacity: 0 },
+          visible: { 
+            opacity: 1, 
+            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+          }
         };
       case "wave":
-      case "slide":
+        return {
+          hidden: { opacity: 0, y: 20 },
+          visible: (i: number) => ({ 
+            opacity: 1, 
+            y: 0,
+            transition: { 
+              duration: 0.5, 
+              ease: [0.22, 1, 0.36, 1],
+              delay: i * 0.05 
+            }
+          })
+        };
+      case "3d":
+        return {
+          hidden: { 
+            opacity: 0, 
+            y: 20, 
+            rotateX: -10,
+            scale: 0.95
+          },
+          visible: (i: number) => ({ 
+            opacity: 1, 
+            y: 0, 
+            rotateX: 0,
+            scale: 1,
+            transition: { 
+              duration: 0.6, 
+              ease: [0.22, 1, 0.36, 1],
+              delay: i * 0.04 
+            }
+          })
+        };
+      case "stagger":
       default:
         return {
-          hidden: { y: 10, opacity: 0 },
+          hidden: { opacity: 0, y: 20, scale: 0.9 },
           visible: (i: number) => ({ 
+            opacity: 1, 
             y: 0, 
-            opacity: 1,
-            transition: {
-              duration: 0.5,
-              ease: "easeOut",
-              delay: i * 0.08,
+            scale: 1,
+            transition: { 
+              duration: 0.5, 
+              ease: [0.22, 1, 0.36, 1],
+              delay: i * 0.04 
             }
-          }),
+          })
         };
     }
-  }, [shouldReduceMotion, animationStyle]);
-
-  // Don't render if no words
-  if (processedWords.length === 0) {
-    console.warn('AnimatedTitle: No words to render. Please provide either "words" or "text" prop.');
-    return null;
-  }
-
+  };
+  
+  // Get style based on color prop - simplified
+  const getStyleByColor = () => {
+    switch (color) {
+      case 'modern':
+        return {
+          background: 'linear-gradient(135deg, #8b5cf6, #4f46e5, #06b6d4)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          color: 'transparent',
+          fontWeight: 'bold',
+        };
+      case 'clean':
+        return {
+          color: 'white',
+          fontWeight: 'bold',
+          letterSpacing: '0.02em',
+        };
+      case '3d':
+        return {
+          color: 'white',
+          fontWeight: 'bold',
+          letterSpacing: '0.05em',
+        };
+      case 'bright':
+        return {
+          color: 'white',
+          fontWeight: 'bold',
+          letterSpacing: '0.03em',
+        };
+      case 'glow':
+        return {
+          background: 'linear-gradient(to bottom, #ffffff, #88e1ff)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          color: 'transparent',
+          fontWeight: 'bold',
+          letterSpacing: '0.02em',
+        };
+      case 'crystal':
+        return {
+          color: '#ffffff',
+          fontWeight: 'bold',
+          letterSpacing: '0.02em',
+        };
+      case 'weseedu-clear':
+        return {
+          background: 'linear-gradient(to right, #c084fc, #34d399)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          color: 'transparent',
+          fontWeight: 'bold',
+          letterSpacing: '0.02em',
+        };
+      case 'weseedu-vibrant':
+        return {
+          background: 'linear-gradient(to right, #a855f7, #14b8a6, #22c55e)',
+          backgroundClip: 'text',
+          WebkitBackgroundClip: 'text',
+          color: 'transparent',
+          fontWeight: 'bold',
+          letterSpacing: '0.02em',
+        };
+      default:
+        return {
+          color: color,
+        };
+    }
+  };
+  
+  const characterVariant = getCharacterVariant();
+  const titleStyle = getStyleByColor();
+  
   return (
-    <motion.div
-      className={`inline-flex flex-wrap items-center justify-center gap-x-2 ${className}`}
-      variants={containerVariants}
+    <motion.h1
+      className={`${className} relative`}
       initial="hidden"
       animate="visible"
+      variants={container}
+      aria-label={text}
+      style={{
+        position: 'relative',
+        zIndex: 9999,
+        display: 'inline-block',
+        ...titleStyle
+      }}
     >
-      {processedWords.map((word, index) => (
+      {characters.map((char, index) => (
         <motion.span
-          key={`word-${index}-${word}`}
-          className={`
-            ${processedColors[index] || ''} 
-            ${processedColors[index] ? '' : 'text-white'}
-            inline-block 
-            ${highlightIndex === index ? 'relative after:content-[""] after:absolute after:-bottom-1 after:left-0 after:w-full after:h-[3px] after:bg-current after:opacity-70' : ''}
-          `}
-          style={{ 
-            letterSpacing,
-            willChange: 'transform, opacity',
-          }}
-          variants={animationVariants}
+          key={`${char}-${index}`}
+          variants={characterVariant}
           custom={index}
+          style={{
+            display: 'inline-block',
+            willChange: 'transform, opacity',
+            transformOrigin: 'center bottom',
+            position: 'relative',
+            zIndex: 9999 - index
+          }}
         >
-          {word}
+          {char === " " ? "\u00A0" : char}
         </motion.span>
       ))}
-    </motion.div>
+    </motion.h1>
   );
 }

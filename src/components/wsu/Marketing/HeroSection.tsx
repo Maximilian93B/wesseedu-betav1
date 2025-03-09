@@ -1,208 +1,179 @@
 "use client"
-import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
-import Image from 'next/image'
-import Link from 'next/link'
-import { cn } from "@/lib/utils"
 import { AnimatedTitle } from "@/components/ui/AnimatedTitle"
+import { Button } from "@/components/ui/button"
+import { ArrowRight, ChevronDown } from "lucide-react"
+import Link from "next/link"
+import { motion } from "framer-motion"
 
-// Define card data outside component for better performance
-const FEATURE_ITEMS = ['Exclusive opportunities', 'Sustainable focus', 'Vetted by experts', 'Direct founder access']
-
-// Define card types
-type CardData = {
-  id: string
-  title: string
-  description?: string
-  className: string
-  imageUrl?: string
-  buttonText?: string
-  buttonHref?: string
-  featured?: boolean
-}
-
-// Card data
-const CARDS: CardData[] = [
-  {
-    id: 'platform',
-    title: 'WeSeedU Platform',
-    description: 'Access exclusive investment opportunities in sustainable startups, vetted by our team and aligned with UN SDGs.',
-    className: 'group h-[600px] sm:h-[650px] md:h-[580px] lg:h-[620px] md:-mt-8 md:col-start-2 md:col-end-3 md:row-start-1 md:z-10 transform md:scale-105 md:shadow-[0_0_30px_rgba(139,92,246,0.15)]',
-    buttonText: 'Start Investing',
-    buttonHref: '/auth/signup',
-    featured: true
-  },
-  {
-    id: 'investment',
-    title: 'Platform View',
-    className: 'group h-[440px] sm:h-[460px] md:h-[500px] lg:h-[520px] md:col-start-1 md:col-end-2 md:row-start-1 md:z-0 transform md:scale-95 md:translate-x-4 opacity-90',
-    imageUrl: '/path/to/platform-screenshot1.png',
-    buttonText: 'Explore Platform',
-    buttonHref: '#'
-  },
-  {
-    id: 'security',
-    title: 'Dashboard View',
-    className: 'group h-[440px] sm:h-[460px] md:h-[500px] lg:h-[520px] md:col-start-3 md:col-end-4 md:row-start-1 md:z-0 transform md:scale-95 md:-translate-x-4 opacity-90',
-    imageUrl: '/path/to/platform-screenshot2.png',
-    buttonText: 'View Dashboard',
-    buttonHref: '#'
-  }
-]
-
-// Simple card component
-function CardComponent({ card }: { card: CardData }) {
-  const isFeatured = card.featured;
-  
-  return (
-    <div
-      key={card.id}
-      className={cn(
-        "relative overflow-hidden rounded-3xl bg-black/80 p-6 sm:p-8 flex flex-col",
-        "shadow-[0_0_20px_rgba(139,92,246,0.1)] hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-all duration-700",
-        "before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-500/5 before:via-transparent before:to-teal-500/5 before:opacity-40 before:z-0",
-        card.className
-      )}
-    >
-      {/* Cosmic accent elements - adjusted z-index */}
-      <div className="absolute -top-32 -right-32 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl z-0"></div>
-      <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl z-0"></div>
-      
-      {/* Subtle top edge highlight */}
-      <div className="absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-purple-400/30 to-transparent z-0"></div>
-      
-      {/* Card hover glow effect */}
-      <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 bg-gradient-to-b from-purple-500/10 via-transparent to-teal-500/10"></div>
-      
-      {/* Additional glow effects for featured card */}
-      {isFeatured && (
-        <>
-          {/* Outer glow */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/15 via-teal-500/15 to-purple-500/15 rounded-[24px] blur-sm z-0 opacity-60"></div>
-          
-          {/* Corner accent glows */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-xl z-0 animate-glow-float"></div>
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-teal-500/10 rounded-full blur-xl z-0 animate-glow-float-delayed"></div>
-        </>
-      )}
-      
-      {/* Card content - ensure highest z-index */}
-      <div className="relative flex flex-col h-full z-10">
-        <h3 className="text-xl sm:text-2xl font-semibold text-white mb-4">{card.title}</h3>
-        
-        {card.description && (
-          <p className="text-gray-300 mb-6">{card.description}</p>
-        )}
-        
-        {isFeatured && (
-          <ul className="flex flex-col gap-3 mt-auto mb-8">
-            {FEATURE_ITEMS.map((item) => (
-              <li key={item} className="flex items-center gap-2 text-sm sm:text-base text-gray-300">
-                <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-purple-400 to-teal-400"></div>
-                {item}
-              </li>
-            ))}
-          </ul>
-        )}
-        
-        {card.imageUrl && (
-          <div className="mt-auto mb-6 rounded-lg overflow-hidden shadow-[0_0_15px_rgba(139,92,246,0.15)]">
-            <Image 
-              src={card.imageUrl} 
-              alt={card.title}
-              width={500}
-              height={300}
-              className="w-full h-auto object-cover"
-              loading="lazy"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-          </div>
-        )}
-        
-        {card.buttonText && (
-          <div className="mt-auto">
-            <Button 
-              asChild 
-              className="w-full sm:w-auto bg-black hover:bg-purple-900/40 text-white transition-all duration-300 shadow-[0_0_15px_rgba(139,92,246,0.15)] hover:shadow-[0_0_20px_rgba(139,92,246,0.3)]"
-              size="lg"
-            >
-              <Link href={card.buttonHref || '#'}>
-                {card.buttonText} <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// Add this to your CSS or in a style tag
-const customStyles = `
-  @keyframes pulse-slow {
-    0%, 100% { opacity: 0.1; }
-    50% { opacity: 0.3; }
-  }
-  .animate-pulse-slow {
-    animation: pulse-slow 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-`;
 
 export function HeroSection() {
+  const scrollToNextSection = () => {
+    // Smooth scroll to the next section
+    const cardSection = document.getElementById('card-section');
+    if (cardSection) {
+      cardSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <>
       <style jsx global>{`
         @keyframes pulse-slow {
-          0%, 100% { opacity: 0.15; }
-          50% { opacity: 0.35; }
+          0%, 100% { opacity: 0.12; }
+          50% { opacity: 0.32; }
         }
         .animate-pulse-slow {
-          animation: pulse-slow 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
         
         @keyframes glow-float {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
-          50% { transform: translateY(-10px) scale(1.05); opacity: 0.7; }
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
+          50% { transform: translateY(-12px) scale(1.05); opacity: 0.65; }
         }
         .animate-glow-float {
-          animation: glow-float 8s ease-in-out infinite;
+          animation: glow-float 10s ease-in-out infinite;
         }
         
         @keyframes glow-float-delayed {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
-          50% { transform: translateY(10px) scale(1.05); opacity: 0.7; }
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
+          50% { transform: translateY(12px) scale(1.05); opacity: 0.65; }
         }
         .animate-glow-float-delayed {
-          animation: glow-float-delayed 8s ease-in-out infinite 2s;
+          animation: glow-float-delayed 10s ease-in-out infinite 2.5s;
+        }
+        
+        @keyframes float-down {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(12px); }
+        }
+        .animate-float-down {
+          animation: float-down 2.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+        }
+        
+        @keyframes subtle-shimmer {
+          0% { background-position: -100% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .animate-subtle-shimmer {
+          background-size: 200% 100%;
+          animation: subtle-shimmer 10s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `}</style>
       
-      <div className="container px-4 sm:px-6 py-8 sm:py-12 md:py-20 lg:py-32 mx-auto">
-        <div className="flex flex-col items-center text-center mb-16 sm:mb-20 md:mb-28 lg:mb-40">
-          <div className="max-w-4xl mb-8 md:mb-10">
+      <div className="w-full max-w-5xl mx-auto px-6 sm:px-8 md:px-12 py-8 sm:py-12 md:py-16 lg:py-24 relative">
+        {/* Background decorative elements */}
+        <div className="absolute top-1/4 -left-16 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl z-0 animate-pulse-slow"></div>
+        <div className="absolute bottom-1/4 -right-16 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl z-0 animate-pulse-slow"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-purple-900/5 via-transparent to-transparent rounded-full z-0 opacity-60"></div>
+        
+        <div className="flex flex-col items-center text-center relative z-20" style={{ isolation: 'isolate' }}>
+         
+          {/* Main title with increased spacing and higher z-index */}
+          <div 
+            className="mb-12 md:mb-16 relative px-8 py-4 rounded-lg"
+            style={{ 
+              position: 'relative', 
+              zIndex: 9999,
+              isolation: 'isolate',
+              
+            }}
+          >
+            {/* No glow behind title for maximum clarity */}
+            
             <AnimatedTitle 
-              words={["We", "Seed", "U"]}
-              colors={[
-                "bg-gradient-to-r from-teal-500 to-teal-400 bg-clip-text text-transparent",
-                "bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent",
-                "bg-gradient-to-r from-purple-500 to-teal-500 bg-clip-text text-transparent"
-              ]}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold"
+              text="WeSeedU"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-tight"
               delay={0.5}
-              animationStyle="bounce"
-              staggerDelay={0.2}
-              letterSpacing="tight"
+              revealType="fade"
+              color="crystal"
             />
           </div>
-          <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-3xl md:max-w-4xl">
-           The Worlds best dedicated platform for sustainable startups.
-          </p>
-        </div>
+          
+          {/* Combined and enhanced description */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ 
+              duration: 1.2, 
+              delay: 0.9, 
+              staggerChildren: 0.3,
+              ease: [0.16, 1, 0.3, 1]
+            }}
+            className="space-y-6 mb-16 md:mb-20 max-w-3xl"
+          >
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-200 leading-relaxed">
+              The world's first dedicated platform for 
+              <span className="bg-gradient-to-r from-purple-500 to-emerald-500 bg-clip-text text-transparent font-medium ml-1">
+                sustainable startups
+              </span>
+            </p>
+            
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed">
+              WeSeedU connects visionary founders with impact investors, creating a powerful ecosystem 
+              where sustainable innovation thrives. Our platform enables you to discover, fund, and 
+              support startups that are building solutions for a better tomorrow.
+            </p>
+          </motion.div>
+          
+          {/* Call to action buttons with more space */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.9, 
+              delay: 1.8,
+              ease: [0.16, 1, 0.3, 1]
+            }}
+            className="flex flex-col sm:flex-row gap-6 mb-24 md:mb-32"
+          >
+            <Button 
+              asChild 
+              size="lg" 
+              className="bg-gradient-to-r from-purple-600 to-teal-600 hover:from-purple-700 hover:to-teal-700 text-white border-none shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40 transition-all duration-300 text-lg px-8 py-7 relative overflow-hidden group"
+            >
+              <Link href="/auth/signup">
+                <span className="relative z-10">Start Investing</span>
+                <span className="relative z-10 ml-3 transform group-hover:translate-x-1 transition-transform duration-300">
+                  <ArrowRight className="h-5 w-5" />
+                </span>
+                <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-20 transition-opacity duration-500"></span>
+              </Link>
+            </Button>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-1 gap-6 md:gap-0 md:items-center">
-          {CARDS.map(card => (
-            <CardComponent key={card.id} card={card} />
-          ))}
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="bg-transparent hover:bg-black/20 text-white border border-purple-500/30 hover:border-purple-500/50 shadow-lg shadow-purple-900/10 hover:shadow-purple-900/20 transition-all duration-300 text-lg px-8 py-7 relative overflow-hidden group"
+            >
+              <Link href="/auth/login">
+                <span className="relative z-10">Login</span>
+                <span className="relative z-10 ml-3 transform group-hover:translate-x-1 transition-transform duration-300">
+                  <ArrowRight className="h-5 w-5" />
+                </span>
+                <span className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+              </Link>
+            </Button>
+          </motion.div>
+          
+          {/* Elegant scroll CTA with more space */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 2.0 }}
+            className="mt-auto"
+          >
+            <button 
+              onClick={scrollToNextSection}
+              className="group flex flex-col items-center text-gray-400 hover:text-white transition-colors duration-300 focus:outline-none"
+              aria-label="Scroll to explore our platform"
+            >
+              <span className="mb-4 text-sm uppercase tracking-widest opacity-70">Explore</span>
+              <div className="w-12 h-12 rounded-full border border-gray-700 flex items-center justify-center group-hover:border-gray-500 transition-colors group-hover:bg-black/30 group-hover:scale-110 duration-300">
+                <ChevronDown className="h-5 w-5 animate-float-down" />
+              </div>
+            </button>
+          </motion.div>
         </div>
       </div>
     </>
