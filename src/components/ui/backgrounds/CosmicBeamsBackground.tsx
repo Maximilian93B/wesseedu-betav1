@@ -55,7 +55,7 @@ export default function CosmicBackground() {
     // Add a delayed fade-in effect
     const fadeInTimeout = setTimeout(() => {
       setOpacity(1)
-    }, 800) // Delay the start of fade-in by 800ms
+    }, 100) // Further reduced from 200ms to 100ms for immediate appearance
     
     return () => clearTimeout(fadeInTimeout)
   }, [])
@@ -329,13 +329,13 @@ export default function CosmicBackground() {
       aria-hidden="true"
       style={{
         opacity: opacity,
-        transition: "opacity 1800ms cubic-bezier(0.16, 1, 0.3, 1)", // Use a smooth easing curve
+        transition: "opacity 400ms cubic-bezier(0.11, 0, 0.5, 0)", // Reduced from 600ms to 400ms with a snappier curve
         zIndex: -10 // Ensure it's behind everything
       }}
     >
       <div ref={containerRef} className="w-full h-full"></div>
       {/* Very dark overlay for maximum title clarity */}
-      <div className="absolute inset-0 bg-black/90 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-black/70 pointer-events-none"></div>
     </div>
   )
 }

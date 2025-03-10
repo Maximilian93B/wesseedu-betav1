@@ -12,12 +12,12 @@ import CosmicBackground from "@/components/ui/backgrounds/CosmicBeamsBackground"
 // WeSeedU styled loading component
 const SectionLoader = () => (
   <div className="w-full h-[50vh] flex items-center justify-center">
-    <div className="relative w-full max-w-4xl h-64 rounded-xl overflow-hidden bg-black/30 backdrop-blur-sm border border-purple-500/20">
+    <div className="relative w-full max-w-4xl h-64 rounded-xl overflow-hidden bg-black/30 backdrop-blur-md border border-purple-500/20">
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-teal-500/20 to-purple-600/20 animate-pulse-slow"></div>
       
-      {/* Subtle grid pattern */}
-      <div className="absolute inset-0 opacity-10" 
+      {/* Subtle grid pattern with improved blur */}
+      <div className="absolute inset-0 opacity-10 backdrop-blur-sm" 
         style={{
           backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)',
           backgroundSize: '20px 20px'
@@ -85,7 +85,7 @@ export default function LandingPage() {
 
   return (
     <div 
-      className={`relative min-h-screen w-full overflow-x-hidden transition-all duration-1000 ease-out ${
+      className={`relative min-h-screen w-full overflow-x-hidden transition-all duration-500 ease-out ${
         isMounted ? 'opacity-100' : 'opacity-0'
       }`}
       style={{ 
@@ -95,12 +95,13 @@ export default function LandingPage() {
     >
       {/* Background with lower z-index */}
       <div className="fixed inset-0" style={{ zIndex: -1 }}>
+        <div className="absolute inset-0 backdrop-blur-[1px]" style={{ mixBlendMode: 'overlay' }}></div>
         <CosmicBackground />
       </div>
       
       {/* Content container with higher z-index */}
       <main 
-        className={`relative w-full mx-auto max-w-screen-2xl flex flex-col transition-all duration-1000 ease-out ${
+        className={`relative w-full mx-auto max-w-screen-2xl flex flex-col transition-all duration-500 ease-out ${
           contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}
         style={{ zIndex: 10, position: 'relative' }}
