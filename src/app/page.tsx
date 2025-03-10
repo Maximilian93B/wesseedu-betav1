@@ -1,6 +1,7 @@
 "use client"
 
-import React, { Suspense, useState, useEffect } from 'react'
+import React, { Suspense, useState, useEffect, useRef } from 'react'
+import { Navigation } from "@/components/wsu/Nav"
 import { HeroSection } from "@/components/wsu/Marketing/HeroSection"
 import { CardSection } from "@/components/wsu/Marketing/CardSection"
 import { PartnersAndVetting } from "@/components/wsu/Marketing/PartnersAndVetting"
@@ -8,16 +9,19 @@ import { ProblemSolutionFlow } from "@/components/wsu/Marketing/ProblemSolutionF
 import { KeyFeatures } from "@/components/wsu/Marketing/KeyFeatures"
 import { ImpactSection } from "@/components/wsu/Marketing/ImpactSection"
 import CosmicBackground from "@/components/ui/backgrounds/CosmicBeamsBackground"
+import StarryBackground from '@/components/ui/StarryBackground'
+import { motion, useScroll, useTransform, useSpring } from "framer-motion"
+import { useRouter, usePathname } from "next/navigation"
 
 // WeSeedU styled loading component
 const SectionLoader = () => (
   <div className="w-full h-[50vh] flex items-center justify-center">
-    <div className="relative w-full max-w-4xl h-64 rounded-xl overflow-hidden bg-black/30 backdrop-blur-md border border-purple-500/20">
+    <div className="relative w-full max-w-4xl h-64 rounded-xl overflow-hidden bg-black/30 backdrop-blur-sm border border-purple-500/20">
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-teal-500/20 to-purple-600/20 animate-pulse-slow"></div>
       
-      {/* Subtle grid pattern with improved blur */}
-      <div className="absolute inset-0 opacity-10 backdrop-blur-sm" 
+      {/* Subtle grid pattern */}
+      <div className="absolute inset-0 opacity-10" 
         style={{
           backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)',
           backgroundSize: '20px 20px'
@@ -83,46 +87,155 @@ export default function LandingPage() {
     };
   }, []);
 
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ 
+    container: containerRef
+  })
+  
+  // Create smooth scrolling effect with spring physics
+  const smoothScrollProgress = useSpring(scrollYProgress, {
+    damping: 20,
+    mass: 0.5,
+    stiffness: 100
+  })
+  
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Function to handle smooth scrolling to sections
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element && containerRef.current) {
+      containerRef.current.scrollTo({
+        top: element.offsetTop,
+        behavior: "smooth"
+      })
+    }
+  }
+
+  // Add scroll progress indicator (optional)
+  const scaleX = useTransform(smoothScrollProgress, [0, 1], [0, 1])
+
   return (
     <div 
-      className={`relative min-h-screen w-full overflow-x-hidden transition-all duration-500 ease-out ${
+      className={`relative min-h-screen w-full overflow-hidden transition-all duration-1000 ease-out ${
         isMounted ? 'opacity-100' : 'opacity-0'
       }`}
       style={{ 
         position: 'relative',
-        zIndex: 1 
+        zIndex: 1,
       }}
     >
-      {/* Background with lower z-index */}
-      <div className="fixed inset-0" style={{ zIndex: -1 }}>
-        <div className="absolute inset-0 backdrop-blur-[1px]" style={{ mixBlendMode: 'overlay' }}></div>
+      {/* Global animation styles */}
+      <style jsx global>{`
+        @keyframes rotate-slow {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes animate-subtle-rotate {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        .animate-subtle-rotate {
+          animation: animate-subtle-rotate 120s linear infinite;
+        }
+        
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.15; }
+          50% { opacity: 0.32; }
+        }
+        
+        .animate-pulse-slow {
+          animation: pulse-slow 8s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.8; filter: blur(1px); }
+          50% { opacity: 1; filter: blur(2px); }
+        }
+        
+        .animate-pulse-glow {
+          animation: pulse-glow 6s ease-in-out infinite;
+        }
+        
+        @keyframes float-orbit {
+          0%, 100% { transform: translateX(-5%) translateY(0); }
+          25% { transform: translateX(0) translateY(3%); }
+          50% { transform: translateX(5%) translateY(0); }
+          75% { transform: translateX(0) translateY(-3%); }
+        }
+        
+        .animate-float-orbit {
+          animation: float-orbit 90s ease-in-out infinite;
+        }
+        
+        /* Smooth scrolling for the entire site */
+        html {
+          scroll-behavior: smooth;
+        }
+        
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .hide-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+        }
+      `}</style>
+      
+      {/* Navigation Component - Positioned above all content with scroll functionality */}
+      {isMounted && <Navigation scrollToSection={scrollToSection} currentPath={pathname} />}
+      
+      {/* Scroll progress indicator */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-teal-500 z-50"
+        style={{ scaleX, transformOrigin: "0%" }}
+      />
+      
+      {/* Client-only starry background component */}
+      {isMounted && <StarryBackground />}
+      
+      {/* CosmicBackground with proper transparency - in front of sphere */}
+      <div className="fixed inset-0" style={{ zIndex: -40 }}>
         <CosmicBackground />
       </div>
       
-      {/* Content container with higher z-index */}
-      <main 
-        className={`relative w-full mx-auto max-w-screen-2xl flex flex-col transition-all duration-500 ease-out ${
+      {/* Content container with higher z-index and smooth scrolling */}
+      <motion.main 
+        ref={containerRef}
+        className={`relative w-full h-screen mx-auto max-w-screen-2xl flex flex-col transition-all duration-1000 ease-out hide-scrollbar overflow-y-scroll ${
           contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}
-        style={{ zIndex: 10, position: 'relative' }}
+        style={{ 
+          zIndex: 10, 
+          position: 'relative',
+        }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
       >
         {/* Hero Section - Centered vertically and horizontally */}
-        <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8" style={{ zIndex: 20, position: 'relative' }}>
+        <div id="hero-section" className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8" style={{ zIndex: 20, position: 'relative' }}>
           <HeroSection />
         </div>
     
-  
-        {/* Impact Section */}
-        <Suspense fallback={<SectionLoader />}>
-          <ImpactSection />
-        </Suspense>
-
-        
         {/* Card Section */}
         <Suspense fallback={<SectionLoader />}>
           <section id="card-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
             <CardSection />
           </section>
+        </Suspense>
+
+        {/* Impact Section */}
+        <Suspense fallback={<SectionLoader />}>
+          <div id="impact-section">
+            <ImpactSection />
+          </div>
         </Suspense>
 
         {/* Partners and Vetting Section */}
@@ -145,7 +258,7 @@ export default function LandingPage() {
             <KeyFeatures />
           </section>
         </Suspense>
-      </main>
+      </motion.main>
     </div>
   )
 }

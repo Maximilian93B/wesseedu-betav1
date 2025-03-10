@@ -16,13 +16,11 @@ export function AnimatedTitle({
   color = "white",
   revealType = "stagger"
 }: AnimatedTitleProps) {
+  // Memoize characters to prevent unnecessary re-renders
   const characters = useMemo(() => text.split(""), [text]);
   
-  // Add a console log to verify the prop is changing
-  console.log("AnimatedTitle rendering with revealType:", revealType);
-  
-  // Container animation - modified to be more responsive to revealType
-  const container = {
+  // Memoize container animation for better performance
+  const container = useMemo(() => ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -32,10 +30,10 @@ export function AnimatedTitle({
         ease: [0.16, 1, 0.3, 1]
       }
     }
-  };
+  }), [delay, revealType]);
   
-  // Character animation variants - make differences more dramatic but faster
-  const getCharacterVariant = () => {
+  // Memoize character animation variants for better performance
+  const characterVariant = useMemo(() => {
     switch (revealType) {
       case "fade":
         return {
@@ -47,7 +45,7 @@ export function AnimatedTitle({
         };
       case "slide":
         return {
-          hidden: { opacity: 0, y: 30 },
+          hidden: { opacity: 0, y: 20 },
           visible: { 
             opacity: 1, 
             y: 0, 
@@ -56,7 +54,7 @@ export function AnimatedTitle({
         };
       case "scale":
         return {
-          hidden: { opacity: 0, scale: 0.5 },
+          hidden: { opacity: 0, scale: 0.6 },
           visible: { 
             opacity: 1, 
             scale: 1, 
@@ -74,11 +72,10 @@ export function AnimatedTitle({
         };
       case "wave":
         return {
-          hidden: { opacity: 0, y: 25, rotateZ: 5 },
+          hidden: { opacity: 0, y: 15 },
           visible: (i: number) => ({ 
             opacity: 1, 
             y: 0,
-            rotateZ: 0,
             transition: { 
               duration: 0.3,
               ease: [0.16, 1, 0.3, 1],
@@ -88,17 +85,11 @@ export function AnimatedTitle({
         };
       case "3d":
         return {
-          hidden: { 
-            opacity: 0, 
-            y: 20, 
-            rotateX: -20,
-            scale: 0.9
-          },
+          hidden: { opacity: 0, y: 15, rotateX: -10 },
           visible: (i: number) => ({ 
             opacity: 1, 
             y: 0, 
             rotateX: 0,
-            scale: 1,
             transition: { 
               duration: 0.3,
               ease: [0.16, 1, 0.3, 1],
@@ -106,16 +97,14 @@ export function AnimatedTitle({
             }
           })
         };
-      // Make other reveal types more distinctive
       case "bright":
         return {
-          hidden: { opacity: 0, scale: 1.5, filter: "brightness(2)" },
+          hidden: { opacity: 0, scale: 1.2 },
           visible: (i: number) => ({ 
             opacity: 1, 
             scale: 1,
-            filter: "brightness(1)",
             transition: { 
-              duration: 0.4, 
+              duration: 0.35, 
               ease: [0.22, 1, 0.36, 1],
               delay: i * 0.02 
             }
@@ -123,25 +112,23 @@ export function AnimatedTitle({
         };
       case "glow":
         return {
-          hidden: { opacity: 0, scale: 0.9, textShadow: "0 0 20px rgba(255,255,255,1)" },
+          hidden: { opacity: 0, scale: 0.9 },
           visible: (i: number) => ({ 
             opacity: 1, 
             scale: 1,
-            textShadow: "0 0 0px rgba(255,255,255,0)",
             transition: { 
-              duration: 0.4, 
+              duration: 0.35, 
               ease: [0.22, 1, 0.36, 1],
-              delay: i * 0.025 
+              delay: i * 0.02 
             }
           })
         };
       case "weseedu-vibrant":
       case "weseedu-clear":
         return {
-          hidden: { opacity: 0, x: -20, y: 20 },
+          hidden: { opacity: 0, y: 15 },
           visible: (i: number) => ({ 
             opacity: 1, 
-            x: 0,
             y: 0,
             transition: { 
               duration: 0.3, 
@@ -152,44 +139,36 @@ export function AnimatedTitle({
         };
       case "crystal":
         return {
-          hidden: { opacity: 0, rotateY: 90 },
+          hidden: { opacity: 0, y: 15 },
           visible: (i: number) => ({ 
             opacity: 1, 
-            rotateY: 0,
+            y: 0,
             transition: { 
-              duration: 0.4, 
+              duration: 0.35, 
               ease: [0.22, 1, 0.36, 1],
-              delay: i * 0.025 
+              delay: i * 0.02 
             }
           })
         };
       case "bottom-glow":
         return {
-          hidden: { 
-            opacity: 0, 
-            y: 10, 
-            filter: "drop-shadow(0 10px 8px rgba(255,255,255,0))" 
-          },
+          hidden: { opacity: 0, y: 10 },
           visible: (i: number) => ({ 
             opacity: 1, 
             y: 0,
-            filter: "drop-shadow(0 10px 8px rgba(255,255,255,0.7))",
             transition: { 
-              duration: 0.4, 
+              duration: 0.35, 
               ease: [0.22, 1, 0.36, 1],
-              delay: i * 0.025 
+              delay: i * 0.02 
             }
           })
         };
       case "blur-glow":
         return {
-          hidden: { 
-            opacity: 0, 
-            filter: "blur(8px) drop-shadow(0 8px 6px rgba(255,255,255,0))" 
-          },
+          hidden: { opacity: 0, filter: "blur(8px)" },
           visible: (i: number) => ({ 
             opacity: 1, 
-            filter: "blur(0px) drop-shadow(0 8px 10px rgba(255,255,255,0.7))",
+            filter: "blur(0px)",
             transition: { 
               duration: 0.25,
               ease: [0.16, 1, 0.3, 1],
@@ -200,11 +179,10 @@ export function AnimatedTitle({
       case "stagger":
       default:
         return {
-          hidden: { opacity: 0, y: 15, scale: 0.95 },
+          hidden: { opacity: 0, y: 10 },
           visible: (i: number) => ({ 
             opacity: 1, 
-            y: 0, 
-            scale: 1,
+            y: 0,
             transition: { 
               duration: 0.25,
               ease: [0.16, 1, 0.3, 1],
@@ -213,10 +191,10 @@ export function AnimatedTitle({
           })
         };
     }
-  };
+  }, [revealType]);
   
-  // Get style based on color prop - simplified
-  const getStyleByColor = () => {
+  // Memoize title style for better performance
+  const titleStyle = useMemo(() => {
     switch (color) {
       case 'modern':
         return {
@@ -299,10 +277,7 @@ export function AnimatedTitle({
           fontFamily: 'Helvetica, Arial, sans-serif'
         };
     }
-  };
-  
-  const characterVariant = getCharacterVariant();
-  const titleStyle = getStyleByColor();
+  }, [color]);
   
   return (
     <motion.h1
@@ -314,22 +289,21 @@ export function AnimatedTitle({
       aria-label={text}
       style={{
         position: 'relative',
-        zIndex: 9999,
+        zIndex: 10,
         display: 'inline-block',
         ...titleStyle
       }}
     >
       {characters.map((char, index) => (
         <motion.span
-          key={`${char}-${index}-${revealType}`}
+          key={`${char}-${index}`}
           variants={characterVariant}
           custom={index}
           style={{
             display: 'inline-block',
             willChange: 'transform, opacity',
             transformOrigin: 'center bottom',
-            position: 'relative',
-            zIndex: 9999 - index
+            position: 'relative'
           }}
         >
           {char === " " ? "\u00A0" : char}

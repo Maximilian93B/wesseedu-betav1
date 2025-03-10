@@ -5,7 +5,6 @@ import { ArrowRight, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 
-
 export function HeroSection() {
   const scrollToNextSection = () => {
     // Smooth scroll to the next section
@@ -19,27 +18,12 @@ export function HeroSection() {
     <>
       <style jsx global>{`
         @keyframes pulse-slow {
-          0%, 100% { opacity: 0.12; }
-          50% { opacity: 0.28; }
+          0%, 100% { opacity: 0.15; }
+          50% { opacity: 0.32; }
         }
         .animate-pulse-slow {
           animation: pulse-slow 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        
-        @keyframes glow-float {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
-          50% { transform: translateY(-8px) scale(1.03); opacity: 0.6; }
-        }
-        .animate-glow-float {
-          animation: glow-float 5s ease-in-out infinite;
-        }
-        
-        @keyframes glow-float-delayed {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.4; }
-          50% { transform: translateY(8px) scale(1.03); opacity: 0.6; }
-        }
-        .animate-glow-float-delayed {
-          animation: glow-float-delayed 5s ease-in-out infinite 1s;
+          will-change: opacity;
         }
         
         @keyframes float-down {
@@ -47,57 +31,8 @@ export function HeroSection() {
           50% { transform: translateY(6px); }
         }
         .animate-float-down {
-          animation: float-down 1.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        }
-        
-        @keyframes subtle-shimmer {
-          0% { background-position: -100% 0; }
-          100% { background-position: 200% 0; }
-        }
-        .animate-subtle-shimmer {
-          background-size: 200% 100%;
-          animation: subtle-shimmer 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        
-        @keyframes wave-glow {
-          0% {
-            transform: translateX(-100%) translateY(15%) scale(0.85);
-            opacity: 0;
-          }
-          20% {
-            opacity: 0.8;
-          }
-          80% {
-            opacity: 0.8;
-          }
-          100% {
-            transform: translateX(100%) translateY(-15%) scale(0.85);
-            opacity: 0;
-          }
-        }
-        .wave-glow {
-          animation: wave-glow 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-        
-        @keyframes wave-glow-delayed {
-          0% {
-            transform: translateX(-100%) translateY(-8%) scale(0.8);
-            opacity: 0;
-          }
-          20% {
-            opacity: 0.6;
-          }
-          80% {
-            opacity: 0.6;
-          }
-          100% {
-            transform: translateX(100%) translateY(8%) scale(0.8);
-            opacity: 0;
-          }
-        }
-        .wave-glow-delayed {
-          animation: wave-glow-delayed 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-          animation-delay: 2s;
+          animation: float-down 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+          will-change: transform;
         }
         
         /* Text wave animation keyframes */
@@ -109,7 +44,7 @@ export function HeroSection() {
         /* Base wave-through-text effect */
         .wave-through-text {
           position: relative;
-          color: rgba(255, 255, 255, 0.9);
+          color: rgba(255, 255, 255, 0.95);
         }
         
         .wave-through-text::before {
@@ -122,8 +57,8 @@ export function HeroSection() {
           background: linear-gradient(
             90deg,
             transparent 0%,
-            rgba(168, 85, 247, 0.6) 25%,
-            rgba(20, 184, 166, 0.6) 50%,
+            rgba(168, 85, 247, 0.7) 25%,
+            rgba(20, 184, 166, 0.7) 50%,
             transparent 100%
           );
           background-size: 200% 100%;
@@ -134,107 +69,39 @@ export function HeroSection() {
           will-change: background-position;
           pointer-events: none;
         }
-        
-        /* Secondary wave effect - different colors and delay */
-        .wave-through-text-secondary::before {
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(79, 70, 229, 0.5) 25%,
-            rgba(16, 185, 129, 0.5) 50%,
-            transparent 100%
-          );
-          animation: text-wave-highlight 4s linear infinite 2s;
-        }
-        
-        /* Single-sweep wave effect */
-        .wave-through-text-single-sweep::before {
-          animation: text-wave-highlight 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        
-        /* Fix for the sustainable startups span */
-        .wave-through-text span.gradient-text {
-          background-clip: text;
-          -webkit-background-clip: text;
-          color: transparent;
-          opacity: 1;
-          position: relative;
-          z-index: 5;
-        }
       `}</style>
       
       <div className="w-full max-w-5xl mx-auto px-6 sm:px-8 md:px-12 py-8 sm:py-12 md:py-16 lg:py-24 relative">
-        {/* Background decorative elements */}
-        <div className="absolute top-1/4 -left-16 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl z-0 animate-pulse-slow"></div>
-        <div className="absolute bottom-1/4 -right-16 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl z-0 animate-pulse-slow"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-purple-900/5 via-transparent to-transparent rounded-full z-0 opacity-60"></div>
-        
-        {/* Enhanced Planet-like radial glow effect with increased visibility */}
-        <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] z-0 pointer-events-none overflow-visible"
-          style={{ 
-            transform: 'translate(-50%, -50%)',
-            filter: 'blur(2px)',
-            mixBlendMode: 'screen'
-          }}
-        >
-          {/* Inner glow - brighter core */}
-          <div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] rounded-full animate-pulse-slow"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(147, 51, 234, 0.3) 0%, rgba(139, 92, 246, 0.15) 30%, rgba(139, 92, 246, 0.05) 60%, transparent 80%)',
-              boxShadow: '0 0 80px 40px rgba(147, 51, 234, 0.2)'
-            }}
-          ></div>
-          
-          {/* Middle glow layer */}
-          <div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full animate-glow-float"
-            style={{ 
-              background: 'radial-gradient(circle, transparent 30%, rgba(20, 184, 166, 0.15) 50%, rgba(20, 184, 166, 0.05) 70%, transparent 90%)',
-              boxShadow: '0 0 100px 50px rgba(20, 184, 166, 0.1)'
-            }}
-          ></div>
-          
-          {/* Outer glow - subtle edge */}
-          <div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[170%] h-[170%] rounded-full animate-glow-float-delayed"
-            style={{ 
-              background: 'radial-gradient(circle, transparent 50%, rgba(79, 70, 229, 0.1) 70%, rgba(79, 70, 229, 0.05) 85%, transparent 95%)',
-              boxShadow: '0 0 150px 70px rgba(79, 70, 229, 0.05)'
-            }}
-          ></div>
-          
-          {/* Atmospheric haze */}
-          <div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] rounded-full"
-            style={{ 
-              background: 'radial-gradient(circle, transparent 60%, rgba(88, 28, 135, 0.08) 80%, rgba(88, 28, 135, 0.05) 90%, transparent 100%)',
-              opacity: 0.9
-            }}
-          ></div>
-        </div>
         
         <div className="flex flex-col items-center text-center relative z-20" style={{ isolation: 'isolate' }}>
-         
           {/* Main title with increased spacing and higher z-index */}
           <div 
             className="mb-6 md:mb-8 relative px-8 py-4 rounded-lg"
-            style={{ 
-              position: 'relative', 
-              zIndex: 9999,
-              isolation: 'isolate',
-            }}
+            style={{ position: 'relative', zIndex: 10 }}
           >
-            {/* Subtle glow effect behind title */}
+            {/* Enhanced glow effect behind title with sharper definition */}
             <div 
-              className="absolute inset-0 -z-10 bg-gradient-radial from-purple-500/10 via-transparent to-transparent rounded-full blur-3xl opacity-70"
+              className="absolute inset-0 -z-10 bg-gradient-radial from-purple-500/20 via-purple-500/5 to-transparent rounded-full opacity-85"
               style={{
                 width: '120%',
                 height: '120%',
                 left: '-10%',
                 top: '-10%',
-                transform: 'translateZ(0)',
+                filter: 'blur(4px)',
+                boxShadow: 'inset 0 0 15px 5px rgba(168, 85, 247, 0.05)'
+              }}
+            ></div>
+            
+            {/* Subtle secondary glow for depth */}
+            <div 
+              className="absolute inset-0 -z-10 bg-gradient-radial from-purple-600/5 via-transparent to-transparent rounded-full"
+              style={{
+                width: '140%',
+                height: '140%',
+                left: '-20%',
+                top: '-20%',
+                opacity: 0.7,
+                filter: 'blur(8px)'
               }}
             ></div>
             
@@ -247,25 +114,19 @@ export function HeroSection() {
             />
           </div>
           
-          {/* Refined description section with enhanced animations */}
+          {/* Refined description section */}
           <motion.div 
-            initial={{ opacity: 0, filter: "blur(8px)" }}
-            animate={{ opacity: 1, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ 
-              duration: 0.3,
+              duration: 0.4,
               delay: 0.15,
-              staggerChildren: 0.08,
               ease: [0.16, 1, 0.3, 1]
             }}
             className="space-y-4 mb-8 md:mb-12 max-w-3xl relative"
           >
             {/* Tagline with improved styling */}
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: 0.2 }}
-              className="flex flex-wrap items-baseline justify-center"
-            >
+            <div className="flex flex-wrap items-baseline justify-center">
               <p 
                 className="text-lg sm:text-xl md:text-2xl font-medium leading-relaxed wave-through-text inline"
                 data-text="The world's first dedicated platform for "
@@ -275,18 +136,16 @@ export function HeroSection() {
               <span className="text-lg sm:text-xl md:text-2xl bg-gradient-to-r from-purple-500 via-fuchsia-500 to-emerald-500 bg-clip-text text-transparent font-semibold ml-1 inline">
                 sustainable startups
               </span>
-            </motion.div>
-            
-            
+            </div>
           </motion.div>
           
-          {/* Call to action buttons - refined and modernized */}
+          {/* Call to action buttons */}
           <motion.div 
-            initial={{ opacity: 0, y: 20, filter: "blur(5px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ 
-              duration: 0.3,
-              delay: 0.3,
+              duration: 0.4,
+              delay: 0.25,
               ease: [0.16, 1, 0.3, 1]
             }}
             className="flex flex-col sm:flex-row gap-5 mb-12 md:mb-16"
@@ -321,11 +180,11 @@ export function HeroSection() {
             </Button>
           </motion.div>
           
-          {/* Elegant scroll CTA with more space */}
+          {/* Elegant scroll CTA */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.25, delay: 0.4 }}
+            transition={{ duration: 0.3, delay: 0.35 }}
             className="mt-auto"
           >
             <button 

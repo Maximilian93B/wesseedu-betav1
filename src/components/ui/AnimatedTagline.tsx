@@ -36,30 +36,28 @@ export function AnimatedTagline({
     visible: (i = 1) => ({
       opacity: 1,
       transition: { 
-        staggerChildren: 0.12,
+        staggerChildren: 0.08,
         delayChildren: delay,
       },
     }),
   }
   
-  // Child variants (for each word) - Removed all filter properties to avoid negative blur values
+  // Enhanced child variants with better performance
   const child = {
     hidden: {
       opacity: 0,
-      y: 20,
-      rotateX: 10,
-      scale: 0.95,
+      y: 10,
+      filter: "blur(3px)",
     },
     visible: {
       opacity: 1,
       y: 0,
-      rotateX: 0,
-      scale: 1,
+      filter: "blur(0px)",
       transition: {
         type: "spring",
-        damping: 18,
-        stiffness: 150,
-        mass: 0.7,
+        damping: 24,
+        stiffness: 120,
+        mass: 0.8,
       },
     },
   }
@@ -69,57 +67,43 @@ export function AnimatedTagline({
     return highlightWords.includes(word) || highlightWords.length === 0
   }
   
-  // Get gradient class based on word position
-  const getGradientClass = (index: number, total: number) => {
-    // Create a gradient that shifts across the phrase
-    if (index < total / 3) {
-      return "bg-gradient-to-r from-teal-400 to-purple-400"
-    } else if (index < (total * 2) / 3) {
-      return "bg-gradient-to-r from-purple-400 via-white to-teal-400"
-    } else {
-      return "bg-gradient-to-r from-purple-400 to-teal-400"
-    }
-  }
-  
   return (
     <motion.div
-      className={`flex flex-col ${className}`}
+      className={`${className} will-change-transform`}
       variants={container}
       initial="hidden"
       animate="visible"
-      style={{ position: 'relative', zIndex: 10 }}
     >
-      <div className="flex flex-wrap relative">
-        {/* Subtle glow effect behind text - using opacity instead of blur */}
-        <div className="absolute -inset-4 bg-purple-500/10 rounded-full opacity-50 z-0"></div>
-        
+      <div className="flex flex-wrap">
         {words.map((word, index) => (
           <motion.div
             key={`word-${index}-${word}`}
-            className="mr-3 mb-3 inline-block relative z-10"
+            className={`mr-3 mb-3 inline-block relative ${shouldHighlight(word) ? "z-10" : ""}`}
             variants={child}
             custom={index}
-            style={{ position: 'relative', zIndex: 10 }}
+            whileHover={{ 
+              scale: shouldHighlight(word) ? 1.03 : 1.01,
+              transition: { duration: 0.15, type: "tween" }
+            }}
           >
+            {shouldHighlight(word) && (
+              <div 
+                className="absolute -inset-1 opacity-10 rounded-full -z-10 will-change-opacity" 
+                style={{
+                  background: 'radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%)',
+                  filter: 'blur(1px)'
+                }}
+              ></div>
+            )}
+            
             <span 
-              className={`
-                ${shouldHighlight(word) ? getGradientClass(index, words.length) : 'text-white'} 
-                bg-clip-text text-transparent font-semibold relative z-10
-              `}
+              className={`text-white ${shouldHighlight(word) ? "font-bold" : "font-semibold opacity-90"}`}
             >
               {word}
             </span>
           </motion.div>
         ))}
       </div>
-      
-      {/* Decorative line */}
-      <motion.div 
-        className="h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent mt-4 opacity-70"
-        initial={{ width: 0, opacity: 0 }}
-        animate={{ width: "100%", opacity: 0.7 }}
-        transition={{ delay: delay + 0.5, duration: 0.8, ease: "easeOut" }}
-      />
     </motion.div>
   )
 } 
