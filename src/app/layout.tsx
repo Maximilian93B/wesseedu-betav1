@@ -68,8 +68,7 @@ export default function RootLayout({
                 </div>
               )}
               <main className="flex-1 relative z-0">{children}</main>
-              {/* Only show Footer if NOT on any auth page */}
-              {!isAuthPage && <Footer />}
+             
             </div>
        
         </SupabaseProviders>

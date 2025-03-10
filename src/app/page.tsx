@@ -197,13 +197,23 @@ export default function LandingPage() {
         style={{ scaleX, transformOrigin: "0%" }}
       />
       
-      {/* Client-only starry background component */}
-      {isMounted && <StarryBackground />}
-      
-      {/* CosmicBackground with proper transparency - in front of sphere */}
-      <div className="fixed inset-0" style={{ zIndex: -40 }}>
-        <CosmicBackground />
-      </div>
+      {/* Primary background - cosmos with reduced darkness */}
+      {isMounted && (
+        <>
+          <div 
+            className="fixed inset-0 z-0"
+            style={{ 
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.6) 100%)', // Reduced opacity from 0.85/0.7
+              pointerEvents: 'none',
+              willChange: 'opacity',
+              opacity: contentVisible ? 1 : 0,
+              transition: 'opacity 0.5s ease-out'
+            }}
+          ></div>
+          <StarryBackground />
+          <CosmicBackground />
+        </>
+      )}
       
       {/* Content container with higher z-index and smooth scrolling */}
       <motion.main 

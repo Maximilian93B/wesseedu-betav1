@@ -26,17 +26,17 @@ const glowShader = {
     void main() {
       vec4 color = texture2D(tDiffuse, vUv);
       
-      // Enhanced color adjustment with better cyan and blue tones
-      color.r = color.r * 0.7; // Further reduce red for even cooler, more crystal-like tones
-      color.g = min(color.g * 1.4, 1.0); // Enhance green channel for better cyan
-      color.b = min(color.b * 1.3, 1.0); // Boost blue slightly
+      // Enhanced color adjustment with brighter cyan and blue tones
+      color.r = color.r * 0.75; // Slightly higher red value for better visibility (was 0.7)
+      color.g = min(color.g * 1.5, 1.0); // Enhance green channel even more for better cyan (was 1.4)
+      color.b = min(color.b * 1.4, 1.0); // Boost blue more for better visibility (was 1.3)
       
-      // More pronounced edge falloff for crystal clear definition
+      // Less pronounced edge falloff for better visibility
       float dist = distance(vUv, vec2(0.5, 0.5));
-      color.rgb *= 1.0 - smoothstep(0.3, 0.6, dist) * 0.6; // Sharper falloff
+      color.rgb *= 1.0 - smoothstep(0.3, 0.7, dist) * 0.5; // More gradual falloff (was 0.6 to 0.3)
       
-      // Subtle contrast enhancement
-      color.rgb = pow(color.rgb, vec3(0.925));
+      // Subtle contrast enhancement with slightly reduced power for brighter effect
+      color.rgb = pow(color.rgb, vec3(0.9)); // Was 0.925
       
       gl_FragColor = color;
     }
@@ -95,7 +95,8 @@ export default function CosmicBackground() {
 
     // Scene setup
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color("#000000")
+    // Make the scene background transparent instead of black
+    scene.background = null
     sceneRef.current = scene
 
     // Camera setup
@@ -105,7 +106,8 @@ export default function CosmicBackground() {
     // Renderer setup with optimized parameters
     const renderer = new THREE.WebGLRenderer({ 
       antialias: false, // Disable antialiasing for performance
-      alpha: true,
+      alpha: true,      // Ensure alpha channel is enabled
+      premultipliedAlpha: false, // Better for transparent backgrounds
       powerPreference: 'high-performance',
       precision: 'mediump' // Use medium precision for better performance
     })
@@ -152,8 +154,8 @@ export default function CosmicBackground() {
           // Position and parameters for the horizon
           float horizonY = -0.90;
           float ringRadius = 0.35;
-          float thickness = 0.05; // Thinner for more crystal-like definition
-          float glowStrength = 0.9; // Slightly stronger
+          float thickness = 0.055; // Slightly thicker for better visibility (was 0.05)
+          float glowStrength = 1.0; // Stronger glow (was 0.9)
           
           // Calculate distance to horizon line
           float dist = abs(uv.y - horizonY);
@@ -162,39 +164,39 @@ export default function CosmicBackground() {
           vec2 ringCenter = vec2(0.0, horizonY);
           float ringDist = sdCircle(uv - ringCenter, ringRadius);
           
-          // Black hole in the center
-          float blackHoleRadius = ringRadius * 0.65;
+          // Black hole in the center - slightly smaller for more visible elements
+          float blackHoleRadius = ringRadius * 0.62; // Was 0.65
           float blackHoleDist = sdCircle(uv - ringCenter, blackHoleRadius);
           
-          // Enhanced pulse animation with multi-frequency
-          float fastPulse = (sin(time * 1.1) * 0.04 + 0.96);
-          float slowPulse = (sin(time * 0.4) * 0.05 + 0.95);
+          // Enhanced pulse animation with multi-frequency - slightly stronger
+          float fastPulse = (sin(time * 1.1) * 0.045 + 0.965); // Was 0.04 and 0.96
+          float slowPulse = (sin(time * 0.4) * 0.055 + 0.955); // Was 0.05 and 0.95
           float pulse = fastPulse * slowPulse;
           
-          // Crystal clear glow effects with sharper falloff
-          float horizonGlow = smoothstep(0.1, 0.0, dist) * 0.35;
-          float ringGlow = smoothstep(thickness, 0.0, abs(ringDist)) * 0.8 * pulse;
-          float centerGlow = smoothstep(0.1, 0.0, length(uv - ringCenter)) * 0.7;
+          // Crystal clear glow effects with slightly less sharp falloff
+          float horizonGlow = smoothstep(0.12, 0.0, dist) * 0.4; // Was 0.1 and 0.35
+          float ringGlow = smoothstep(thickness, 0.0, abs(ringDist)) * 0.9 * pulse; // Was 0.8
+          float centerGlow = smoothstep(0.12, 0.0, length(uv - ringCenter)) * 0.8; // Was 0.1 and 0.7
           
-          // Create black hole mask with cleaner edge
-          float blackHoleMask = smoothstep(0.005, -0.005, blackHoleDist);
+          // Create black hole mask with cleaner edge but slightly more transparent
+          float blackHoleMask = smoothstep(0.005, -0.005, blackHoleDist) * 0.95; // Added * 0.95 to make it less dark
           
-          // Enhanced colors for crystal clarity - crisper cyan and teal
-          vec3 horizonColor = vec3(0.1, 0.5, 0.6) * horizonGlow * glowStrength;
-          vec3 ringColor = vec3(0.35, 0.9, 0.85) * ringGlow * glowStrength;
-          vec3 centerColor = vec3(0.05, 0.55, 0.5) * centerGlow * glowStrength * (1.0 - blackHoleMask * 0.95);
+          // Enhanced colors for crystal clarity - brighter cyan and teal
+          vec3 horizonColor = vec3(0.15, 0.55, 0.65) * horizonGlow * glowStrength; // Brighter values
+          vec3 ringColor = vec3(0.4, 0.95, 0.9) * ringGlow * glowStrength;  // Brighter values
+          vec3 centerColor = vec3(0.1, 0.6, 0.55) * centerGlow * glowStrength * (1.0 - blackHoleMask * 0.9); // Less dark mask
           
-          // More focused ray effect
-          float rayIntensity = pow(1.0 - abs(atan(uv.x, uv.y - horizonY) / 3.14159), 15.0) * 0.12 * pulse;
-          vec3 rayColor = vec3(0.2, 0.8, 0.7) * rayIntensity;
+          // More focused ray effect with higher intensity
+          float rayIntensity = pow(1.0 - abs(atan(uv.x, uv.y - horizonY) / 3.14159), 14.0) * 0.15 * pulse; // Less sharp, more intense
+          vec3 rayColor = vec3(0.25, 0.85, 0.75) * rayIntensity; // Brighter values
           
           // Combine all effects
           vec3 finalColor = horizonColor + ringColor + centerColor + rayColor;
           
-          // Apply black hole with cleaner edge
-          finalColor *= mix(1.0, 0.05, blackHoleMask);
+          // Apply black hole with cleaner edge - less dark
+          finalColor *= mix(1.0, 0.1, blackHoleMask); // Was 0.05 - higher value means less dark
           
-          // Additional intensity falloff for crystal clear definition
+          // Additional intensity falloff for crystal clear definition - less sharp falloff
           float distFromCenter = length(uv - ringCenter);
           finalColor *= smoothstep(0.9, 0.2, distFromCenter);
           
