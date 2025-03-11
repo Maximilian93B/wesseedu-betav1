@@ -24,6 +24,19 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
   const sidebarRef = useRef<HTMLDivElement>(null)
   const [isHovering, setIsHovering] = useState(false)
 
+  // Add floating animation state
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  // Detect scrolling to adjust nav appearance
+  useEffect(() => {
+    const handleScroll = () => {
+      setHasScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // Spotlight effect
   useEffect(() => {
     if (!spotlightRef.current || !logoRef.current || !navRef.current) return
@@ -207,10 +220,14 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
 
   return (
     <>
-      {/* Main navigation bar */}
+      {/* Main navigation bar with floating effect */}
       <nav 
         ref={navRef}
-        className="w-full z-50 backdrop-blur-sm bg-black/20 relative border-b border-emerald-500/10 sticky top-0"
+        className={`w-full z-50 fixed top-0 transition-all duration-500 ${
+          hasScrolled 
+            ? 'backdrop-blur-md bg-black/30 border-b border-emerald-500/20' 
+            : 'backdrop-blur-sm bg-black/10'
+        }`}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => {
           setIsHovering(false);
@@ -219,8 +236,23 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
             spotlightRef.current.style.opacity = '0'
           }
         }}
+        style={{
+          transform: 'translateZ(0)', // Hardware acceleration
+          animation: 'float-nav 6s ease-in-out infinite',
+          boxShadow: hasScrolled 
+            ? '0 4px 20px -5px rgba(66, 240, 173, 0.15)' 
+            : '0 8px 32px -5px rgba(66, 240, 173, 0.08)',
+        }}
       >
-        {/* Spotlight effect overlay */}
+        {/* Add floating animation keyframes */}
+        <style jsx global>{`
+          @keyframes float-nav {
+            0%, 100% { transform: translateY(0) translateZ(0); }
+            50% { transform: translateY(-4px) translateZ(0); }
+          }
+        `}</style>
+
+        {/* Spotlight effect overlay - enhanced for floating effect */}
         <div 
           ref={spotlightRef}
           className="absolute inset-0 pointer-events-none z-0 opacity-0 transition-opacity duration-500"
@@ -229,20 +261,29 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
           }}
         />
         
+        {/* Glow border effect */}
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent opacity-70"></div>
+        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex items-center justify-between h-20 relative">
-            {/* Logo */}
+            {/* Logo with enhanced floating effect */}
             <div className="flex items-center">
               <Link href="/" className="flex items-center group">
-                <Zap className="w-8 h-8 text-emerald-400 group-hover:text-emerald-300 transition-colors" />
+                <div className="relative">
+                  <Zap className="w-8 h-8 text-emerald-400 group-hover:text-emerald-300 transition-colors" 
+                    style={{ filter: 'drop-shadow(0 0 8px rgba(52, 211, 153, 0.3))' }}
+                  />
+                  {/* Subtle glow behind icon */}
+                  <div className="absolute inset-0 bg-emerald-500/10 rounded-full blur-md -z-10 scale-150 opacity-0 group-hover:opacity-70 transition-opacity duration-300"></div>
+                </div>
                 <div ref={logoRef} className="ml-2 text-xl font-bold flex">
                   <span className="bg-gradient-to-r from-emerald-400 to-emerald-500 bg-clip-text text-transparent">
                     We
                   </span>
                   <span className="seed-text bg-gradient-to-r from-white to-white bg-clip-text text-transparent relative">
                     Seed
-                    {/* Subtle glow effect for the Seed text */}
-                    <span className="absolute inset-0 blur-sm bg-white/10 opacity-50 rounded-full" />
+                    {/* Enhanced glow effect for the Seed text */}
+                    <span className="absolute inset-0 blur-md bg-white/10 opacity-50 rounded-full" />
                   </span>
                   <span className="bg-gradient-to-r from-emerald-400 to-purple-400 bg-clip-text text-transparent">
                     U
@@ -251,18 +292,20 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
               </Link>
             </div>
 
-            {/* Menu toggle button */}
+            {/* Menu toggle button with subtle float effect */}
             <Button 
               variant="ghost" 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30"
+              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30 relative overflow-hidden group"
               aria-label="Toggle navigation menu"
+              style={{ animation: 'float-nav 7s ease-in-out infinite reverse' }}
             >
-              {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
+              {isSidebarOpen ? <X className="h-6 w-6 relative z-10" /> : <Menu className="h-6 w-6 relative z-10" />}
             </Button>
             
-            {/* Login button - visible on desktop navbar */}
-            <div className="hidden md:block">
+            {/* Login button - visible on desktop navbar with floating effect */}
+            <div className="hidden md:block" style={{ animation: 'float-nav 8s ease-in-out infinite' }}>
               {loginDialog}
             </div>
           </div>

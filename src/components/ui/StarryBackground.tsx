@@ -8,9 +8,24 @@ const StarryBackground = memo(() => {
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Reduced number of stars and orbital particles
-  const TOTAL_STARS = 100; // Reduced from 200
-  const TOTAL_PARTICLES = 15; // Reduced from 30
+  // Further reduced particles for better performance
+  const TOTAL_STARS = 60; // Reduced from 75
+  const TOTAL_PARTICLES = 8; // Reduced from 10
+  
+  // Detect if reduced motion is preferred
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      setPrefersReducedMotion(mediaQuery.matches);
+      
+      // Add listener for changes
+      const handleChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, []);
   
   // Only generate stars when component is visible in viewport
   useEffect(() => {
@@ -40,9 +55,9 @@ const StarryBackground = memo(() => {
     // Only generate stars if we haven't yet
     if (stars.length === 0) {
       const generatedStars = Array.from({ length: TOTAL_STARS }).map((_, i) => {
-        const size = Math.random() * 2.2;
+        const size = Math.random() * 2;
         const isLarger = Math.random() > 0.92;
-        const hasGlow = Math.random() > 0.7; // Reduced glow frequency from 0.6
+        const hasGlow = Math.random() > 0.85; // Further reduced glow frequency
         const isBright = Math.random() > 0.75;
         
         return (
@@ -60,13 +75,17 @@ const StarryBackground = memo(() => {
                 isLarger ? 
                   `rgba(${240 + Math.random() * 15}, ${240 + Math.random() * 15}, ${250}, 1)` : 
                   `rgba(${210 + Math.random() * 45}, ${210 + Math.random() * 45}, ${230 + Math.random() * 25}, 1)`,
-              // Simplify box shadow for performance
-              boxShadow: hasGlow ? 
-                `0 0 ${Math.random() * 4 + 2}px rgba(255, 255, 255, ${Math.random() * 0.5 + 0.5})` : 
+              // Only apply shadow to larger stars to save performance
+              boxShadow: hasGlow && isLarger ? 
+                `0 0 ${Math.random() * 2 + 1}px rgba(255, 255, 255, ${Math.random() * 0.3 + 0.3})` : 
                 'none',
-              // Optimize animation - longer durations, fewer variations
-              animation: `twinkle ${Math.random() * 3 + 5}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`
+              // Use reduced motion if preferred by user
+              animation: !prefersReducedMotion ? 
+                `twinkle ${Math.random() * 6 + 8}s ease-in-out infinite` : 
+                'none',
+              animationDelay: `${Math.random() * 5}s`,
+              // Hardware acceleration for smoother animations
+              transform: 'translateZ(0)'
             }}
           />
         );
@@ -77,7 +96,7 @@ const StarryBackground = memo(() => {
     
     // Only generate orbiting particles if we haven't yet
     if (orbitingParticles.length === 0) {
-      const generatedOrbitingParticles = Array.from({ length: TOTAL_PARTICLES }).map((_, i) => {
+      const generatedOrbitingParticles = Array.from({ length: prefersReducedMotion ? Math.floor(TOTAL_PARTICLES / 2) : TOTAL_PARTICLES }).map((_, i) => {
         const angle = Math.random() * 360;
         const distance = 75 + Math.random() * 10;
         const size = Math.random() * 1.5 + 0.5;
@@ -93,13 +112,17 @@ const StarryBackground = memo(() => {
               backgroundColor: isBright ?
                 `rgba(255, 255, 255, ${Math.random() * 0.3 + 0.7})` :
                 `rgba(${210 + Math.random() * 45}, ${210 + Math.random() * 45}, ${240}, ${Math.random() * 0.4 + 0.6})`,
-              // Simplify box shadow for better performance
-              boxShadow: `0 0 ${Math.random() * 2 + 1}px rgba(255, 255, 255, ${Math.random() * 0.5 + 0.5})`,
+              // Simplified shadow
+              boxShadow: `0 0 ${Math.random() * 1 + 0.5}px rgba(255, 255, 255, ${Math.random() * 0.3 + 0.3})`,
               left: `calc(50% + ${distance * Math.cos(angle * Math.PI / 180)}vmin)`,
               top: `calc(50% + ${distance * Math.sin(angle * Math.PI / 180)}vmin)`,
-              // Use slower animations to reduce CPU usage
-              animation: `rotate-slow ${Math.random() * 20 + 80}s linear infinite${Math.random() > 0.5 ? ' reverse' : ''}`,
-              opacity: Math.random() * 0.3 + 0.7
+              // Slower animations for better performance
+              animation: !prefersReducedMotion ? 
+                `rotate-slow ${Math.random() * 30 + 120}s linear infinite${Math.random() > 0.5 ? ' reverse' : ''}` : 
+                'none',
+              opacity: Math.random() * 0.3 + 0.6,
+              // Hardware acceleration for smoother animations
+              transform: 'translateZ(0)'
             }}
           />
         );
@@ -107,32 +130,50 @@ const StarryBackground = memo(() => {
       
       setOrbitingParticles(generatedOrbitingParticles);
     }
-  }, [isVisible, stars.length, orbitingParticles.length]);
+  }, [isVisible, stars.length, orbitingParticles.length, prefersReducedMotion]);
   
   // Add any necessary CSS keyframes
   return (
     <>
-      {/* Add essential keyframes */}
+      {/* Add essential keyframes - simplified animations */}
       <style jsx global>{`
         @keyframes twinkle {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.3; transform: scale(0.95); }
         }
         
         @keyframes rotate-slow {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% { transform: rotate(0deg) translateZ(0); }
+          100% { transform: rotate(360deg) translateZ(0); }
+        }
+
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 0.7; }
+        }
+
+        @keyframes atmospheric-shimmer {
+          0%, 100% { 
+            box-shadow: 0 0 40px 10px rgba(168, 85, 247, 0.08), inset 0 0 100px 40px rgba(147, 51, 234, 0.15);
+            opacity: 0.65;
+            transform: scale(1) translateZ(0);
+          }
+          50% { 
+            box-shadow: 0 0 50px 15px rgba(168, 85, 247, 0.12), inset 0 0 120px 50px rgba(147, 51, 234, 0.2);
+            opacity: 0.75;
+            transform: scale(1.005) translateZ(0);
+          }
         }
       `}</style>
       
       {/* Fixed background container */}
       <div ref={containerRef} className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: -110 }}>
-        {/* Deep space gradient background with richer blacks - reducing darkness to improve planet visibility */}
+        {/* Deep space gradient background */}
         <div 
           className="absolute inset-0" 
           style={{ 
             background: 'radial-gradient(ellipse at center, #05060a 0%, #040508 45%, #020307 70%, #010205 100%)',
-            opacity: 0.85, // Reduced opacity to make background less dark
+            opacity: 0.85,
           }}
         ></div>
         
@@ -140,19 +181,9 @@ const StarryBackground = memo(() => {
         <div className="absolute inset-0">
           {stars}
         </div>
-        
-        {/* Simplified noise texture - reduced opacity further */}
-        <div 
-          className="fixed inset-0 pointer-events-none" 
-          style={{ 
-            zIndex: -105,
-            backgroundImage: 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFZSURBVGhD7ZgxTsNAEEX/ItcgPQfgBFyAkpqGBuUCHCLpKWjpOQMlBQUFNR0FRyAFHR3iP7GjKGuv7NjSWP6f9GTt7tjy82i9hIiIiIjIAjmZCLvgbvmt3az6Ojs5BW8TYbxTn4K5xj25qv3CXxvg9sE8bpqR92KFHa36j7xS39Q+qO2D47aqxrJ5LA04HiP+mWqvv9zzFdXZUJ2eMIKp9VP9Oi3PQg0r6HM02rqpMfJoe+B6H3yvnUtX1fMYXZF3D7gAD2DfCPDTUPelz5Oce2AHXICHdPwt9a0BnpcMI9ige54JzKFwriXDCDboXiPAnAr/Wbqt7cHnOh0jRH9r61Nwqy4rfkhxI9ig7uVJg0bFjfiXunN1OpbrGZ1fRHfUhZ/3A/UndSPYoFuLRnRHXWQ9o0VERERkcOZzsR1oxC+2g+/aOTHfi61l4BfbIiIiIiIzI4QfiKSE8+j7GrIAAAAASUVORK5CYII=") repeat',
-            opacity: 0.005 // Reduced from 0.01
-          }}
-        ></div>
       </div>
       
-      {/* Black sphere with planetary elements - simplified for performance */}
+      {/* Modified planet implementation - positioned to create "cresting over" effect with simplified animations */}
       {isVisible && (
         <div 
           className="fixed inset-0 pointer-events-none overflow-visible"
@@ -160,36 +191,33 @@ const StarryBackground = memo(() => {
             zIndex: -80,
           }}
         >
+          {/* Planet container - moved up to create cresting effect */}
           <div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] pointer-events-none overflow-visible"
+            className="absolute w-screen pointer-events-none overflow-visible"
             style={{ 
-              transform: 'translate(-50%, -50%)',
-              mixBlendMode: 'screen', 
+              top: '50%',
+              left: '0',
+              right: '0',
+              mixBlendMode: 'screen',
+              willChange: 'transform',
             }}
           >
-            {/* Planet core with simplified effects - increased visibility */}
+            {/* Planet core with full width - positioned higher to create cresting effect */}
             <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-square rounded-full"
+              className="absolute rounded-[50%]"
               style={{ 
-                width: '120vmin',
-                height: '120vmin',
+                width: '300vw',
+                height: '300vw',
+                left: '50%',
+                transform: 'translateX(-50%) translateZ(0)',
+                top: '10vh',
                 background: 'linear-gradient(135deg, #030310 0%, #05051a 100%)',
-                boxShadow: '0 0 90px 25px rgba(15, 15, 40, 0.7), inset 0 0 60px 30px rgba(5, 5, 15, 0.8)',
+                boxShadow: '0 0 80px 20px rgba(15, 15, 40, 0.6), inset 0 0 50px 25px rgba(5, 5, 15, 0.7)',
                 border: '1px solid rgba(60, 60, 100, 0.4)',
                 zIndex: 1,
                 overflow: 'hidden',
-                willChange: 'transform', // Performance hint for browsers
               }}
             >
-              {/* Simplified glowing effects - brighter glow */}
-              <div className="absolute -inset-[5%] -z-10 rounded-full" 
-                style={{ 
-                  background: 'radial-gradient(circle at center, transparent 78%, rgba(160, 220, 255, 0.5) 82%, rgba(180, 130, 255, 0.7) 86%, rgba(230, 110, 255, 0.6) 90%, rgba(120, 240, 255, 0.5) 94%, transparent 98%)',
-                  filter: 'blur(5px)',
-                  opacity: 0.98,
-                }}
-              ></div>
-              
               {/* Planet texture overlay - increased visibility */}
               <div 
                 className="absolute inset-0 opacity-25"
@@ -199,37 +227,63 @@ const StarryBackground = memo(() => {
               ></div>
             </div>
             
-            {/* Primary glow ring - brighter */}
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-square rounded-full"
-              style={{ 
-                width: '145vmin',
-                height: '145vmin',
-                background: 'radial-gradient(circle at center, transparent 72%, rgba(56, 189, 248, 0.2) 80%, rgba(14, 165, 233, 0.85) 88%, rgba(3, 105, 161, 0.45) 95%, transparent 100%)',
-                opacity: 0.98,
-                zIndex: 0,
-                filter: 'blur(1px)',
-                boxShadow: '0 0 80px 35px rgba(56, 189, 248, 0.35)',
-                willChange: 'transform',
-                transform: 'rotate(0deg)',
-                animation: 'rotate-slow 120s linear infinite'
-              }}
-            ></div>
+            {/* Atmospheric radiant ring - simplified for performance but preserves visual effect */}
+            {!prefersReducedMotion && (
+              <div 
+                className="absolute rounded-[50%]"
+                style={{ 
+                  width: '302vw',
+                  height: '302vw',
+                  left: '50%',
+                  transform: 'translateX(-50%) translateZ(0)',
+                  top: '9.5vh',
+                  zIndex: 0,
+                  background: 'transparent',
+                  border: '4px solid rgba(168, 85, 247, 0.08)',
+                  boxShadow: '0 0 40px 10px rgba(168, 85, 247, 0.1), inset 0 0 100px 40px rgba(147, 51, 234, 0.15)',
+                  opacity: 0.75,
+                  willChange: 'transform, opacity',
+                  animation: 'atmospheric-shimmer 30s ease-in-out infinite'
+                }}
+              ></div>
+            )}
             
-            {/* Secondary glow ring - brighter */}
+            {/* Secondary atmospheric halo - simplified for performance */}
+            {!prefersReducedMotion && (
+              <div 
+                className="absolute rounded-[50%]"
+                style={{ 
+                  width: '307vw',
+                  height: '307vw',
+                  left: '50%',
+                  transform: 'translateX(-50%) translateZ(0)',
+                  top: '8.3vh',
+                  zIndex: -1,
+                  background: 'transparent',
+                  boxShadow: '0 0 120px 25px rgba(126, 34, 206, 0.05), inset 0 0 50px 15px rgba(168, 85, 247, 0.07)',
+                  opacity: 0.55,
+                  willChange: 'opacity',
+                  animation: 'pulse-glow 35s ease-in-out infinite'
+                }}
+              ></div>
+            )}
+            
+            {/* Primary glow ring - simplified for performance */}
             <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 aspect-square rounded-full"
+              className="absolute rounded-[50%]"
               style={{ 
-                width: '150vmin',
-                height: '150vmin',
-                background: 'radial-gradient(circle at center, transparent 72%, rgba(168, 85, 247, 0.2) 80%, rgba(147, 51, 234, 0.85) 88%, rgba(126, 34, 206, 0.45) 95%, transparent 100%)',
-                opacity: 0.98,
-                transform: 'rotate(60deg)',
-                zIndex: 0,
-                filter: 'blur(1px)',
-                boxShadow: '0 0 80px 35px rgba(168, 85, 247, 0.35)',
-                willChange: 'transform',
-                animation: 'rotate-slow 180s linear infinite reverse'
+                width: '320vw',
+                height: '320vw',
+                left: '50%',
+                transform: 'translateX(-50%) translateZ(0)',
+                top: '7vh',
+                background: !prefersReducedMotion ? 
+                  'radial-gradient(circle at center, transparent 72%, rgba(168, 85, 247, 0.1) 80%, rgba(147, 51, 234, 0.5) 88%, rgba(126, 34, 206, 0.25) 95%, transparent 100%)' :
+                  'radial-gradient(circle at center, transparent 72%, rgba(168, 85, 247, 0.05) 80%, rgba(147, 51, 234, 0.25) 88%, rgba(126, 34, 206, 0.15) 95%, transparent 100%)',
+                opacity: 0.8,
+                zIndex: -2,
+                willChange: !prefersReducedMotion ? 'transform' : 'auto',
+                animation: !prefersReducedMotion ? 'rotate-slow 400s linear infinite reverse' : 'none'
               }}
             ></div>
           </div>

@@ -117,15 +117,7 @@ export default function LandingPage() {
   const scaleX = useTransform(smoothScrollProgress, [0, 1], [0, 1])
 
   return (
-    <div 
-      className={`relative min-h-screen w-full overflow-hidden transition-all duration-1000 ease-out ${
-        isMounted ? 'opacity-100' : 'opacity-0'
-      }`}
-      style={{ 
-        position: 'relative',
-        zIndex: 1,
-      }}
-    >
+    <div className="relative min-h-screen w-full overflow-hidden">
       {/* Global animation styles */}
       <style jsx global>{`
         @keyframes rotate-slow {
@@ -197,25 +189,33 @@ export default function LandingPage() {
         style={{ scaleX, transformOrigin: "0%" }}
       />
       
-      {/* Primary background - cosmos with reduced darkness */}
       {isMounted && (
         <>
           <div 
             className="fixed inset-0 z-0"
             style={{ 
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.6) 100%)', // Reduced opacity from 0.85/0.7
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.65) 100%)',
               pointerEvents: 'none',
               willChange: 'opacity',
               opacity: contentVisible ? 1 : 0,
-              transition: 'opacity 0.5s ease-out'
+              transition: 'opacity 0.6s ease-out' // Slightly longer for smoother transition
             }}
           ></div>
-          <StarryBackground />
-          <CosmicBackground />
+          
+          {/* Optimize background components based on device capabilities */}
+          {typeof window !== 'undefined' && (
+            <>
+              <StarryBackground />
+              {/* Only render CosmicBackground on more powerful devices that don't have reduced motion preferences */}
+              {!window.matchMedia('(prefers-reduced-motion: reduce)').matches && !isMobile() && (
+                <CosmicBackground />
+              )}
+            </>
+          )}
         </>
       )}
       
-      {/* Content container with higher z-index and smooth scrolling */}
+      {/* Content container with higher z-index and smooth scrolling - optimized animations */}
       <motion.main 
         ref={containerRef}
         className={`relative w-full h-screen mx-auto max-w-screen-2xl flex flex-col transition-all duration-1000 ease-out hide-scrollbar overflow-y-scroll ${
@@ -224,51 +224,100 @@ export default function LandingPage() {
         style={{ 
           zIndex: 10, 
           position: 'relative',
+          willChange: 'opacity, transform', // Hardware acceleration hint
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        transition={{ 
+          duration: 1.0, // Slower animation for smoother appearance and better performance
+          ease: [0.25, 0.1, 0.25, 1.0] // Custom cubic bezier for more natural motion
+        }}
         exit={{ opacity: 0 }}
       >
-        {/* Hero Section - Centered vertically and horizontally */}
-        <div id="hero-section" className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8" style={{ zIndex: 20, position: 'relative' }}>
+        {/* Hero Section with spacing adjusted for cresting planet effect */}
+        <div 
+          id="hero-section" 
+          className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8" 
+          style={{ 
+            zIndex: 20, 
+            position: 'relative',
+            paddingBottom: '3vh',
+          }}
+        >
           <HeroSection />
         </div>
     
-        {/* Card Section */}
+        {/* Progressively load sections with better performance using priority loading */}
         <Suspense fallback={<SectionLoader />}>
-          <section id="card-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+          <section id="card-section" className="pt-24 pb-24 md:pb-36 flex justify-center px-4 sm:px-6 lg:px-8">
             <CardSection />
           </section>
         </Suspense>
 
-        {/* Impact Section */}
-        <Suspense fallback={<SectionLoader />}>
-          <div id="impact-section">
+        {/* Use IntersectionObserver-based lazy loading for sections that aren't immediately visible */}
+        <LazyLoadSection id="impact-section">
+          <Suspense fallback={<SectionLoader />}>
             <ImpactSection />
-          </div>
-        </Suspense>
+          </Suspense>
+        </LazyLoadSection>
 
-        {/* Partners and Vetting Section */}
-        <Suspense fallback={<SectionLoader />}>
-          <section id="partners-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+        {/* Remaining sections with improved loading strategies */}
+        <LazyLoadSection id="partners-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+          <Suspense fallback={<SectionLoader />}>
             <PartnersAndVetting />
-          </section>
-        </Suspense>
+          </Suspense>
+        </LazyLoadSection>
 
         {/* Problem Solution Flow */}
-        <Suspense fallback={<SectionLoader />}>
-          <section id="solution-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+        <LazyLoadSection id="solution-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+          <Suspense fallback={<SectionLoader />}>
             <ProblemSolutionFlow />
-          </section>
-        </Suspense>
+          </Suspense>
+        </LazyLoadSection>
     
         {/* Key Features */}
-        <Suspense fallback={<SectionLoader />}>
-          <section id="features-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+        <LazyLoadSection id="features-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+          <Suspense fallback={<SectionLoader />}>
             <KeyFeatures />
-          </section>
-        </Suspense>
+          </Suspense>
+        </LazyLoadSection>
       </motion.main>
     </div>
   )
+}
+
+// Helper function to detect mobile devices
+function isMobile() {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.innerWidth < 768; // Consider tablets and small screens as mobile for performance
+}
+
+// Lazy loading component that only renders when scrolled into view
+function LazyLoadSection({ id, className, children }: { id: string, className?: string, children: React.ReactNode }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect(); // Only need to observe once
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px 0px' } // Start loading when within 100px of viewport
+    );
+    
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section id={id} className={className} ref={sectionRef}>
+      {isVisible ? children : <div className="min-h-[50vh]" />}
+    </section>
+  );
 }

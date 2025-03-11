@@ -39,8 +39,8 @@ const CARDS: CardData[] = [
     buttonHref: '/auth/signup',
     featured: true,
     stats: [
-      { value: '45+', label: 'Startups' },
-      { value: '92%', label: 'Satisfaction' },
+      { value: '20', label: 'Startups' },
+      { value: '92%', label: ' ESG Satisfaction' },
       { value: '$2.4M', label: 'Invested' }
     ]
   },
@@ -53,7 +53,7 @@ const CARDS: CardData[] = [
     buttonText: 'Explore Communities',
     buttonHref: '#',
     stats: [
-      { value: '18', label: 'Communities' },
+      { value: '20+', label: 'Communities' },
       { value: '35+', label: 'Ambassadors' }
     ],
     highlights: [
@@ -71,13 +71,13 @@ const CARDS: CardData[] = [
     buttonText: 'Experience Dashboard',
     buttonHref: '#',
     stats: [
-      { value: '24/7', label: 'Monitoring' },
-      { value: 'Real-time', label: 'Updates' }
+      { value: 'Impact', label: 'Scoring' },
+      { value: 'AI', label: 'Analytics' }
     ],
     highlights: [
-      'Portfolio performance tracker',
-      'Impact measurement tools',
-      'Founder update streams'
+      'Data analytics and insights to help you make better decisions',
+      'AI-powered recommendations',
+      'Track your investments and their impact',
     ]
   }
 ]
@@ -93,7 +93,9 @@ function CardComponent({ card, index }: { card: CardData; index: number }) {
       ref={cardRef}
       key={card.id}
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-black/80 p-6 sm:p-7 md:p-8 flex flex-col",
+        "relative overflow-hidden rounded-3xl bg-black/80 flex flex-col",
+        // Consistent padding for all cards
+        isFeatured ? "p-7 sm:p-8 md:p-10" : "p-5 sm:p-6 md:p-7",
         "shadow-[0_0_20px_rgba(139,92,246,0.1)] will-change-transform transform-gpu",
         "hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-shadow duration-150",
         "before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-500/5 before:via-transparent before:to-teal-500/5 before:opacity-40 before:z-0",
@@ -103,9 +105,10 @@ function CardComponent({ card, index }: { card: CardData; index: number }) {
         isFeatured 
           ? "flex-1 md:scale-110 md:shadow-[0_0_40px_rgba(139,92,246,0.2)] md:z-10"
           : "flex-1 md:scale-90 opacity-90 md:z-0",
-        // Improved positioning for secondary cards
-        card.id === 'investment' && "md:translate-x-6 md:-translate-y-2",
-        card.id === 'security' && "md:-translate-x-6 md:-translate-y-2",
+        // Consistent positioning for secondary cards
+        !isFeatured && "md:-translate-y-2",
+        card.id === 'investment' && "md:translate-x-6",
+        card.id === 'security' && "md:-translate-x-6",
         // Faster initial appearance animation with staggered delay
         isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
         `transition-all duration-500 delay-[${index * 75}ms]`,
@@ -148,113 +151,128 @@ function CardComponent({ card, index }: { card: CardData; index: number }) {
         </>
       )}
       
-      {/* Card content with dynamic spacing system using flexbox */}
+      {/* Card content with refined spacing */}
       <div className="relative flex flex-col h-full z-10">
-        {/* Card main content area - uses flex-grow to fill available space */}
-        <div className="flex-1 flex flex-col">
-          {/* Card header - using relative units for spacing */}
-          <div className="mb-5 sm:mb-6">
-            <h3 className={cn(
-              "font-semibold text-white group-hover:text-purple-300 transition-colors duration-100 leading-tight",
-              isFeatured ? "text-xl sm:text-2xl" : "text-lg sm:text-xl" 
-            )}>
-              {card.title}
-            </h3>
-            
-            {card.description && (
-              <p className={cn(
-                "text-gray-300 mt-2", 
-                isFeatured ? "text-sm sm:text-base" : "text-xs sm:text-sm",
-                "line-clamp-3" 
-              )}>
-                {card.description}
-              </p>
-            )}
-          </div>
+        {/* Card header - Consistent spacing scale */}
+        <div className={cn(
+          isFeatured ? "mb-8 md:mb-8" : "mb-4"
+        )}>
+          <h3 className={cn(
+            "font-semibold text-white group-hover:text-purple-300 transition-colors duration-100 leading-tight mt-2",
+            isFeatured ? "text-xl sm:text-2xl md:text-3xl" : "text-lg sm:text-xl" 
+          )}>
+            {card.title}
+          </h3>
           
-          {/* Flexible spacer only if we have more content below */}
-          {(!card.stats || isFeatured) && <div className="flex-grow" />}
+          {card.description && (
+            <p className={cn(
+              "text-gray-300", 
+              isFeatured ? "text-sm sm:text-base mt-4 sm:mt-4" : "text-xs sm:text-sm mt-2",
+              "line-clamp-3" 
+            )}>
+              {card.description}
+            </p>
+          )}
         </div>
         
-        {/* Stats positioned consistently across all cards */}
-        {card.stats && (
-          <div className={cn(
-            "mb-5 sm:mb-6",
-            isFeatured ? "" : "mt-auto" // Push stats down on non-featured cards
-          )}>
-            <div className={cn(
-              "grid py-3 px-2",
-              !isFeatured && "bg-gradient-to-r from-black/40 via-black/30 to-black/40 border border-purple-500/10 rounded-xl",
-              isFeatured ? "bg-black/30 rounded-xl divide-x divide-gray-800/50" : "divide-x divide-gray-800/30",
-              card.stats.length > 2 
-                ? "grid-cols-3" 
-                : "grid-cols-2"
-            )}>
-              {card.stats.map((stat, idx) => (
-                <div key={stat.label} className={cn(
-                  "flex flex-col items-center justify-center text-center px-2",
-                  !isFeatured && "py-2"
-                )}>
-                  <p className={cn(
-                    "font-bold bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent leading-none",
-                    isFeatured ? "text-lg sm:text-xl" : "text-base sm:text-lg"
-                  )}>
-                    {stat.value}
-                  </p>
-                  <p className={cn(
-                    "text-xs mt-1.5 whitespace-nowrap",
-                    isFeatured ? "text-gray-400" : "text-gray-300"
-                  )}>
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        
-        {/* Bottom content area with proper spacing and alignment */}
-        <div className={isFeatured ? "mt-0" : "mt-0"}>
-          {/* Feature/Highlight lists with proportional spacing */}
+        {/* Middle content section with flex-grow to push stats to appropriate position */}
+        <div className="flex-1 flex flex-col">
+          {/* Stats positioned at correct vertical position based on card type */}
           {isFeatured ? (
-            <ul className="flex flex-col gap-3 mb-5 sm:mb-6">
+            /* Featured card - stats centered vertically */
+            <div className="my-auto">
+              {card.stats && (
+                <div className="bg-black/30 rounded-xl overflow-hidden">
+                  <div className="flex w-full h-full">
+                    {card.stats.map((stat, idx) => (
+                      <div 
+                        key={stat.label} 
+                        className={cn(
+                          "flex-1 flex flex-col items-center justify-center text-center py-4 px-3",
+                          idx !== 0 && "border-l border-gray-800/50" // Apply border to all except first
+                        )}
+                      >
+                        <p className="font-bold bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent leading-none text-xl sm:text-2xl mb-1.5">
+                          {stat.value}
+                        </p>
+                        <p className="text-xs text-gray-400 whitespace-nowrap">
+                          {stat.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Side cards - consistent spacing for both */
+            <>
+              {/* Using percentage of available space to position stats consistently in both cards */}
+              <div className="flex-grow" style={{ minHeight: '10%' }}></div>
+              {card.stats && (
+                <div className="mb-4">
+                  <div className="grid grid-cols-2 bg-gradient-to-r from-black/40 via-black/30 to-black/40 border border-purple-500/10 rounded-xl py-3 px-1 divide-x divide-gray-800/30">
+                    {card.stats.map((stat, idx) => (
+                      <div key={stat.label} className="flex flex-col items-center justify-center text-center px-2 py-1.5">
+                        <p className="font-bold bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent leading-none text-lg mb-1">
+                          {stat.value}
+                        </p>
+                        <p className="text-xs text-gray-300 whitespace-nowrap">
+                          {stat.label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        
+        {/* Bottom section - consistent spacing */}
+        <div>
+          {/* Feature lists - consistent styling for side cards */}
+          {isFeatured ? (
+            <ul className="flex flex-col gap-5 sm:gap-5 mb-7 md:mb-8">
               {FEATURE_ITEMS.map((item, idx) => (
-                <li key={item} className="flex items-start gap-3 text-xs sm:text-sm text-gray-300">
-                  <div className="flex items-center justify-center h-5 w-5 flex-shrink-0 rounded-full bg-gradient-to-r from-purple-500/20 to-teal-500/20 text-purple-400 mt-0.5">
-                    <Check size={12} />
+                <li key={item} className="flex items-start gap-4 text-xs sm:text-sm text-gray-300">
+                  <div className="flex items-center justify-center h-6 w-6 flex-shrink-0 rounded-full bg-gradient-to-r from-purple-500/20 to-teal-500/20 text-purple-400 mt-0.5">
+                    <Check size={14} />
                   </div>
                   <span className="flex-1">{item}</span>
                 </li>
               ))}
             </ul>
           ) : card.highlights ? (
-            <ul className="flex flex-col gap-3 mb-5 sm:mb-6">
+            <ul className="flex flex-col gap-3 mt-6 mb-8">
               {card.highlights.map((item, idx) => (
-                <li key={item} className="flex items-start gap-2.5 text-xs text-gray-400">
-                  <div className="flex-shrink-0 h-1.5 w-1.5 rounded-full bg-gradient-to-r from-purple-400/50 to-teal-400/50 mt-1.5">
-                  </div>
+                <li key={item} className="flex items-start text-[11px] leading-tight text-gray-400">
+                  <span className="flex-shrink-0 h-1 w-1 rounded-full bg-gradient-to-r from-purple-400/50 to-teal-400/50 mt-1.5 mr-2"></span>
                   <span className="flex-1">{item}</span>
                 </li>
               ))}
             </ul>
           ) : null}
           
-          {/* Image section with responsive aspect ratio */}
+          {/* Image with identical styling for side cards */}
           {card.imageUrl && (
-            <div className="mb-5 sm:mb-6 rounded-lg overflow-hidden transition-shadow duration-150 shadow-[0_0_15px_rgba(139,92,246,0.15)] hover:shadow-[0_0_25px_rgba(139,92,246,0.25)]">
-              <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10"></div>
-                <div className="aspect-w-16 aspect-h-9 w-full">
-                  <Image 
-                    src={card.imageUrl} 
-                    alt={card.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300 ease-out transform-gpu will-change-transform"
-                    loading="lazy"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
-                    priority={isFeatured}
-                  />
-                </div>
+            <div className="rounded-lg overflow-hidden transition-shadow duration-150 shadow-[0_0_15px_rgba(139,92,246,0.15)] hover:shadow-[0_0_25px_rgba(139,92,246,0.25)] mb-6">
+              <div className="relative overflow-hidden"
+              style={{ aspectRatio: "16/9" }}>
+                {/* Gradient overlay with higher z-index */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-[5]"></div>
+                
+                {/* Image with consistent dimensions */}
+                <Image 
+                  src={card.imageUrl} 
+                  alt={card.title}
+                  width={800}
+                  height={450}
+                  className="w-full h-full object-cover z-[1] group-hover:scale-105 transition-transform duration-300 ease-out transform-gpu will-change-transform"
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
+                  priority={isFeatured}
+                />
               </div>
             </div>
           )}
@@ -267,8 +285,8 @@ function CardComponent({ card, index }: { card: CardData; index: number }) {
                 className={cn(
                   "w-full text-white relative overflow-hidden group/button transition-shadow duration-150",
                   isFeatured 
-                    ? "py-4 md:py-5 shadow-[0_0_20px_rgba(139,92,246,0.2)] hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] bg-gradient-to-r from-purple-600 to-teal-600 hover:from-purple-500 hover:to-teal-500 text-base" 
-                    : "py-3 md:py-4 shadow-[0_0_10px_rgba(139,92,246,0.1)] hover:shadow-[0_0_20px_rgba(139,92,246,0.2)] bg-black hover:bg-purple-900/40 text-sm"
+                    ? "py-5 sm:py-6 text-base sm:text-lg shadow-[0_0_20px_rgba(139,92,246,0.2)] hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] bg-gradient-to-r from-purple-600 to-teal-600 hover:from-purple-500 hover:to-teal-500" 
+                    : "py-3 shadow-[0_0_10px_rgba(139,92,246,0.1)] hover:shadow-[0_0_20px_rgba(139,92,246,0.2)] bg-black hover:bg-purple-900/40 text-sm"
                 )}
                 size="default"
               >
@@ -277,7 +295,7 @@ function CardComponent({ card, index }: { card: CardData; index: number }) {
                     {card.buttonText} 
                     <ArrowRight className={cn(
                       "group-hover/button:translate-x-1 transition-transform duration-150 ease-out",
-                      isFeatured ? "ml-2 h-4 w-4" : "ml-1.5 h-3.5 w-3.5"
+                      isFeatured ? "ml-3 h-5 w-5" : "ml-1.5 h-3.5 w-3.5"
                     )} />
                   </span>
                   {/* Fast hover effect overlay */}
@@ -286,7 +304,25 @@ function CardComponent({ card, index }: { card: CardData; index: number }) {
               </Button>
             )}
             
-            
+            {/* Footer text - consistently styled for side cards */}
+            {isFeatured ? (
+              <div className="flex items-center justify-center pt-2">
+                <p className="text-sm text-gray-400 flex items-center">
+                  <span className="inline-flex -space-x-2 mr-4">
+                    {[...Array(3)].map((_, i) => (
+                      <span key={i} className={`inline-block h-7 w-7 rounded-full border border-black bg-gradient-to-r ${i === 0 ? 'from-purple-400 to-purple-500' : i === 1 ? 'from-indigo-400 to-indigo-500' : 'from-teal-400 to-teal-500'}`}></span>
+                    ))}
+                  </span>
+                  <span>Joined by <span className="text-purple-400 font-medium">280+ investors</span></span>
+                </p>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center pt-1.5">
+                <p className="text-[10px] text-gray-500 opacity-75">
+                  {card.id === 'investment' ? 'Part of WeSeedU platform' : 'Included with membership'}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
