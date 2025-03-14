@@ -268,3 +268,33 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+/* Add animation for subtle pulse effect */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.8; }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 4s ease-in-out infinite;
+}
+
+/* Add custom utility classes at the end of the file */
+
+@layer utilities {
+  .bg-grid-pattern {
+    background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), 
+                     linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+}
+
+/* Add animation for shimmer effect */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: 0 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

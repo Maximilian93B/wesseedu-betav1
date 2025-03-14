@@ -1,345 +1,204 @@
 "use client"
 
-import { AnimatedTagline } from "@/components/ui/AnimatedTagline"
-import { motion } from "framer-motion"
+import { useRef, useState, useLayoutEffect } from "react"
+import { useInView } from "framer-motion"
+import { cn } from "@/lib/utils"
+import { OptimizedAnimatedTagline } from "@/components/ui/OptimizedAnimatedTagline"
 
-export function ImpactSection() {
-  // Impact phrases organized by category
-  const impactCategories = [
-    {
-      header: "Environmental Impact",
-      highlightWord: "Environmental",
-      phrases: [
-        "Accelerating solutions for climate challenges",
-        "Creating positive environmental change",
-        "Reducing carbon footprints across industries"
-      ]
-    },
-    {
-      header: "Social Innovation",
-      highlightWord: "Social",
-      phrases: [
-        "Building a more equitable future",
-        "Empowering sustainable startups",
-        "Supporting underrepresented founders"
-      ]
-    },
-    {
-      header: "Investment Revolution",
-      highlightWord: "Investment",
-      phrases: [
-        "Connecting visionary founders with impact investors",
-        "Transforming how we invest in our planet",
-        "Measuring real-world impact alongside financial returns"
-      ]
+import { 
+  CategorySection, 
+  FooterCTA, 
+  BackgroundEffects, 
+  ImpactCategory
+} from "./ImpactSectionComponents"
+
+// Sample data for demonstration
+const impactCategories: ImpactCategory[] = [
+  {
+    title: "Environmental Impact",
+    description: "We're accelerating solutions for climate challenges through innovative technologies and sustainable approaches.",
+    contentItems: [
+      {
+        title: "Carbon Reduction Initiatives",
+        content: "Supporting green technologies that help businesses and communities reduce their carbon footprint through measurable improvements."
+      },
+      {
+        title: "Sustainable Infrastructure",
+        content: "Investing in projects that redesign urban and rural infrastructure to be more efficient, resilient, and environmentally friendly."
+      },
+      {
+        title: "Clean Energy Solutions",
+        content: "Advancing renewable energy adoption through innovative financing models and technology partnerships."
+      }
+    ],
+    backgroundImageUrl: "/images/environmental-impact.jpg"
+  },
+  {
+    title: "Social Innovation",
+    description: "Building a more equitable future by supporting underrepresented founders and sustainable startups.",
+    contentItems: [
+      {
+        title: "Inclusive Entrepreneurship",
+        content: "Creating pathways for underrepresented founders to access capital, mentorship, and market opportunities."
+      },
+      {
+        title: "Education Equity",
+        content: "Developing solutions that make quality education more accessible to communities around the world."
+      },
+      {
+        title: "Health Access Improvements",
+        content: "Supporting innovations that bring healthcare solutions to underserved populations and regions."
+      }
+    ],
+    backgroundImageUrl: "/images/social-innovation.jpg"
+  },
+  {
+    title: "Investment Revolution",
+    description: "Transforming how capital is deployed to support both profit and purpose through innovative investment models.",
+    contentItems: [
+      {
+        title: "Impact Measurement",
+        content: "Pioneering new metrics and frameworks that accurately capture both financial returns and social/environmental impact."
+      },
+      {
+        title: "Blended Finance Models",
+        content: "Creating investment structures that bring together public, private, and philanthropic capital for maximum impact."
+      },
+      {
+        title: "Sustainable Growth",
+        content: "Supporting businesses that demonstrate how profitability and positive impact can grow together."
+      }
+    ],
+    backgroundImageUrl: "/images/investment-revolution.jpg"
+  }
+];
+
+// Helper function to detect low power devices - extracted outside component
+const detectLowPowerDevice = (): boolean => {
+  // Check for battery API support
+  if ('getBattery' in navigator) {
+    // @ts-ignore - getBattery() is not in the standard Navigator type
+    navigator.getBattery().then((battery: any) => {
+      // Consider it a low power device if in low power mode or battery below 15%
+      if (battery.charging === false && battery.level < 0.15) {
+        return true;
+      }
+    }).catch(() => false);
+  }
+  
+  // Simple heuristic - check for mobile devices which are more likely to be battery-constrained
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Additional check for device memory if available
+  if ('deviceMemory' in navigator) {
+    // @ts-ignore - deviceMemory is not in the standard Navigator type
+    const lowMemory = (navigator as any).deviceMemory < 4;
+    return isMobile || lowMemory;
+  }
+  
+  return isMobile;
+};
+
+export const ImpactSection = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { 
+    once: true, 
+    amount: 0.1 
+  });
+  
+  // Check for mobile viewport with useLayoutEffect to avoid render issues
+  const [isMobile, setIsMobile] = useState(false);
+  useLayoutEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Get container height for animations with useLayoutEffect
+  const [containerHeight, setContainerHeight] = useState(0);
+  useLayoutEffect(() => {
+    if (sectionRef.current) {
+      setContainerHeight(sectionRef.current.clientHeight);
     }
-  ]
+  }, []);
+  
+  // Simple image props for background images
+  const backgroundImageProps = {};
 
   return (
-    <>
-      <style jsx global>{`
-        @keyframes pulse-subtle {
-          0%, 100% { opacity: 0.05; }
-          50% { opacity: 0.15; }
-        }
-        .animate-pulse-subtle {
-          animation: pulse-subtle 7s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          will-change: opacity;
-        }
-        
-        @keyframes float-subtle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(3px); }
-        }
-        .animate-float-subtle {
-          animation: float-subtle 4s ease-in-out infinite;
-          will-change: transform;
-        }
-      `}</style>
-
-      <section className="py-32 sm:py-40 md:py-48 relative overflow-hidden">
-        {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/0 pointer-events-none"></div>
-        
-        {/* Main content container with clean layout */}
-        <div className="container mx-auto px-8 sm:px-12 md:px-16">
-          {/* Main header with elegant glow effect */}
-          <motion.div 
-            className="mb-40 sm:mb-48 text-center relative"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {/* Subtle glow effect with reduced opacity */}
-            <div 
-              className="absolute -inset-10 opacity-20 animate-pulse-subtle"
-              style={{
-                background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
-                filter: 'blur(15px)',
-                zIndex: -1
-              }}
-            ></div>
-            
-            <AnimatedTagline 
-              text="Creating Limitless Impact"
-              highlightWords={["Limitless", "Impact"]}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold"
-              delay={0.2}
-            />
-          </motion.div>
-          
-          {/* Dynamic multi-section layout with increased spacing */}
-          <div className="space-y-40 sm:space-y-48">
-            {/* First category - Left aligned */}
-            <div className="relative">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16 items-start">
-                {/* Category header */}
-                <motion.div 
-                  className="md:col-span-5 md:sticky md:top-32 pr-0 md:pr-8"
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], mass: 0.8 }}
-                >
-                  <div className="relative">
-                    {/* Very subtle light effect */}
-                    <div 
-                      className="absolute -inset-8 opacity-20 animate-pulse-subtle"
-                      style={{
-                        background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
-                        filter: 'blur(15px)',
-                        zIndex: -1
-                      }}
-                    ></div>
-                    
-                    <AnimatedTagline 
-                      text={impactCategories[0].header}
-                      highlightWords={[impactCategories[0].highlightWord]}
-                      className="text-3xl sm:text-4xl md:text-5xl font-bold text-left"
-                      delay={0.3}
-                    />
-                  </div>
-                </motion.div>
-                
-                {/* Category phrases */}
-                <div className="md:col-span-7">
-                  <motion.div
-                    className="flex flex-col items-start space-y-12 sm:space-y-14"
-                    variants={{
-                      hidden: { opacity: 0 },
-                      visible: {
-                        opacity: 1,
-                        transition: { staggerChildren: 0.2, delayChildren: 0.4 }
-                      }
-                    }}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-50px" }}
-                  >
-                    {impactCategories[0].phrases.map((phrase, index) => (
-                      <motion.div
-                        key={index}
-                        className="relative text-left pl-4 border-l border-white/30 group hover:border-white/50 transition-colors duration-300"
-                        variants={{
-                          hidden: { opacity: 0, x: -20 },
-                          visible: {
-                            opacity: 1, 
-                            x: 0,
-                            transition: {
-                              type: "spring",
-                              damping: 22,
-                              stiffness: 150,
-                              mass: 0.8
-                            }
-                          }
-                        }}
-                      >
-                        <span className="text-xl sm:text-2xl md:text-3xl font-medium text-white/90 group-hover:text-white transition-colors duration-300">
-                          {phrase}
-                        </span>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Second category - Right aligned */}
-            <div className="relative">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16 items-start">
-                {/* Category phrases */}
-                <div className="md:col-span-7 md:order-1 md:order-first">
-                  <motion.div
-                    className="flex flex-col items-start space-y-12 sm:space-y-14"
-                    variants={{
-                      hidden: { opacity: 0 },
-                      visible: {
-                        opacity: 1,
-                        transition: { staggerChildren: 0.2, delayChildren: 0.4 }
-                      }
-                    }}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-50px" }}
-                  >
-                    {impactCategories[1].phrases.map((phrase, index) => (
-                      <motion.div
-                        key={index}
-                        className="relative text-left pl-4 border-l border-white/30 group hover:border-white/50 transition-colors duration-300"
-                        variants={{
-                          hidden: { opacity: 0, x: -20 },
-                          visible: {
-                            opacity: 1, 
-                            x: 0,
-                            transition: {
-                              type: "spring",
-                              damping: 22,
-                              stiffness: 150,
-                              mass: 0.8
-                            }
-                          }
-                        }}
-                      >
-                        <span className="text-xl sm:text-2xl md:text-3xl font-medium text-white/90 group-hover:text-white transition-colors duration-300">
-                          {phrase}
-                        </span>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </div>
-                
-                {/* Category header */}
-                <motion.div 
-                  className="md:col-span-5 md:sticky md:top-32 md:order-2 md:order-last pl-0 md:pl-8"
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], mass: 0.8 }}
-                >
-                  <div className="relative">
-                    {/* Very subtle light effect */}
-                    <div 
-                      className="absolute -inset-8 opacity-20 animate-pulse-subtle"
-                      style={{
-                        background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
-                        filter: 'blur(15px)',
-                        zIndex: -1
-                      }}
-                    ></div>
-                    
-                    <AnimatedTagline 
-                      text={impactCategories[1].header}
-                      highlightWords={[impactCategories[1].highlightWord]}
-                      className="text-3xl sm:text-4xl md:text-5xl font-bold text-right md:text-right"
-                      delay={0.3}
-                    />
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-            
-            {/* Third category - Center aligned */}
-            <div className="relative">
-              <div className="flex flex-col items-center">
-                {/* Category header with subtle glow */}
-                <motion.div 
-                  className="mb-16 sm:mb-20 text-center relative"
-                  initial={{ opacity: 0, y: -20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], mass: 0.8 }}
-                >
-                  {/* Very subtle light effect */}
-                  <div 
-                    className="absolute -inset-8 opacity-20 animate-pulse-subtle"
-                    style={{
-                      background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
-                      filter: 'blur(15px)',
-                      zIndex: -1
-                    }}
-                  ></div>
-                  
-                  <AnimatedTagline 
-                    text={impactCategories[2].header}
-                    highlightWords={[impactCategories[2].highlightWord]}
-                    className="text-3xl sm:text-4xl md:text-5xl font-bold"
-                    delay={0.3}
-                  />
-                </motion.div>
-                
-                {/* Category phrases with elegant hover effects */}
-                <motion.div
-                  className="flex flex-col items-center space-y-12 sm:space-y-14 max-w-3xl"
-                  variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                      opacity: 1,
-                      transition: { staggerChildren: 0.2, delayChildren: 0.4 }
-                    }
-                  }}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, margin: "-50px" }}
-                >
-                  {impactCategories[2].phrases.map((phrase, index) => (
-                    <motion.div
-                      key={index}
-                      className="relative text-center px-6 py-3 group"
-                      variants={{
-                        hidden: { opacity: 0, y: 20 },
-                        visible: {
-                          opacity: 1, 
-                          y: 0,
-                          transition: {
-                            type: "spring",
-                            damping: 22,
-                            stiffness: 150,
-                            mass: 0.8
-                          }
-                        }
-                      }}
-                    >
-                      {/* Subtle highlight on hover */}
-                      <div 
-                        className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-all duration-300 rounded-md -z-10"
-                      ></div>
-                      
-                      <span className="text-xl sm:text-2xl md:text-3xl font-medium text-white/90 group-hover:text-white transition-colors duration-300">
-                        {phrase}
-                      </span>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-            </div>
+    <section 
+      ref={sectionRef}
+      className="py-12 xs:py-16 sm:py-20 md:py-24 lg:py-28 min-h-[calc(100vh-4rem)] flex flex-col justify-center relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/5"
+    >
+      {/* Radiant border effect */}
+      <div className="absolute -inset-1 md:-inset-2 bg-gradient-to-br from-purple-500/10 via-transparent to-teal-500/10 rounded-2xl md:rounded-3xl blur-sm opacity-40 group-hover:opacity-70 transition-opacity duration-700"></div>
+      <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 via-transparent to-teal-500/5 rounded-2xl md:rounded-3xl"></div>
+      
+      {/* Corner glow effects */}
+      <div className="absolute -top-20 -left-20 w-60 h-60 bg-purple-500/10 rounded-full blur-[80px] animate-pulse-subtle"></div>
+      <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-teal-500/10 rounded-full blur-[80px] animate-pulse-subtle" style={{ animationDelay: "2s" }}></div>
+      
+      {/* Pulsing edge highlights */}
+      <div className="absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-purple-400/30 to-transparent animate-pulse-subtle"></div>
+      <div className="absolute bottom-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-teal-400/30 to-transparent animate-pulse-subtle" style={{ animationDelay: "1.5s" }}></div>
+      
+      {/* Background effects */}
+      <BackgroundEffects />
+      
+      {/* Container for impact categories */}
+      <div className="container px-4 xs:px-5 sm:px-6 lg:px-8 xl:px-10 mx-auto max-w-7xl flex-1 flex flex-col justify-center relative z-10">
+        {/* Section header */}
+        <div 
+          className={cn(
+            "flex flex-col items-center text-center mb-8 xs:mb-10 sm:mb-12 md:mb-16 transition-all duration-500 space-y-3 xs:space-y-4 sm:space-y-5",
+            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          )}
+        >
+          <div className="inline-block">
+            <span className="inline-flex items-center px-3 xs:px-4 py-1 xs:py-1.5 text-xs font-medium rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              Impact Framework
+            </span>
           </div>
           
-          {/* Final statement with elegant floating animation */}
-          <motion.div 
-            className="mt-40 sm:mt-48 text-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-          >
-            <div className="inline-block px-8 py-8 relative">
-              {/* Subtle glow effect */}
-              <div 
-                className="absolute -inset-10 opacity-20 animate-pulse-subtle"
-                style={{
-                  background: 'radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%)',
-                  filter: 'blur(15px)',
-                  zIndex: -1
-                }}
-              ></div>
-              
-              <p className="text-2xl sm:text-3xl md:text-4xl font-medium text-white animate-float-subtle">
-                The future of impact investing is here.
-              </p>
-            </div>
-          </motion.div>
+          <div className="space-y-3 xs:space-y-4 sm:space-y-6">
+            <OptimizedAnimatedTagline
+              text="Creating Impact That Matters"
+              highlightWords={["Impact"]}
+              className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold"
+              delay={0.3}
+            />
+            
+            <p className="text-sm xs:text-base sm:text-lg text-gray-300 max-w-xl xs:max-w-2xl mx-auto">
+              We're building a better future through sustainable investments, innovative technology, and community empowerment.
+            </p>
+          </div>
         </div>
-      </section>
-    </>
-  )
-} 
+        
+        {/* Impact categories */}
+        <div className="space-y-8 md:space-y-12 lg:space-y-16">
+          {impactCategories.map((category, index) => (
+            <CategorySection
+              key={index}
+              category={category}
+              index={index}
+              inView={isInView}
+              isMobile={isMobile}
+              containerHeight={containerHeight}
+              backgroundImageProps={backgroundImageProps}
+            />
+          ))}
+        </div>
+        
+        {/* Footer CTA */}
+        <div className="mt-12 xs:mt-16 sm:mt-20 md:mt-24">
+          <FooterCTA />
+        </div>
+      </div>
+    </section>
+  );
+}; 

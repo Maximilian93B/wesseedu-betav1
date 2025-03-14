@@ -194,7 +194,7 @@ export default function LandingPage() {
           <div 
             className="fixed inset-0 z-0"
             style={{ 
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.65) 100%)',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.45) 100%)',
               pointerEvents: 'none',
               willChange: 'opacity',
               opacity: contentVisible ? 1 : 0,
@@ -241,7 +241,8 @@ export default function LandingPage() {
           style={{ 
             zIndex: 20, 
             position: 'relative',
-            paddingBottom: '3vh',
+            paddingBottom: '5vh',
+            paddingTop: '5vh',
           }}
         >
           <HeroSection />
@@ -254,13 +255,6 @@ export default function LandingPage() {
           </section>
         </Suspense>
 
-        {/* Use IntersectionObserver-based lazy loading for sections that aren't immediately visible */}
-        <LazyLoadSection id="impact-section">
-          <Suspense fallback={<SectionLoader />}>
-            <ImpactSection />
-          </Suspense>
-        </LazyLoadSection>
-
         {/* Remaining sections with improved loading strategies */}
         <LazyLoadSection id="partners-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
           <Suspense fallback={<SectionLoader />}>
@@ -268,13 +262,23 @@ export default function LandingPage() {
           </Suspense>
         </LazyLoadSection>
 
+
         {/* Problem Solution Flow */}
         <LazyLoadSection id="solution-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
           <Suspense fallback={<SectionLoader />}>
             <ProblemSolutionFlow />
           </Suspense>
         </LazyLoadSection>
-    
+
+
+    {/* Use IntersectionObserver-based lazy loading for sections that aren't immediately visible */}
+    <LazyLoadSection id="impact-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+          <Suspense fallback={<SectionLoader />}>
+            <ImpactSection />
+          </Suspense>
+        </LazyLoadSection>
+
+
         {/* Key Features */}
         <LazyLoadSection id="features-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
           <Suspense fallback={<SectionLoader />}>

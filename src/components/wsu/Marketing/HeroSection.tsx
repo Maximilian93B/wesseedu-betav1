@@ -72,13 +72,14 @@ export function HeroSection() {
     <>
       <GlobalAnimations />
       
-      {/* Optimized hero container with strategic spacing */}
-      <div className="relative w-full h-screen flex flex-col justify-center items-center">
-        {/* Content container with optimal positioning - adjusted for planet effect */}
+      {/* Optimized hero container with strategic spacing - adjusted for enhanced planetary glow */}
+      <div className="relative w-full h-screen flex flex-col justify-center items-center" 
+        style={{ paddingBottom: '4vh' }}>
+        {/* Content container with optimal positioning - adjusted higher for better balance with planet effect */}
         <div 
           className="w-full max-w-7xl mx-auto px-6 sm:px-8 md:px-12 relative z-10 flex flex-col items-center"
           style={{ 
-            marginTop: 'min(calc(-5vh), -40px)',
+            marginTop: 'min(calc(-12vh), -90px)',
           }}
         >
           {/* Main content with proper visual hierarchy */}
@@ -88,18 +89,18 @@ export function HeroSection() {
               initial="hidden"
               animate="visible"
               variants={titleContainerVariants}
-              className="mb-6 sm:mb-8 relative px-4 py-4"
+              className="mb-5 sm:mb-6 relative px-4 py-3"
               style={{ willChange: "transform, opacity" }}
             >
               {/* Enhanced glow effect - simplified for performance */}
               <div 
-                className="absolute inset-0 -z-10 bg-gradient-radial from-purple-500/15 via-purple-500/5 to-transparent rounded-full opacity-80"
+                className="absolute inset-0 -z-10 bg-gradient-radial from-purple-500/30 via-purple-500/15 to-transparent rounded-full opacity-95"
                 style={{
                   width: '140%',
                   height: '140%',
                   left: '-20%',
                   top: '-20%',
-                  filter: 'blur(15px)', // Reduced blur for better performance
+                  filter: 'blur(18px)', // Increased blur for better harmony with planet glow
                   transform: 'translateZ(0)', // Hardware acceleration
                 }}
               ></div>
@@ -134,11 +135,11 @@ export function HeroSection() {
             >
               <div className="flex flex-wrap items-baseline justify-center gap-x-2">
                 <p 
-                  className="text-xl sm:text-2xl md:text-3xl font-medium leading-relaxed text-gray-200"
+                  className="text-xl sm:text-2xl md:text-3xl font-medium leading-relaxed text-gray-100"
                 >
                   The world's first dedicated platform for
                 </p>
-                <span className="text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-purple-400 via-fuchsia-400 to-emerald-400 bg-clip-text text-transparent font-semibold">
+                <span className="text-xl sm:text-2xl md:text-3xl bg-gradient-to-r from-purple-300 via-fuchsia-300 to-emerald-300 bg-clip-text text-transparent font-semibold">
                   sustainable startups
                 </span>
               </div>
@@ -155,7 +156,7 @@ export function HeroSection() {
               <Button
                 asChild
                 size="lg"
-                className="bg-gradient-to-r from-purple-600 to-teal-600 hover:from-purple-700 hover:to-teal-700 text-white border-none shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40 transition-all duration-300 text-base sm:text-lg px-6 sm:px-8 py-6 sm:py-7 relative overflow-hidden group flex-1"
+                className="bg-gradient-to-r from-purple-600 to-teal-600 hover:from-purple-700 hover:to-teal-700 text-white border-none shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 transition-all duration-300 text-base sm:text-lg px-6 sm:px-8 py-6 sm:py-7 relative overflow-hidden group flex-1"
               >
                 <Link href="/auth/signup">
                   <span className="relative z-10">Start Investing</span>
@@ -189,7 +190,7 @@ export function HeroSection() {
           initial="hidden"
           animate="visible"
           variants={scrollIndicatorVariants}
-          className="absolute bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 z-10"
+          className="absolute bottom-8 sm:bottom-10 left-1/2 -translate-x-1/2 z-10"
         >
           <button 
             onClick={scrollToNextSection}

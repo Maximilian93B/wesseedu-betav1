@@ -154,14 +154,81 @@ const StarryBackground = memo(() => {
 
         @keyframes atmospheric-shimmer {
           0%, 100% { 
-            box-shadow: 0 0 40px 10px rgba(168, 85, 247, 0.08), inset 0 0 100px 40px rgba(147, 51, 234, 0.15);
-            opacity: 0.65;
+            box-shadow: 0 0 40px 10px rgba(168, 85, 247, 0.15), inset 0 0 100px 40px rgba(147, 51, 234, 0.2);
+            opacity: 0.7;
             transform: scale(1) translateZ(0);
           }
           50% { 
-            box-shadow: 0 0 50px 15px rgba(168, 85, 247, 0.12), inset 0 0 120px 50px rgba(147, 51, 234, 0.2);
-            opacity: 0.75;
-            transform: scale(1.005) translateZ(0);
+            box-shadow: 0 0 60px 15px rgba(168, 85, 247, 0.2), inset 0 0 120px 50px rgba(147, 51, 234, 0.3);
+            opacity: 0.9;
+            transform: scale(1.01) translateZ(0);
+          }
+        }
+        
+        /* Enhanced atmospheric shimmer with more dramatic glow */
+        @keyframes enhanced-atmospheric-shimmer {
+          0%, 100% { 
+            box-shadow: 0 0 60px 15px rgba(168, 85, 247, 0.25), inset 0 0 120px 50px rgba(147, 51, 234, 0.3);
+            opacity: 0.85;
+            transform: scale(1) translateZ(0);
+            filter: brightness(1);
+          }
+          50% { 
+            box-shadow: 0 0 80px 25px rgba(168, 85, 247, 0.35), inset 0 0 150px 70px rgba(147, 51, 234, 0.4);
+            opacity: 0.95;
+            transform: scale(1.01) translateZ(0);
+            filter: brightness(1.05);
+          }
+        }
+        
+        @keyframes atmospheric-clouds {
+          0% { transform: translateX(0%) translateZ(0); opacity: 0.5; }
+          50% { opacity: 0.7; }
+          100% { transform: translateX(-100%) translateZ(0); opacity: 0.5; }
+        }
+
+        @keyframes horizon-shimmer {
+          0%, 100% { 
+            opacity: 0.7;
+            transform: translateY(0px) translateZ(0);
+          }
+          50% { 
+            opacity: 0.9;
+            transform: translateY(-1px) translateZ(0);
+          }
+        }
+        
+        /* Enhanced edge radiance with more glow */
+        @keyframes edge-radiance {
+          0%, 100% { 
+            opacity: 0.95;
+            filter: blur(0.5px) brightness(1.05);
+            border-top-color: rgba(89, 209, 197, 0.7);
+            box-shadow: 0 -5px 15px 1px rgba(89, 209, 197, 0.4);
+          }
+          33% { 
+            opacity: 0.9;
+            filter: blur(0.6px) brightness(1);
+            border-top-color: rgba(89, 209, 197, 0.65);
+            box-shadow: 0 -4px 12px 1px rgba(89, 209, 197, 0.35);
+          }
+          66% { 
+            opacity: 1;
+            filter: blur(0.4px) brightness(1.1);
+            border-top-color: rgba(89, 209, 197, 0.8);
+            box-shadow: 0 -6px 18px 2px rgba(89, 209, 197, 0.5);
+          }
+        }
+        
+        /* Glowing pulse animation for additional elements */
+        @keyframes glow-pulse {
+          0%, 100% {
+            opacity: 0.7;
+            filter: blur(5px) brightness(1);
+          }
+          50% {
+            opacity: 0.9;
+            filter: blur(7px) brightness(1.15);
           }
         }
       `}</style>
@@ -173,7 +240,7 @@ const StarryBackground = memo(() => {
           className="absolute inset-0" 
           style={{ 
             background: 'radial-gradient(ellipse at center, #05060a 0%, #040508 45%, #020307 70%, #010205 100%)',
-            opacity: 0.85,
+            opacity: 0.7,
           }}
         ></div>
         
@@ -210,7 +277,7 @@ const StarryBackground = memo(() => {
                 height: '300vw',
                 left: '50%',
                 transform: 'translateX(-50%) translateZ(0)',
-                top: '10vh',
+                top: '16vh',
                 background: 'linear-gradient(135deg, #030310 0%, #05051a 100%)',
                 boxShadow: '0 0 80px 20px rgba(15, 15, 40, 0.6), inset 0 0 50px 25px rgba(5, 5, 15, 0.7)',
                 border: '1px solid rgba(60, 60, 100, 0.4)',
@@ -218,16 +285,212 @@ const StarryBackground = memo(() => {
                 overflow: 'hidden',
               }}
             >
-              {/* Planet texture overlay - increased visibility */}
+              {/* Enhanced planet texture overlay with directional lighting */}
               <div 
-                className="absolute inset-0 opacity-25"
+                className="absolute inset-0 opacity-30"
                 style={{
-                  backgroundImage: 'radial-gradient(circle at 70% 30%, rgba(60, 60, 100, 0.8) 0%, transparent 60%), radial-gradient(circle at 30% 70%, rgba(50, 50, 80, 0.8) 0%, transparent 60%)'
+                  backgroundImage: 'radial-gradient(circle at 65% 35%, rgba(90, 80, 170, 0.9) 0%, transparent 45%), radial-gradient(circle at 30% 70%, rgba(50, 50, 100, 0.8) 0%, transparent 60%)'
                 }}
               ></div>
+              
+              {/* Edge highlight to enhance 3D appearance */}
+              <div 
+                className="absolute inset-0 opacity-30"
+                style={{
+                  background: 'radial-gradient(circle at 75% 25%, rgba(180, 160, 220, 0.25) 0%, transparent 30%)',
+                  mixBlendMode: 'overlay'
+                }}
+              ></div>
+              
+              {/* Enhanced 3D surface texture with subtle highlights */}
+              {!prefersReducedMotion && (
+                <div 
+                  className="absolute inset-0"
+                  style={{
+                    background: 'radial-gradient(ellipse at 65% 35%, rgba(140, 100, 200, 0.25) 0%, transparent 50%), radial-gradient(ellipse at 30% 60%, rgba(80, 130, 170, 0.15) 0%, transparent 60%)',
+                    transform: 'translateZ(0)',
+                    opacity: 0.8
+                  }}
+                ></div>
+              )}
+              
+              {/* Surface detail for topography */}
+              {!prefersReducedMotion && (
+                <div 
+                  className="absolute inset-0 opacity-15"
+                  style={{
+                    backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
+                    opacity: 0.07,
+                    mixBlendMode: 'overlay'
+                  }}
+                ></div>
+              )}
             </div>
             
-            {/* Atmospheric radiant ring - simplified for performance but preserves visual effect */}
+            {/* === ATMOSPHERIC EFFECTS - REORGANIZED AND CONSOLIDATED === */}
+            
+            {/* Primary atmospheric halo - with enhanced pulsing glow effect */}
+            {!prefersReducedMotion && (
+              <div 
+                className="absolute rounded-[50%]"
+                style={{ 
+                  width: '310vw',
+                  height: '310vw',
+                  left: '50%',
+                  transform: 'translateX(-50%) translateZ(0)',
+                  top: '15vh',
+                  zIndex: -1,
+                  background: 'transparent',
+                  boxShadow: '0 0 100px 25px rgba(126, 34, 206, 0.15), inset 0 0 70px 25px rgba(168, 85, 247, 0.18)',
+                  opacity: 0.85,
+                  willChange: 'opacity, box-shadow',
+                  animation: 'halo-pulse 35s ease-in-out infinite'
+                }}
+              ></div>
+            )}
+            
+            {/* === HORIZON EDGE EFFECTS - CONSOLIDATED & ALIGNED === */}
+            
+            {/* Primary horizon glow - main curved atmospheric effect */}
+            {!prefersReducedMotion && (
+              <div 
+                className="absolute rounded-[50%]"
+                style={{ 
+                  width: '300vw',
+                  height: '300vw',
+                  left: '50%',
+                  transform: 'translateX(-50%) translateZ(0)',
+                  top: '16vh',
+                  zIndex: 2,
+                  background: 'linear-gradient(to bottom, rgba(89, 209, 197, 0.05) 0%, transparent 15%)',
+                  border: '5px solid transparent',
+                  borderTopColor: 'rgba(89, 209, 197, 0.75)',
+                  borderLeftColor: 'rgba(89, 209, 197, 0.15)',
+                  borderRightColor: 'rgba(89, 209, 197, 0.15)',
+                  boxShadow: '0 -15px 40px 5px rgba(89, 209, 197, 0.6), inset 0 15px 35px 3px rgba(147, 51, 234, 0.4)',
+                  filter: 'blur(4px)',
+                  opacity: 0.97,
+                  animation: 'enhanced-atmospheric-shimmer 30s ease-in-out infinite'
+                }}
+              ></div>
+            )}
+            
+            {/* Atmospheric rim light with subtle movement */}
+            {!prefersReducedMotion && (
+              <div 
+                className="absolute rounded-[50%]"
+                style={{ 
+                  width: '300vw',
+                  height: '300vw',
+                  left: '50%',
+                  transform: 'translateX(-50%) translateZ(0)',
+                  top: '16vh',
+                  background: 'transparent',
+                  boxShadow: 'inset 0 20px 25px -8px rgba(89, 209, 197, 0.75)',
+                  filter: 'blur(3px)',
+                  opacity: 0.9,
+                  zIndex: 3,
+                  pointerEvents: 'none',
+                  mixBlendMode: 'screen',
+                  animation: 'horizon-shimmer 15s ease-in-out infinite, atmospheric-dance 80s ease-in-out infinite'
+                }}
+              ></div>
+            )}
+            
+            {/* Atmospheric cloud layer with more pronounced movement */}
+            {!prefersReducedMotion && (
+              <div 
+                className="absolute rounded-[50%]"
+                style={{
+                  width: '300vw',
+                  height: '300vw',
+                  left: '50%',
+                  top: '16vh',
+                  background: 'transparent',
+                  borderTop: '14vh solid rgba(89, 209, 197, 0.1)',
+                  borderLeft: '5vh solid rgba(147, 51, 234, 0.04)',
+                  borderRight: '5vh solid rgba(147, 51, 234, 0.04)',
+                  transform: 'translateX(-50%) translateZ(0)',
+                  filter: 'blur(12px)',
+                  opacity: 0.85,
+                  zIndex: 1,
+                  animation: 'rotate-slow 220s linear infinite'
+                }}
+              ></div>
+            )}
+            
+            {/* Horizon line that follows the planet's curve precisely */}
+            {!prefersReducedMotion && (
+              <div 
+                className="absolute rounded-[50%]"
+                style={{ 
+                  width: '300vw',
+                  height: '300vw',
+                  left: '50%',
+                  top: '16vh',
+                  transform: 'translateX(-50%)',
+                  border: '1.5px solid rgba(89, 209, 197, 0.8)',
+                  borderBottom: 'none',
+                  borderLeft: '1px solid rgba(89, 209, 197, 0.2)',
+                  borderRight: '1px solid rgba(89, 209, 197, 0.2)',
+                  boxShadow: '0 -2px 10px 0.5px rgba(89, 209, 197, 0.5)',
+                  filter: 'blur(0.4px)',
+                  opacity: 0.98,
+                  zIndex: 15,
+                  pointerEvents: 'none',
+                  mixBlendMode: 'screen',
+                  animation: 'edge-radiance 15s ease-in-out infinite'
+                }}
+              ></div>
+            )}
+
+            {/* Additional intense highlight for extra glow */}
+            {!prefersReducedMotion && (
+              <div 
+                className="absolute rounded-[50%]"
+                style={{ 
+                  width: '300vw',
+                  height: '300vw',
+                  left: '50%',
+                  top: '16vh',
+                  transform: 'translateX(-50%)',
+                  border: '2.5px solid transparent',
+                  borderTopColor: 'rgba(89, 209, 197, 0.65)',
+                  borderLeftColor: 'rgba(89, 209, 197, 0.15)',
+                  borderRightColor: 'rgba(89, 209, 197, 0.15)',
+                  boxShadow: '0 -3px 15px 1px rgba(89, 209, 197, 0.45)',
+                  filter: 'blur(0.8px)',
+                  opacity: 0.92,
+                  zIndex: 16,
+                  pointerEvents: 'none',
+                  mixBlendMode: 'screen'
+                }}
+              ></div>
+            )}
+            
+            {/* Inner glow accent for professional definition */}
+            {!prefersReducedMotion && (
+              <div 
+                className="absolute rounded-[50%]"
+                style={{ 
+                  width: '299vw',
+                  height: '299vw',
+                  left: '50%',
+                  top: '16.2vh',
+                  transform: 'translateX(-50%)',
+                  border: '0.75px solid transparent',
+                  borderTopColor: 'rgba(255, 255, 255, 0.8)',
+                  boxShadow: '0 -1px 8px 0.5px rgba(255, 255, 255, 0.3)',
+                  filter: 'blur(0.3px)',
+                  opacity: 0.8,
+                  zIndex: 17,
+                  pointerEvents: 'none',
+                  mixBlendMode: 'overlay'
+                }}
+              ></div>
+            )}
+            
+            {/* Atmospheric bright halo effect for extra glow */}
             {!prefersReducedMotion && (
               <div 
                 className="absolute rounded-[50%]"
@@ -235,57 +498,21 @@ const StarryBackground = memo(() => {
                   width: '302vw',
                   height: '302vw',
                   left: '50%',
-                  transform: 'translateX(-50%) translateZ(0)',
-                  top: '9.5vh',
-                  zIndex: 0,
+                  top: '15.5vh',
+                  transform: 'translateX(-50%)',
                   background: 'transparent',
-                  border: '4px solid rgba(168, 85, 247, 0.08)',
-                  boxShadow: '0 0 40px 10px rgba(168, 85, 247, 0.1), inset 0 0 100px 40px rgba(147, 51, 234, 0.15)',
-                  opacity: 0.75,
-                  willChange: 'transform, opacity',
-                  animation: 'atmospheric-shimmer 30s ease-in-out infinite'
+                  border: '3px solid transparent',
+                  borderTopColor: 'rgba(255, 255, 255, 0.15)',
+                  boxShadow: '0 -10px 30px 5px rgba(255, 255, 255, 0.1), 0 -5px 15px 2px rgba(89, 209, 197, 0.3)',
+                  filter: 'blur(5px)',
+                  opacity: 0.7,
+                  zIndex: 4,
+                  pointerEvents: 'none',
+                  mixBlendMode: 'screen',
+                  animation: 'glow-pulse 20s ease-in-out infinite'
                 }}
               ></div>
             )}
-            
-            {/* Secondary atmospheric halo - simplified for performance */}
-            {!prefersReducedMotion && (
-              <div 
-                className="absolute rounded-[50%]"
-                style={{ 
-                  width: '307vw',
-                  height: '307vw',
-                  left: '50%',
-                  transform: 'translateX(-50%) translateZ(0)',
-                  top: '8.3vh',
-                  zIndex: -1,
-                  background: 'transparent',
-                  boxShadow: '0 0 120px 25px rgba(126, 34, 206, 0.05), inset 0 0 50px 15px rgba(168, 85, 247, 0.07)',
-                  opacity: 0.55,
-                  willChange: 'opacity',
-                  animation: 'pulse-glow 35s ease-in-out infinite'
-                }}
-              ></div>
-            )}
-            
-            {/* Primary glow ring - simplified for performance */}
-            <div 
-              className="absolute rounded-[50%]"
-              style={{ 
-                width: '320vw',
-                height: '320vw',
-                left: '50%',
-                transform: 'translateX(-50%) translateZ(0)',
-                top: '7vh',
-                background: !prefersReducedMotion ? 
-                  'radial-gradient(circle at center, transparent 72%, rgba(168, 85, 247, 0.1) 80%, rgba(147, 51, 234, 0.5) 88%, rgba(126, 34, 206, 0.25) 95%, transparent 100%)' :
-                  'radial-gradient(circle at center, transparent 72%, rgba(168, 85, 247, 0.05) 80%, rgba(147, 51, 234, 0.25) 88%, rgba(126, 34, 206, 0.15) 95%, transparent 100%)',
-                opacity: 0.8,
-                zIndex: -2,
-                willChange: !prefersReducedMotion ? 'transform' : 'auto',
-                animation: !prefersReducedMotion ? 'rotate-slow 400s linear infinite reverse' : 'none'
-              }}
-            ></div>
           </div>
         </div>
       )}

@@ -7,7 +7,7 @@ alwaysApply: false
 # Technical Stack
 
 
- UI & Styling: Radix UI for accessible components and Tailwind CSS with merge/animate utilities.
+ UI & Styling: Radix UI, Shadcn ,for accessible components and Tailwind CSS with merge/animate utilities.
 Animation & Interactivity: Framer Motion and Geist.
 Forms & Charts: React Hook Form and Recharts.
 Backend: Supabase for auth and database.

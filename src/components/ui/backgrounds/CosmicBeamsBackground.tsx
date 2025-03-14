@@ -348,7 +348,7 @@ export default function CosmicBackground() {
       className="fixed inset-0 w-full h-full" 
       aria-hidden="true"
       style={{
-        opacity: opacity * 0.7, // Slightly reduced opacity for clarity
+        opacity: opacity * 0.5, // Reduced from 0.7 for improved visibility
         transition: "opacity 400ms cubic-bezier(0.11, 0, 0.5, 0)",
         zIndex: -10,
         mixBlendMode: 'screen'
@@ -356,11 +356,11 @@ export default function CosmicBackground() {
     >
       <div ref={containerRef} className="w-full h-full"></div>
       
-      {/* Crisper overlay gradient */}
+      {/* Crisper overlay gradient - reduced opacity */}
       <div 
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.05) 20%, rgba(0,0,0,0.25) 50%, rgba(0,0,0,0.7) 100%)',
+          background: 'radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.03) 20%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.5) 100%)',
           mixBlendMode: 'multiply'
         }}
       ></div>
@@ -371,7 +371,7 @@ export default function CosmicBackground() {
         style={{
           background: 'radial-gradient(circle at 50% 80%, rgba(40,120,150,0.02) 0%, rgba(20,60,100,0.01) 30%, transparent 50%)',
           mixBlendMode: 'screen',
-          opacity: 0.3
+          opacity: 0.4  // Increased from 0.3 for slightly more vibrant color
         }}
       ></div>
     </div>
