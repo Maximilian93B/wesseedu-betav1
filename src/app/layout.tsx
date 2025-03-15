@@ -2,9 +2,10 @@ import type { Metadata } from "next"
 import SupabaseProviders from "./providers"
 import { Navigation } from "@/components/wsu/Nav"
 import "./globals.css"
-import type React from "react" // Import React
+import React from "react"
 import { headers } from 'next/headers'
-import { Footer } from "@/components/wsu/Footer"
+import { Footer } from "@/components/wsu/Marketing/Footer"
+import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
   title: "WeSeedU - Sustainable Investment Platform",
@@ -42,30 +43,36 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Get the request headers
   const headersList = headers()
+  
+  // Try to get the pathname from headers
   const pathname = headersList.get('x-pathname') || ''
   
-  // Hide navigation for ALL auth routes
-  const isAuthRoute = pathname.startsWith('/auth')
-
+  // Get the URL from the referer header as a fallback
+  const referer = headersList.get('referer') || ''
+  
+  // Check if we're on any auth-related page using both methods
+  const isAuthPage = pathname.includes('/auth') || referer.includes('/auth')
+  
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className={cn("min-h-screen bg-background font-sans antialiased")}>
         <SupabaseProviders>
-          <div className="relative flex min-h-screen flex-col">
-            {/* Only show Navigation if NOT in auth routes */}
-            {!isAuthRoute && (
-              <div className="relative z-10">
-                <Navigation />
-              </div>
-            )}
-            <main className="flex-1 relative z-0">{children}</main>
-            {/* Only show Footer if NOT in auth routes */}
-            {!isAuthRoute && <Footer />}
-          </div>
+       
+            <div className="relative flex min-h-screen flex-col">
+              {/* Only show Navigation if NOT on any auth page */}
+              {!isAuthPage && (
+                <div className="relative z-10">
+                 
+                </div>
+              )}
+              <main className="flex-1 relative z-0">{children}</main>
+             
+            </div>
+       
         </SupabaseProviders>
       </body>
     </html>
   )
 }
-

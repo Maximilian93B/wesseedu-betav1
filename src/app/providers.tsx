@@ -3,18 +3,19 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { useState } from 'react';
+import { Toaster } from "@/components/ui/toaster";
 
-export default function SupabaseProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function Providers({ children }: { children: React.ReactNode }) {
   // ✅ Ensure Supabase client is correctly initialized
-  const [supabase] = useState(() => createClientComponentClient());
+  const [supabaseClient] = useState(() => createClientComponentClient());
+
 
   return (
-    <SessionContextProvider supabaseClient={supabase}>
+    <SessionContextProvider supabaseClient={supabaseClient}>
       {children}
+      <Toaster />
     </SessionContextProvider>
   );
 }
+
+export default Providers;

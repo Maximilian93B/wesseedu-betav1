@@ -68,6 +68,47 @@
   .text-gradient-primary {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500;
   }
+  
+  /* Cosmic card styling */
+  .cosmic-card {
+    @apply relative overflow-hidden rounded-3xl bg-black/80 p-6 sm:p-8 flex flex-col;
+    @apply shadow-[0_0_20px_rgba(139,92,246,0.1)] hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-all duration-700;
+    @apply before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-500/5 before:via-transparent before:to-teal-500/5 before:opacity-40 before:z-0;
+  }
+  
+  /* Cosmic accent elements */
+  .cosmic-accent-top {
+    @apply absolute -top-32 -right-32 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl z-0;
+  }
+  
+  .cosmic-accent-bottom {
+    @apply absolute -bottom-32 -left-32 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl z-0;
+  }
+  
+  /* Subtle edge highlight */
+  .cosmic-edge-highlight {
+    @apply absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-purple-400/30 to-transparent z-0;
+  }
+  
+  /* Card hover glow effect */
+  .cosmic-hover-glow {
+    @apply absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 bg-gradient-to-b from-purple-500/10 via-transparent to-teal-500/10;
+  }
+  
+  /* Feature badge */
+  .feature-badge {
+    @apply inline-flex items-center space-x-2 bg-teal-500/10 border border-teal-500/20 px-5 py-2 rounded-full;
+  }
+  
+  /* Feature badge dot */
+  .feature-badge-dot {
+    @apply w-2 h-2 rounded-full bg-teal-500 animate-pulse;
+  }
+  
+  /* WeSeedU gradient text */
+  .weseedu-gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-blue-400 to-teal-400 animate-flow;
+  }
 }
 
 /* Additional global styles */
@@ -85,40 +126,175 @@ main {
   flex: 1;
 }
 
-/* Smooth scrolling */
+/* Enhanced Smooth scrolling */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* Adjust based on your header height */
+  overscroll-behavior: none; /* Prevents bouncing on some browsers */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
+/* Improved Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--background);
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--muted);
-  border-radius: 5px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
 }
 
+/* Animation keyframes */
 @keyframes flow {
   0% {
-    background-position: 0% center;
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
   }
   100% {
-    background-position: 200% center;
+    background-position: 0% 50%;
   }
 }
 
 .animate-flow {
-  animation: flow 8s linear infinite;
-  background-size: 200% auto;
+  background-size: 200% 200%;
+  animation: flow 15s ease infinite;
 }
 
+@keyframes gradient-x {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 3s ease infinite;
+}
+
+/* Scroll animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0; 
+    transform: translateX(-50px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes zoomIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.6s ease forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.6s ease forwards;
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.6s ease forwards;
+}
+
+/* Animation delay utilities */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Add animation for subtle pulse effect */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.8; }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 4s ease-in-out infinite;
+}
+
+/* Add custom utility classes at the end of the file */
+
+@layer utilities {
+  .bg-grid-pattern {
+    background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), 
+                     linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+}
+
+/* Add animation for shimmer effect */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: 0 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

@@ -1,7 +1,11 @@
 import Image from "next/image"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
+import { ArrowUpRight, Sparkles, Star, CheckCircle2 } from "lucide-react"
 
+// Update interface to match your DB schema
 interface SponsoredAd {
   id: string
   name: string
@@ -9,20 +13,103 @@ interface SponsoredAd {
   description: string
   impact_score: number
   cta: string
+  url: string
+  company_id: string
+  active: boolean
+  priority: number
+  placement: string
+  created_at: string
+  updated_at: string
+  benefits?: string[] // Add benefits field if available in your API
+  tagline?: string // Add tagline field if available in your API
 }
 
 export function SidebarAds() {
-  const sponsoredAds: SponsoredAd[] = [
-    {
-      id: "1",
-      name: "EcoTech Solutions",
-      logo: "/companies/eco-tech.png",
-      description: "Revolutionary carbon capture technology",
-      impact_score: 92,
-      cta: "Learn More"
-    },
-    // Add more ads as needed
-  ]
+  const [sponsoredAd, setSponsoredAd] = useState<SponsoredAd | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    const fetchAd = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch only one ad with sidebar placement
+        const response = await fetch('/api/protected/sponsored-ads?placement=sidebar&limit=1');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch sponsored ad');
+        }
+        
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setSponsoredAd(data[0]);
+          console.log('Fetched ad data:', data[0]); // Log the data to see its structure
+        } else if (data.error) {
+          throw new Error(data.error);
+        } else if (Array.isArray(data) && data.length === 0) {
+          // No sidebar ads found
+          setSponsoredAd(null);
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (err) {
+        console.error('Error fetching sponsored ad:', err);
+        setError('Unable to load sponsored content');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAd();
+  }, []);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <aside className="w-80 fixed left-0 top-14 h-[calc(100vh-3.5rem)] 
+        border-r border-white/5 bg-black/20 backdrop-blur-sm">
+        <div className="h-full px-6 py-8 flex flex-col items-center justify-center">
+          <div className="w-12 h-12 rounded-full border-2 border-emerald-400/20 border-t-emerald-400 animate-spin mb-4"></div>
+          <p className="text-sm text-zinc-400">Loading sponsored content...</p>
+        </div>
+      </aside>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <aside className="w-80 fixed left-0 top-14 h-[calc(100vh-3.5rem)] 
+        border-r border-white/5 bg-black/20 backdrop-blur-sm">
+        <div className="h-full px-6 py-8 flex items-center justify-center">
+          <p className="text-sm text-zinc-400">{error}</p>
+        </div>
+      </aside>
+    );
+  }
+
+  // No sponsored ad available
+  if (!sponsoredAd) {
+    return (
+      <aside className="w-80 fixed left-0 top-14 h-[calc(100vh-3.5rem)] 
+        border-r border-white/5 bg-black/20 backdrop-blur-sm">
+        <div className="h-full px-6 py-8 flex items-center justify-center">
+          <p className="text-sm text-zinc-400">No sponsored content available</p>
+        </div>
+      </aside>
+    );
+  }
+
+  // Default benefits if none provided in the API
+  const defaultBenefits = [
+    "Higher long-term returns with positive impact",
+    "Support innovation that addresses climate challenges",
+    "Join a community of forward-thinking investors"
+  ];
+
+  // Use benefits from API if available, otherwise use defaults
+  const benefits = sponsoredAd.benefits || defaultBenefits;
 
   return (
     <aside className="w-80 fixed left-0 top-14 h-[calc(100vh-3.5rem)] 
@@ -32,113 +119,165 @@ export function SidebarAds() {
         scrollbar-track-transparent">
         
         {/* Header */}
-        <div className="flex items-center justify-between mb-10">
-          <span className="text-sm font-medium text-zinc-400">
-            Featured Opportunities
-          </span>
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-between mb-10"
+        >
+          <div className="flex items-center">
+            <Sparkles className="h-4 w-4 text-emerald-400 mr-2" />
+            <span className="text-sm font-medium text-zinc-200">
+              {sponsoredAd.tagline || "Featured Opportunity"}
+            </span>
+          </div>
           <Badge variant="outline" 
-            className="bg-emerald-400/5 text-emerald-400 border-emerald-400/20 text-xs">
+            className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 text-xs px-2.5 py-0.5">
             Sponsored
           </Badge>
-        </div>
+        </motion.div>
 
-        {/* Main Ads Section */}
-        <div className="space-y-8">
-          {sponsoredAds.map((ad) => (
-            <Card key={ad.id} 
-              className="group bg-black/30 border border-white/5 
-                hover:border-emerald-400/20 transition-all duration-300">
-              <CardContent className="p-6"> {/* Increased padding */}
-                {/* Company Info - Better internal spacing */}
-                <div className="flex items-start gap-5 mb-6">
-                  <div className="relative w-16 h-16 rounded-lg overflow-hidden 
-                    border border-white/10 flex-shrink-0">
-                    <Image src={ad.logo} alt={ad.name} fill sizes="100vw"
-                      className="object-cover" />
+        {/* Sponsored Ad */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card 
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            className="group relative bg-gradient-to-br from-black to-emerald-950/20 border border-white/5 
+              hover:border-emerald-400/30 transition-all duration-300 overflow-hidden rounded-xl"
+          >
+            {/* Animated gradient background on hover */}
+            <div className={`absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-emerald-400/10 to-emerald-500/5 opacity-0 
+              group-hover:opacity-100 transition-opacity duration-700 ${isHovered ? 'animate-gradient-x' : ''}`}></div>
+            
+            <CardContent className="p-6 relative z-10">
+              {/* Company Info */}
+              <div className="flex items-start gap-5 mb-6">
+                <motion.div 
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  className="relative w-16 h-16 rounded-lg overflow-hidden 
+                    border border-white/10 flex-shrink-0 shadow-lg shadow-emerald-900/20"
+                >
+                  {sponsoredAd.logo ? (
+                    <>
+                      <Image 
+                        src={sponsoredAd.logo} 
+                        alt={`${sponsoredAd.name} logo`} 
+                        fill 
+                        sizes="100vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-emerald-900/20">
+                      <Sparkles className="h-8 w-8 text-emerald-400" />
+                    </div>
+                  )}
+                </motion.div>
+                
+                <div className="min-w-0 flex-1 space-y-3">
+                  <h3 className="text-base font-semibold text-white truncate group-hover:text-emerald-300 transition-colors">
+                    {sponsoredAd.name}
+                  </h3>
+                  
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`h-3.5 w-3.5 ${
+                          i < Math.floor(sponsoredAd.impact_score) 
+                            ? 'text-emerald-400 fill-emerald-400' 
+                            : 'text-zinc-700'
+                        } ${isHovered && i < Math.floor(sponsoredAd.impact_score) ? 'animate-pulse' : ''}`} 
+                      />
+                    ))}
+                    <span className="ml-2 text-xs font-medium text-emerald-400">
+                      Impact Score: {sponsoredAd.impact_score}
+                    </span>
                   </div>
-                  <div className="min-w-0 flex-1 space-y-3">
-                    <h3 className="text-sm font-medium text-white truncate">
-                      {ad.name}
-                    </h3>
-                    <Badge className="bg-emerald-400/10 text-emerald-400 text-xs">
-                      Impact Score: {ad.impact_score}
-                    </Badge>
-                    <p className="text-xs text-zinc-400 line-clamp-2">
-                      {ad.description}
-                    </p>
-                  </div>
+                  
+                  <p className="text-sm text-zinc-300 line-clamp-3 leading-relaxed">
+                    {sponsoredAd.description}
+                  </p>
                 </div>
-
-                {/* CTA Button */}
-                <button className="w-full py-2 px-4 text-xs font-medium 
-                  bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-400 
-                  rounded-lg transition-colors">
-                  {ad.cta}
-                </button>
-              </CardContent>
-            </Card>
-          ))}
-
-          {/* Featured Project Card */}
-          <Card className="bg-black/30 border border-white/5 overflow-hidden">
-            <div className="relative h-40 w-full"> {/* Increased height */}
-              <Image src="/projects/featured.png" alt="Featured Project" fill
-                sizes="100vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-black/20" />
-              <div className="absolute bottom-4 left-4 right-4 space-y-3">
-                <Badge className="bg-emerald-400/10 text-emerald-400 text-xs">
-                  Featured Project
-                </Badge>
-                <h4 className="text-sm font-medium text-white">
-                  Green Energy Initiative
-                </h4>
-                <p className="text-xs text-zinc-400 line-clamp-2">
-                  Join the revolution in sustainable energy production
-                </p>
               </div>
-            </div>
-          </Card>
 
-
-          {/* Newsletter Section */}
-           <Card className="bg-gradient-to-br from-emerald-400/10 via-emerald-400/5 
-            to-transparent border border-emerald-400/20">
-            <CardContent className="p-6 space-y-6">
-              <div className="text-center space-y-2">
-                <h4 className="text-sm font-medium text-white">
-                  Stay Updated
-                </h4>
-                <p className="text-xs text-zinc-400">
-                  Get weekly insights on sustainable investments
-                </p>
-              </div>
+              {/* CTA Button */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <a 
+                  href={sponsoredAd.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block w-full"
+                >
+                  <button className="w-full py-3 px-4 text-sm font-medium 
+                    bg-gradient-to-r from-emerald-500 to-emerald-600
+                    hover:from-emerald-400 hover:to-emerald-500
+                    text-white rounded-lg transition-all duration-300
+                    flex items-center justify-center group shadow-lg shadow-emerald-900/20">
+                    {sponsoredAd.cta}
+                    <ArrowUpRight className="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </button>
+                </a>
+              </motion.div>
               
-              <div className="space-y-3">
-                <input type="email" placeholder="Enter your email"
-                  className="w-full px-4 py-2.5 text-xs bg-black/30 border border-white/10 
-                    rounded-lg text-white placeholder:text-zinc-500 focus:outline-none 
-                    focus:border-emerald-400/50" />
-                <button className="w-full py-2.5 px-4 text-xs font-medium 
-                  bg-emerald-400 hover:bg-emerald-500 text-black 
-                  rounded-lg transition-colors">
-                  Subscribe
-                </button>
-              </div>
+              {/* Benefits */}
+              {benefits.length > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: isHovered ? 1 : 0, height: isHovered ? 'auto' : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-5 pt-4 border-t border-white/5 overflow-hidden"
+                >
+                  <h4 className="text-xs font-medium text-emerald-400 mb-2">Why invest in {sponsoredAd.name}?</h4>
+                  <ul className="text-xs text-zinc-400 space-y-1.5">
+                    {benefits.map((benefit, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 mr-2 flex-shrink-0 mt-0.5" />
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
             </CardContent>
           </Card>
-        </div>
-
+        </motion.div>
 
         {/* Footer */}
-        <div className="mt-10 pt-6 border-t border-white/5">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-10 pt-6 border-t border-white/5"
+        >
           <p className="text-xs text-zinc-500 text-center">
             Interested in advertising? 
-            <a href="#" className="text-emerald-400 ml-1.5 hover:text-emerald-300">
+            <a href="/contact" className="text-emerald-400 ml-1.5 hover:text-emerald-300 transition-colors underline-offset-2 hover:underline">
               Learn more
             </a>
           </p>
-        </div>
+        </motion.div>
       </div>
     </aside>
-  )
-} 
+  );
+}
+
+// Add this to your global CSS
+// @keyframes gradient-x {
+//   0% { background-position: 0% 50%; }
+//   50% { background-position: 100% 50%; }
+//   100% { background-position: 0% 50%; }
+// }
+// .animate-gradient-x {
+//   background-size: 200% 200%;
+//   animation: gradient-x 3s ease infinite;
+// } 

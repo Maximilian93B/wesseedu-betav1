@@ -1,15 +1,19 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BarChart, Users, TrendingUp, Leaf, Globe } from "lucide-react"
 import { motion } from "framer-motion"
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import { WatchlistView, useWatchlist } from "./WatchlistView"
+import UserInvestments from "./UserInvestments"
+import { useAuth } from "@/hooks/use-auth"
+import { useToast } from "@/hooks/use-toast"
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
+import { CACHE_KEYS, CACHE_EXPIRY, getCachedData, setCachedData } from "@/lib/utils/cacheUtils"
 
 export const dynamic = "force-dynamic"
 
@@ -26,15 +30,19 @@ interface InvestmentData {
   amount: number
 }
 
-const sampleInvestmentData: InvestmentData[] = [
-  { month: "Jan", amount: 1000 },
-  { month: "Feb", amount: 2200 },
-  { month: "Mar", amount: 1800 },
-  { month: "Apr", amount: 2400 },
-  { month: "May", amount: 3200 },
-  { month: "Jun", amount: 2800 },
-  { month: "Jul", amount: 3600 },
-]
+interface ProfileData {
+  profile: any;
+  investments: any[];
+  savedCompanies: Array<{
+    id: string;
+    company_id: string;
+    companies: any;
+  }>;
+  stats: {
+    companiesCount: number;
+    usersCount: number;
+  };
+}
 
 interface DashboardViewProps {
   user: any  // You can make this more specific based on your user type
@@ -42,93 +50,304 @@ interface DashboardViewProps {
 
 export function DashboardView({ user }: DashboardViewProps) {
   const router = useRouter()
-  const supabase = useSupabaseClient()
+  const { profile: authProfile, loading: authLoading } = useAuth()
+  const { toast } = useToast()
   const [stats, setStats] = useState<DashboardStat[]>([])
+  const [investmentData, setInvestmentData] = useState<InvestmentData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [savedCompanies, setSavedCompanies] = useState<any[]>([])
+  const [profileData, setProfileData] = useState<ProfileData | null>(null)
+  const [watchlistCompanies, setWatchlistCompanies] = useState<any[]>([])
+  const [watchlistLoading, setWatchlistLoading] = useState(false)
+  
+  // Use the shared watchlist hook to avoid duplicate data fetching
+  const { 
+    fetchWatchlistCompanies
+  } = useWatchlist()
+
+  // Set default stats even before loading
+  useEffect(() => {
+    setStats([
+      {
+        title: "Total Investments",
+        value: `$${authProfile?.total_investments?.toLocaleString() || '0'}`,
+        description: "Your total investment",
+        icon: <BarChart className="h-6 w-6" />,
+        color: "from-green-400 to-blue-500",
+      },
+      {
+        title: "Sustainable Companies",
+        value: "0",
+        description: "Across various sectors",
+        icon: <Leaf className="h-6 w-6" />,
+        color: "from-green-500 to-emerald-600",
+      },
+      {
+        title: "Impact Score",
+        value: `${authProfile?.impact_score || 0}/10`,
+        description: "Based on ESG criteria",
+        icon: <Globe className="h-6 w-6" />,
+        color: "from-blue-400 to-indigo-600",
+      },
+      {
+        title: "Community Members",
+        value: "0",
+        description: "Active investors",
+        icon: <Users className="h-6 w-6" />,
+        color: "from-purple-400 to-pink-500",
+      },
+    ]);
+  }, [authProfile]);
 
   useEffect(() => {
+    if (authLoading) {
+      console.log("DashboardView: Auth is still loading, waiting...");
+      return;
+    }
+    
     if (user) {
-      fetchDashboardStats()
-      fetchSavedCompanies()
+      console.log("DashboardView: User detected, loading data");
+      const loadData = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          
+          // Set a timeout to force loading to end after 5 seconds
+          const timeoutId = setTimeout(() => {
+            if (loading) {
+              console.log("DashboardView: Loading timeout reached");
+              setLoading(false);
+              setError("Loading took too long. Some data may be incomplete.");
+              toast({
+                title: "Warning",
+                description: "Loading took too long. Some data may be incomplete.",
+                variant: "destructive"
+              });
+            }
+          }, 5000);
+          
+          await fetchProfileData();
+          
+          // Clear timeout if data loaded successfully
+          clearTimeout(timeoutId);
+          setLoading(false);
+        } catch (error) {
+          console.error("Error loading dashboard data:", error);
+          setError("Failed to load dashboard data");
+          setLoading(false);
+        }
+      };
+      
+      loadData();
+    } else {
+      console.log("DashboardView: No user, skipping data load");
+      setLoading(false);
     }
-  }, [user])
+  }, [user, authLoading]);
 
-  const fetchDashboardStats = async () => {
-    try {
-      // Get user profile data
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select(`
-          total_investments,
-          previous_month_investments,
-          impact_score
-        `)
-        .eq("id", user?.id)
-        .single()
-
-      if (profileError) throw profileError
-
-      // Get total number of companies
-      const { count: companiesCount, error: companiesError } = await supabase
-        .from("companies")
-        .select("*", { count: "exact" })
-
-      if (companiesError) throw companiesError
-
-      // Get total number of users
-      const { count: usersCount, error: usersError } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact" })
-
-      if (usersError) throw usersError
-
-      // Calculate percentage change in investments
-      const percentageChange = profileData.previous_month_investments 
-        ? ((profileData.total_investments - profileData.previous_month_investments) / profileData.previous_month_investments * 100).toFixed(1)
-        : 0
-
-        setStats([
-          {
-            title: "Total Investments",
-            value: `$${profileData.total_investments.toLocaleString()}`,
-            description: `${percentageChange}% change from last month`,
-            icon: <BarChart className="h-6 w-6" />,
-            color: "from-green-400 to-blue-500",
-          },
-          {
-            title: "Sustainable Companies",
-            value: companiesCount?.toString() || "0",
-            description: "Across various sectors",
-            icon: <Leaf className="h-6 w-6" />,
-            color: "from-green-500 to-emerald-600",
-          },
-          {
-            title: "Impact Score",
-            value: `${profileData.impact_score}/10`,
-            description: "Based on ESG criteria",
-            icon: <Globe className="h-6 w-6" />,
-            color: "from-blue-400 to-indigo-600",
-          },
-          {
-            title: "Community Members",
-            value: usersCount?.toString() || "0",
-            description: "Active investors",
-            icon: <Users className="h-6 w-6" />,
-            color: "from-purple-400 to-pink-500",
-          },
-        ])
-      } catch (error) {
-        console.error("Error fetching dashboard stats:", error)
+  const fetchProfileData = async () => {
+    console.log("DashboardView: Checking for cached profile data");
+    
+    // Check if we have cached data using the utility function with proper typing
+    const cachedData = getCachedData<ProfileData>(CACHE_KEYS.PROFILE_DATA, CACHE_EXPIRY.PROFILE_DATA);
+    
+    if (cachedData) {
+      console.log("DashboardView: Using cached profile data");
+      setProfileData(cachedData);
+      
+      // Process saved companies data from cache
+      if (cachedData.savedCompanies && cachedData.savedCompanies.length > 0) {
+        console.log(`DashboardView: Using ${cachedData.savedCompanies.length} saved companies from cache`);
+        
+        // Transform the data to match the WatchlistCompany interface
+        const transformedCompanies = cachedData.savedCompanies.map((item: any) => ({
+          id: item.id,
+          company_id: item.company_id,
+          companies: item.companies
+        }));
+        
+        setSavedCompanies(transformedCompanies);
+        
+        // Also refresh the watchlist data to ensure consistency
+        fetchWatchlistCompanies();
+      } else {
+        console.log("DashboardView: No saved companies in cache");
+        setSavedCompanies([]);
       }
+      
+      return;
     }
-  const fetchSavedCompanies = async () => {
+    
+    // If no valid cache exists, fetch fresh data
+    console.log("DashboardView: Fetching profile data from API");
     try {
-      const { data, error } = await supabase.from("company_saves").select("*, companies(*)").limit(3)
-      if (error) throw error
-      setSavedCompanies(data)
+      const { data, error } = await fetchWithAuth('/api/auth/profile', {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (error) {
+        console.error("Error fetching profile data:", error);
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error("No data returned from API");
+      }
+      
+      console.log("DashboardView: Profile data fetched successfully", data);
+      
+      // Cache the fresh data using the utility function
+      setCachedData(CACHE_KEYS.PROFILE_DATA, data);
+      
+      setProfileData(data);
+      
+      // Process saved companies data
+      if (data.savedCompanies && data.savedCompanies.length > 0) {
+        console.log(`DashboardView: Found ${data.savedCompanies.length} saved companies`);
+        
+        // Transform the data to match the WatchlistCompany interface
+        const transformedCompanies = data.savedCompanies.map((item: any) => ({
+          id: item.id,
+          company_id: item.company_id,
+          companies: item.companies
+        }));
+        
+        console.log("DashboardView: Transformed saved companies data", transformedCompanies);
+        setSavedCompanies(transformedCompanies);
+        
+        // Also refresh the watchlist data to ensure consistency
+        fetchWatchlistCompanies();
+      } else {
+        console.log("DashboardView: No saved companies found");
+        setSavedCompanies([]);
+      }
+      
+      // Process investments to create chart data
+      if (data.investments && data.investments.length > 0) {
+        // Group investments by month
+        const investmentsByMonth = data.investments.reduce((acc: Record<string, number>, inv: any) => {
+          const date = new Date(inv.investment_date);
+          const monthYear = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+          
+          if (!acc[monthYear]) {
+            acc[monthYear] = 0;
+          }
+          
+          acc[monthYear] += parseFloat(inv.amount) || 0;
+          return acc;
+        }, {});
+        
+        // Convert to array format for chart
+        const chartData = Object.entries(investmentsByMonth).map(([month, amount]) => ({
+          month,
+          amount: Number(amount)
+        }));
+        
+        // Sort by date
+        chartData.sort((a, b) => {
+          const dateA = new Date(a.month);
+          const dateB = new Date(b.month);
+          return dateA.getTime() - dateB.getTime();
+        });
+        
+        // Take last 7 months or fill with sample data if less
+        const finalChartData = chartData.length >= 7 
+          ? chartData.slice(-7) 
+          : [...Array(7 - chartData.length).fill(null).map((_, i) => ({
+              month: `Month ${i+1}`,
+              amount: 0
+            })), ...chartData];
+            
+        setInvestmentData(finalChartData);
+      } else {
+        // Use sample data if no investments
+        setInvestmentData([
+          { month: "Jan", amount: 1000 },
+          { month: "Feb", amount: 2200 },
+          { month: "Mar", amount: 1800 },
+          { month: "Apr", amount: 2400 },
+          { month: "May", amount: 3200 },
+          { month: "Jun", amount: 2800 },
+          { month: "Jul", amount: 3600 },
+        ]);
+      }
+      
+      // Update stats
+      setStats([
+        {
+          title: "Total Investments",
+          value: `$${data.profile?.total_investments?.toLocaleString() || '0'}`,
+          description: "Your total investment",
+          icon: <BarChart className="h-6 w-6" />,
+          color: "from-green-400 to-blue-500",
+        },
+        {
+          title: "Sustainable Companies",
+          value: data.stats?.companiesCount?.toString() || "0",
+          description: "Across various sectors",
+          icon: <Leaf className="h-6 w-6" />,
+          color: "from-green-500 to-emerald-600",
+        },
+        {
+          title: "Impact Score",
+          value: `${data.profile?.impact_score || 0}/10`,
+          description: "Based on ESG criteria",
+          icon: <Globe className="h-6 w-6" />,
+          color: "from-blue-400 to-indigo-600",
+        },
+        {
+          title: "Community Members",
+          value: data.stats?.usersCount?.toString() || "0",
+          description: "Active investors",
+          icon: <Users className="h-6 w-6" />,
+          color: "from-purple-400 to-pink-500",
+        },
+      ]);
     } catch (error) {
-      console.error("Error fetching saved companies:", error)
+      console.error("Error in fetchProfileData:", error);
+      throw error;
     }
+  };
+
+  // Show a more informative loading state
+  if (authLoading || loading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 space-y-4">
+        <div className="h-10 w-10 animate-spin">
+          <BarChart className="h-10 w-10 text-emerald-400/50" />
+        </div>
+        <p className="text-emerald-400 animate-pulse">Loading dashboard data...</p>
+        <p className="text-zinc-500 text-sm">This may take a few moments</p>
+      </div>
+    );
+  }
+
+  // Show error state if there was an error
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 space-y-4">
+        <p className="text-red-400">{error}</p>
+        <Button 
+          onClick={() => window.location.reload()}
+          className="bg-emerald-500 hover:bg-emerald-400 text-white"
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  // Redirect if no user
+  if (!user) {
+    router.push("/auth/signin");
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-zinc-400">Redirecting to login...</p>
+      </div>
+    );
   }
 
   return (
@@ -167,7 +386,7 @@ export function DashboardView({ user }: DashboardViewProps) {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={sampleInvestmentData}>
+              <AreaChart data={investmentData}>
                 <defs>
                   <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity={0.5} />
@@ -209,43 +428,40 @@ export function DashboardView({ user }: DashboardViewProps) {
         <Card className="col-span-3 bg-black border-emerald-500/20 border-2 shadow-lg hover:border-emerald-400/40 transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-xl font-semibold text-white">Recent Activities</CardTitle>
+              <CardTitle className="text-xl font-semibold text-white">Watchlist</CardTitle>
               <p className="text-sm text-gray-400">Your saved companies</p>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push("/dashboard/saved")}
+              onClick={() => router.push("/auth/home")}
               className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50"
             >
               View All
             </Button>
           </CardHeader>
           <CardContent>
-            {savedCompanies.length === 0 ? (
-              <p className="text-sm text-gray-400">No saved companies yet</p>
-            ) : (
-              <ul className="space-y-4">
-                {savedCompanies.map((saved) => (
-                  <li key={saved.id} className="flex items-center justify-between bg-black/50 border border-emerald-500/20 p-3 rounded-lg">
-                    <span className="text-sm text-white">{saved.companies.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push(`/companies/${saved.companies.id}`)}
-                      className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50"
-                    >
-                      View
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <WatchlistView 
+              externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
+              externalLoading={loading}
+              isPreview={true}
+              maxItems={3}
+              onViewAll={() => router.push("/auth/home")}
+            />
           </CardContent>
         </Card>
       </div>
 
-    
+      {/* New Investments and Watchlist Section */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <UserInvestments />
+        </motion.div>
+      </div>
 
       <div className="flex justify-between">
         <Button
@@ -254,9 +470,8 @@ export function DashboardView({ user }: DashboardViewProps) {
         >
           Explore Sustainable Companies
         </Button>
-
       </div>
     </div>
-  )
+  );
 }
 

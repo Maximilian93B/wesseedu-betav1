@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Leaf } from "lucide-react"
+import { Leaf, User, Mail, Lock } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function SignupPage() {
   const supabase = useSupabaseClient()
@@ -49,7 +50,7 @@ export default function SignupPage() {
       }
 
       setInfoMsg(data.message)
-      router.push("/auth/confirmation")
+      router.push("/auth/confirmation?email=" + encodeURIComponent(email))
     } catch (err: any) {
       console.error("Unexpected signup error:", err)
       setErrorMsg(err.message || "An unexpected error occurred. Please try again later.")
@@ -60,76 +61,138 @@ export default function SignupPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-[350px]">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-2">
-            <Leaf className="h-10 w-10 text-primary" />
-          </div>
-          <CardTitle className="text-2xl text-center">Create an account</CardTitle>
-          <CardDescription className="text-center">Enter your details to create your WeSeedU account</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          {errorMsg && (
-            <Alert variant="destructive">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{errorMsg}</AlertDescription>
-            </Alert>
-          )}
-          {infoMsg && (
-            <Alert>
-              <AlertTitle>Success</AlertTitle>
-              <AlertDescription>{infoMsg}</AlertDescription>
-            </Alert>
-          )}
-          <form onSubmit={handleSignup}>
-            <div className="grid gap-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="w-[400px] max-w-[90vw] shadow-lg">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-center mb-2">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="rounded-full bg-primary/10 p-3"
+              >
+                <Leaf className="h-10 w-10 text-primary" />
+              </motion.div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button className="w-full mt-4" type="submit" disabled={isLoading}>
-              {isLoading ? "Signing up..." : "Sign Up"}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter>
-          <p className="text-sm text-center text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/auth/login" className="text-primary hover:underline">
-              Log in
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+            <CardTitle className="text-2xl text-center">Create an account</CardTitle>
+            <CardDescription className="text-center">Enter your details to create your WeSeedU account</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            {errorMsg && (
+              <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{errorMsg}</AlertDescription>
+              </Alert>
+            )}
+            {infoMsg && (
+              <Alert>
+                <AlertTitle>Success</AlertTitle>
+                <AlertDescription>{infoMsg}</AlertDescription>
+              </Alert>
+            )}
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName" className="text-sm font-medium">
+                    First Name
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="firstName"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="pl-10"
+                      placeholder="John"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName" className="text-sm font-medium">
+                    Last Name
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="lastName"
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="pl-10"
+                      placeholder="Doe"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    className="pl-10"
+                    placeholder="you@example.com"
+                    required 
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Password must be at least 8 characters long
+                </p>
+              </div>
+              <Button className="w-full mt-2" type="submit" disabled={isLoading}>
+                {isLoading ? "Creating account..." : "Create Account"}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4 border-t pt-6">
+            <p className="text-sm text-center text-muted-foreground">
+              Already have an account?{" "}
+              <Link href="/auth/login" className="text-primary hover:underline font-medium">
+                Sign in
+              </Link>
+            </p>
+            <p className="text-xs text-center text-muted-foreground">
+              By creating an account, you agree to our{" "}
+              <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
+                Privacy Policy
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </motion.div>
     </div>
   )
 }

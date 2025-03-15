@@ -37,9 +37,14 @@ export function useLogin() {
       if (!data.hasProfile) {
         router.push('/auth/profile-create')
       } else {
-        const returnUrl = searchParams.get('returnUrl') || '/auth/Home'
+        const returnUrl = searchParams.get('returnUrl') || '/auth/home'
         router.push(returnUrl)
       }
+
+      const redirectUrl = data.redirectUrl || searchParams.get('returnUrl') || '/auth/home'
+      
+      console.log("Redirecting to:", redirectUrl)
+      router.push(redirectUrl)
       router.refresh()
       
       return data

@@ -1,0 +1,22 @@
+---
+description: This is WeSeedUs Tech Stack
+globs: 
+alwaysApply: false
+---
+
+# Technical Stack
+
+
+ UI & Styling: Radix UI, Shadcn ,for accessible components and Tailwind CSS with merge/animate utilities.
+Animation & Interactivity: Framer Motion and Geist.
+Forms & Charts: React Hook Form and Recharts.
+Backend: Supabase for auth and database.
+3D Graphics & Utilities: Three.js and supporting libraries like clsx and class-variance-authority.
+Dev Tools: ESLint, PostCSS, and TypeScript.
+
+
+
+
+
+
+

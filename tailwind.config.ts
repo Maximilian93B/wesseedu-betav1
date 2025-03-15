@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from "tailwindcss";
+
+const config: Config = {
 	darkMode: ["class"],
 	content: [
 	  "./pages/**/*.{ts,tsx}",
@@ -77,16 +79,36 @@ module.exports = {
 			'0%': { backgroundPosition: '0% center' },
 			'100%': { backgroundPosition: '-200% center' },
 		  },
+		  shimmer: {
+			"100%": {
+			  backgroundPosition: "200% 0",
+			},
+		  },
+		  "pulse-subtle": {
+			"0%, 100%": {
+			  opacity: "0.2",
+			},
+			"50%": {
+			  opacity: "0.3",
+			},
+		  },
 		},
 		animation: {
 		'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 		"accordion-down": "accordion-down 0.2s ease-out",
 		"accordion-up": "accordion-up 0.2s ease-out",
 		  gradient: 'gradient 3s linear infinite',
+		  shimmer: "shimmer 5s infinite",
+		  "pulse-subtle": "pulse-subtle 4s infinite",
+		},
+		screens: {
+		  'xs': '480px',
 		},
 	  },
 	},
 	plugins: [require("tailwindcss-animate")],
-  }
+}
+
+export default config;
   
   
