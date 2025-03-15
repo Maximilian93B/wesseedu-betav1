@@ -4,12 +4,12 @@ import React, { Suspense, useState, useEffect, useRef } from 'react'
 import { Navigation } from "@/components/wsu/Nav"
 import { HeroSection } from "@/components/wsu/Marketing/HeroSection"
 import { CardSection } from "@/components/wsu/Marketing/CardSection"
-import { PartnersAndVetting } from "@/components/wsu/Marketing/PartnersAndVetting"
+import { PartnersAndVetting } from "@/components/wsu/Marketing/PartnersAndVetting/index"
 import { ProblemSolutionFlow } from "@/components/wsu/Marketing/ProblemSolutionFlow"
 import { KeyFeatures } from "@/components/wsu/Marketing/KeyFeatures"
 import { ImpactSection } from "@/components/wsu/Marketing/ImpactSection"
 import CosmicBackground from "@/components/ui/backgrounds/CosmicBeamsBackground"
-import StarryBackground from '@/components/ui/StarryBackground'
+import GridRadiatingBackground from "@/components/ui/backgrounds/GridRadiatingBackground"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import { useRouter, usePathname } from "next/navigation"
 
@@ -202,10 +202,10 @@ export default function LandingPage() {
             }}
           ></div>
           
-          {/* Optimize background components based on device capabilities */}
+          {/* Replace StarryBackground with GridRadiatingBackground */}
           {typeof window !== 'undefined' && (
             <>
-              <StarryBackground />
+              <GridRadiatingBackground />
               {/* Only render CosmicBackground on more powerful devices that don't have reduced motion preferences */}
               {!window.matchMedia('(prefers-reduced-motion: reduce)').matches && !isMobile() && (
                 <CosmicBackground />

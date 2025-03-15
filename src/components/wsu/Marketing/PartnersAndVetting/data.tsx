@@ -1,5 +1,6 @@
 import { Shield, BarChart2, FileCheck, CheckCircle } from "lucide-react"
 import { Partner, VettingStep } from "./types"
+import React from 'react'
 
 export const PARTNERS: Partner[] = [
   {
