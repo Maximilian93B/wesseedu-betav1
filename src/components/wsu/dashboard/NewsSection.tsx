@@ -1,255 +1,341 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import React, { useState, useEffect } from "react"
+import { Newspaper, Calendar, Link2, ExternalLink, Bookmark, BookmarkCheck } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { motion } from "framer-motion"
-import { ArrowRight, ArrowUpRight, Clock, ExternalLink, Newspaper, Share2, Sparkles, TrendingUp } from "lucide-react"
-import { useState } from "react"
-import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { motion, AnimatePresence } from "framer-motion"
+import { formatDistanceToNow } from "date-fns"
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
+import { useToast } from "@/hooks/use-toast"
 
+// Interface for news items
 interface NewsItem {
-  id: number
+  id: string
   title: string
+  source: string
+  url: string
+  published_at: string
   category: string
-  summary: string
-  time: string
-  image?: string
-  source?: string
-  trending?: boolean
+  is_featured: boolean
+  image_url: string // Make image_url required
+  summary?: string
 }
 
+// Interface for saved article response
+interface SavedArticle {
+  article_id: string
+}
+
+// Placeholder news data
+const PLACEHOLDER_NEWS: NewsItem[] = [
+  {
+    id: "news-1",
+    title: "CleanEco Secures $50M Funding for Carbon Capture Technology",
+    source: "Green Investor",
+    url: "#",
+    published_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    category: "Funding",
+    is_featured: true,
+    image_url: "https://images.unsplash.com/photo-1569936708126-28188d1df943?q=80&w=800&auto=format&fit=crop",
+    summary: "CleanEco's breakthrough carbon capture technology has secured significant funding to scale operations globally."
+  },
+  {
+    id: "news-2", 
+    title: "Solar Industries Reports Record Q3 Growth with 35% Increase in Installations",
+    source: "EcoNews",
+    url: "#",
+    published_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    category: "Market",
+    is_featured: false,
+    image_url: "https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=800&auto=format&fit=crop",
+    summary: "Solar adoption continues to accelerate with unprecedented growth in both residential and commercial sectors."
+  },
+  {
+    id: "news-3",
+    title: "New ESG Regulations Expected to Impact Investment Strategies in 2024",
+    source: "Sustainable Finance",
+    url: "#",
+    published_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    category: "Regulation",
+    is_featured: false,
+    image_url: "https://images.unsplash.com/photo-1638913662295-9630035ef770?q=80&w=800&auto=format&fit=crop",
+    summary: "Upcoming regulatory changes will require more stringent sustainability reporting from publicly traded companies."
+  },
+  {
+    id: "news-4",
+    title: "OceanClean Launches Revolutionary Plastic Removal System for Coastal Waters",
+    source: "Marine Tech Today",
+    url: "#",
+    published_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+    category: "Innovation",
+    is_featured: true,
+    image_url: "https://images.unsplash.com/photo-1565641644012-826582e2fe30?q=80&w=800&auto=format&fit=crop",
+    summary: "The new system can remove up to 90% of microplastics from coastal waters without harming marine ecosystems."
+  },
+  {
+    id: "news-5",
+    title: "Green Building Materials Market Expected to Reach $650B by 2030",
+    source: "Construction Weekly",
+    url: "#",
+    published_at: new Date(Date.now() - 432000000).toISOString(), // 5 days ago
+    category: "Market",
+    is_featured: false,
+    image_url: "https://images.unsplash.com/photo-1599619585752-c3de37eec4a9?q=80&w=800&auto=format&fit=crop",
+    summary: "Sustainable construction materials are seeing unprecedented demand as developers commit to carbon-neutral building practices."
+  }
+];
+
+// Initial saved articles (first and third article are saved)
+const INITIAL_SAVED_ARTICLES = new Set(["news-1", "news-4"]);
+
 export function NewsSection() {
-  const [hoveredNewsId, setHoveredNewsId] = useState<number | null>(null);
-  
-  const news: NewsItem[] = [
-    {
-      id: 1,
-      title: "New Sustainable Energy Project Launched",
-      category: "Energy",
-      summary: "Revolutionary solar project aims to power 100,000 homes with zero emissions and create thousands of green jobs in the process.",
-      time: "2h ago",
-      image: "/images/news/solar-panels.jpg",
-      source: "CleanTech Today",
-      trending: true
-    },
-    {
-      id: 2,
-      title: "Green Tech Startup Raises $50M in Funding",
-      category: "Technology",
-      summary: "Breakthrough in carbon capture technology attracts major investors including prominent venture capital firms focused on climate solutions.",
-      time: "4h ago",
-      image: "/images/news/startup-funding.jpg",
-      source: "Tech Innovators"
-    },
-    {
-      id: 3,
-      title: "Global Climate Summit Announces New Initiatives",
-      category: "Policy",
-      summary: "World leaders commit to ambitious carbon reduction targets and pledge financial support for developing nations to transition to clean energy.",
-      time: "6h ago",
-      image: "/images/news/climate-summit.jpg",
-      source: "Global News Network",
-      trending: true
-    },
-    {
-      id: 4,
-      title: "Sustainable Fashion Brand Goes Public",
-      category: "Business",
-      summary: "Eco-friendly clothing manufacturer completes successful IPO, highlighting growing investor interest in sustainable consumer goods.",
-      time: "12h ago",
-      image: "/images/news/sustainable-fashion.jpg",
-      source: "Business Insider"
-    },
-  ]
+  const [hoveredNewsId, setHoveredNewsId] = useState<string | null>(null);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [savedArticles, setSavedArticles] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  // Fetch news items (now using placeholder data)
+  useEffect(() => {
+    // Simulate API delay
+    const loadPlaceholderData = async () => {
+      try {
+        setLoading(true);
+        
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Set placeholder news data
+        setNewsItems(PLACEHOLDER_NEWS);
+        
+        // Set placeholder saved articles
+        setSavedArticles(INITIAL_SAVED_ARTICLES);
+      } catch (error) {
+        console.error("Failed to load placeholder news:", error);
+        setNewsItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlaceholderData();
+  }, []);
+
+  // Toggle saving an article
+  const toggleSaveArticle = async (articleId: string) => {
+    try {
+      // For placeholder data, we'll just update the local state
+      const isSaved = savedArticles.has(articleId);
+      
+      // Update local state
+      const newSavedArticles = new Set(savedArticles);
+      if (isSaved) {
+        newSavedArticles.delete(articleId);
+        toast({
+          title: "Article removed from saved list",
+          variant: "default"
+        });
+      } else {
+        newSavedArticles.add(articleId);
+        toast({
+          title: "Article saved successfully",
+          variant: "default"
+        });
+      }
+      
+      setSavedArticles(newSavedArticles);
+    } catch (error) {
+      console.error("Error toggling article save:", error);
+      toast({
+        title: "Failed to save article",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
-    <aside className="w-80 fixed right-0 top-14 h-[calc(100vh-3.5rem)] 
-      border-l border-white/5 bg-black/20 backdrop-blur-sm">
-      <div className="h-full px-6 py-8 overflow-y-auto 
-        scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 
-        scrollbar-track-transparent">
-        
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center justify-between mb-8"
-        >
-          <div className="flex items-center gap-2">
-            <Newspaper className="w-4 h-4 text-emerald-400" />
-            <span className="text-sm font-medium text-zinc-200">Latest Updates</span>
-          </div>
-          <Badge variant="outline" 
-            className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 text-xs px-2.5 py-0.5">
-            Live Feed
-          </Badge>
-        </motion.div>
+    <div className="h-full overflow-y-auto">
+      {/* Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex items-center justify-between mb-8"
+      >
+        <div className="flex items-center gap-2">
+          <Newspaper className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-medium text-zinc-200">Latest Updates</span>
+        </div>
+        <Badge variant="outline" 
+          className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 text-xs px-2.5 py-0.5">
+          Live Feed
+        </Badge>
+      </motion.div>
 
-        {/* News Feed */}
-        <div className="space-y-4">
-          {news.map((item, index) => (
+      {/* News Feed */}
+      <div className="space-y-5">
+        {loading ? (
+          // Skeleton loading state
+          Array(5).fill(0).map((_, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+              className="bg-zinc-900/30 border border-white/5 rounded-lg p-4"
+            >
+              <div className="flex gap-4">
+                <Skeleton className="h-16 w-24 rounded-md bg-zinc-800/50 flex-shrink-0" />
+                <div className="space-y-3 flex-1">
+                  <Skeleton className="h-4 w-3/4 bg-zinc-800/50" />
+                  <Skeleton className="h-4 w-1/2 bg-zinc-800/50" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-3 w-20 bg-zinc-800/50" />
+                    <Skeleton className="h-3 w-16 bg-zinc-800/50" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))
+        ) : newsItems.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-zinc-500">No news articles available</p>
+          </div>
+        ) : (
+          // Actual news items
+          newsItems.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ 
+                duration: 0.4, 
+                delay: index * 0.1,
+                type: "spring",
+                stiffness: 100
+              }}
               onMouseEnter={() => setHoveredNewsId(item.id)}
               onMouseLeave={() => setHoveredNewsId(null)}
+              className={`relative group bg-zinc-900/30 border border-white/5 
+                hover:border-emerald-500/20 rounded-lg p-4 transition-all duration-300
+                ${hoveredNewsId === item.id ? 'bg-zinc-900/50 shadow-lg shadow-emerald-500/5' : ''}
+                ${item.is_featured ? 'ring-1 ring-emerald-500/20' : ''}
+              `}
             >
-              <Card className="group relative bg-gradient-to-br from-black to-zinc-950/20 border border-white/5 
-                hover:border-emerald-400/30 transition-all duration-300 overflow-hidden rounded-xl">
-                
-                {/* Animated gradient background on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-emerald-400/10 to-emerald-500/5 opacity-0 
-                  group-hover:opacity-100 transition-opacity duration-700 ${hoveredNewsId === item.id ? 'animate-gradient-x' : ''}`}></div>
-                
-                <CardContent className="p-4 space-y-3 relative z-10">
-                  {/* Header with category and time */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-emerald-400/10 text-emerald-400 text-xs">
-                        {item.category}
-                      </Badge>
-                      {item.trending && (
-                        <Badge className="bg-amber-400/10 text-amber-400 border-amber-400/20 text-xs">
-                          <TrendingUp className="h-3 w-3 mr-1" />
-                          Trending
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center text-xs text-zinc-500">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {item.time}
-                    </div>
-                  </div>
-                  
-                  {/* News content */}
-                  <div className="flex gap-3">
-                    {item.image && (
-                      <div className="relative w-16 h-16 rounded-lg overflow-hidden 
-                        border border-white/10 flex-shrink-0 shadow-lg shadow-emerald-900/10">
-                        <div className="absolute inset-0 bg-emerald-900/20 z-10"></div>
-                        <div className="w-full h-full bg-emerald-900/20 flex items-center justify-center">
-                          <Newspaper className="h-6 w-6 text-emerald-400/50" />
-                        </div>
-                      </div>
-                    )}
-                    <div>
-                      <h3 className="text-sm font-medium text-white mb-1 line-clamp-2 group-hover:text-emerald-300 transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="text-xs text-zinc-400 line-clamp-2 group-hover:text-zinc-300 transition-colors">
-                        {item.summary}
-                      </p>
-                      {item.source && (
-                        <p className="text-xs text-zinc-500 mt-1 flex items-center">
-                          <span>Source:</span>
-                          <span className="ml-1 text-emerald-400">{item.source}</span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
+              {/* Hovered state background effect */}
+              <AnimatePresence>
+                {hoveredNewsId === item.id && (
                   <motion.div 
-                    className="flex items-center justify-between pt-2"
-                    initial={{ opacity: 0.8 }}
-                    animate={{ opacity: hoveredNewsId === item.id ? 1 : 0.8 }}
-                  >
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Button 
-                        variant="ghost" 
-                        className="text-xs text-emerald-400 hover:text-emerald-300 
-                          hover:bg-emerald-400/10 px-2 py-1 h-auto flex items-center"
-                      >
-                        Read More
-                        <ArrowRight className="h-3 w-3 ml-1 transition-transform duration-300 group-hover:translate-x-0.5" />
-                      </Button>
-                    </motion.div>
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 rounded-lg pointer-events-none"
+                  />
+                )}
+              </AnimatePresence>
+              
+              {/* Featured tag */}
+              {item.is_featured && (
+                <div className="absolute -top-2 -right-2">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/80 text-white">
+                    Featured
+                  </span>
+                </div>
+              )}
+              
+              {/* Article content with image */}
+              <div className="flex gap-4">
+                {/* Article image */}
+                <div className="flex-shrink-0 w-24 h-16 overflow-hidden rounded-md">
+                  <img 
+                    src={item.image_url} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+                
+                {/* Article text content */}
+                <div className="space-y-2 flex-1">
+                  <h3 className="text-sm font-medium leading-snug text-zinc-200 line-clamp-2 group-hover:text-white transition-colors">
+                    {item.title}
+                  </h3>
+                  
+                  {item.summary && (
+                    <p className="text-xs text-zinc-400 line-clamp-2">
+                      {item.summary}
+                    </p>
+                  )}
+                  
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2 text-xs text-zinc-500">
+                      <span className="font-medium text-emerald-400/80">{item.source}</span>
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="h-3 w-3" />
+                        {formatDistanceToNow(new Date(item.published_at), { addSuffix: true })}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
                       <Button
+                        size="sm"
                         variant="ghost"
-                        className="text-xs text-zinc-400 hover:text-zinc-300 
-                          hover:bg-white/5 px-2 py-1 h-auto flex items-center"
+                        onClick={() => toggleSaveArticle(item.id)}
+                        className={`h-7 w-7 p-0 rounded-full
+                          ${savedArticles.has(item.id) 
+                            ? 'text-emerald-400 hover:text-emerald-300' 
+                            : 'text-zinc-400 hover:text-zinc-300'} 
+                          opacity-70 hover:opacity-100 hover:bg-white/5 transition-all duration-200`}
                       >
-                        Share
-                        <Share2 className="h-3 w-3 ml-1" />
+                        {savedArticles.has(item.id) ? (
+                          <BookmarkCheck className="h-3.5 w-3.5" />
+                        ) : (
+                          <Bookmark className="h-3.5 w-3.5" />
+                        )}
                       </Button>
-                    </motion.div>
-                  </motion.div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Breaking News Section */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-6"
-        >
-          <Card className="bg-gradient-to-br from-emerald-950/40 via-emerald-900/20 to-black 
-            border border-emerald-400/20 overflow-hidden relative rounded-xl">
-            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay"></div>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-            <CardContent className="p-5 relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="h-4 w-4 text-emerald-400" />
-                <Badge className="bg-emerald-400/20 text-emerald-400 border-emerald-400/30 text-xs">
-                  Breaking News
-                </Badge>
+                      
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => window.open(item.url, '_blank')}
+                        className="h-7 w-7 p-0 rounded-full text-zinc-400 hover:text-zinc-300
+                          opacity-70 hover:opacity-100 hover:bg-white/5 transition-all duration-200"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h4 className="text-base font-semibold text-white mb-2 leading-tight">
-                Major Breakthrough in Renewable Energy Storage
-              </h4>
-              <p className="text-sm text-zinc-300 mb-4 leading-relaxed">
-                Scientists announce revolutionary battery technology with 10x capacity and 50% lower production costs.
-              </p>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button 
-                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600
-                    hover:from-emerald-400 hover:to-emerald-500
-                    text-white text-sm shadow-lg shadow-emerald-900/20
-                    flex items-center justify-center group"
-                >
-                  Full Coverage
-                  <ExternalLink className="h-4 w-4 ml-2 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </Button>
-              </motion.div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Footer */}
-        <motion.div 
+            </motion.div>
+          ))
+        )}
+      </div>
+      
+      {/* View more button */}
+      {!loading && newsItems.length > 0 && (
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-          className="mt-8 pt-6 border-t border-white/5"
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-6 text-center"
         >
-          <p className="text-xs text-zinc-500 text-center">
-            Subscribe to our 
-            <Button variant="link" className="text-emerald-400 px-1 py-0 h-auto hover:text-emerald-300 transition-colors underline-offset-2 hover:underline">
-              newsletter
-            </Button>
-            for daily updates
-          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.open('/news', '_self')}
+            className="w-full text-xs border-white/10 text-zinc-400 
+              hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/20 
+              transition-all duration-300"
+          >
+            View All Updates
+          </Button>
         </motion.div>
-      </div>
-    </aside>
+      )}
+    </div>
   )
 }
 

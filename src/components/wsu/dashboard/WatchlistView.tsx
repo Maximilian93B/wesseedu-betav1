@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ExternalLink, Bookmark, TrendingUp, BarChart } from "lucide-react"
@@ -23,6 +23,7 @@ interface WatchlistCompany {
     score: number
     pitch_deck_url: string
     sustainability_data: any
+    logo_url?: string
   } | null
 }
 
@@ -41,7 +42,8 @@ export function useWatchlist() {
   const { user, loading: authLoading } = useAuth()
   const { toast } = useToast()
 
-  const fetchWatchlistCompanies = async () => {
+  // Use useCallback to memoize the function
+  const fetchWatchlistCompanies = useCallback(async () => {
     if (authLoading) {
       console.log("useWatchlist: Auth is still loading, waiting...")
       return
@@ -56,50 +58,9 @@ export function useWatchlist() {
     try {
       console.log("useWatchlist: Starting fetch, setting loading to true")
       setLoading(true)
-      console.log(`useWatchlist: Fetching watchlist data from API for user ${user.id}`)
       
-      // First try to get data from the profile API which includes saved companies
-      console.log("useWatchlist: Trying to fetch from profile API first")
-      const profileResponse = await fetchWithAuth('/api/auth/profile', {
-        cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      })
-      
-      if (profileResponse.data && profileResponse.data.savedCompanies) {
-        console.log(`useWatchlist: Found ${profileResponse.data.savedCompanies.length} saved companies in profile data`)
-        
-        // Transform the data to match the WatchlistCompany interface
-        const transformedCompanies = profileResponse.data.savedCompanies.map((item: any) => ({
-          id: item.id,
-          company_id: item.company_id,
-          companies: item.companies
-        }))
-        
-        console.log("useWatchlist: Setting watchlist companies from profile data")
-        setWatchlistCompanies(transformedCompanies)
-        setLoading(false)
-        
-        // Log how many companies have valid company data
-        const validCompanies = transformedCompanies.filter((item: WatchlistCompany) => item.companies !== null)
-        console.log(`useWatchlist: ${validCompanies.length} of ${transformedCompanies.length} items have valid company data`)
-        
-        // Log the company IDs for debugging
-        const companyIds = transformedCompanies.map((item: WatchlistCompany) => item.company_id)
-        console.log(`useWatchlist: Company IDs in watchlist: ${JSON.stringify(companyIds)}`)
-        
-        return
-      }
-      
-      // Fallback to the watchlist API
-      console.log("useWatchlist: No saved companies in profile data, falling back to watchlist API")
-      
-      // Use a dedicated watchlist endpoint instead of profile
-      const response = await fetchWithAuth('/api/protected/watchlist', {
-        // Add cache-busting query parameter to prevent caching
+      // Use the correct API endpoint that matches your route
+      const response = await fetchWithAuth('/api/user/watchlist', {
         cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +109,7 @@ export function useWatchlist() {
       console.log("useWatchlist: Setting loading to false")
       setLoading(false)
     }
-  }
+  }, [user?.id, authLoading, toast]); // Only depend on these values
 
   const handleRemoveFromWatchlist = async (companyId: string) => {
     if (!user?.id) return
@@ -156,13 +117,12 @@ export function useWatchlist() {
     try {
       console.log("Removing company from watchlist:", companyId)
       
-      // Call the API to remove the company from watchlist
-      const response = await fetchWithAuth('/api/protected/watchlist/remove', {
-        method: 'POST',
+      // Call the correct API endpoint
+      const response = await fetchWithAuth(`/api/user/watchlist/${companyId}`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ companyId }),
+        }
       })
       
       console.log("Remove response:", response)
@@ -189,35 +149,29 @@ export function useWatchlist() {
   }
 
   useEffect(() => {
-    if (!authLoading) {
-      console.log("useWatchlist: Auth loading complete, user:", user ? "logged in" : "not logged in")
-      if (user) {
-        console.log(`useWatchlist: User authenticated (${user.email}), fetching watchlist data`)
-        fetchWatchlistCompanies()
-        
-        // Set a timeout to exit loading state after 10 seconds
-        const timeoutId = setTimeout(() => {
-          if (loading) {
-            console.log("useWatchlist: Loading timeout reached, forcing exit from loading state")
-            setLoading(false)
-            setWatchlistCompanies([])
-            toast({
-              title: "Loading Timeout",
-              description: "Could not load watchlist data in a reasonable time. Please try again later.",
-              variant: "destructive"
-            })
-          }
-        }, 10000)
-        
-        return () => clearTimeout(timeoutId)
-      } else {
-        console.log("useWatchlist: No user, setting loading to false")
-        setLoading(false)
-      }
+    if (!authLoading && user) {
+      console.log(`useWatchlist: User authenticated (${user.email}), fetching watchlist data`)
+      fetchWatchlistCompanies()
+      
+      // Set a timeout to exit loading state after 10 seconds
+      const timeoutId = setTimeout(() => {
+        if (loading) {
+          console.log("useWatchlist: Loading timeout reached, forcing exit from loading state")
+          setLoading(false)
+          setWatchlistCompanies([])
+          toast({
+            title: "Loading Timeout",
+            description: "Could not load watchlist data in a reasonable time. Please try again later.",
+            variant: "destructive"
+          })
+        }
+      }, 10000)
+      
+      return () => clearTimeout(timeoutId)
     } else {
-      console.log("useWatchlist: Auth is still loading, waiting for authentication to complete")
+      setLoading(false)
     }
-  }, [authLoading, user])
+  }, [authLoading, user]); // Remove fetchWatchlistCompanies from dependencies
 
   return {
     watchlistCompanies,
@@ -253,15 +207,15 @@ export function WatchlistView({
   const watchlistCompanies = externalData || hookWatchlistCompanies
   const loading = externalLoading !== undefined ? externalLoading : hookLoading
 
-  // Force a refresh of the data when the component mounts
+  // Fix the useEffect to prevent infinite loops
   useEffect(() => {
-    if (!externalData) {
+    if (!externalData && !loading) {
       console.log("WatchlistView: No external data provided, fetching data from hook");
       fetchWatchlistCompanies();
     } else {
-      console.log(`WatchlistView: Using external data (${externalData.length} items)`);
+      console.log(`WatchlistView: Using external data or already loading`);
     }
-  }, [externalData, fetchWatchlistCompanies]);
+  }, [externalData, loading]); // Remove fetchWatchlistCompanies from dependencies
 
   // Test function to check if API routes are working
   const testApiConnection = async () => {

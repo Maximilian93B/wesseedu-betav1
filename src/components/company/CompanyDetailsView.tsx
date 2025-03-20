@@ -6,7 +6,9 @@ import {
   Download, 
   Building2, 
   Users, 
-  FileText 
+  FileText,
+  Bell,
+  BellOff
 } from "lucide-react";
 import { 
   Card, 
@@ -18,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import SaveCompanyButton from "@/components/company/SaveCompanyButton";
 import PitchDeckDownload from "@/components/company/PitchDeckDownload";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface Company {
   id: string;
@@ -45,6 +49,11 @@ interface Company {
   };
 }
 
+interface CommunityInfo {
+  id: string;
+  isMember: boolean;
+}
+
 interface CompanyDetailsViewProps {
   companyId: string;
   onClose: () => void;
@@ -54,6 +63,9 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [communityInfo, setCommunityInfo] = useState<CommunityInfo | null>(null);
+  const [joiningOrLeaving, setJoiningOrLeaving] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchCompanyData() {
@@ -65,6 +77,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
         }
         const data = await response.json();
         setCompany(data.company);
+        
+        // After getting company data, fetch the community info
+        if (data.company) {
+          fetchCompanyCommunity(data.company.id);
+        }
       } catch (err) {
         console.error('Error fetching company data:', err);
         setError('Failed to load company data. Please try again later.');
@@ -77,6 +94,62 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
       fetchCompanyData();
     }
   }, [companyId]);
+
+  const fetchCompanyCommunity = async (companyId: string) => {
+    try {
+      const response = await fetchWithAuth(`/api/companies/${companyId}/community`);
+      
+      if (response.error || response.status >= 400) {
+        console.log("No community found or error fetching community");
+        return;
+      }
+      
+      setCommunityInfo(response.data);
+    } catch (error) {
+      console.error('Error fetching company community:', error);
+    }
+  };
+  
+  const handleJoinOrLeave = async () => {
+    if (!communityInfo) return;
+    
+    setJoiningOrLeaving(true);
+    try {
+      const endpoint = communityInfo.isMember 
+        ? `/api/communities/${communityInfo.id}/leave` 
+        : `/api/communities/${communityInfo.id}/join`;
+      
+      const response = await fetchWithAuth(endpoint, {
+        method: 'POST',
+      });
+      
+      if (response.error || response.status >= 400) {
+        throw new Error(communityInfo.isMember ? 'Failed to leave community' : 'Failed to join community');
+      }
+      
+      // Update the community info
+      setCommunityInfo({
+        ...communityInfo,
+        isMember: !communityInfo.isMember
+      });
+      
+      toast({
+        title: 'Success',
+        description: communityInfo.isMember 
+          ? 'You have left the community' 
+          : 'You have joined the community',
+      });
+    } catch (error) {
+      console.error('Error joining/leaving community:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to process your request. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setJoiningOrLeaving(false);
+    }
+  };
 
   // Show loading state
   if (loading) {
@@ -191,6 +264,26 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                         text-emerald-400 hover:bg-emerald-400/20 transition-colors duration-200">
                       {company.sustainability_data.construction}
                     </Badge>
+                  )}
+                  
+                  {/* Add Join Community Button */}
+                  {communityInfo && (
+                    <Button
+                      onClick={handleJoinOrLeave}
+                      className={communityInfo.isMember 
+                        ? "bg-red-500/80 hover:bg-red-600 text-white" 
+                        : "bg-emerald-600 hover:bg-emerald-500 text-white"}
+                      disabled={joiningOrLeaving || !communityInfo.id}
+                    >
+                      {joiningOrLeaving ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      ) : communityInfo.isMember ? (
+                        <BellOff className="h-4 w-4 mr-2" />
+                      ) : (
+                        <Bell className="h-4 w-4 mr-2" />
+                      )}
+                      {communityInfo.isMember ? 'Leave Community' : 'Join Community'}
+                    </Button>
                   )}
                 </motion.div>
                 
@@ -665,6 +758,25 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                           companyId={company.id} 
                           companyName={company.name || 'company'} 
                         />
+                      )}
+                      {communityInfo && (
+                        <Button
+                          onClick={handleJoinOrLeave}
+                          className={communityInfo.isMember 
+                            ? "border-red-500/30 text-red-400 hover:bg-red-500/10 px-8 py-6 text-lg h-auto" 
+                            : "border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 px-8 py-6 text-lg h-auto"}
+                          variant="outline"
+                          disabled={joiningOrLeaving || !communityInfo.id}
+                        >
+                          {joiningOrLeaving ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          ) : communityInfo.isMember ? (
+                            <BellOff className="h-5 w-5 mr-2" />
+                          ) : (
+                            <Bell className="h-5 w-5 mr-2" />
+                          )}
+                          {communityInfo.isMember ? 'Leave Community' : 'Join Community'}
+                        </Button>
                       )}
                       <Button
                         onClick={() => company && company.id ? window.location.href = `/admin/companies/${company.id}` : null}
