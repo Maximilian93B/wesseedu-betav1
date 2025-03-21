@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Newspaper, Calendar, Link2, ExternalLink, Bookmark, BookmarkCheck } from "lucide-react"
+import { Newspaper, Calendar, Link2, ExternalLink, Bookmark, BookmarkCheck, Sparkles } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -157,44 +157,88 @@ export function NewsSection() {
   };
 
   return (
-    <div className="h-full overflow-y-auto">
-      {/* Header */}
+    <div className="h-full overflow-y-auto relative bg-white rounded-xl">
+      {/* Background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -right-20 w-60 h-60 bg-emerald-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-emerald-500/5 rounded-full blur-3xl"></div>
+        
+        {/* Floating particles */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1.5 h-1.5 rounded-full bg-emerald-500/40"
+            style={{
+              left: `${10 + Math.random() * 80}%`,
+              top: `${10 + Math.random() * 80}%`,
+            }}
+            animate={{
+              y: [0, -15, 0],
+              x: [0, Math.random() * 10 - 5, 0],
+              opacity: [0.3, 0.7, 0.3]
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 2
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Header with improved animation */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="flex items-center justify-between mb-8"
+        className="flex items-center justify-between mb-6 relative z-10 p-6 pt-8"
       >
         <div className="flex items-center gap-2">
-          <Newspaper className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm font-medium text-zinc-200">Latest Updates</span>
+          <div className="relative">
+            <Newspaper className="w-4 h-4 text-emerald-600" />
+            <motion.div
+              className="absolute -inset-1 bg-emerald-500/20 rounded-full blur-sm"
+              animate={{ scale: [1, 1.2, 1], opacity: [0.7, 0.2, 0.7] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </div>
+          <span className="text-sm font-medium bg-gradient-to-r from-emerald-800 to-emerald-600 bg-clip-text text-transparent">
+            Latest Updates
+          </span>
         </div>
-        <Badge variant="outline" 
-          className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 text-xs px-2.5 py-0.5">
-          Live Feed
+        <Badge
+          className="relative overflow-hidden bg-emerald-50 text-emerald-600 border-emerald-200 text-xs px-2.5 py-0.5"
+        >
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-emerald-400/0 via-emerald-400/10 to-emerald-400/0"
+            animate={{ x: [-100, 100] }}
+            transition={{ duration: 1.5, repeat: Infinity, repeatType: "mirror", ease: "linear" }}
+          />
+          <span className="relative z-10">Live Feed</span>
         </Badge>
       </motion.div>
 
-      {/* News Feed */}
-      <div className="space-y-5">
+      {/* News Feed with enhanced animations */}
+      <div className="space-y-4 relative z-10 px-6">
         {loading ? (
-          // Skeleton loading state
+          // Enhanced skeleton loading state
           Array(5).fill(0).map((_, index) => (
             <motion.div 
               key={index}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="bg-zinc-900/30 border border-white/5 rounded-lg p-4"
+              className="bg-gradient-to-r from-emerald-50/80 to-white border border-emerald-100 rounded-lg p-4 relative overflow-hidden shadow-sm"
             >
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/3 to-emerald-500/0 animate-pulse"></div>
               <div className="flex gap-4">
-                <Skeleton className="h-16 w-24 rounded-md bg-zinc-800/50 flex-shrink-0" />
+                <Skeleton className="h-16 w-24 rounded-md bg-emerald-100/50 flex-shrink-0" />
                 <div className="space-y-3 flex-1">
-                  <Skeleton className="h-4 w-3/4 bg-zinc-800/50" />
-                  <Skeleton className="h-4 w-1/2 bg-zinc-800/50" />
+                  <Skeleton className="h-4 w-3/4 bg-emerald-100/50" />
+                  <Skeleton className="h-4 w-1/2 bg-emerald-100/50" />
                   <div className="flex items-center gap-2">
-                    <Skeleton className="h-3 w-20 bg-zinc-800/50" />
-                    <Skeleton className="h-3 w-16 bg-zinc-800/50" />
+                    <Skeleton className="h-3 w-20 bg-emerald-100/50" />
+                    <Skeleton className="h-3 w-16 bg-emerald-100/50" />
                   </div>
                 </div>
               </div>
@@ -205,7 +249,7 @@ export function NewsSection() {
             <p className="text-zinc-500">No news articles available</p>
           </div>
         ) : (
-          // Actual news items
+          // Enhanced news items
           newsItems.map((item, index) => (
             <motion.div
               key={item.id}
@@ -219,10 +263,11 @@ export function NewsSection() {
               }}
               onMouseEnter={() => setHoveredNewsId(item.id)}
               onMouseLeave={() => setHoveredNewsId(null)}
-              className={`relative group bg-zinc-900/30 border border-white/5 
-                hover:border-emerald-500/20 rounded-lg p-4 transition-all duration-300
-                ${hoveredNewsId === item.id ? 'bg-zinc-900/50 shadow-lg shadow-emerald-500/5' : ''}
-                ${item.is_featured ? 'ring-1 ring-emerald-500/20' : ''}
+              className={`relative group bg-gradient-to-r from-emerald-50/80 to-white border border-emerald-100
+                hover:border-emerald-300 rounded-lg p-4 transition-all duration-300
+                ${hoveredNewsId === item.id ? 'shadow-md shadow-emerald-100' : 'shadow-sm'}
+                ${item.is_featured ? 'ring-1 ring-emerald-200' : ''}
+                overflow-hidden
               `}
             >
               {/* Hovered state background effect */}
@@ -233,24 +278,72 @@ export function NewsSection() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 rounded-lg pointer-events-none"
+                    className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 pointer-events-none"
                   />
                 )}
               </AnimatePresence>
+
+              {/* Animated wave at bottom on hover */}
+              <AnimatePresence>
+                {hoveredNewsId === item.id && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute bottom-0 left-0 w-full h-10 overflow-hidden pointer-events-none"
+                  >
+                    <svg
+                      className="absolute bottom-0 w-full"
+                      preserveAspectRatio="none"
+                      viewBox="0 0 1200 120"
+                      height="12"
+                      width="100%"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <motion.path
+                        animate={{ 
+                          d: [
+                            "M0,64 C400,30 800,110 1200,64 L1200,120 L0,120 Z",
+                            "M0,64 C400,100 800,40 1200,64 L1200,120 L0,120 Z"
+                          ]
+                        }}
+                        transition={{ 
+                          duration: 8, 
+                          repeat: Infinity, 
+                          repeatType: "reverse",
+                          ease: "easeInOut" 
+                        }}
+                        fill="#10b981"
+                        opacity="0.1"
+                      />
+                    </svg>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               
-              {/* Featured tag */}
+              {/* Featured badge with glow effect */}
               {item.is_featured && (
-                <div className="absolute -top-2 -right-2">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/80 text-white">
-                    Featured
-                  </span>
+                <div className="absolute -top-2 -right-2 z-20">
+                  <div className="relative">
+                    <motion.div
+                      className="absolute -inset-1.5 bg-emerald-500/20 rounded-full blur-md"
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    <div className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-600 to-emerald-500 text-white relative z-10">
+                      <Sparkles className="mr-1 h-3 w-3" />
+                      Featured
+                    </div>
+                  </div>
                 </div>
               )}
               
               {/* Article content with image */}
-              <div className="flex gap-4">
-                {/* Article image */}
-                <div className="flex-shrink-0 w-24 h-16 overflow-hidden rounded-md">
+              <div className="flex gap-4 relative">
+                {/* Article image with improved hover animation */}
+                <div className="flex-shrink-0 w-24 h-16 overflow-hidden rounded-md relative shadow-sm">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
                   <img 
                     src={item.image_url} 
                     alt={item.title} 
@@ -260,19 +353,19 @@ export function NewsSection() {
                 
                 {/* Article text content */}
                 <div className="space-y-2 flex-1">
-                  <h3 className="text-sm font-medium leading-snug text-zinc-200 line-clamp-2 group-hover:text-white transition-colors">
+                  <h3 className="text-sm font-medium leading-snug text-zinc-800 line-clamp-2 group-hover:text-emerald-700 transition-colors">
                     {item.title}
                   </h3>
                   
                   {item.summary && (
-                    <p className="text-xs text-zinc-400 line-clamp-2">
+                    <p className="text-xs text-zinc-500 line-clamp-2 group-hover:text-zinc-600 transition-colors">
                       {item.summary}
                     </p>
                   )}
                   
                   <div className="flex items-center justify-between pt-1">
                     <div className="flex items-center gap-2 text-xs text-zinc-500">
-                      <span className="font-medium text-emerald-400/80">{item.source}</span>
+                      <span className="font-medium text-emerald-600 group-hover:text-emerald-700 transition-colors">{item.source}</span>
                       <span className="flex items-center gap-1.5">
                         <Calendar className="h-3 w-3" />
                         {formatDistanceToNow(new Date(item.published_at), { addSuffix: true })}
@@ -284,16 +377,24 @@ export function NewsSection() {
                         size="sm"
                         variant="ghost"
                         onClick={() => toggleSaveArticle(item.id)}
-                        className={`h-7 w-7 p-0 rounded-full
+                        className={`h-7 w-7 p-0 rounded-full relative overflow-hidden
                           ${savedArticles.has(item.id) 
-                            ? 'text-emerald-400 hover:text-emerald-300' 
-                            : 'text-zinc-400 hover:text-zinc-300'} 
-                          opacity-70 hover:opacity-100 hover:bg-white/5 transition-all duration-200`}
+                            ? 'text-emerald-600 hover:text-emerald-700' 
+                            : 'text-zinc-400 hover:text-zinc-500'} 
+                          opacity-80 hover:opacity-100 hover:bg-emerald-50 transition-all duration-200`}
                       >
+                        {savedArticles.has(item.id) && (
+                          <motion.div
+                            className="absolute inset-0 bg-emerald-500/10 rounded-full"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: [0, 1.5, 1] }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        )}
                         {savedArticles.has(item.id) ? (
-                          <BookmarkCheck className="h-3.5 w-3.5" />
+                          <BookmarkCheck className="h-3.5 w-3.5 relative z-10" />
                         ) : (
-                          <Bookmark className="h-3.5 w-3.5" />
+                          <Bookmark className="h-3.5 w-3.5 relative z-10" />
                         )}
                       </Button>
                       
@@ -301,10 +402,16 @@ export function NewsSection() {
                         size="sm"
                         variant="ghost"
                         onClick={() => window.open(item.url, '_blank')}
-                        className="h-7 w-7 p-0 rounded-full text-zinc-400 hover:text-zinc-300
-                          opacity-70 hover:opacity-100 hover:bg-white/5 transition-all duration-200"
+                        className="h-7 w-7 p-0 rounded-full text-zinc-400 hover:text-zinc-500
+                          opacity-80 hover:opacity-100 hover:bg-emerald-50 transition-all duration-200 relative overflow-hidden"
                       >
-                        <ExternalLink className="h-3.5 w-3.5" />
+                        <motion.div
+                          className="absolute inset-0 bg-emerald-500/10 rounded-full"
+                          initial={{ scale: 0, opacity: 0 }}
+                          whileHover={{ scale: 1, opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                        <ExternalLink className="h-3.5 w-3.5 relative z-10" />
                       </Button>
                     </div>
                   </div>
@@ -315,26 +422,65 @@ export function NewsSection() {
         )}
       </div>
       
-      {/* View more button */}
+      {/* View more button with enhanced styling */}
       {!loading && newsItems.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-6 text-center"
+          className="mt-6 mb-8 text-center relative z-10 px-6"
         >
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open('/news', '_self')}
-            className="w-full text-xs border-white/10 text-zinc-400 
-              hover:bg-emerald-500/10 hover:text-emerald-400 hover:border-emerald-500/20 
-              transition-all duration-300"
-          >
-            View All Updates
-          </Button>
+          <div className="relative inline-block group">
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-emerald-400/10 to-emerald-500/10 rounded-md opacity-0 group-hover:opacity-100"
+              animate={{
+                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open('/news', '_self')}
+              className="relative w-full px-8 py-5 text-sm border-emerald-200 text-emerald-700 
+                hover:text-emerald-800 hover:border-emerald-300
+                bg-white hover:bg-emerald-50
+                transition-all duration-300 z-10 shadow-sm hover:shadow-md"
+            >
+              View All Updates
+            </Button>
+          </div>
         </motion.div>
       )}
+      
+      {/* Bottom wave decoration */}
+      <div className="h-6 relative overflow-hidden">
+        <svg
+          className="absolute bottom-0 w-full"
+          preserveAspectRatio="none"
+          viewBox="0 0 1200 120"
+          height="20"
+          width="100%"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <motion.path
+            animate={{ 
+              d: [
+                "M0,64 C400,30 800,110 1200,64 L1200,120 L0,120 Z",
+                "M0,64 C400,100 800,40 1200,64 L1200,120 L0,120 Z"
+              ]
+            }}
+            transition={{ 
+              duration: 8, 
+              repeat: Infinity, 
+              repeatType: "reverse",
+              ease: "easeInOut" 
+            }}
+            fill="#10b981"
+            opacity="0.1"
+          />
+        </svg>
+      </div>
     </div>
   )
 }
