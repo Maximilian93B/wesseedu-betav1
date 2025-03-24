@@ -54,7 +54,7 @@ export default async function AuthLayout({
 
   return (
     <div className="flex min-h-screen bg-black">
-      <main className="flex-1">
+      <main className="flex-1 overflow-hidden w-full max-w-[100vw]">
         {children}
       </main>
     </div>

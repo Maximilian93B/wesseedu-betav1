@@ -1,102 +1,98 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { AuthProvider, useAuth } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
 import { useWatchlist } from "@/components/wsu/dashboard/WatchlistView"
-import { Community } from "@/types/community"
+import Head from "next/head"
 import dynamic from "next/dynamic"
-
-// Import view components
-import { DashboardView } from "@/components/wsu/dashboard/DashboardView"
-import { WatchlistView } from "@/components/wsu/dashboard/WatchlistView"
-import CompaniesView from "@/components/company/CompaniesView"
-import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
-import CommunitiesView from "@/components/community/CommunitiesView"
-import CommunityDetailsView from "@/components/community/CommunityDetailsView"
 
 // Import home page specific components
 import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
 import { SectionTransition } from "@/components/wsu/dashboard/SectionTransition"
-import { DataVizTransition } from "@/components/wsu/dashboard/DataVizTransition"
 
 // Import new modularized components from barrel file
-import {
-  HomeHero,
-  StatsCards,
-  QuickActions,
-  HowItWorks,
-  PlatformImpact,
-  FeaturedContent,
-  CallToAction,
-  LoadingScreen,
-  LoginRequired
-} from "@/components/wsu/home"
+import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
+
+// Placeholder component for lazy loading
+const LazyLoadingPlaceholder = () => (
+  <div className="flex justify-center items-center min-h-[50vh]">
+    <LoadingScreen />
+  </div>
+)
 
 // Dynamically import heavier components
-const DashboardViewDynamic = dynamic(() => import("@/components/wsu/dashboard/DashboardView").then(mod => ({ default: mod.DashboardView })), { 
-  ssr: true,
-  loading: () => <div className="flex justify-center items-center min-h-[50vh]"><LoadingScreen /></div>
-})
+const DashboardViewDynamic = dynamic(
+  () => import("@/components/wsu/dashboard/DashboardView").then(mod => ({ default: mod.DashboardView })), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
 
-const WatchlistViewDynamic = dynamic(() => import("@/components/wsu/dashboard/WatchlistView").then(mod => ({ default: mod.WatchlistView })), {
-  ssr: true,
-  loading: () => <div className="flex justify-center items-center min-h-[50vh]"><LoadingScreen /></div>
-})
+const WatchlistViewDynamic = dynamic(
+  () => import("@/components/wsu/dashboard/WatchlistView").then(mod => ({ default: mod.WatchlistView })), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
 
-const CompaniesViewDynamic = dynamic(() => import("@/components/company/CompaniesView"), {
-  ssr: true,
-  loading: () => <div className="flex justify-center items-center min-h-[50vh]"><LoadingScreen /></div>
-})
+const CompaniesViewDynamic = dynamic(
+  () => import("@/components/company/CompaniesView"), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
 
-const CompanyDetailsViewDynamic = dynamic(() => import("@/components/company/CompanyDetailsView").then(mod => ({ default: mod.CompanyDetailsView })), {
-  ssr: true,
-  loading: () => <div className="flex justify-center items-center min-h-[50vh]"><LoadingScreen /></div>
-})
+const CompanyDetailsViewDynamic = dynamic(
+  () => import("@/components/company/CompanyDetailsView").then(mod => ({ default: mod.CompanyDetailsView })), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
 
-const CommunitiesViewDynamic = dynamic(() => import("@/components/community/CommunitiesView"), {
-  ssr: true,
-  loading: () => <div className="flex justify-center items-center min-h-[50vh]"><LoadingScreen /></div>
-})
+const CommunitiesViewDynamic = dynamic(
+  () => import("@/components/community/CommunitiesView"), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
 
-const CommunityDetailsViewDynamic = dynamic(() => import("@/components/community/CommunityDetailsView"), {
-  ssr: true,
-  loading: () => <div className="flex justify-center items-center min-h-[50vh]"><LoadingScreen /></div>
-})
+const CommunityDetailsViewDynamic = dynamic(
+  () => import("@/components/community/CommunityDetailsView"), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
 
 // Dynamically import home page components
-const HomeHeroDynamic = dynamic(() => import("@/components/wsu/home").then(mod => ({ default: mod.HomeHero })), {
-  ssr: true
-})
+const HomeHeroDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.HomeHero })), 
+  { ssr: true }
+)
 
-const StatsCardsDynamic = dynamic(() => import("@/components/wsu/home").then(mod => ({ default: mod.StatsCards })), {
-  ssr: true
-})
+const QuickActionsDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.QuickActions })), 
+  { ssr: true }
+)
 
-const QuickActionsDynamic = dynamic(() => import("@/components/wsu/home").then(mod => ({ default: mod.QuickActions })), {
-  ssr: true
-})
+const HowItWorksDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.HowItWorks })), 
+  { ssr: true }
+)
 
-const HowItWorksDynamic = dynamic(() => import("@/components/wsu/home").then(mod => ({ default: mod.HowItWorks })), {
-  ssr: true
-})
+const PlatformImpactDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.PlatformImpact })), 
+  { ssr: true }
+)
 
-const PlatformImpactDynamic = dynamic(() => import("@/components/wsu/home").then(mod => ({ default: mod.PlatformImpact })), {
-  ssr: true
-})
+const FeaturedContentDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.FeaturedContent })), 
+  { ssr: true }
+)
 
-const FeaturedContentDynamic = dynamic(() => import("@/components/wsu/home").then(mod => ({ default: mod.FeaturedContent })), {
-  ssr: true
-})
+const CallToActionDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.CallToAction })), 
+  { ssr: true }
+)
 
-const CallToActionDynamic = dynamic(() => import("@/components/wsu/home").then(mod => ({ default: mod.CallToAction })), {
-  ssr: true
-})
+const GrowthHeroDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.GrowthHero })), 
+  { ssr: true }
+)
 
-const DataVizTransitionDynamic = dynamic(() => import("@/components/wsu/dashboard/DataVizTransition").then(mod => ({ default: mod.DataVizTransition })), {
-  ssr: false
-})
+const DataVizTransitionDynamic = dynamic(
+  () => import("@/components/wsu/dashboard/DataVizTransition").then(mod => ({ default: mod.DataVizTransition })), 
+  { ssr: false }
+)
 
 function HomePageContent() {
   const { user, profile, loading, signOut } = useAuth()
@@ -109,6 +105,9 @@ function HomePageContent() {
   const { toast } = useToast()
   const router = useRouter()
   
+  // Track whether we've shown the loading timeout toast
+  const hasShownTimeoutToastRef = useRef(false)
+  
   // Use the shared watchlist hook to avoid duplicate data fetching
   const { watchlistCompanies, loading: watchlistLoading } = useWatchlist()
 
@@ -117,33 +116,37 @@ function HomePageContent() {
     // Flag to track component mount state for preventing memory leaks
     let isMounted = true;
     
+    // If auth loading is already complete, update local loading state immediately
+    if (!loading && isMounted) {
+      setLocalLoading(false);
+    }
+    
     // Set a timeout to force loading to false after 5 seconds
     const timeoutId = setTimeout(() => {
       if (isMounted && localLoading) {
-        console.warn('HomePage: Loading timeout reached, forcing loading to false');
         setLocalLoading(false);
         
-        toast({
-          title: "Loading timeout",
-          description: "Some data might not be available. Please refresh if needed.",
-          variant: "default"
-        });
+        // Only show toast if we actually had to force the loading state change
+        // and we haven't shown it yet
+        if (loading && !hasShownTimeoutToastRef.current) {
+          hasShownTimeoutToastRef.current = true;
+          toast({
+            title: "Loading timeout",
+            description: "Some data might not be available. Please refresh if needed.",
+            variant: "default"
+          });
+        }
       }
     }, 5000);
-
-    // Update loading state when auth loading completes
-    if (isMounted && !loading) {
-      setLocalLoading(false);
-    }
 
     // Cleanup function to prevent memory leaks and cancel timeout
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [loading, localLoading, toast]);
+  }, [loading]); // Only depend on auth loading state, not localLoading
 
-  const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => {
+  const handleNavigation = useCallback((view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => {
     if (view === 'home') {
       setCurrentView('home')
     } else if (view === 'dashboard') {
@@ -156,7 +159,17 @@ function HomePageContent() {
       // Use router to navigate to the communities page instead of changing view
       router.push('/communities')
     }
-  }
+  }, [router]);
+
+  const handleCompanySelect = useCallback((id: string) => {
+    setSelectedCompanyId(id);
+    setCurrentView('company-details');
+  }, []);
+
+  const handleCommunitySelect = useCallback((id: string) => {
+    setSelectedCommunityId(id);
+    setCurrentView('community-details');
+  }, []);
 
   // Show loading state
   if (localLoading) {
@@ -169,217 +182,207 @@ function HomePageContent() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-black relative overflow-hidden">
-      <HomePageNav
-        currentView={currentView}
-        onNavigate={handleNavigation}
-        onSignOut={signOut}
-      />
-      
-      {/* Enhanced background effects */}
-      <div className="absolute left-[5%] top-[-5%] w-[900px] h-[900px] 
-        bg-gradient-to-br from-emerald-500/10 to-emerald-900/5 blur-[150px] rounded-full 
-        animate-pulse [animation-duration:15s] pointer-events-none"></div>
-      
-      <div className="absolute right-[5%] bottom-[-10%] w-[800px] h-[800px] 
-        bg-gradient-to-tl from-emerald-600/10 to-emerald-300/5 blur-[130px] rounded-full 
-        animate-pulse [animation-duration:20s] [animation-delay:1s] pointer-events-none"></div>
-
-      <div className="absolute left-[40%] top-[40%] w-[600px] h-[600px] 
-        bg-gradient-to-r from-emerald-400/5 to-emerald-500/3 blur-[100px] rounded-full 
-        animate-pulse [animation-duration:25s] [animation-delay:2s] pointer-events-none"></div>
-
-      {/* Main Layout */}
-      <div className="flex-1 relative">
-        {/* Main Content */}
-        <main>
-          {currentView === 'home' && (
-            <>
-              {/* Dark Section: Hero */}
-              <div className="bg-black relative">
-                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/5 to-transparent z-10"></div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16">
-                  <Suspense fallback={<div className="h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
-                    <HomeHeroDynamic 
-                      profile={profile} 
-                      onNavigate={handleNavigation} 
-                    />
-                    <div className="mt-16 md:mt-24">
-                      <StatsCardsDynamic profile={profile} />
-                    </div>
-                    <div className="mt-16 md:mt-20 mb-8">
-                      <QuickActionsDynamic onNavigate={handleNavigation} />
-                    </div>
-                  </Suspense>
+    <>
+      <div className="flex flex-col min-h-screen bg-black relative overflow-hidden max-w-[100vw]">
+        <HomePageNav
+          currentView={currentView}
+          onNavigate={handleNavigation}
+          onSignOut={signOut}
+        />
+        
+        {/* Simplified background effects - reduced number and intensity for better performance */}
+        <div 
+          className="absolute left-[5%] top-[-5%] w-[600px] h-[600px] 
+            bg-gradient-to-br from-emerald-500/5 to-transparent blur-[100px] rounded-full 
+            pointer-events-none opacity-80"
+          aria-hidden="true"
+        ></div>
+        
+        {/* Main Layout - with overflow handling for mobile */}
+        <div className="flex-1 relative overflow-x-hidden">
+          {/* Main Content */}
+          <main className="w-full">
+            {currentView === 'home' && (
+              <>
+                {/* Dark Section: Hero */}
+                <div className="bg-black relative">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-16">
+                    <Suspense fallback={<div className="h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
+                      <HomeHeroDynamic 
+                        profile={profile} 
+                        onNavigate={handleNavigation} 
+                      />
+                      
+                      {/* QuickActions */}
+                      <div className="mt-8 md:mt-16 relative">
+                        <QuickActionsDynamic onNavigate={handleNavigation} />
+                      </div>
+                    </Suspense>
+                  </div>
                 </div>
-              </div>
 
-              {/* Transition from dark to light */}
-              <SectionTransition direction="dark-to-light" />
+                {/* Transition from dark to light */}
+                <SectionTransition direction="dark-to-light" />
 
-              {/* WHITE SECTION 1: How It Works */}
-              <div className="bg-white py-24 md:py-32 relative">
-                <div className="absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_center_top,rgba(16,185,129,0.03),transparent_70%)] pointer-events-none"></div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                  <Suspense fallback={<div className="h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
-                    <HowItWorksDynamic />
-                    <div className="mt-24 md:mt-32">
-                      <PlatformImpactDynamic />
-                    </div>
-                  </Suspense>
+                {/* WHITE SECTION 1: How It Works */}
+                <div className="bg-white py-16 md:py-24 relative">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                    <Suspense fallback={<div className="h-[200px] flex items-center justify-center"><LoadingScreen /></div>}>
+                      <HowItWorksDynamic />
+                      <div className="mt-16 md:mt-24">
+                        <PlatformImpactDynamic />
+                      </div>
+                    </Suspense>
+                  </div>
                 </div>
-              </div>
 
-              {/* DataViz with integrated wave transition */}
-              <Suspense fallback={<div className="h-[600px] bg-black flex items-center justify-center"><LoadingScreen /></div>}>
-                <DataVizTransitionDynamic />
-              </Suspense>
-              
-              {/* BACK TO DARK: Featured Content Section - CLEAN IMPLEMENTATION */}
-              <div className="relative">
-                {/* Simple split background container */}
-                <div className="flex flex-col md:flex-row">
-                  {/* Left half - Black */}
-                  <div className="w-full md:w-1/2 bg-black"></div>
+                {/* DataViz with integrated wave transition */}
+                <Suspense fallback={<div className="h-[400px] bg-black flex items-center justify-center"><LoadingScreen /></div>}>
+                  <DataVizTransitionDynamic />
+                </Suspense>
+                
+                {/* BACK TO DARK: Featured Content Section - SIMPLIFIED */}
+                <div className="relative">
+                  {/* Simple split background container */}
+                  <div className="flex flex-col md:flex-row">
+                    <div className="w-full md:w-1/2 bg-black"></div>
+                    <div className="w-full md:w-1/2 bg-white"></div>
+                  </div>
                   
-                  {/* Right half - White */}
-                  <div className="w-full md:w-1/2 bg-white"></div>
+                  {/* Content container */}
+                  <div className="absolute inset-0">
+                    <Suspense fallback={<div className="h-full flex items-center justify-center py-12"><LoadingScreen /></div>}>
+                      <FeaturedContentDynamic />
+                    </Suspense>
+                  </div>
+                  
+                  {/* Fixed height container - adjusted for mobile */}
+                  <div className="h-[600px] sm:h-[660px] md:h-[720px] lg:h-[800px]"></div>
                 </div>
                 
-                {/* Subtle top separator */}
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent"></div>
-                
-                {/* Content container */}
-                <div className="absolute inset-0">
-                  <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingScreen /></div>}>
-                    <FeaturedContentDynamic />
+                {/* GrowthHero Section */}
+                <div className="relative bg-black">
+                  <Suspense fallback={<div className="h-[70vh] flex items-center justify-center"><LoadingScreen /></div>}>
+                    <GrowthHeroDynamic 
+                      onAction={() => handleNavigation('companies')} 
+                      actionButtonText="Start Investing Today"
+                    />
                   </Suspense>
                 </div>
                 
-                {/* Subtle bottom separator */}
-                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent"></div>
-                
-                {/* Fixed height container - increased for better spacing */}
-                <div className="h-[680px] sm:h-[700px] md:h-[750px] lg:h-[780px]"></div>
-              </div>
-
-              {/* Transition from dark to light */}
-              <SectionTransition direction="dark-to-light" />
-
-              {/* WHITE SECTION 2: Call to Action */}
-              <div className="bg-white pt-12 pb-24 relative">
-                {/* Enhanced top decoration for better integration with SectionTransition */}
-                <div className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_center_top,rgba(16,185,129,0.05),transparent_70%)] pointer-events-none"></div>
-                <div className="absolute inset-x-0 top-4 h-px bg-gradient-to-r from-transparent via-emerald-200/50 to-transparent"></div>
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-16">
-                  <Suspense fallback={<div className="h-[200px] flex items-center justify-center"><LoadingScreen /></div>}>
-                    <CallToActionDynamic onNavigate={handleNavigation} />
-                  </Suspense>
+                {/* Call to Action */}
+                <div className="bg-zinc-900 pt-12 pb-16 sm:pt-16 sm:pb-20 relative overflow-hidden">
+                  {/* Subtle accent glow element */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                  
+                  {/* Content container */}
+                  <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-8 relative z-10">
+                    <Suspense fallback={<div className="h-[150px] flex items-center justify-center"><LoadingScreen /></div>}>
+                      <CallToActionDynamic onNavigate={handleNavigation} />
+                    </Suspense>
+                  </div>
                 </div>
+              </>
+            )}
+
+            {/* Dashboard overlay */}
+            {currentView === 'dashboard' && (
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <DashboardViewDynamic user={user} />
+                </Suspense>
               </div>
-            </>
-          )}
+            )}
 
-          {/* Dashboard overlay */}
-          {currentView === 'dashboard' && (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-12">
-              <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingScreen /></div>}>
-                <DashboardViewDynamic user={user} />
-              </Suspense>
-            </div>
-          )}
+            {/* Companies overlay */}
+            {currentView === 'companies' && (
+              <div className="py-4 md:py-6">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <CompaniesViewDynamic 
+                    onCompanySelect={handleCompanySelect}
+                  />
+                </Suspense>
+              </div>
+            )}
 
-          {/* Companies overlay */}
-          {currentView === 'companies' && (
-            <div className="py-6 md:py-8">
-              <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingScreen /></div>}>
-                <CompaniesViewDynamic 
-                  onCompanySelect={(id: string) => {
-                    setSelectedCompanyId(id)
-                    setCurrentView('company-details')
-                  }}
-                />
-              </Suspense>
-            </div>
-          )}
+            {/* Company details overlay */}
+            {currentView === 'company-details' && selectedCompanyId && (
+              <div className="py-4 md:py-6">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <CompanyDetailsViewDynamic 
+                    companyId={selectedCompanyId}
+                    onClose={() => {
+                      setSelectedCompanyId(null)
+                      setCurrentView('companies')
+                    }}
+                  />
+                </Suspense>
+              </div>
+            )}
 
-          {/* Company details overlay */}
-          {currentView === 'company-details' && selectedCompanyId && (
-            <div className="py-6 md:py-8">
-              <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingScreen /></div>}>
-                <CompanyDetailsViewDynamic 
-                  companyId={selectedCompanyId}
-                  onClose={() => {
-                    setSelectedCompanyId(null)
-                    setCurrentView('companies')
-                  }}
-                />
-              </Suspense>
-            </div>
-          )}
+            {/* Communities overlay */}
+            {currentView === 'communities' && (
+              <div className="py-4 md:py-6">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <CommunitiesViewDynamic 
+                    onCommunitySelect={handleCommunitySelect}
+                  />
+                </Suspense>
+              </div>
+            )}
 
-          {/* Communities overlay */}
-          {currentView === 'communities' && (
-            <div className="py-6 md:py-8">
-              <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingScreen /></div>}>
-                <CommunitiesViewDynamic 
-                  onCommunitySelect={(id: string) => {
-                    setSelectedCommunityId(id)
-                    setCurrentView('community-details')
-                  }}
-                />
-              </Suspense>
-            </div>
-          )}
-
-          {/* Community details overlay */}
-          {currentView === 'community-details' && selectedCommunityId && (
-            <div className="py-6 md:py-8">
-              <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingScreen /></div>}>
-                <CommunityDetailsViewDynamic
-                  community={{
-                    id: selectedCommunityId,
-                    isMember: false,
-                    description: null,
-                    created_at: new Date().toISOString(),
-                    companies: {
+            {/* Community details overlay */}
+            {currentView === 'community-details' && selectedCommunityId && (
+              <div className="py-4 md:py-6">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <CommunityDetailsViewDynamic
+                    community={{
                       id: selectedCommunityId,
-                      name: 'Loading...',
+                      isMember: false,
                       description: null,
-                      mission_statement: null,
-                      score: 0,
-                      image_url: null
-                    }
-                  }}
-                  onBack={() => {
-                    setSelectedCommunityId(null)
-                    setCurrentView('communities')
-                  }}
-                />
-              </Suspense>
-            </div>
-          )}
+                      created_at: new Date().toISOString(),
+                      companies: {
+                        id: selectedCommunityId,
+                        name: 'Loading...',
+                        description: null,
+                        mission_statement: null,
+                        score: 0,
+                        image_url: null
+                      }
+                    }}
+                    onBack={() => {
+                      setSelectedCommunityId(null)
+                      setCurrentView('communities')
+                    }}
+                  />
+                </Suspense>
+              </div>
+            )}
 
-          {/* Watchlist overlay */}
-          {currentView === 'saved' && (
-            <div className="py-6 md:py-8">
-              <Suspense fallback={<div className="h-[600px] flex items-center justify-center"><LoadingScreen /></div>}>
-                <WatchlistViewDynamic 
-                  externalData={watchlistCompanies}
-                  externalLoading={watchlistLoading}
-                />
-              </Suspense>
-            </div>
-          )}
-        </main>
+            {/* Watchlist overlay */}
+            {currentView === 'saved' && (
+              <div className="py-4 md:py-6">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <WatchlistViewDynamic 
+                    externalData={watchlistCompanies}
+                    externalLoading={watchlistLoading}
+                  />
+                </Suspense>
+              </div>
+            )}
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
 export default function HomePage() {
   return (
     <AuthProvider>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      </Head>
       <HomePageContent />
     </AuthProvider>
   )

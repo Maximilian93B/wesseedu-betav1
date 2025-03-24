@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
+import { BarChart, TrendingUp, DollarSign } from 'lucide-react';
 
 interface InvestmentStats {
   totalInvested: number;
@@ -22,7 +24,6 @@ const InvestmentSummary = () => {
       // Set a timeout to exit loading state after 10 seconds
       const timeoutId = setTimeout(() => {
         if (isLoading) {
-          console.log("InvestmentSummary: Loading timeout reached, forcing exit from loading state");
           setIsLoading(false);
           setStats({
             totalInvested: 0,
@@ -34,12 +35,11 @@ const InvestmentSummary = () => {
             variant: "destructive"
           });
         }
-      }, 10000);
+      }, 5000);
       
       return () => clearTimeout(timeoutId);
     } else if (!authLoading && !user) {
       // Handle case when authentication is complete but no user is found
-      console.log("InvestmentSummary: No authenticated user found");
       setIsLoading(false);
       setStats({
         totalInvested: 0,
@@ -50,37 +50,27 @@ const InvestmentSummary = () => {
 
   const fetchStats = async () => {
     if (!user?.id) {
-      console.log("InvestmentSummary: No user ID, skipping fetch");
       setIsLoading(false);
       return;
     }
     
     try {
-      console.log("InvestmentSummary: Starting fetch, setting loading to true");
       setIsLoading(true);
-      
-      console.log("InvestmentSummary: Fetching investment stats from API");
       
       // Use the fetchWithAuth helper instead of direct Supabase client
       const response = await fetchWithAuth('/api/protected/investments/stats');
       
-      console.log("InvestmentSummary: API response received:", response);
-      
       if (response.error) {
-        console.error("InvestmentSummary: Error in response:", response.error);
         throw new Error(response.error.toString());
       }
       
       // Even if there's no data, we should set default values
-      console.log("InvestmentSummary: Setting stats with data:", response.data || { totalInvested: 0, investmentCount: 0 });
       setStats({
         totalInvested: response.data?.totalInvested || 0,
         investmentCount: response.data?.investmentCount || 0
       });
-      
-      console.log("InvestmentSummary: Stats set successfully");
     } catch (error) {
-      console.error('InvestmentSummary: Error fetching investment stats:', error);
+      console.error('Error fetching investment stats:', error);
       toast({
         title: "Error",
         description: "Failed to load investment statistics. Please try again.",
@@ -88,66 +78,76 @@ const InvestmentSummary = () => {
       });
       
       // Set default values on error
-      console.log("InvestmentSummary: Setting default stats due to error");
       setStats({
         totalInvested: 0,
         investmentCount: 0
       });
     } finally {
-      console.log("InvestmentSummary: Setting loading to false");
       setIsLoading(false);
     }
   };
 
+  // Calculate the average investment if we have stats
+  const getAverageInvestment = (): string => {
+    if (!stats || stats.investmentCount === 0) return "$0";
+    
+    const average = stats.totalInvested / stats.investmentCount;
+    return `$${average.toLocaleString(undefined, {maximumFractionDigits: 2})}`;
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">Total Invested</div>
-          {isLoading ? (
-            <Skeleton className="h-8 w-24" />
-          ) : (
-            <div className="text-xl font-bold text-white">
-              ${stats?.totalInvested.toLocaleString() || "0"}
+    <Card className="bg-black border-emerald-500/20 border shadow-lg overflow-hidden">
+      <CardHeader className="px-4 pt-4 pb-0">
+        <CardTitle className="text-lg font-semibold text-white">Investment Summary</CardTitle>
+      </CardHeader>
+      <CardContent className="px-4 py-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-3">
+            <div className="text-xs text-zinc-400 flex items-center mb-1">
+              <DollarSign className="h-3 w-3 mr-1 text-emerald-400/70" />
+              <span>Total Invested</span>
             </div>
-          )}
+            {isLoading ? (
+              <Skeleton className="h-7 w-20" />
+            ) : (
+              <div className="text-lg sm:text-xl font-bold text-white">
+                ${stats?.totalInvested.toLocaleString() || "0"}
+              </div>
+            )}
+          </div>
+          
+          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-3">
+            <div className="text-xs text-zinc-400 flex items-center mb-1">
+              <BarChart className="h-3 w-3 mr-1 text-emerald-400/70" />
+              <span>Investments</span>
+            </div>
+            {isLoading ? (
+              <Skeleton className="h-7 w-16" />
+            ) : (
+              <div className="text-lg sm:text-xl font-bold text-white">
+                {stats?.investmentCount || "0"}
+              </div>
+            )}
+          </div>
         </div>
         
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">Investments</div>
-          {isLoading ? (
-            <Skeleton className="h-8 w-16" />
-          ) : (
-            <div className="text-xl font-bold text-white">
-              {stats?.investmentCount || "0"}
+        <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-3 mt-3">
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-zinc-400 flex items-center">
+              <TrendingUp className="h-3 w-3 mr-1 text-emerald-400/70" />
+              <span>Average per Investment</span>
             </div>
-          )}
+            {isLoading ? (
+              <Skeleton className="h-6 w-16" />
+            ) : (
+              <div className="text-md font-medium text-emerald-400">
+                {getAverageInvestment()}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-400">Average per Investment</div>
-          {isLoading ? (
-            <Skeleton className="h-6 w-20" />
-          ) : (
-            <div className="text-lg font-semibold text-emerald-400">
-              ${stats && stats.investmentCount > 0 
-                ? (stats.totalInvested / stats.investmentCount).toLocaleString(undefined, {maximumFractionDigits: 2}) 
-                : "0"}
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Debug button */}
-      <button 
-        onClick={fetchStats}
-        className="text-xs text-zinc-500 hover:text-zinc-400 mt-2 p-1"
-      >
-        Retry loading
-      </button>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

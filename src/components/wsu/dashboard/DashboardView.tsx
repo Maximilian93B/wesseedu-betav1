@@ -474,4 +474,3 @@ export function DashboardView({ user }: DashboardViewProps) {
     </div>
   );
 }
-

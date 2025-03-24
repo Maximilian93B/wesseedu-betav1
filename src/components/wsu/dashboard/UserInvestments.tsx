@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
   Table,
@@ -41,7 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, BadgeInfo } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
@@ -114,18 +116,14 @@ const UserInvestments = () => {
     
     try {
       setIsLoading(true);
-      console.log("UserInvestments: Fetching investment data from API");
       
       const response = await fetchWithAuth('/api/auth/profile');
       
       if (!response.data) {
-        console.warn("UserInvestments: No profile data returned");
         setInvestments([]);
         setTotalInvested(0);
         return;
       }
-      
-      console.log("UserInvestments: Profile data fetched successfully", response.data);
       
       // Extract investments from the profile response
       const investmentsData = response.data.investments || [];
@@ -161,21 +159,17 @@ const UserInvestments = () => {
 
   const fetchCompanies = async () => {
     try {
-      console.log("UserInvestments: Fetching companies data");
       const response = await fetchWithAuth('/api/companies');
       
       if (response.error) {
-        console.error("Error in companies response:", response.error);
         throw new Error(response.error.toString());
       }
       
       if (!response.data) {
-        console.warn("No companies data returned from API");
         setCompanies([]);
         return;
       }
       
-      console.log(`UserInvestments: Successfully fetched ${response.data.length} companies`);
       setCompanies(response.data);
     } catch (error) {
       console.error('Error fetching companies:', error);
@@ -229,141 +223,158 @@ const UserInvestments = () => {
     }
   };
 
+  // Function to format date in a more readable format
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(date);
+  };
+
   return (
-    <Card className="bg-[#0A0A0A] border-2 border-white/5 transition-all duration-300">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-1 bg-gradient-to-b from-emerald-400 to-teal-600 rounded-full"></div>
-            <h3 className="text-xl font-semibold">Your Investments</h3>
-          </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-700">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Investment
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-zinc-900 border-zinc-700 text-white">
-              <DialogHeader>
-                <DialogTitle>Add Investment</DialogTitle>
-                <DialogDescription className="text-zinc-400">
-                  Record a new investment in a sustainable company.
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="company_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a company" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {companies.map(company => (
-                              <SelectItem key={company.id} value={company.id}>
-                                {company.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Amount ($)</FormLabel>
+    <Card className="bg-black border-emerald-500/20 border shadow-lg overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between px-4 pt-4 pb-0">
+        <CardTitle className="text-lg font-semibold text-white">Your Investments</CardTitle>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button
+              size="sm"
+              className="bg-emerald-500 hover:bg-emerald-400 text-white h-8 px-3"
+            >
+              <PlusCircle className="mr-1 h-3 w-3" />
+              <span className="text-xs">Add</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-zinc-900 border-zinc-700 text-white">
+            <DialogHeader>
+              <DialogTitle>Add Investment</DialogTitle>
+              <DialogDescription className="text-zinc-400">
+                Record a new investment in a sustainable company.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="company_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Company</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="Enter amount" 
-                            {...field} 
-                          />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a company" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Notes</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Optional notes" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <DialogFooter>
-                    <Button type="submit">Save</Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
-        
+                        <SelectContent>
+                          {companies.map(company => (
+                            <SelectItem key={company.id} value={company.id}>
+                              {company.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount ($)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          placeholder="Enter amount" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Notes</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Optional notes" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <DialogFooter>
+                  <Button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-white">Save</Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </CardHeader>
+      
+      <CardContent className="px-4 py-4">
         {isLoading ? (
           <div className="flex items-center justify-center h-40">
-            <div className="animate-pulse text-zinc-500">Loading investments...</div>
+            <div className="animate-pulse text-emerald-400/50">Loading investments...</div>
           </div>
         ) : investments.length > 0 ? (
-          <div className="rounded-lg border border-zinc-800 overflow-hidden">
-            <Table>
-              <TableHeader className="bg-zinc-900">
-                <TableRow className="hover:bg-zinc-900/80 border-zinc-800">
-                  <TableHead className="text-zinc-400">Company</TableHead>
-                  <TableHead className="text-zinc-400 text-right">Amount</TableHead>
-                  <TableHead className="text-zinc-400">Date</TableHead>
-                  <TableHead className="text-zinc-400">Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {investments.map(investment => (
-                  <TableRow key={investment.id} className="hover:bg-zinc-900/50 border-zinc-800">
-                    <TableCell className="font-medium">{investment.companies.name}</TableCell>
-                    <TableCell className="text-right text-emerald-400 font-semibold">
-                      ${parseFloat(investment.amount.toString()).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-zinc-400">
-                      {new Date(investment.investment_date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-zinc-400">{investment.notes || '-'}</TableCell>
+          <div className="overflow-x-auto">
+            <div className="rounded-lg border border-zinc-800/50 overflow-hidden">
+              <Table>
+                <TableHeader className="bg-zinc-900/30">
+                  <TableRow className="hover:bg-zinc-900/80 border-zinc-800/50">
+                    <TableHead className="text-zinc-400 text-xs">Company</TableHead>
+                    <TableHead className="text-zinc-400 text-right text-xs">Amount</TableHead>
+                    <TableHead className="text-zinc-400 text-xs hidden sm:table-cell">Date</TableHead>
+                    <TableHead className="text-zinc-400 text-xs hidden md:table-cell">Notes</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {investments.map(investment => (
+                    <TableRow key={investment.id} className="hover:bg-zinc-900/30 border-zinc-800/50">
+                      <TableCell className="font-medium text-xs sm:text-sm">{investment.companies.name}</TableCell>
+                      <TableCell className="text-right text-emerald-400 font-semibold text-xs sm:text-sm">
+                        ${parseFloat(investment.amount.toString()).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-zinc-400 text-xs hidden sm:table-cell">
+                        {formatDate(investment.investment_date)}
+                      </TableCell>
+                      <TableCell className="text-zinc-400 text-xs hidden md:table-cell">{investment.notes || '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="flex justify-between items-center mt-3 text-xs text-zinc-500">
+              <span>Total amount: <span className="text-emerald-400">${totalInvested.toLocaleString()}</span></span>
+              <span>{investments.length} investment{investments.length !== 1 ? 's' : ''}</span>
+            </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-40 text-center space-y-4 bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
-            <p className="text-zinc-400">No investments found. Start investing to track your portfolio!</p>
+          <div className="flex flex-col items-center justify-center h-40 text-center space-y-4 bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-6">
+            <BadgeInfo className="h-8 w-8 text-zinc-500" />
+            <p className="text-zinc-400 text-sm">No investments found. Start investing to track your portfolio!</p>
             <Button 
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white"
+              className="bg-emerald-500 hover:bg-emerald-400 text-white text-xs"
               onClick={() => setOpen(true)}
             >
-              <PlusCircle className="mr-2 h-4 w-4" />
+              <PlusCircle className="mr-1 h-3 w-3" />
               Add Your First Investment
             </Button>
           </div>

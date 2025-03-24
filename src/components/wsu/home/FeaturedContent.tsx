@@ -1,35 +1,68 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, ChevronRight, ChevronLeft } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, TouchEvent } from "react";
 
 export function FeaturedContent() {
   const router = useRouter();
   const [activeSlide, setActiveSlide] = useState(0);
   const totalSlides = 3;
-  const slideRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   
-  // Auto-advance carousel
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % totalSlides);
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, []);
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
   
   // Handle next/previous
-  const nextSlide = () => setActiveSlide((prev) => (prev + 1) % totalSlides);
-  const prevSlide = () => setActiveSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  const nextSlide = () => {
+    setActiveSlide((prev) => (prev + 1) % totalSlides);
+  };
   
-  // Update slide position
-  useEffect(() => {
-    if (slideRef.current) {
-      slideRef.current.style.transform = `translateX(-${activeSlide * 100}%)`;
+  const prevSlide = () => {
+    setActiveSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  };
+  
+  // Touch handlers for swipe functionality
+  const onTouchStart = (e: TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  
+  const onTouchMove = (e: TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+  
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      nextSlide();
+    } else if (isRightSwipe) {
+      prevSlide();
     }
-  }, [activeSlide]);
+  };
+  
+  // Improved animation variants
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? '100%' : '-100%',
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? '100%' : '-100%',
+      opacity: 0,
+    }),
+  };
   
   const cards = [
     {
@@ -37,7 +70,7 @@ export function FeaturedContent() {
       description: "Stay informed on sustainable investing trends with curated news and expert analysis.",
       linkText: "Browse Latest News",
       linkHref: "/news",
-      imageSrc: "/images/esg-news-analysis.jpg", 
+      imageSrc: "/images/pexels-aboodi-18620005.jpg", 
       imageAlt: "Sustainable investing news analytics dashboard"
     },
     {
@@ -45,7 +78,7 @@ export function FeaturedContent() {
       description: "Discover sustainable businesses with strong ESG scores and positive environmental impact.",
       linkText: "Explore Companies",
       linkHref: "/companies",
-      imageSrc: "/images/top-rated-companies.jpg",
+      imageSrc: "/images/pexels-jahoo-388415.jpg",
       imageAlt: "Sustainable companies ranking chart"
     },
     {
@@ -53,29 +86,46 @@ export function FeaturedContent() {
       description: "Track how your portfolio contributes to sustainability goals and compare against benchmarks.",
       linkText: "Track Your Impact",
       linkHref: "/impact",
-      imageSrc: "/images/impact-tracking.jpg",
+      imageSrc: "/images/pexels-jahoo-388415.jpg",
       imageAlt: "Environmental impact tracking dashboard"
     }
   ];
 
+  // Track slide direction for animations - with proper typing
+  const [direction, setDirection] = useState(0);
+  const prevActiveSlide = useRef(activeSlide);
+
+  // Update direction when active slide changes
+  useEffect(() => {
+    // Determine direction based on which way we're moving
+    const newDirection = activeSlide > prevActiveSlide.current ? 1 : -1;
+    setDirection(newDirection);
+    prevActiveSlide.current = activeSlide;
+  }, [activeSlide]);
+
   return (
-    <div className="flex flex-col md:flex-row h-full">
+    <div className="flex flex-col md:flex-row h-full w-full pb-10 md:pb-16 lg:pb-20">
       {/* LEFT SIDE - Text content on black background */}
-      <div className="w-full md:w-1/2 bg-black text-white py-24 md:py-32 lg:py-36 flex items-center">
-        <div className="max-w-xl mx-auto px-10 md:px-14 lg:px-20">
+      <div className="w-full md:w-1/2 bg-black text-white flex items-start pt-16 md:pt-20 lg:pt-24 pb-20 md:pb-24 lg:pb-32">
+        <div className="max-w-xl mx-auto px-10 md:px-14 lg:px-16 xl:px-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="space-y-10 md:space-y-12 lg:space-y-14"
+            className="space-y-8 md:space-y-10 lg:space-y-12"
           >
-            <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full border border-emerald-800 bg-emerald-900/30">
+            <div className="inline-flex items-center gap-2 mb-2 px-4 py-1.5 rounded-full border border-emerald-800 bg-emerald-900/30">
               <span className="text-xs font-medium text-emerald-300">Featured</span>
             </div>
             
-            <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
-              <span className="bg-gradient-to-r from-emerald-400 to-emerald-500 bg-clip-text text-transparent">
-                Discover Sustainable Investment Opportunities
+            {/* Updated heading to match the image - split text and solid color */}
+            <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-[1.1]">
+              <span className="text-emerald-400 block">
+                Discover<br />
+                Sustainable<br />
+                Investment<br />
+                Opportunities
               </span>
             </h2>
             
@@ -83,9 +133,9 @@ export function FeaturedContent() {
               Access premium insights and curated sustainable investment options that align your financial goals with positive environmental and social impact.
             </p>
             
-            <div className="pt-8 md:pt-10">
+            <div className="pt-6 md:pt-8">
               <Button
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-8 h-auto text-base md:text-lg"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-6 h-auto text-base"
                 onClick={() => router.push('/dashboard')}
               >
                 Get Started
@@ -96,89 +146,121 @@ export function FeaturedContent() {
         </div>
       </div>
       
-      {/* RIGHT SIDE - Card carousel on white background */}
-      <div className="w-full md:w-1/2 bg-white flex items-stretch relative overflow-hidden">
-        <div className="w-full h-full">
-          {/* Carousel container */}
-          <div className="relative h-full overflow-hidden">
-            {/* Slides */}
-            <div 
-              ref={slideRef}
-              className="flex h-full transition-transform duration-500 ease-in-out"
-              style={{ width: `${totalSlides * 100}%` }}
-            >
-              {cards.map((card, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="w-full h-full"
-                  style={{ width: `${100 / totalSlides}%` }}
-                >
-                  <div className="h-full relative overflow-hidden">
-                    {/* Background Image */}
-                    <div className="absolute inset-0 z-0">
-                      <Image 
-                        src={card.imageSrc}
-                        alt={card.imageAlt}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        priority={index === 0}
-                        className="object-cover"
-                        style={{ objectPosition: "center" }}
-                      />
-                      {/* Lighter gradient overlay for better image visibility */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/80 to-white/60 z-10"></div>
-                    </div>
-                    
-                    {/* Content positioned over the image */}
-                    <div className="h-full flex flex-col justify-center px-12 md:px-20 lg:px-24 relative z-20">
-                      <div className="h-1.5 w-24 bg-emerald-500 mb-10"></div>
-                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-zinc-900 mb-8">{card.title}</h3>
-                      <p className="text-zinc-700 text-lg md:text-xl mb-12 leading-relaxed max-w-xl">{card.description}</p>
+      {/* RIGHT SIDE - Card carousel on white background - ENHANCED IMPLEMENTATION */}
+      <div 
+        className="w-full md:w-1/2 bg-white flex items-stretch relative overflow-hidden rounded-xl"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        aria-roledescription="carousel"
+        aria-label="Featured content carousel"
+      >
+        <div className="w-full h-full p-6 md:p-8 lg:p-10">
+          {/* Carousel container with improved animation */}
+          <div className="relative h-full overflow-hidden rounded-xl shadow-lg border border-white/10">
+            {/* Slides with AnimatePresence for better transitions */}
+            <AnimatePresence custom={direction} initial={false} mode="wait">
+              <motion.div
+                key={`slide-${activeSlide}`}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.4 }
+                }}
+                className="absolute inset-0 w-full h-full"
+              >
+                <div className="h-full relative overflow-hidden">
+                  {/* Background Image with optimized loading */}
+                  <div className="absolute inset-0 z-0">
+                    <Image 
+                      src={cards[activeSlide].imageSrc}
+                      alt={cards[activeSlide].imageAlt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      priority={activeSlide === 0}
+                      loading={activeSlide === 0 ? "eager" : "lazy"}
+                      className="object-cover"
+                      style={{ objectPosition: "center" }}
+                      quality={85}
+                    />
+                  </div>
+                  
+                  {/* Content positioned over the image - styled to match the screenshot */}
+                  <div className="h-full flex flex-col justify-center px-10 sm:px-14 md:px-16 lg:px-20 relative z-20 text-white">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                    >
+                      {/* Green line accent matching the screenshot */}
+                      <div className="h-1 w-16 bg-emerald-500 mb-8"></div>
                       
+                      {/* Title - larger and more prominent */}
+                      <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 drop-shadow-lg">
+                        {cards[activeSlide].title}
+                      </h3>
+                      
+                      {/* Description - improved readability */}
+                      <p className="text-base md:text-lg mb-10 leading-relaxed max-w-md drop-shadow-lg">
+                        {cards[activeSlide].description}
+                      </p>
+                      
+                      {/* Link styled as in screenshot */}
                       <a 
-                        href={card.linkHref}
-                        className="inline-flex items-center text-emerald-600 hover:text-emerald-700 font-medium text-lg group"
+                        href={cards[activeSlide].linkHref}
+                        className="inline-flex items-center text-emerald-400 hover:text-emerald-300 font-medium text-base group"
                       >
-                        {card.linkText}
+                        {cards[activeSlide].linkText}
                         <ChevronRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                       </a>
-                    </div>
+                    </motion.div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
             
-            {/* Navigation dots - positioned higher from bottom */}
-            <div className="absolute bottom-20 left-0 right-0 flex justify-center space-x-4 z-30">
+            {/* Navigation dots styled to match the screenshot */}
+            <div 
+              className="absolute bottom-8 left-0 right-0 flex justify-center space-x-3 z-30"
+              role="tablist"
+              aria-label="Carousel pagination"
+            >
               {[...Array(totalSlides)].map((_, i) => (
                 <button
                   key={i}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    activeSlide === i ? "bg-emerald-500 w-12" : "bg-zinc-300"
+                  role="tab"
+                  aria-selected={activeSlide === i}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    activeSlide === i ? "bg-emerald-500" : "bg-white/40 hover:bg-white/60"
                   }`}
                   onClick={() => setActiveSlide(i)}
-                  aria-label={`Go to slide ${i + 1}`}
                 />
               ))}
             </div>
             
-            {/* Navigation arrows - moved slightly inward */}
+            {/* Navigation arrows styled to match the screenshot */}
             <button 
-              className="absolute top-1/2 left-6 -translate-y-1/2 w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-zinc-700 hover:text-emerald-600 transition-colors duration-300 z-30"
+              className="absolute top-1/2 left-4 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm
+                flex items-center justify-center text-white hover:bg-white/50 
+                transition-all duration-300 z-30 hover:scale-110 focus:outline-none"
               onClick={prevSlide}
               aria-label="Previous slide"
             >
-              <ChevronLeft className="h-7 w-7" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <button 
-              className="absolute top-1/2 right-6 -translate-y-1/2 w-14 h-14 rounded-full bg-white shadow-lg flex items-center justify-center text-zinc-700 hover:text-emerald-600 transition-colors duration-300 z-30"
+              className="absolute top-1/2 right-4 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm
+                flex items-center justify-center text-white hover:bg-white/50 
+                transition-all duration-300 z-30 hover:scale-110 focus:outline-none"
               onClick={nextSlide}
               aria-label="Next slide"
             >
-              <ChevronRight className="h-7 w-7" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         </div>

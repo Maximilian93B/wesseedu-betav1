@@ -21,12 +21,11 @@ export const DataVizTransition = memo(function DataVizTransition() {
   const isInView = useInView(containerRef, { once: false, amount: 0.3 });
   const [mounted, setMounted] = useState(false);
 
-  // Tiers configuration
-  const investmentTiers = [
-    { amount: "$100,000", label: "Base", color: "#84cc16", isActive: true },
-    { amount: "$200,000", label: "Builder", color: "#10b981", isActive: true },
-    { amount: "$300,000", label: "Growth", color: "#14b8a6", isActive: false },
-    { amount: "$500,000", label: "Impact", color: "#06b6d4", isActive: false },
+  // Tiers configuration - matching the colors from the prototype image
+  const investmentTiers: TierInfo[] = [
+    { amount: "$100,000", label: "ROOT", color: "#0ea5e9", isActive: true },    // Blue
+    { amount: "$200,000", label: "THRIVE", color: "#f97316", isActive: true },  // Orange
+    { amount: "$300,000", label: "IMPACT", color: "#dc2626", isActive: false }, // Red
   ];
 
   // Set mounted state on client side
@@ -56,10 +55,10 @@ export const DataVizTransition = memo(function DataVizTransition() {
 
   return (
     <div className="w-full overflow-hidden relative bg-black" ref={containerRef}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-28 md:py-36">
-        <div className="flex flex-col md:flex-row items-center gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-24 md:py-32">
+        <div className="flex flex-col md:flex-row items-start gap-16">
           {/* Left side - Content */}
-          <div className="w-full md:w-1/2">
+          <div className="w-full md:w-2/5">
             <motion.div
               initial="hidden"
               animate={isInView ? "visible" : "hidden"}
@@ -75,18 +74,18 @@ export const DataVizTransition = memo(function DataVizTransition() {
               </h2>
               
               <p className="text-zinc-300 mt-10 text-lg max-w-md">
-                When you reach $200,000 in assets, you get to choose any reward you like from one of our trusted partners. Plus, you can unlock another reward at your next two $100,000 milestones after that.
+                Your investment journey passes through three growth stages: ROOT, THRIVE, and IMPACT. Each stage represents progress in your sustainable investment portfolio.
               </p>
               
               <p className="text-zinc-300 mt-4 text-lg max-w-md">
-                Investing is already rewarding — we're here to make it even better.
+                As you advance through each stage, you'll unlock new features and benefits that enhance your investment experience.
               </p>
               
               <motion.div
                 initial="hidden"
                 animate={isInView ? "visible" : "hidden"}
                 variants={fadeInUpVariant}
-                className="mt-8"
+                className="mt-10"
               >
                 <Button 
                   variant="default" 
@@ -102,102 +101,78 @@ export const DataVizTransition = memo(function DataVizTransition() {
           </div>
 
           {/* Right side - Visualization */}
-          <div className="w-full md:w-1/2 relative">
-            <div className="relative h-[600px] md:h-[700px] lg:h-[750px]">
+          <div className="w-full md:w-3/5 relative">
+            <div className="relative h-[600px] md:h-[750px] lg:h-[800px]">
               {/* Status card */}
               <motion.div
                 initial="hidden"
                 animate={isInView ? "visible" : "hidden"}
                 variants={fadeInUpVariant}
-                className="absolute top-0 left-0 z-30 bg-zinc-900/90 border border-zinc-800 rounded-xl p-5 w-full"
+                className="absolute top-0 right-4 z-30 bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl p-5 w-full max-w-sm shadow-xl"
               >
                 <div>
-                  <p className="text-zinc-400 text-sm">Your assets</p>
-                  <p className="text-3xl font-bold text-white">$400,000</p>
+                  <p className="text-zinc-400 text-sm font-medium">Current stage</p>
+                  <h3 className="text-3xl font-bold text-white mt-1">THRIVE</h3>
+                  <div className="mt-3 bg-zinc-800 rounded-full h-2.5 w-full overflow-hidden">
+                    <div className="bg-gradient-to-r from-cyan-600 via-orange-500 to-red-600 h-2.5 rounded-full w-2/3 shadow-inner"></div>
+                  </div>
                 </div>
               </motion.div>
               
-              {/* 3D visualization - only render when in view and mounted */}
-              <div className="absolute inset-0 flex items-center justify-center z-10 pt-24">
-                {mounted && isInView && (
-                  <ThreeWrapper investmentTiers={investmentTiers} />
-                )}
+              {/* 3D visualization wrapper */}
+              <div className="absolute inset-0 flex items-center justify-center z-10 pt-20">
+                <div className="w-full h-full relative">
+                  {mounted && isInView && (
+                    <ThreeWrapper investmentTiers={investmentTiers} />
+                  )}
+                </div>
               </div>
               
-              {/* Milestone tracker - use motion variants for efficient animations */}
-              <div className="absolute top-32 left-0 z-20 w-full px-4 space-y-8">
-                {/* $400,000 - Current level */}
-                <motion.div
-                  initial="hidden"
-                  animate={isInView ? "visible" : "hidden"}
-                  variants={milestoneVariant}
-                  custom={0}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
-                    <Check className="h-4 w-4 text-black" />
-                  </div>
-                  <div className="flex-1 flex items-center justify-between">
-                    <span className="text-2xl font-bold text-white">$400,000</span>
-                    <span className="text-zinc-400 text-xs">Invest your third reward</span>
-                  </div>
-                </motion.div>
-                
-                {/* Line */}
-                <div className="w-px h-16 bg-zinc-700 ml-3"></div>
-                
-                {/* $500,000 */}
-                <motion.div
-                  initial="hidden"
-                  animate={isInView ? "visible" : "hidden"}
-                  variants={milestoneVariant}
-                  custom={1}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-zinc-600"></div>
-                  </div>
-                  <div className="flex-1 flex items-center justify-between">
-                    <span className="text-2xl font-bold text-zinc-500">$500,000</span>
-                    <span className="text-xs text-white bg-zinc-800 px-2 py-1 rounded">GENERATION</span>
-                  </div>
-                </motion.div>
-                
-                {/* Line */}
-                <div className="w-px h-16 bg-zinc-700 ml-3"></div>
-                
-                {/* Progress bar - full screen width */}
-                <div className="w-full h-px bg-zinc-700 my-6"></div>
-                
-                {/* $100,000 - using single animations for all below */}
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-                  transition={{ delay: 0.6, duration: 0.5 }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-zinc-600"></div>
+              {/* Milestone trackers - now laid out horizontally to match the 3D visualization */}
+              <div className="absolute bottom-8 left-0 right-0 z-20 w-full">
+                <div className="flex flex-row gap-4 md:gap-16 lg:gap-24 justify-center items-start px-4">
+                  {/* ROOT - left */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="flex flex-col items-center text-center w-1/3 md:w-auto"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center shadow-md mb-2">
+                      <Check className="h-4 w-4 text-white" />
                     </div>
-                    <div className="flex-1 flex items-center justify-between">
-                      <span className="text-2xl font-bold text-zinc-500">$100,000</span>
-                      <span className="text-xs text-cyan-300 bg-cyan-950 border border-cyan-800 px-2 py-0.5 rounded-full">PREMIUM</span>
-                    </div>
-                  </div>
+                    <span className="text-base md:text-lg font-semibold text-white">ROOT</span>
+                    <span className="text-zinc-400 text-xs">First stage of growth</span>
+                  </motion.div>
                   
-                  {/* Line */}
-                  <div className="w-px h-16 bg-zinc-700 ml-3 mt-8"></div>
+                  {/* THRIVE - center */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="flex flex-col items-center text-center w-1/3 md:w-auto"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center shadow-md mb-2">
+                      <Check className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-base md:text-lg font-semibold text-white">THRIVE</span>
+                    <span className="text-zinc-400 text-xs">Growing stage</span>
+                  </motion.div>
                   
-                  {/* $200,000 */}
-                  <div className="flex items-center gap-3 mt-8">
-                    <div className="w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-zinc-600"></div>
+                  {/* IMPACT - right */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                    className="flex flex-col items-center text-center w-1/3 md:w-auto"
+                  >
+                    <div className="w-8 h-8 rounded-full border border-zinc-700 flex items-center justify-center mb-2">
+                      <div className="w-2 h-2 rounded-full bg-zinc-700"></div>
                     </div>
-                    <div className="flex-1">
-                      <span className="text-2xl font-bold text-zinc-500">$200,000</span>
-                    </div>
-                  </div>
-                </motion.div>
+                    <span className="text-base md:text-lg font-semibold text-zinc-500">IMPACT</span>
+                    <span className="text-xs text-white bg-zinc-900/80 px-2 py-0.5 rounded-sm mt-1 inline-block shadow-sm">FINAL STAGE</span>
+                  </motion.div>
+                </div>
               </div>
             </div>
           </div>

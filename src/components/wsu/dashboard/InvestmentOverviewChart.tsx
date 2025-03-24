@@ -3,7 +3,18 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from "recharts"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 // Sample data - replace this with your actual data
 const monthlyData = [
@@ -14,11 +25,6 @@ const monthlyData = [
   { name: "May", value: 6000 },
   { name: "Jun", value: 5500 },
   { name: "Jul", value: 7000 },
-  { name: "Aug", value: 8000 },
-  { name: "Sep", value: 7500 },
-  { name: "Oct", value: 9000 },
-  { name: "Nov", value: 10000 },
-  { name: "Dec", value: 12000 },
 ]
 
 const yearlyData = [
@@ -31,64 +37,150 @@ const yearlyData = [
 
 export function InvestmentOverviewChart() {
   const [timeframe, setTimeframe] = useState<"monthly" | "yearly">("monthly")
+  const [chartType, setChartType] = useState<"line" | "area">("area")
 
   const data = timeframe === "monthly" ? monthlyData : yearlyData
 
   return (
-    <Card className="col-span-4 bg-black border-emerald-500/20 border-2 shadow-lg hover:border-emerald-400/40 transition-all duration-200">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-xl font-semibold text-white">Investment Overview</CardTitle>
-        <div className="space-x-2">
-          <Button
-            variant={timeframe === "monthly" ? "secondary" : "outline"}
-            onClick={() => setTimeframe("monthly")}
-            className="text-sm"
+    <Card className="col-span-7 md:col-span-4 bg-black border-emerald-500/20 border shadow-lg">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between px-4 pt-4 pb-2">
+        <CardTitle className="text-lg font-semibold text-white">Investment Overview</CardTitle>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-2 sm:mt-0">
+          <div className="flex space-x-1">
+            <Button
+              variant={timeframe === "monthly" ? "secondary" : "ghost"}
+              onClick={() => setTimeframe("monthly")}
+              className="text-xs h-8 px-2"
+              size="sm"
+            >
+              Monthly
+            </Button>
+            <Button
+              variant={timeframe === "yearly" ? "secondary" : "ghost"}
+              onClick={() => setTimeframe("yearly")}
+              className="text-xs h-8 px-2"
+              size="sm"
+            >
+              Yearly
+            </Button>
+          </div>
+          <Tabs 
+            value={chartType} 
+            onValueChange={(value) => setChartType(value as "line" | "area")}
+            className="w-[120px]"
           >
-            Monthly
-          </Button>
-          <Button
-            variant={timeframe === "yearly" ? "secondary" : "outline"}
-            onClick={() => setTimeframe("yearly")}
-            className="text-sm"
-          >
-            Yearly
-          </Button>
+            <TabsList className="grid w-full grid-cols-2 bg-zinc-800/50 h-8">
+              <TabsTrigger value="area" className="text-xs py-1 px-2">Area</TabsTrigger>
+              <TabsTrigger value="line" className="text-xs py-1 px-2">Line</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={data}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
-              <XAxis dataKey="name" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#1f2937",
-                  border: "1px solid #374151",
-                  borderRadius: "0.375rem",
+      <CardContent className="px-2 sm:px-4 pt-2 pb-6">
+        <div className="h-[250px] w-full">
+          {chartType === "area" ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={data}
+                margin={{
+                  top: 10,
+                  right: 10,
+                  left: 0,
+                  bottom: 5,
                 }}
-                labelStyle={{ color: "#e5e7eb" }}
-                itemStyle={{ color: "#10b981" }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke="#10b981"
-                strokeWidth={2}
-                dot={{ fill: "#10b981", strokeWidth: 2 }}
-                activeDot={{ r: 8 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+              >
+                <defs>
+                  <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="#6b7280" 
+                  tick={{ fill: '#6b7280', fontSize: 10 }} 
+                  tickLine={{ stroke: '#6b7280', strokeWidth: 0.5 }}
+                  axisLine={{ stroke: '#6b7280', strokeWidth: 0.5 }}
+                />
+                <YAxis 
+                  stroke="#6b7280"
+                  tick={{ fill: '#6b7280', fontSize: 10 }}
+                  tickLine={{ stroke: '#6b7280', strokeWidth: 0.5 }}
+                  axisLine={{ stroke: '#6b7280', strokeWidth: 0.5 }}
+                  tickFormatter={(value) => `$${value}`}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#111",
+                    border: "1px solid rgba(16, 185, 129, 0.2)",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    padding: "8px"
+                  }}
+                  labelStyle={{ color: "#fff", fontSize: "12px" }}
+                  itemStyle={{ color: "#10b981", fontSize: "12px" }}
+                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Investment']}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#investmentGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={data}
+                margin={{
+                  top: 10,
+                  right: 10,
+                  left: 0,
+                  bottom: 5,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#2d2d2d" />
+                <XAxis 
+                  dataKey="name" 
+                  stroke="#6b7280" 
+                  tick={{ fill: '#6b7280', fontSize: 10 }}
+                  tickLine={{ stroke: '#6b7280', strokeWidth: 0.5 }}
+                  axisLine={{ stroke: '#6b7280', strokeWidth: 0.5 }}
+                />
+                <YAxis 
+                  stroke="#6b7280" 
+                  tick={{ fill: '#6b7280', fontSize: 10 }}
+                  tickLine={{ stroke: '#6b7280', strokeWidth: 0.5 }}
+                  axisLine={{ stroke: '#6b7280', strokeWidth: 0.5 }}
+                  tickFormatter={(value) => `$${value}`}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#111",
+                    border: "1px solid rgba(16, 185, 129, 0.2)",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    padding: "8px"
+                  }}
+                  labelStyle={{ color: "#fff", fontSize: "12px" }}
+                  itemStyle={{ color: "#10b981", fontSize: "12px" }}
+                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Investment']}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  dot={{ fill: "#10b981", strokeWidth: 1, r: 4 }}
+                  activeDot={{ r: 6, fill: "#10b981" }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>
