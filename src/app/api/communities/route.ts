@@ -180,8 +180,7 @@ export async function GET(request: Request) {
       .select(`
         community_id,
         profiles:user_id (
-          name,
-          avatar_url
+          name
         )
       `)
       .in('community_id', communityIds)

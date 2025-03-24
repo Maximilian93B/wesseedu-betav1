@@ -5,11 +5,21 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { BarChart, TrendingUp, DollarSign } from 'lucide-react';
+import { motion } from "framer-motion";
 
 interface InvestmentStats {
   totalInvested: number;
   investmentCount: number;
 }
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
 
 const InvestmentSummary = () => {
   const [stats, setStats] = useState<InvestmentStats | null>(null);
@@ -96,56 +106,82 @@ const InvestmentSummary = () => {
   };
 
   return (
-    <Card className="bg-black border-emerald-500/20 border shadow-lg overflow-hidden">
-      <CardHeader className="px-4 pt-4 pb-0">
-        <CardTitle className="text-lg font-semibold text-white">Investment Summary</CardTitle>
+    <Card className="bg-black/60 backdrop-blur-sm border border-zinc-800/50 shadow-lg overflow-hidden rounded-xl hover:border-zinc-700/50 transition-all duration-200">
+      <CardHeader className="px-5 pt-5 pb-0">
+        <CardTitle className="text-lg font-semibold text-white flex items-center">
+          <DollarSign className="h-5 w-5 mr-2 text-emerald-400" />
+          Investment Summary
+        </CardTitle>
       </CardHeader>
-      <CardContent className="px-4 py-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-3">
-            <div className="text-xs text-zinc-400 flex items-center mb-1">
-              <DollarSign className="h-3 w-3 mr-1 text-emerald-400/70" />
+      <CardContent className="px-5 py-5">
+        <motion.div 
+          className="grid grid-cols-2 gap-4 mb-4"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.1
+              }
+            }
+          }}
+        >
+          <motion.div 
+            variants={itemVariants}
+            className="bg-gradient-to-br from-black to-emerald-950/20 rounded-lg border border-emerald-500/20 p-4"
+          >
+            <div className="text-xs text-zinc-400 flex items-center mb-2">
+              <DollarSign className="h-3 w-3 mr-1 text-emerald-400" />
               <span>Total Invested</span>
             </div>
             {isLoading ? (
-              <Skeleton className="h-7 w-20" />
+              <Skeleton className="h-7 w-24 bg-emerald-950/30" />
             ) : (
-              <div className="text-lg sm:text-xl font-bold text-white">
+              <div className="text-xl font-bold text-emerald-400">
                 ${stats?.totalInvested.toLocaleString() || "0"}
               </div>
             )}
-          </div>
+          </motion.div>
           
-          <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-3">
-            <div className="text-xs text-zinc-400 flex items-center mb-1">
-              <BarChart className="h-3 w-3 mr-1 text-emerald-400/70" />
+          <motion.div 
+            variants={itemVariants}
+            className="bg-gradient-to-br from-black to-blue-950/20 rounded-lg border border-blue-500/20 p-4"
+          >
+            <div className="text-xs text-zinc-400 flex items-center mb-2">
+              <BarChart className="h-3 w-3 mr-1 text-blue-400" />
               <span>Investments</span>
             </div>
             {isLoading ? (
-              <Skeleton className="h-7 w-16" />
+              <Skeleton className="h-7 w-16 bg-blue-950/30" />
             ) : (
-              <div className="text-lg sm:text-xl font-bold text-white">
+              <div className="text-xl font-bold text-blue-400">
                 {stats?.investmentCount || "0"}
               </div>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
         
-        <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-lg p-3 mt-3">
+        <motion.div 
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+          className="bg-gradient-to-br from-black to-purple-950/20 rounded-lg border border-purple-500/20 p-4"
+        >
           <div className="flex items-center justify-between">
             <div className="text-xs text-zinc-400 flex items-center">
-              <TrendingUp className="h-3 w-3 mr-1 text-emerald-400/70" />
-              <span>Average per Investment</span>
+              <TrendingUp className="h-3 w-3 mr-1 text-purple-400" />
+              <span>Average Investment</span>
             </div>
             {isLoading ? (
-              <Skeleton className="h-6 w-16" />
+              <Skeleton className="h-6 w-16 bg-purple-950/30" />
             ) : (
-              <div className="text-md font-medium text-emerald-400">
+              <div className="text-md font-medium text-purple-400">
                 {getAverageInvestment()}
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       </CardContent>
     </Card>
   );

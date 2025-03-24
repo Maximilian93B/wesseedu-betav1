@@ -1,141 +1,217 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Users, Building, Calendar, ArrowRight, Leaf, TrendingUp, Award } from 'lucide-react'
-import Image from 'next/image'
-import { formatDistanceToNow } from 'date-fns'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { motion } from 'framer-motion'
-import { CommunityCardProps } from '@/types/community'
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Users, Share2, MessageCircle, Award, ArrowRight } from 'lucide-react';
 
-export default function CommunityCard({ community, onSelect }: CommunityCardProps) {
-  const companyName = community.companies?.name || 'Unknown Company'
-  const companyDescription = community.companies?.mission_statement || community.companies?.description || 'No description available'
-  const logoUrl = community.companies?.image_url || '/placeholder-logo.png'
-  const formattedDate = formatDistanceToNow(new Date(community.created_at), { addSuffix: true })
-  const isMember = community.isMember === true
+export interface CommunityCardProps {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image?: string;
+  memberCount: number;
+  postCount: number;
+  ambassadorCount: number;
+  ambassadors?: {
+    id: string;
+    name: string;
+    image?: string;
+  }[];
+  tags?: string[];
+  variant?: 'default' | 'featured';
+}
+
+// Animation variants
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { 
+      type: "spring", 
+      stiffness: 300, 
+      damping: 24,
+      duration: 0.4 
+    }
+  },
+  hover: {
+    y: -5,
+    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+    transition: { 
+      type: "spring", 
+      stiffness: 400, 
+      damping: 10 
+    }
+  }
+};
+
+export function CommunityCard({
+  id,
+  name,
+  slug,
+  description,
+  image,
+  memberCount,
+  postCount,
+  ambassadorCount,
+  ambassadors = [],
+  tags = [],
+  variant = 'default',
+}: CommunityCardProps) {
+  // Limit description to 120 characters
+  const truncatedDescription = description.length > 120
+    ? description.substring(0, 120) + '...'
+    : description;
+
+  const isFeatured = variant === 'featured';
   
-  // Safely handle potentially undefined ambassador properties
-  const hasAmbassadors = 
-    community.hasAmbassadors === true || 
-    (community.ambassadorCount !== undefined && community.ambassadorCount > 0)
-  
-  // Derive sustainability score for visualization
-  const score = community.companies?.score || 0
-  const scoreClass = score > 70 
-    ? 'bg-emerald-900/40 text-emerald-400 border-emerald-700/50' 
-    : score > 40 
-      ? 'bg-amber-900/40 text-amber-400 border-amber-700/50'
-      : 'bg-red-900/40 text-red-400 border-red-700/50'
+  // Display at most 3 ambassadors
+  const displayAmbassadors = ambassadors.slice(0, 3);
+  const hasMoreAmbassadors = ambassadors.length > 3;
   
   return (
-    <Card className="overflow-hidden h-full flex flex-col hover:shadow-lg transition-all duration-300 bg-zinc-900/60 backdrop-blur-sm border border-zinc-800 hover:border-emerald-600/20 relative group">
-      {/* Ambassador Badge */}
-      {hasAmbassadors && (
-        <div className="absolute top-3 left-3 z-10">
-          <Badge className="font-medium bg-amber-900/30 text-amber-400 border border-amber-700/30">
-            <Award className="h-3 w-3 mr-1" />
-            With Ambassadors
-          </Badge>
-        </div>
-      )}
-      
-      {/* Member Badge */}
-      {isMember && (
-        <div className="absolute top-3 right-3 z-10">
-          <Badge className="font-medium bg-emerald-900/40 text-emerald-400 border-emerald-700/50">
-            Member
-          </Badge>
-        </div>
-      )}
-      
-      {/* Score Badge - position depends on if member badge exists */}
-      <div className={`absolute ${isMember ? 'top-11' : 'top-3'} right-3 z-10`}>
-        <Badge className={`font-medium ${scoreClass}`}>
-          <Leaf className="h-3 w-3 mr-1" />
-          {score} Impact Score
-        </Badge>
-      </div>
-      
-      <CardHeader className="pb-0">
-        <div className="flex items-center space-x-3">
-          <div className="relative h-12 w-12 rounded-full overflow-hidden bg-zinc-800 border border-zinc-700 flex items-center justify-center group-hover:border-emerald-700/50 transition-all">
-            {logoUrl ? (
-              <Image 
-                src={logoUrl} 
-                alt={companyName} 
-                fill 
-                className="object-cover"
-              />
-            ) : (
-              <Building className="h-6 w-6 text-zinc-400" />
-            )}
-          </div>
-          <div>
-            <CardTitle className="text-lg text-white">{companyName}</CardTitle>
-            <div className="flex items-center text-xs text-zinc-400">
-              <Calendar className="h-3 w-3 mr-1" />
-              <span>Created {formattedDate}</span>
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="flex-1 pt-4">
-        <div className="space-y-3">
-          <CardDescription className="line-clamp-3 text-sm text-zinc-400">
-            {companyDescription}
-          </CardDescription>
-          
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Badge variant="outline" className="bg-zinc-800/50 text-xs font-normal border-zinc-700">
-              <TrendingUp className="h-3 w-3 mr-1 text-emerald-400" />
-              Sustainability
-            </Badge>
-            <Badge variant="outline" className="bg-zinc-800/50 text-xs font-normal border-zinc-700">
-              <Users className="h-3 w-3 mr-1 text-blue-400" />
-              Private Equity
-            </Badge>
-          </div>
-          
-          {/* Featured Ambassador Section */}
-          {community.featuredAmbassador && (
-            <div className="pt-3 mt-3 border-t border-zinc-800">
-              <div className="flex items-center">
-                <Award className="h-3 w-3 text-amber-400 mr-1" />
-                <span className="text-xs font-medium text-zinc-400">Featured Ambassador</span>
-              </div>
-              <div className="flex items-center mt-2 gap-2">
-                <Avatar className="h-6 w-6 border border-amber-700/50">
-                  <AvatarImage src={community.featuredAmbassador.avatar_url || undefined} />
-                  <AvatarFallback className="bg-amber-900/30 text-amber-400 text-xs">
-                    {community.featuredAmbassador.name?.substring(0, 2).toUpperCase() || "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-zinc-400 truncate">
-                  {community.featuredAmbassador.name}
-                </span>
-              </div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      whileHover="hover"
+      variants={cardVariants}
+    >
+      <Card className="h-full overflow-hidden border border-green-700/30 bg-black rounded-xl shadow-lg hover:border-green-600/50 transition-all duration-300 relative z-10">
+        <div className="aspect-video w-full relative overflow-hidden">
+          {image ? (
+            <Image
+              src={image}
+              alt={name}
+              fill
+              className="object-cover transition-transform duration-500 hover:scale-105"
+            />
+          ) : (
+            <div className="w-full h-full bg-black flex items-center justify-center">
+              <Users className="h-16 w-16 text-green-600/80" />
             </div>
           )}
+          
+          {isFeatured && (
+            <div className="absolute top-4 left-4">
+              <Badge className="bg-green-600 text-white font-medium border-none px-3 py-1 rounded-md">
+                Featured Opportunity
+              </Badge>
+            </div>
+          )}
+          
+          <div className="absolute bottom-4 right-4">
+            <Badge className="bg-black/80 text-green-400 font-medium border border-green-600/40 px-3 py-1 rounded-md">
+              Sustainable Investment
+            </Badge>
+          </div>
         </div>
-      </CardContent>
-      
-      <CardFooter className="pt-0 pb-4">
-        <motion.div className="w-full" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button 
-            onClick={() => onSelect(community.id)}
-            className={`w-full ${isMember 
-              ? 'bg-emerald-700/30 hover:bg-emerald-700/50 text-emerald-400 border border-emerald-700/50' 
-              : 'bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-emerald-600/30 text-white'} group`}
-          >
-            <span className={`mr-auto ${!isMember && 'text-emerald-400 group-hover:text-white transition-colors'}`}>
-              {isMember ? 'View Your Community' : 'View Community'}
-            </span>
-            <ArrowRight className="h-4 w-4 text-emerald-400 group-hover:text-white transition-transform group-hover:translate-x-1" />
-          </Button>
-        </motion.div>
-      </CardFooter>
-    </Card>
-  )
+
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xl font-bold text-white tracking-tight">{name}</h3>
+              <p className="text-sm text-zinc-400 mt-2">{truncatedDescription}</p>
+            </div>
+
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {tags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="bg-black border-green-700/30 text-green-400 hover:bg-green-950/30 text-xs px-3 py-1 rounded-md"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-6 mt-4">
+              <div className="flex items-center text-green-400 text-xs">
+                <Users className="h-4 w-4 mr-2" />
+                <span>{memberCount} investors</span>
+              </div>
+              
+              <div className="flex items-center text-green-400 text-xs">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                <span>{postCount} updates</span>
+              </div>
+              
+              <div className="flex items-center text-green-400 text-xs">
+                <Award className="h-4 w-4 mr-2" />
+                <span>{ambassadorCount} partners</span>
+              </div>
+            </div>
+
+            {ambassadors.length > 0 && (
+              <div className="mt-4">
+                <div className="text-xs text-green-600 mb-2 font-medium">Key Stakeholders</div>
+                <div className="flex items-center">
+                  <div className="flex -space-x-2 mr-2">
+                    {displayAmbassadors.map((ambassador, index) => (
+                      <Avatar key={ambassador.id} className={`border-2 ${isFeatured ? 'border-green-900/60' : 'border-zinc-900'} h-8 w-8 ring-0`}>
+                        <AvatarImage 
+                          src={ambassador.image} 
+                          alt={ambassador.name} 
+                        />
+                        <AvatarFallback className={`text-xs bg-gradient-to-br ${
+                          isFeatured 
+                            ? 'from-green-900/60 to-green-950/80 text-green-200' 
+                            : 'from-zinc-800 to-zinc-900 text-zinc-300'
+                        }`}>
+                          {ambassador.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                    
+                    {hasMoreAmbassadors && (
+                      <Avatar className={`border-2 ${isFeatured ? 'border-green-900/60' : 'border-zinc-900'} h-8 w-8 ring-0`}>
+                        <AvatarFallback className={`text-xs ${
+                          isFeatured 
+                            ? 'bg-green-900/60 text-green-200' 
+                            : 'bg-zinc-800 text-zinc-300'
+                        }`}>
+                          +{ambassadors.length - 3}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+
+        <CardFooter className="px-6 py-4 border-t border-green-900/20 bg-black/50">
+          <div className="flex justify-between items-center w-full">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-green-400 hover:text-white hover:bg-green-600 transition-colors duration-200 px-4 py-2 rounded-md"
+            >
+              <Link href={`/communities/${slug}`}>
+                View Investment
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-green-400 hover:text-white hover:bg-green-600/20 rounded-full p-2 h-9 w-9"
+              aria-label="Share investment opportunity"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+    </motion.div>
+  );
 } 

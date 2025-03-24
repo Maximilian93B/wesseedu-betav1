@@ -1,61 +1,122 @@
-import { useState } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Users, Building2, Filter, SlidersHorizontal, Search, Award } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { motion } from 'framer-motion'
-import CommunityCard from './CommunityCard'
-import { Community } from '@/types/community'
+import { useState, useEffect, useCallback } from 'react'
+import { Building2 } from 'lucide-react'
 import { useCommunities } from '@/hooks/use-communities'
+import { useCompanies } from '@/hooks/use-companies'
+import { FilterBar } from './filters/FilterBar'
+import { ActiveFilters } from './filters/ActiveFilters'
+import { CommunitiesGrid } from './CommunitiesGrid'
+import { useCommunityFilters } from '@/hooks/use-community-filters'
+
+// Export interface for use in other components
+export interface ExtendedCommunity {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image?: string;
+  memberCount: number;
+  postCount: number;
+  ambassadorCount: number;
+  ambassadors?: {
+    id: string;
+    name: string;
+    image?: string;
+  }[];
+  tags?: string[];
+  companies: {
+    id: string;
+    name: string;
+    description: string | null;
+    mission_statement: string | null;
+    score: number;
+    image_url: string | null;
+    sector?: string;
+  } | any;
+  created_at?: string;
+  isMember?: boolean;
+  featured?: boolean;
+  sectors?: string[];
+}
 
 interface CommunitiesViewProps {
   onCommunitySelect: (id: string) => void
 }
 
-export default function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [activeTab, setActiveTab] = useState('all-communities')
-
+export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
   const { 
     communities, 
-    loading, 
-    fetchCommunities, 
-    filterCommunities,
-    hasAmbassadorCommunities 
+    loading: communitiesLoading,
+    error: communitiesError,
+    fetchCommunities,
+    hasAmbassadorCommunities
   } = useCommunities()
+  
+  const {
+    companies,
+    loading: companiesLoading,
+    error: companiesError,
+    fetchCompanies
+  } = useCompanies()
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    fetchCommunities(searchQuery)
+  // Use the community filters hook
+  const {
+    filteredCommunities,
+    searchQuery,
+    setSearchQuery,
+    activeTab,
+    setActiveTab,
+    selectedSectors,
+    setSelectedSectors,
+    showAmbassadors,
+    setShowAmbassadors,
+    sortOption,
+    setSortOption,
+    clearFilters,
+    handleSectorToggle,
+    hasActiveFilters,
+    allSectors,
+    checkAmbassadorCommunities
+  } = useCommunityFilters({ communities, companies, communitiesLoading, companiesLoading })
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchCommunities()
+    fetchCompanies()
+  }, [])
+
+  // Handle card selection with useCallback
+  const handleCardSelect = useCallback((id: string) => {
+    onCommunitySelect(id)
+  }, [onCommunitySelect])
+
+  // Show error state if there's an issue with the API
+  if ((communitiesError || companiesError) && !communitiesLoading && !companiesLoading) {
+    return (
+      <div className="py-12 text-center bg-black/40 backdrop-blur-sm border border-zinc-800/30 rounded-xl">
+        <div className="max-w-md mx-auto">
+          <h3 className="text-lg font-medium text-zinc-300 mb-2">Error Loading Communities</h3>
+          <p className="text-sm text-zinc-500 mb-4">
+            We encountered an issue loading the communities. Please try again later.
+          </p>
+          <button 
+            className="px-4 py-2 rounded bg-black/60 text-zinc-300 border border-zinc-700/50 hover:bg-zinc-900/60"
+            onClick={() => {
+              fetchCommunities()
+              fetchCompanies()
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
   }
 
-  // Filter communities based on active tab and search query
-  const filteredCommunities = filterCommunities(activeTab, searchQuery)
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  }
+  // Simplified isLoading determination
+  const isLoading = communitiesLoading || companiesLoading
 
   return (
-    <div className="w-full">
+    <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between gap-4 mb-8 items-center bg-black/40 backdrop-blur-sm p-6 rounded-xl border border-zinc-800">
         <div className="flex flex-col">
           <h2 className="text-2xl font-bold text-white flex items-center">
@@ -65,90 +126,68 @@ export default function CommunitiesView({ onCommunitySelect }: CommunitiesViewPr
           <p className="text-zinc-400 mt-1">Discover sustainable communities working towards a better future</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-            <Input
-              placeholder="Search communities..."
-              className="pl-10 min-w-[200px] bg-zinc-900/60 border-zinc-800 text-white placeholder:text-zinc-500 focus-visible:ring-emerald-600"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          
-          <div className="flex gap-2">
-            <Select value={activeTab} onValueChange={setActiveTab}>
-              <SelectTrigger className="w-full sm:w-[180px] bg-zinc-900/60 border-zinc-800 text-white">
-                <div className="flex items-center">
-                  <Filter className="h-4 w-4 mr-2 text-emerald-400" />
-                  <SelectValue placeholder="Filter by" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-                <SelectItem value="all-communities">All Communities</SelectItem>
-                {hasAmbassadorCommunities() && (
-                  <SelectItem value="ambassador-communities" className="flex items-center">
-                    <div className="flex items-center">
-                      <Award className="h-4 w-4 mr-2 text-amber-400" />
-                      With Ambassadors
-                    </div>
-                  </SelectItem>
-                )}
-                <SelectItem value="my-communities">My Communities</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="bg-zinc-900/60 border-zinc-800 text-white hover:bg-zinc-800"
-              onClick={() => fetchCommunities(searchQuery)}
-            >
-              <SlidersHorizontal className="h-4 w-4 text-emerald-400" />
-            </Button>
-          </div>
-        </div>
+        <FilterBar 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          checkAmbassadorCommunities={checkAmbassadorCommunities}
+          fetchCommunities={fetchCommunities}
+        />
       </div>
       
-      {loading ? (
-        <div className="flex justify-center py-10">
-          <div className="w-14 h-14 border-2 border-t-emerald-500 border-r-emerald-400/40 border-b-emerald-400/20 border-l-emerald-400/60 rounded-full animate-spin"></div>
+      {/* Search and filter section */}
+      <div className="space-y-4">
+        <FilterBar 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+          showAmbassadors={showAmbassadors}
+          setShowAmbassadors={setShowAmbassadors}
+          selectedSectors={selectedSectors}
+          handleSectorToggle={handleSectorToggle}
+          clearFilters={clearFilters}
+          allSectors={allSectors}
+          hasActiveFilters={hasActiveFilters}
+          fullWidth
+        />
+        
+        {/* Active filters display */}
+        {hasActiveFilters && (
+          <ActiveFilters 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            showAmbassadors={showAmbassadors}
+            setShowAmbassadors={setShowAmbassadors}
+            selectedSectors={selectedSectors}
+            handleSectorToggle={handleSectorToggle}
+            clearFilters={clearFilters}
+          />
+        )}
+      </div>
+      
+      {/* Results count */}
+      <div className="flex justify-between items-center">
+        <div className="text-sm text-zinc-400">
+          {filteredCommunities.length} {filteredCommunities.length === 1 ? 'community' : 'communities'} found
+          {isLoading && ' (Loading...)'}
         </div>
-      ) : filteredCommunities.length > 0 ? (
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
-          {filteredCommunities.map((community) => (
-            <motion.div key={community.id} variants={item}>
-              <CommunityCard 
-                community={community} 
-                onSelect={onCommunitySelect}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
-      ) : (
-        <div className="flex flex-col items-center justify-center p-12 bg-zinc-900/30 rounded-xl border border-zinc-800 text-center">
-          <Users className="h-12 w-12 text-zinc-600 mb-4" />
-          <h3 className="text-xl font-medium text-white">No communities found</h3>
-          <p className="text-zinc-400 mt-2 max-w-md">
-            We couldn't find any communities matching your search criteria. Try adjusting your filters or search terms.
-          </p>
-          <Button 
-            onClick={() => {
-              setSearchQuery('')
-              setActiveTab('all-communities')
-              fetchCommunities()
-            }}
-            className="mt-4 bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
-          >
-            Reset Filters
-          </Button>
-        </div>
-      )}
+        {hasActiveFilters && communities.length !== filteredCommunities.length && (
+          <div className="text-sm text-zinc-500">
+            Showing {filteredCommunities.length} of {communities.length}
+          </div>
+        )}
+      </div>
+      
+      <CommunitiesGrid 
+        filteredCommunities={filteredCommunities}
+        isLoading={isLoading}
+        handleCardSelect={handleCardSelect}
+        clearFilters={clearFilters}
+      />
     </div>
   )
 } 

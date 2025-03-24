@@ -23,16 +23,26 @@ export function useCommunities() {
         : '/api/communities'
       
       const response = await fetchWithAuth(endpoint)
+      console.log('Raw API response from communities endpoint:', response)
       
       if (response.error || response.status >= 400) {
-        throw new Error('Failed to fetch communities')
+        throw new Error(response.error || 'Failed to fetch communities')
       }
       
-      // The API consistently returns data in the format { data: [...communities] }
+      // Based on the API structure in route.ts, the response should be:
+      // { data: [ array of communities with companies property nested inside ] }
       if (response.data && Array.isArray(response.data)) {
+        // Direct array response
+        console.log('Communities format: direct array', response.data.length)
         setCommunities(response.data)
       } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        // Response with nested data property (common in API responses)
+        console.log('Communities format: nested data property', response.data.data.length)
         setCommunities(response.data.data)
+      } else if (typeof response === 'object' && response !== null && 'data' in response && Array.isArray(response.data)) {
+        // Response where data is a direct property
+        console.log('Communities format: data property at root', response.data.length)
+        setCommunities(response.data)
       } else {
         console.error('Unexpected API response format:', response)
         setCommunities([])
