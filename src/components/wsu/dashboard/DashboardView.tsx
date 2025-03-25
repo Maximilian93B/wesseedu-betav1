@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-import { useEffect, useState, useMemo } from "react"
+import React, { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -354,7 +353,7 @@ export function DashboardView({ user }: DashboardViewProps) {
   // Show a more informative loading state
   if (authLoading || loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[80vh]">
+      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[80vh] bg-white">
         <div className="relative h-12 w-12">
           <motion.div 
             className="absolute inset-0"
@@ -368,17 +367,17 @@ export function DashboardView({ user }: DashboardViewProps) {
               ease: "easeInOut"
             }}
           >
-            <Leaf className="h-12 w-12 text-emerald-400" />
+            <Leaf className="h-12 w-12 text-emerald-500" />
           </motion.div>
         </div>
         <motion.p 
-          className="text-emerald-400 font-medium"
+          className="text-emerald-600 font-medium"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
           Loading your sustainable investments...
         </motion.p>
-        <p className="text-zinc-500 text-sm">Growing your impact dashboard</p>
+        <p className="text-slate-500 text-sm">Growing your impact dashboard</p>
       </div>
     );
   }
@@ -386,13 +385,13 @@ export function DashboardView({ user }: DashboardViewProps) {
   // Show error state if there was an error
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[60vh]">
+      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[60vh] bg-white">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-red-400 mb-4">{error}</p>
+          <p className="text-red-500 mb-4">{error}</p>
           <Button 
             onClick={() => window.location.reload()}
             className="bg-emerald-500 hover:bg-emerald-400 text-white"
@@ -408,9 +407,9 @@ export function DashboardView({ user }: DashboardViewProps) {
   if (!user) {
     router.push("/auth/signin");
     return (
-      <div className="flex items-center justify-center p-8 min-h-[60vh]">
+      <div className="flex items-center justify-center p-8 min-h-[60vh] bg-white">
         <motion.p 
-          className="text-zinc-400"
+          className="text-slate-500"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
@@ -421,30 +420,30 @@ export function DashboardView({ user }: DashboardViewProps) {
   }
 
   return (
-    <div className="bg-black text-white min-h-screen">
-      <DashboardHero 
-        username={user?.email}
-        totalInvestments={parseInt(authProfile?.total_investments) || 0}
-        savedCompaniesCount={savedCompanies.length || 0}
-        impactScore={authProfile?.impact_score || 0}
-        communitySize={profileData?.stats?.usersCount || 0}
-        onManageInvestments={() => setActiveTab("investments")}
-      />
-      
-      {/* Main Dashboard Content */}
-      <div className="bg-gradient-to-b from-black to-zinc-950 py-10">
-        <div className="container px-4 sm:px-6 lg:px-8 mx-auto">
-          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full max-w-md mx-auto grid grid-cols-2 mb-10 bg-black/60 backdrop-blur-sm border border-zinc-800/30 p-1 rounded-lg">
+    <div className="w-full">
+      <div className="rounded-xl overflow-hidden mb-6 relative border border-slate-200 bg-white shadow-md">
+        {/* Decorative top accent */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-blue-400/50 to-transparent z-10" />
+        <div className="absolute top-1 right-0 w-[40%] h-px bg-gradient-to-l from-slate-300/40 to-transparent" />
+        
+        <div className="px-4 py-5 sm:p-6">
+          <DashboardHero 
+            user={user} 
+            profile={authProfile}
+            loading={loading}
+          />
+          
+          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mt-6">
+            <TabsList className="bg-slate-50 border border-slate-200 p-1 mb-5 rounded-lg">
               <TabsTrigger 
                 value="overview" 
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-6 py-2.5 transition-all"
+                className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 rounded-md px-4 py-1.5 text-sm"
               >
                 Overview
               </TabsTrigger>
               <TabsTrigger 
                 value="investments" 
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-md px-6 py-2.5 transition-all"
+                className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 rounded-md px-4 py-1.5 text-sm"
               >
                 Investments
               </TabsTrigger>
@@ -455,24 +454,27 @@ export function DashboardView({ user }: DashboardViewProps) {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="space-y-10"
+                className="space-y-6"
               >
                 {/* Investment Growth Chart */}
-                <div className="bg-black/60 backdrop-blur-sm rounded-xl border border-zinc-800/50 p-6 shadow-lg">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                <div className="rounded-xl border border-slate-200 p-5 shadow-md bg-white relative overflow-hidden">
+                  {/* Subtle accent line */}
+                  <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-emerald-500/30 via-emerald-400/10 to-transparent" />
+                  
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 relative z-10">
                     <div>
-                      <h2 className="text-xl font-bold text-white">Investment Growth</h2>
-                      <p className="text-zinc-400 text-sm">Track your sustainable investment growth over time</p>
+                      <h2 className="text-lg font-bold text-slate-800">Investment Growth</h2>
+                      <p className="text-slate-500 text-xs">Track your sustainable investment growth over time</p>
                     </div>
                     <div className="flex items-center space-x-2 mt-2 md:mt-0">
-                      <span className="text-xs text-zinc-400">Last 7 periods</span>
-                      <div className="h-4 w-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                        <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
+                      <span className="text-xs text-slate-500">Last 7 periods</span>
+                      <div className="h-3 w-3 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="h-[320px]">
+                  <div className="h-[250px] relative z-10">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={investmentData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
@@ -497,7 +499,7 @@ export function DashboardView({ user }: DashboardViewProps) {
                         />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            backgroundColor: 'rgba(24, 24, 27, 0.95)',
                             border: '1px solid rgba(16, 185, 129, 0.2)',
                             borderRadius: '6px',
                             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
@@ -513,32 +515,38 @@ export function DashboardView({ user }: DashboardViewProps) {
                           strokeWidth={2}
                           fillOpacity={1}
                           fill="url(#investmentGradient)"
-                          activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2, fill: '#fff' }}
+                          activeDot={{ r: 5, stroke: '#10b981', strokeWidth: 2, fill: '#fff' }}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
+                  
+                  {/* Background glow effect */}
+                  <div className="absolute bottom-0 right-[10%] w-[200px] h-[200px] bg-emerald-100 rounded-full blur-[80px] pointer-events-none"></div>
                 </div>
 
                 {/* Analytics Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                   {/* Left: Stats Grid */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     {stats.map((stat, index) => (
                       <motion.div
                         key={index}
                         variants={itemVariants}
                         className="h-full"
                       >
-                        <div className="bg-black/60 backdrop-blur-sm rounded-lg border border-zinc-800/50 p-4 shadow-md hover:border-zinc-700/50 transition-colors duration-200">
-                          <div className="flex items-start justify-between mb-3">
+                        <div className="bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 rounded-lg border border-zinc-800/50 p-3 shadow-md hover:border-zinc-700/50 transition-all duration-200 hover:shadow-lg relative overflow-hidden">
+                          {/* Subtle top accent */}
+                          <div className={`absolute top-0 left-0 w-full h-px bg-gradient-to-r ${stat.color} opacity-30`} />
+                          
+                          <div className="flex items-start justify-between mb-2 relative z-10">
                             <span className="text-xs text-zinc-400 uppercase tracking-wide">{stat.title}</span>
-                            <div className={`p-1.5 rounded bg-gradient-to-br ${stat.color} bg-opacity-10`}>
-                              {stat.icon}
+                            <div className={`p-1 rounded-lg bg-gradient-to-br ${stat.color} bg-opacity-10 shadow-sm`}>
+                              {React.cloneElement(stat.icon as React.ReactElement, { className: 'h-4 w-4' })}
                             </div>
                           </div>
-                          <div className="text-xl md:text-2xl font-bold text-white">{stat.value}</div>
-                          <p className="text-xs text-zinc-500 mt-1">{stat.description}</p>
+                          <div className="text-lg font-bold text-white">{stat.value}</div>
+                          <p className="text-xs text-zinc-500 mt-0.5">{stat.description}</p>
                         </div>
                       </motion.div>
                     ))}
@@ -546,24 +554,29 @@ export function DashboardView({ user }: DashboardViewProps) {
 
                   {/* Right: Watchlist */}
                   <div className="lg:col-span-2">
-                    <div className="bg-black/60 backdrop-blur-sm rounded-xl border border-zinc-800/50 h-full shadow-lg overflow-hidden hover:border-zinc-700/50 transition-colors duration-200">
-                      <div className="p-5 border-b border-zinc-800/50">
+                    <div className="bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 rounded-xl border border-zinc-800/50 h-full shadow-lg overflow-hidden hover:border-zinc-700/50 transition-all duration-200 relative">
+                      {/* Decorative top accent */}
+                      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-indigo-600/50 via-indigo-500/10 to-transparent" />
+                      {/* Subtle glow */}
+                      <div className="absolute top-[20%] right-[10%] w-[150px] h-[150px] bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+                      
+                      <div className="p-3 border-b border-zinc-800/50 relative z-10">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h2 className="text-lg font-bold text-white">Watchlist</h2>
+                            <h2 className="text-base font-bold text-white">Watchlist</h2>
                             <p className="text-xs text-zinc-400">Companies you're tracking</p>
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => router.push("/auth/home")}
-                            className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50 px-2.5 py-1.5 text-xs rounded-md"
+                            className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50 px-2 py-1 text-xs rounded-md"
                           >
                             View All
                           </Button>
                         </div>
                       </div>
-                      <div className="p-4">
+                      <div className="p-3 relative z-10">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key="watchlist"
@@ -596,8 +609,16 @@ export function DashboardView({ user }: DashboardViewProps) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
+                  className="bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 rounded-xl border border-zinc-800/50 shadow-lg p-5 relative overflow-hidden"
                 >
-                  <UserInvestments />
+                  {/* Decorative top accent */}
+                  <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-blue-600/50 via-blue-500/10 to-transparent" />
+                  {/* Subtle glow */}
+                  <div className="absolute bottom-[10%] left-[10%] w-[200px] h-[200px] bg-blue-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+                  
+                  <div className="relative z-10">
+                    <UserInvestments />
+                  </div>
                 </motion.div>
               </AnimatePresence>
             </TabsContent>

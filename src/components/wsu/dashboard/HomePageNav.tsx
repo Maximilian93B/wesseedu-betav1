@@ -15,15 +15,15 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="px-4 lg:px-6 h-16 flex items-center border-b border-emerald-400/10 
-        bg-black/60 backdrop-blur-xl shadow-sm shadow-emerald-900/5 sticky top-0 z-50"
+      className="px-4 lg:px-6 h-16 flex items-center border-b border-slate-200 
+        bg-white/95 backdrop-blur-xl shadow-sm sticky top-0 z-50"
     >
       <div className="flex-shrink-0">
         {currentView !== 'home' ? (
           <Button
             variant="ghost"
             onClick={() => onNavigate('home')}
-            className="hover:bg-white/5 text-zinc-400 hover:text-emerald-400 transition-all duration-300"
+            className="hover:bg-slate-50 text-slate-600 hover:text-emerald-500 transition-all duration-300"
           >
               <ArrowLeft className="h-4 w-4 mr-2" />
             Back
@@ -31,10 +31,10 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
         ) : (
           <Link className="flex items-center justify-center group" href="/home">
             <div className="relative">
-              <div className="absolute -inset-1 bg-emerald-400/20 blur-sm rounded-full opacity-0 group-hover:opacity-70 transition-opacity duration-300"></div>
-              <Leaf className="relative h-6 w-6 text-emerald-400 group-hover:text-emerald-300 transition-colors duration-300" />
+              <div className="absolute -inset-1 bg-emerald-100 blur-sm rounded-full opacity-0 group-hover:opacity-70 transition-opacity duration-300"></div>
+              <Leaf className="relative h-6 w-6 text-emerald-500 group-hover:text-emerald-600 transition-colors duration-300" />
             </div>
-            <span className="ml-2 text-lg font-bold bg-gradient-to-r from-zinc-200 to-white bg-clip-text text-transparent">
+            <span className="ml-2 text-lg font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent">
               WeSeedU
             </span>
           </Link>
@@ -51,8 +51,8 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
               (currentView === view || 
               (view === 'companies' && currentView === 'company-details') ||
               (view === 'communities' && currentView === 'community-details'))
-                ? 'text-emerald-400' 
-                : 'text-zinc-400 hover:text-emerald-400'
+                ? 'text-emerald-600' 
+                : 'text-slate-600 hover:text-emerald-500'
             }`}
           >
             {(currentView === view || 
@@ -60,7 +60,7 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
               (view === 'communities' && currentView === 'community-details')) && (
               <motion.span
                 layoutId="nav-indicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-400"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
@@ -75,7 +75,7 @@ export function HomePageNav({ currentView, onNavigate, onSignOut }: NavProps) {
         <Button
           variant="ghost"
           onClick={onSignOut}
-          className="text-sm font-medium text-zinc-400 hover:text-emerald-400 hover:bg-white/5 transition-all duration-300"
+          className="text-sm font-medium text-slate-600 hover:text-emerald-500 hover:bg-slate-50 transition-all duration-300"
         >
           Sign Out
         </Button>

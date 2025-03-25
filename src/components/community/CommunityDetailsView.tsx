@@ -73,7 +73,7 @@ export default function CommunityDetailsView({ community, onBack }: CommunityDet
   
   return (
     <motion.div 
-      className="w-full"
+      className="w-full bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 min-h-screen transition-colors"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

@@ -38,22 +38,22 @@ export function CallToAction({ onNavigate }: CallToActionProps) {
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
       variants={containerVariants}
-      className="py-4 md:py-8"
+      className="py-12 md:py-16 bg-gradient-to-b from-white to-slate-50 rounded-2xl shadow-sm my-8"
     >
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="max-w-4xl mx-auto text-center px-4">
         {/* Section heading */}
         <motion.h2 
           className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 tracking-tight"
           variants={itemVariants}
         >
-          <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-emerald-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent">
             Ready to make sustainable investments?
           </span>
         </motion.h2>
         
         {/* Description */}
         <motion.p 
-          className="text-zinc-200 mb-14 max-w-2xl mx-auto text-lg leading-relaxed"
+          className="text-slate-600 mb-14 max-w-2xl mx-auto text-lg leading-relaxed"
           variants={itemVariants}
         >
           Join thousands of forward-thinking investors who are building wealth 
@@ -70,8 +70,8 @@ export function CallToAction({ onNavigate }: CallToActionProps) {
         >
           <Button 
             onClick={() => onNavigate('companies')}
-            className="px-8 py-6 bg-gradient-to-r from-emerald-600 to-emerald-500 
-              hover:from-emerald-500 hover:to-emerald-400 text-white text-base font-medium 
+            className="px-8 py-6 bg-gradient-to-r from-blue-500 to-emerald-500 
+              hover:from-blue-400 hover:to-emerald-400 text-white text-base font-medium 
               rounded-lg shadow-md hover:shadow-lg
               transition-all duration-300 group border-0"
             size="lg"

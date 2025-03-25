@@ -17,13 +17,13 @@ interface AmbassadorsTabProps {
 export const AmbassadorsTab = ({ ambassadors }: AmbassadorsTabProps) => {
   return (
     <TabsContent value="ambassadors" className="mt-6">
-      <Card className="bg-black/60 backdrop-blur-sm border-zinc-800/70 shadow-lg rounded-xl">
+      <Card className="bg-white dark:bg-slate-900 backdrop-blur-sm border-slate-200 dark:border-slate-800 shadow-md rounded-xl">
         <CardHeader>
-          <CardTitle className="text-xl text-white flex items-center">
-            <Award className="h-5 w-5 mr-2 text-amber-400" />
+          <CardTitle className="text-xl text-slate-800 dark:text-slate-200 flex items-center">
+            <Award className="h-5 w-5 mr-2 text-orange-500 dark:text-orange-400" />
             Celebrity Ambassadors
           </CardTitle>
-          <CardDescription className="text-zinc-400">
+          <CardDescription className="text-slate-600 dark:text-slate-400">
             Meet the influential figures supporting this community
           </CardDescription>
         </CardHeader>
@@ -38,7 +38,7 @@ export const AmbassadorsTab = ({ ambassadors }: AmbassadorsTabProps) => {
                 whileHover={{ y: -5 }}
                 className="group"
               >
-                <div className="rounded-xl overflow-hidden border border-amber-700/20 bg-gradient-to-b from-black to-amber-950/10 shadow-lg">
+                <div className="rounded-xl overflow-hidden border border-orange-200 dark:border-orange-900/30 bg-gradient-to-b from-white to-orange-50 dark:from-slate-900 dark:to-orange-950/10 shadow-md">
                   <div className="relative h-48 w-full">
                     {ambassador.avatar_url ? (
                       <Image 
@@ -49,14 +49,14 @@ export const AmbassadorsTab = ({ ambassadors }: AmbassadorsTabProps) => {
                         loading={index < 2 ? "eager" : "lazy"}
                       />
                     ) : (
-                      <div className="h-full w-full bg-gradient-to-br from-amber-900/20 to-black" />
+                      <div className="h-full w-full bg-gradient-to-br from-orange-100 to-white dark:from-orange-900/20 dark:to-slate-900" />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-white/80 dark:from-slate-900/90 to-transparent" />
                   </div>
                   
                   <div className="p-5 relative">
                     <div className="flex items-start gap-4">
-                      <div className="relative -mt-12 border-4 border-amber-950 rounded-full overflow-hidden h-20 w-20 bg-amber-900/20 shadow-xl">
+                      <div className="relative -mt-12 border-4 border-white dark:border-slate-800 rounded-full overflow-hidden h-20 w-20 bg-orange-50 dark:bg-orange-900/30 shadow-md">
                         {ambassador.avatar_url ? (
                           <Image 
                             src={ambassador.avatar_url} 
@@ -66,33 +66,33 @@ export const AmbassadorsTab = ({ ambassadors }: AmbassadorsTabProps) => {
                             loading={index < 2 ? "eager" : "lazy"}
                           />
                         ) : (
-                          <div className="h-full w-full flex items-center justify-center text-amber-300 text-lg font-bold">
+                          <div className="h-full w-full flex items-center justify-center text-orange-500 dark:text-orange-400 text-lg font-bold">
                             {ambassador.name?.substring(0, 2).toUpperCase() || "A"}
                           </div>
                         )}
                       </div>
                       
                       <div className="pt-2 flex-1">
-                        <h3 className="text-lg font-semibold text-white group-hover:text-amber-300 transition-colors">
+                        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
                           {ambassador.name}
                         </h3>
                         
-                        <div className="flex items-center text-xs text-amber-500/70 mb-2">
+                        <div className="flex items-center text-xs text-orange-600 dark:text-orange-500 mb-2">
                           <Award className="h-3.5 w-3.5 mr-1" />
                           <span>{ambassador.role || 'Community Ambassador'}</span>
                         </div>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-zinc-400 mt-3 leading-relaxed">
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
                       {ambassador.bio || 'This ambassador is committed to promoting sustainable investments and creating a positive impact on the environment and society.'}
                     </p>
                   </div>
                   
-                  <div className="flex border-t border-amber-800/20 bg-gradient-to-r from-black to-amber-950/10">
+                  <div className="flex border-t border-orange-100 dark:border-orange-900/20 bg-gradient-to-r from-orange-50/50 to-white dark:from-slate-900 dark:to-orange-950/10">
                     <div className="flex-1 px-5 py-3">
-                      <div className="text-xs text-zinc-500">Joined</div>
-                      <div className="text-sm text-amber-300">{ambassador.joined_date || 'Unknown'}</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-500">Joined</div>
+                      <div className="text-sm text-orange-600 dark:text-orange-400">{ambassador.joined_date || 'Unknown'}</div>
                     </div>
                   </div>
                 </div>
@@ -101,13 +101,13 @@ export const AmbassadorsTab = ({ ambassadors }: AmbassadorsTabProps) => {
           </div>
         </CardContent>
         
-        <CardFooter className="border-t border-zinc-800/50 py-4">
+        <CardFooter className="border-t border-slate-200 dark:border-slate-800/50 py-4">
           <div className="w-full flex justify-between items-center">
-            <span className="text-xs text-zinc-500">Want to become an ambassador?</span>
+            <span className="text-xs text-slate-500 dark:text-slate-500">Want to become an ambassador?</span>
             <MemoizedButton 
               variant="ghost" 
               size="sm"
-              className="text-amber-400 hover:text-amber-300 hover:bg-amber-950/20"
+              className="text-orange-600 dark:text-orange-500 hover:text-orange-700 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20"
             >
               Apply Now
               <ArrowRight className="ml-2 h-4 w-4" />

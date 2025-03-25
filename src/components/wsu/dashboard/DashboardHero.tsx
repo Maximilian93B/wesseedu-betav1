@@ -1,17 +1,13 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Leaf, Globe, Users, TrendingUp } from "lucide-react"
+import {  Leaf, Globe, Users, TrendingUp } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 interface DashboardHeroProps {
-  username?: string
-  totalInvestments: number
-  savedCompaniesCount: number
-  impactScore: number
-  communitySize: number
-  onManageInvestments: () => void
+  user?: any
+  profile?: any
+  loading?: boolean
 }
 
 const containerVariants = {
@@ -35,136 +31,107 @@ const itemVariants = {
 }
 
 export function DashboardHero({
-  username,
-  totalInvestments = 0,
-  savedCompaniesCount = 0,
-  impactScore = 0,
-  communitySize = 0,
-  onManageInvestments
+  user,
+  profile,
+  loading
 }: DashboardHeroProps) {
   const router = useRouter()
   
+  const totalInvestments = profile?.total_investments || 0
+  const savedCompaniesCount = profile?.saved_companies_count || 0
+  const impactScore = profile?.impact_score || 0
+  const communitySize = profile?.community_size || 0
+  
   return (
-    <>
-      {/* Clean, professional hero section */}
-      <div className="relative bg-black py-12 md:py-16">
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-emerald-900/10 to-transparent opacity-60"></div>
+    <div className="relative overflow-hidden mb-6">
+      {/* Banner section with light gradient overlay */}
+      <div className="relative h-48 md:h-64 w-full">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-white to-emerald-100" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/50 via-blue-50/40 to-white/90" />
+      </div>
         
-        <div className="container relative z-10 px-4 sm:px-6 lg:px-8 mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left column: Welcome and CTA */}
-            <div>
-              <motion.div 
-                className="space-y-5"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                {username && (
-                  <div className="inline-flex items-center px-3 py-1.5 bg-emerald-900/40 border border-emerald-500/30 rounded-full mb-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
-                    <span className="text-xs font-medium text-emerald-300">Welcome back</span>
-                  </div>
-                )}
-                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
-                  <span className="text-white block mb-1">Your Impact</span>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-emerald-500">
-                    Dashboard
-                  </span>
-                </h1>
-                <p className="text-gray-300 max-w-lg">
-                  Track your sustainable investments and measure the positive impact you're making on our planet.
-                </p>
-
-                <div className="flex flex-wrap gap-4 mt-8">
-                  <Button
-                    onClick={() => router.push("/companies")}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-md transition-all duration-200"
-                  >
-                    Discover Companies <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button
-                    onClick={onManageInvestments}
-                    variant="outline"
-                    className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-950/50 px-5 py-2.5 rounded-md transition-all duration-200"
-                  >
-                    Manage Portfolio
-                  </Button>
+      <div className="relative z-10 p-6 sm:p-8 -mt-36">
+        <div className="flex flex-col sm:flex-row gap-8 items-start">
+          {/* Logo/avatar section with light styling */}
+          <div className="relative h-32 w-32 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 to-white border border-slate-200/80 shadow-lg ring-2 ring-white/80">
+            <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-blue-50 to-white">
+              <Users className="h-16 w-16 text-blue-400 drop-shadow-[0_1px_2px_rgba(59,130,246,0.4)]" />
+            </div>
+          </div>
+          
+          <div className="flex-1 mt-8 sm:mt-2">
+            {/* Main content header with enhanced typography */}
+            <div className="mb-6">
+              <div className="flex items-center mb-3">
+                <div className="bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1 rounded-full text-xs font-medium mr-3 flex items-center">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+                  <span>Active Investor</span>
                 </div>
-              </motion.div>
+                <div className="h-px flex-grow bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+              </div>
+              
+              <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-3 tracking-tight">
+                Your Impact Dashboard
+              </h1>
+              
+              <p className="text-slate-600 text-lg max-w-2xl mb-2">
+                Track your sustainable investments and measure the positive impact you're making on our planet.
+              </p>
             </div>
 
-            {/* Right column: Key Metrics */}
-            <motion.div
-              className="grid grid-cols-2 gap-4"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <motion.div 
-                variants={itemVariants}
-                className="bg-gradient-to-br from-black to-emerald-950/30 rounded-lg border border-emerald-500/20 p-5 shadow-xl"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-3xl font-bold text-emerald-400 mb-1">${totalInvestments.toLocaleString()}</h3>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">Portfolio Value</p>
-                  </div>
-                  <div className="bg-emerald-500/10 p-2 rounded-md">
-                    <Leaf className="h-6 w-6 text-emerald-500" />
-                  </div>
+            {/* Stats row with modern badges */}
+            <div className="flex flex-wrap gap-3 mb-5">
+              <div className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-sm py-1.5 pl-1.5 pr-2.5 rounded-full shadow-sm">
+                <div className="bg-emerald-100 rounded-full p-1 mr-1.5 inline-flex">
+                  <Leaf className="h-3.5 w-3.5 drop-shadow-sm" />
                 </div>
-              </motion.div>
+                ${totalInvestments.toLocaleString()} Invested
+              </div>
               
-              <motion.div 
-                variants={itemVariants}
-                className="bg-gradient-to-br from-black to-blue-950/30 rounded-lg border border-blue-500/20 p-5 shadow-xl"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-3xl font-bold text-blue-400 mb-1">{savedCompaniesCount}</h3>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">Companies</p>
-                  </div>
-                  <div className="bg-blue-500/10 p-2 rounded-md">
-                    <Users className="h-6 w-6 text-blue-500" />
-                  </div>
+              <div className="bg-amber-50 text-amber-600 border border-amber-200 text-sm py-1.5 pl-1.5 pr-2.5 rounded-full shadow-sm">
+                <div className="bg-amber-100 rounded-full p-1 mr-1.5 inline-flex">
+                  <Globe className="h-3.5 w-3.5 drop-shadow-sm" />
                 </div>
-              </motion.div>
+                {impactScore}/10 Impact Score
+              </div>
               
-              <motion.div 
-                variants={itemVariants}
-                className="bg-gradient-to-br from-black to-indigo-950/30 rounded-lg border border-indigo-500/20 p-5 shadow-xl"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-3xl font-bold text-indigo-400 mb-1">{impactScore}<span className="text-indigo-400/60 text-lg">/10</span></h3>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">Impact Score</p>
-                  </div>
-                  <div className="bg-indigo-500/10 p-2 rounded-md">
-                    <Globe className="h-6 w-6 text-indigo-500" />
-                  </div>
+              <div className="bg-slate-50 text-slate-600 border border-slate-200 text-sm py-1.5 pl-1.5 pr-2.5 rounded-full shadow-sm">
+                <div className="bg-slate-100 rounded-full p-1 mr-1.5 inline-flex">
+                  <Users className="h-3.5 w-3.5 drop-shadow-sm" />
                 </div>
-              </motion.div>
+                {communitySize} community members
+              </div>
               
-              <motion.div 
-                variants={itemVariants}
-                className="bg-gradient-to-br from-black to-amber-950/30 rounded-lg border border-amber-500/20 p-5 shadow-xl"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-3xl font-bold text-amber-400 mb-1">{communitySize}</h3>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">Community Size</p>
-                  </div>
-                  <div className="bg-amber-500/10 p-2 rounded-md">
-                    <TrendingUp className="h-6 w-6 text-amber-500" />
-                  </div>
+              <div className="bg-blue-50 text-blue-600 border border-blue-200 text-sm py-1.5 pl-1.5 pr-2.5 rounded-full shadow-sm">
+                <div className="bg-blue-100 rounded-full p-1 mr-1.5 inline-flex">
+                  <TrendingUp className="h-3.5 w-3.5 drop-shadow-sm" />
                 </div>
-              </motion.div>
-            </motion.div>
+                {savedCompaniesCount} Companies
+              </div>
+            </div>
+            
+            {/* Action buttons with premium design */}
+            <div className="flex flex-wrap gap-3 mt-6">
+              <Button 
+                className="bg-gradient-to-r from-blue-500 to-emerald-500 hover:from-blue-400 hover:to-emerald-400 text-white font-medium py-5 px-6 shadow-md"
+                onClick={() => router.push("/companies")}
+              >
+                <Users className="h-5 w-5 mr-2" />
+                Discover Companies
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="border-slate-200 bg-white backdrop-blur-sm text-slate-700 py-5 px-6 hover:bg-slate-50 hover:text-emerald-600 shadow-sm"
+                onClick={() => router.push("/investments")}
+              >
+                <TrendingUp className="h-5 w-5 mr-2 text-emerald-500" />
+                Manage Portfolio
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 } 

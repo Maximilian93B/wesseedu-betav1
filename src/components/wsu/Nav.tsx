@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import LoginForm from "@/components/wsu/LoginForm"
 import { useLogin } from '@/hooks/use-login'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 // Define the props for the Navigation component
 interface NavigationProps {
@@ -184,8 +185,8 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
       <nav 
         className={`w-full z-50 fixed top-0 transition-all duration-300 ${
           hasScrolled 
-            ? 'backdrop-blur-md bg-black/30 border-b border-emerald-500/20' 
-            : 'backdrop-blur-sm bg-black/10'
+            ? 'backdrop-blur-md bg-black/30 border-b border-emerald-500/20 dark:backdrop-blur-md dark:bg-black/30 dark:border-emerald-500/20' 
+            : 'backdrop-blur-sm bg-black/10 dark:backdrop-blur-sm dark:bg-black/10'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -196,26 +197,27 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
                 <Zap className="w-6 h-6 text-emerald-400" />
                 <div className="ml-2 text-xl font-bold flex">
                   <span className="text-emerald-400">We</span>
-                  <span className="text-white">Seed</span>
+                  <span className="text-white dark:text-white">Seed</span>
                   <span className="text-emerald-400">U</span>
                 </div>
               </Link>
+            </div>
+
+            {/* Desktop buttons */}
+            <div className="hidden md:flex items-center space-x-3">
+              <ThemeToggle />
+              {loginDialog}
             </div>
 
             {/* Menu toggle button */}
             <Button 
               variant="ghost" 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30"
+              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30 md:hidden"
               aria-label="Toggle navigation menu"
             >
               {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
-            
-            {/* Login button - visible on desktop navbar */}
-            <div className="hidden md:block">
-              {loginDialog}
-            </div>
           </div>
         </div>
       </nav>
@@ -223,7 +225,7 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
       {/* Sidebar overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 dark:bg-black/50 dark:backdrop-blur-sm"
           aria-hidden="true"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -232,11 +234,12 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
       {/* Sidebar */}
       <div 
         ref={sidebarRef}
-        className={`fixed top-0 right-0 h-full w-64 bg-black/90 backdrop-blur-md z-50 border-l border-emerald-500/20 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-64 bg-black/90 backdrop-blur-md z-50 border-l border-emerald-500/20 transform transition-transform duration-300 ease-in-out dark:bg-black/90 dark:backdrop-blur-md dark:border-emerald-500/20 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <div className="p-6 flex flex-col gap-4">
           {/* Close sidebar button */}
-          <div className="flex justify-end">
+          <div className="flex justify-between items-center">
+            <ThemeToggle className="ml-1" />
             <Button 
               variant="ghost" 
               size="sm"
@@ -249,7 +252,7 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
           </div>
           
           {/* Navigation links */}
-          <div className="space-y-2 mt-4">
+          <div className="mt-4 flex flex-col gap-1">
             {/* If we're on the home page, show section links */}
             {currentPath === '/' && (
               <div className="mb-6">
