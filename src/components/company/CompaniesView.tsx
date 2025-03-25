@@ -52,15 +52,23 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
         throw new Error(response.error.toString())
       }
       
-      if (!response.data) {
-        console.warn("No companies data returned from API")
+      // Handle different possible response formats
+      let companiesData;
+      if (response.data?.data && Array.isArray(response.data.data)) {
+        // New format: data is nested in response.data.data
+        companiesData = response.data.data;
+      } else if (Array.isArray(response.data)) {
+        // Old format: data is directly in response.data
+        companiesData = response.data;
+      } else {
+        console.warn("No companies data returned from API or unexpected format:", response)
         setCompanies([])
         return
       }
       
-      console.log(`CompaniesView: Successfully fetched ${response.data.length} companies`)
+      console.log(`CompaniesView: Successfully fetched ${companiesData.length} companies`)
       
-      const formattedCompanies = response.data.map((company: any) => ({
+      const formattedCompanies = companiesData.map((company: any) => ({
         id: company.id,
         name: company.name,
         description: company.description || "",

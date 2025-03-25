@@ -15,6 +15,16 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
     });
 
     if (!response.ok) {
+      // Special handling for 401 unauthorized errors
+      if (response.status === 401) {
+        return {
+          data: null,
+          error: "Unauthorized",
+          status: response.status,
+        };
+      }
+
+      // For other errors, try to parse the error message
       const errorData = await response.json().catch(() => ({}));
       return {
         data: null,

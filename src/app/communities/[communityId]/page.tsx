@@ -57,14 +57,14 @@ export default function CommunityPage({ params }: CommunityPageProps) {
   if (loading) {
     return (
       <main className="min-h-screen bg-black relative">
-        {/* Gradient overlay effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-black pointer-events-none" />
-        <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-emerald-950/10 to-transparent pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 h-60 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
+        {/* Remove Gradient overlay effects */}
+        {/* <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-black pointer-events-none" /> */}
+        {/* <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-emerald-950/10 to-transparent pointer-events-none" /> */}
+        {/* <div className="absolute bottom-0 left-0 right-0 h-60 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" /> */}
         
-        {/* Ambient glow effects */}
-        <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-900/10 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-20 right-1/3 w-72 h-72 bg-blue-900/10 blur-[100px] rounded-full pointer-events-none" />
+        {/* Remove Ambient glow effects */}
+        {/* <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-900/10 blur-[120px] rounded-full pointer-events-none" /> */}
+        {/* <div className="absolute bottom-20 right-1/3 w-72 h-72 bg-blue-900/10 blur-[100px] rounded-full pointer-events-none" /> */}
         
         {/* Return to home button - fixed position */}
         <div className="fixed top-6 left-6 z-50">
@@ -93,14 +93,14 @@ export default function CommunityPage({ params }: CommunityPageProps) {
   if (!community) {
     return (
       <main className="min-h-screen bg-black relative">
-        {/* Gradient overlay effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-black pointer-events-none" />
-        <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-emerald-950/10 to-transparent pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 h-60 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
+        {/* Remove Gradient overlay effects */}
+        {/* <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-black pointer-events-none" /> */}
+        {/* <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-emerald-950/10 to-transparent pointer-events-none" /> */}
+        {/* <div className="absolute bottom-0 left-0 right-0 h-60 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" /> */}
         
-        {/* Ambient glow effects */}
-        <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-900/10 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-20 right-1/3 w-72 h-72 bg-blue-900/10 blur-[100px] rounded-full pointer-events-none" />
+        {/* Remove Ambient glow effects */}
+        {/* <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-900/10 blur-[120px] rounded-full pointer-events-none" /> */}
+        {/* <div className="absolute bottom-20 right-1/3 w-72 h-72 bg-blue-900/10 blur-[100px] rounded-full pointer-events-none" /> */}
         
         {/* Return to home button - fixed position */}
         <div className="fixed top-6 left-6 z-50">
@@ -135,14 +135,14 @@ export default function CommunityPage({ params }: CommunityPageProps) {
 
   return (
     <main className="min-h-screen bg-black relative">
-      {/* Gradient overlay effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-black pointer-events-none" />
-      <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-emerald-950/10 to-transparent pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 h-60 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
+      {/* Remove Gradient overlay effects */}
+      {/* <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 via-black to-black pointer-events-none" /> */}
+      {/* <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-emerald-950/10 to-transparent pointer-events-none" /> */}
+      {/* <div className="absolute bottom-0 left-0 right-0 h-60 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" /> */}
       
-      {/* Ambient glow effects */}
-      <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-900/10 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-20 right-1/3 w-72 h-72 bg-blue-900/10 blur-[100px] rounded-full pointer-events-none" />
+      {/* Remove Ambient glow effects */}
+      {/* <div className="absolute top-10 left-1/4 w-96 h-96 bg-emerald-900/10 blur-[120px] rounded-full pointer-events-none" /> */}
+      {/* <div className="absolute bottom-20 right-1/3 w-72 h-72 bg-blue-900/10 blur-[100px] rounded-full pointer-events-none" /> */}
       
       {/* Return to home button - fixed position */}
       <div className="fixed top-6 left-6 z-50">

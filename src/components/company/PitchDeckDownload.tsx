@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useState } from "react"
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
+import { useToast } from "@/hooks/use-toast"
 
 interface PitchDeckDownloadProps {
   companyId: string
@@ -11,23 +13,31 @@ interface PitchDeckDownloadProps {
 
 export default function PitchDeckDownload({ companyId, companyName, variant = 'default' }: PitchDeckDownloadProps) {
   const [isDownloading, setIsDownloading] = useState(false)
+  const { toast } = useToast()
   
   const handleDownload = async () => {
     try {
       setIsDownloading(true)
-      const response = await fetch(`/api/companies/${companyId}/pitch-deck`)
+      const response = await fetchWithAuth(`/api/companies/${companyId}/pitch-deck`)
       
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Download failed')
+      if (response.error) {
+        throw new Error(response.error || 'Download failed')
       }
       
-      const data = await response.json()
+      // Handle different possible response formats
+      let downloadData;
+      if (response.data?.url) {
+        downloadData = response.data;
+      } else if (response.data?.data?.url) {
+        downloadData = response.data.data;
+      } else {
+        throw new Error('No download URL available')
+      }
       
-      if (data.url) {
+      if (downloadData.url) {
         const link = document.createElement('a')
-        link.href = data.url
-        link.download = data.fileName || `${companyName}-pitch-deck.pdf`
+        link.href = downloadData.url
+        link.download = downloadData.fileName || `${companyName}-pitch-deck.pdf`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -36,6 +46,11 @@ export default function PitchDeckDownload({ companyId, companyName, variant = 'd
       }
     } catch (error) {
       console.error('Download failed:', error)
+      toast({
+        title: "Error",
+        description: "Failed to download pitch deck. Please try again.",
+        variant: "destructive"
+      })
     } finally {
       setIsDownloading(false)
     }

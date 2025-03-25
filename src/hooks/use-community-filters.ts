@@ -11,31 +11,18 @@ interface UseCommunityFiltersProps {
 }
 
 export function useCommunityFilters({ 
-  communities, 
-  companies, 
+  communities = [], 
+  companies = [], 
   communitiesLoading, 
   companiesLoading 
 }: UseCommunityFiltersProps) {
   const [filteredCommunities, setFilteredCommunities] = useState<ExtendedCommunity[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
   const [activeTab, setActiveTab] = useState('all-communities')
   const [selectedSectors, setSelectedSectors] = useState<string[]>([])
-  const [showAmbassadors, setShowAmbassadors] = useState(false)
   const [sortOption, setSortOption] = useState<'newest' | 'popular' | 'alphabetical'>('popular')
 
-  // Get all unique sectors from communities
-  const allSectors = Array.from(
-    new Set(
-      filteredCommunities.flatMap(community => community.sectors || [])
-    )
-  ).filter(Boolean) as string[]
-  
-  // Check if there are communities with ambassadors
-  const checkAmbassadorCommunities = () => 
-    filteredCommunities.some(c => (c.ambassadors && c.ambassadors.length > 0) || (c.ambassadorCount || 0) > 0)
-
   // Determine if there are active filters
-  const hasActiveFilters: boolean = Boolean(searchQuery) || selectedSectors.length > 0 || showAmbassadors || activeTab !== 'all-communities'
+  const hasActiveFilters: boolean = selectedSectors.length > 0 || activeTab !== 'all-communities'
 
   // Handle sector toggle
   const handleSectorToggle = (sector: string) => {
@@ -48,23 +35,25 @@ export function useCommunityFilters({
   
   // Clear all filters and reset to initial state
   const clearFilters = () => {
-    setSearchQuery('')
     setSelectedSectors([])
-    setShowAmbassadors(false)
     setSortOption('popular')
     setActiveTab('all-communities')
   }
 
-  // Use memoized value for filtered communities to prevent unnecessary recomputation
-  const filteredAndSortedCommunities = useMemo(() => {
-    // Skip if no data is available
-    if (communities.length === 0 || companies.length === 0) {
+  // Create enriched communities data
+  const enhancedCommunities = useMemo(() => {
+    // Handle empty data cases
+    if (!communities?.length || !companies?.length) {
       return []
     }
     
-    // Create base enriched communities
-    const baseEnrichedCommunities = communities.map(community => {
-      const companyData = companies.find(company => company.id === community.companies?.id)
+    return communities.map(community => {
+      // Handle potential undefined data
+      if (!community || !community.companies) {
+        return null
+      }
+      
+      const companyData = companies.find(company => company?.id === community.companies?.id)
       
       return {
         id: community.id,
@@ -84,22 +73,14 @@ export function useCommunityFilters({
           'Sustainable Investment'
         ].filter(Boolean) as string[],
         sectors: [(companyData?.sector || 'Sustainable Business')].filter(Boolean) as string[],
-        featured: (companyData?.score || community.companies?.score || 0) > 75
+        featured: false
       } as ExtendedCommunity
-    })
-    
-    let results = [...baseEnrichedCommunities]
-    
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      results = results.filter(
-        community => 
-          community.name.toLowerCase().includes(query) || 
-          (community.description && community.description.toLowerCase().includes(query)) ||
-          (community.tags || []).some(tag => tag.toLowerCase().includes(query))
-      )
-    }
+    }).filter(Boolean) as ExtendedCommunity[] // Filter out any null values
+  }, [communities, companies])
+
+  // Apply filters and sorting
+  const filteredAndSortedCommunities = useMemo(() => {
+    let results = [...enhancedCommunities]
     
     // Apply sector filters
     if (selectedSectors.length > 0) {
@@ -107,15 +88,6 @@ export function useCommunityFilters({
         community => 
           community.sectors && 
           community.sectors.some(sector => selectedSectors.includes(sector))
-      )
-    }
-    
-    // Apply ambassador filter
-    if (showAmbassadors) {
-      results = results.filter(
-        community => 
-          (community.ambassadors && community.ambassadors.length > 0) || 
-          (community.ambassadorCount !== undefined && community.ambassadorCount > 0)
       )
     }
     
@@ -140,22 +112,19 @@ export function useCommunityFilters({
           if (a.created_at && b.created_at) {
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           }
-          return b.id.localeCompare(a.id)
+          return 0
         })
         break
       case 'popular':
-        // Since memberCount is always 0, sort by ambassador count instead
+        // Sort by ambassador count
         results.sort((a, b) => (b.ambassadorCount || 0) - (a.ambassadorCount || 0))
         break
     }
     
     return results
   }, [
-    communities, 
-    companies, 
-    searchQuery, 
+    enhancedCommunities, 
     selectedSectors, 
-    showAmbassadors, 
     sortOption, 
     activeTab
   ])
@@ -167,16 +136,28 @@ export function useCommunityFilters({
     }
   }, [filteredAndSortedCommunities, communitiesLoading, companiesLoading])
 
+  // Get all unique sectors from communities
+  const allSectors = useMemo(() => {
+    return Array.from(
+      new Set(
+        enhancedCommunities.flatMap(community => community.sectors || [])
+      )
+    ).filter(Boolean) as string[]
+  }, [enhancedCommunities])
+
+  // Check if there are communities with ambassadors
+  const checkAmbassadorCommunities = () => 
+    filteredCommunities.some(c => 
+      (c.ambassadors && c.ambassadors.length > 0) || 
+      (c.ambassadorCount || 0) > 0
+    )
+
   return {
     filteredCommunities,
-    searchQuery,
-    setSearchQuery,
     activeTab,
     setActiveTab,
     selectedSectors,
     setSelectedSectors,
-    showAmbassadors,
-    setShowAmbassadors,
     sortOption,
     setSortOption,
     clearFilters,

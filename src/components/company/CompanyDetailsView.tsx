@@ -71,16 +71,32 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
     async function fetchCompanyData() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/companies/${companyId}`);
-        if (!response.ok) {
+        const response = await fetchWithAuth(`/api/companies/${companyId}`);
+        
+        if (response.error) {
           throw new Error('Failed to fetch company data');
         }
-        const data = await response.json();
-        setCompany(data.company);
+        
+        // Handle different response formats
+        let companyData;
+        if (response.data?.company) {
+          // Format: { company: {...} }
+          companyData = response.data.company;
+        } else if (response.data?.data) {
+          // New format: { data: {...} }
+          companyData = response.data.data;
+        } else if (response.data) {
+          // Simple format: direct data
+          companyData = response.data;
+        } else {
+          throw new Error('Unexpected response format');
+        }
+        
+        setCompany(companyData);
         
         // After getting company data, fetch the community info
-        if (data.company) {
-          fetchCompanyCommunity(data.company.id);
+        if (companyData) {
+          fetchCompanyCommunity(companyData.id);
         }
       } catch (err) {
         console.error('Error fetching company data:', err);
@@ -99,12 +115,20 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
     try {
       const response = await fetchWithAuth(`/api/companies/${companyId}/community`);
       
-      if (response.error || response.status >= 400) {
+      if (response.error) {
         console.log("No community found or error fetching community");
         return;
       }
       
-      setCommunityInfo(response.data);
+      // Handle different response formats
+      let communityData;
+      if (response.data?.data) {
+        communityData = response.data.data;
+      } else {
+        communityData = response.data;
+      }
+      
+      setCommunityInfo(communityData);
     } catch (error) {
       console.error('Error fetching company community:', error);
     }
@@ -123,7 +147,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
         method: 'POST',
       });
       
-      if (response.error || response.status >= 400) {
+      if (response.error) {
         throw new Error(communityInfo.isMember ? 'Failed to leave community' : 'Failed to join community');
       }
       

@@ -67,8 +67,19 @@ export function useCompanies() {
       
       const response = await fetchWithAuth(endpoint);
       
-      if (response.error || response.status >= 400) {
-        throw new Error('Failed to fetch companies');
+      if (response.error) {
+        // Pass through the exact error message from fetchWithAuth
+        setError(response.error);
+        
+        // Only show toast for non-auth errors to avoid duplicate messages
+        if (response.error !== "Unauthorized") {
+          toast({
+            title: 'Error',
+            description: 'Failed to load companies. Please try again.',
+            variant: 'destructive',
+          });
+        }
+        return;
       }
       
       // Handle different response formats
@@ -79,7 +90,12 @@ export function useCompanies() {
       } else {
         console.error('Unexpected API response format:', response);
         setCompanies([]);
-        throw new Error('Unexpected API response format');
+        setError('Unexpected API response format');
+        toast({
+          title: 'Error',
+          description: 'Received unexpected data format from the server.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error fetching companies:', error);
@@ -101,8 +117,19 @@ export function useCompanies() {
     try {
       const response = await fetchWithAuth(`/api/companies/${id}`);
       
-      if (response.error || response.status >= 400) {
-        throw new Error(`Failed to fetch company with ID ${id}`);
+      if (response.error) {
+        // Pass through the exact error message from fetchWithAuth
+        setError(response.error);
+        
+        // Only show toast for non-auth errors to avoid duplicate messages
+        if (response.error !== "Unauthorized") {
+          toast({
+            title: 'Error',
+            description: `Failed to load company details. Please try again.`,
+            variant: 'destructive',
+          });
+        }
+        return null;
       }
       
       return response.data;
@@ -127,8 +154,16 @@ export function useCompanies() {
         body: JSON.stringify({ companyId }),
       });
       
-      if (response.error || response.status >= 400) {
-        throw new Error('Failed to save company');
+      if (response.error) {
+        // Pass through the exact error message from fetchWithAuth
+        if (response.error !== "Unauthorized") {
+          toast({
+            title: 'Error',
+            description: 'Failed to save company. Please try again.',
+            variant: 'destructive',
+          });
+        }
+        return false;
       }
       
       // Update the local state to reflect that the company is saved
@@ -162,8 +197,16 @@ export function useCompanies() {
         method: 'DELETE',
       });
       
-      if (response.error || response.status >= 400) {
-        throw new Error('Failed to remove company from saved list');
+      if (response.error) {
+        // Pass through the exact error message from fetchWithAuth
+        if (response.error !== "Unauthorized") {
+          toast({
+            title: 'Error',
+            description: 'Failed to remove company from saved list. Please try again.',
+            variant: 'destructive',
+          });
+        }
+        return false;
       }
       
       // Update the local state to reflect that the company is no longer saved
@@ -198,8 +241,19 @@ export function useCompanies() {
     try {
       const response = await fetchWithAuth('/api/companies/savedCompanies');
       
-      if (response.error || response.status >= 400) {
-        throw new Error('Failed to fetch saved companies');
+      if (response.error) {
+        // Pass through the exact error message from fetchWithAuth
+        setError(response.error);
+        
+        // Only show toast for non-auth errors
+        if (response.error !== "Unauthorized") {
+          toast({
+            title: 'Error',
+            description: 'Failed to load saved companies. Please try again.',
+            variant: 'destructive',
+          });
+        }
+        return;
       }
       
       // Handle different response formats
@@ -210,7 +264,12 @@ export function useCompanies() {
       } else {
         console.error('Unexpected API response format:', response);
         setCompanies([]);
-        throw new Error('Unexpected API response format');
+        setError('Unexpected API response format');
+        toast({
+          title: 'Error',
+          description: 'Received unexpected data format from the server.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error fetching saved companies:', error);
