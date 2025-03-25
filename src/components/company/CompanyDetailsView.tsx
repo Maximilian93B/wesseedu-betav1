@@ -178,8 +178,14 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
   // Show loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black">
-        <p className="text-white text-xl">Loading company details...</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-black">
+        <div className="relative mb-8">
+          <div className="w-16 h-16 border-4 border-zinc-700/50 rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-emerald-400 rounded-full 
+            animate-spin absolute top-0 left-0 border-t-transparent"></div>
+        </div>
+        <p className="text-emerald-400 font-medium mb-2">Loading</p>
+        <p className="text-zinc-400 text-sm">Retrieving company details...</p>
       </div>
     );
   }
@@ -188,8 +194,18 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
   if (error || !company) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-black">
-        <p className="text-white text-xl mb-4">{error || 'Company not found'}</p>
-        <Button onClick={onClose} variant="outline">
+        <div className="w-20 h-20 rounded-full bg-zinc-800/50 flex items-center justify-center 
+          mb-8 border border-zinc-700/50">
+          <Building2 className="h-10 w-10 text-zinc-600" />
+        </div>
+        <h3 className="text-white text-xl font-medium mb-2">
+          {error || 'Company not found'}
+        </h3>
+        <p className="text-zinc-400 mb-8 max-w-md text-center">
+          We couldn't find the company you're looking for. It may have been removed or there might be a temporary issue.
+        </p>
+        <Button onClick={onClose} variant="outline" className="border-emerald-500/30 text-emerald-400 
+          hover:bg-emerald-500/10 px-5 py-2.5">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Companies
         </Button>
