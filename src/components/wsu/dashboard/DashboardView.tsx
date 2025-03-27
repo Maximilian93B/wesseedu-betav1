@@ -15,7 +15,6 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
 import { CACHE_KEYS, CACHE_EXPIRY, getCachedData, setCachedData } from "@/lib/utils/cacheUtils"
-import InvestmentOverviewChart from "./InvestmentOverviewChart"
 
 export const dynamic = "force-dynamic"
 
@@ -47,28 +46,28 @@ interface ProfileData {
 }
 
 interface DashboardViewProps {
-  user: any
+  user: any  // You can make this more specific based on your user type
 }
 
-// Animation variants
+// Variants for animations
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { 
     opacity: 1,
     transition: { 
       when: "beforeChildren",
-      staggerChildren: 0.07,
-      duration: 0.3
+      staggerChildren: 0.1,
+      duration: 0.4
     }
   }
 }
 
 const itemVariants = {
-  hidden: { y: 15, opacity: 0 },
+  hidden: { y: 20, opacity: 0 },
   visible: { 
     y: 0, 
     opacity: 1,
-    transition: { type: "spring", stiffness: 350, damping: 25 }
+    transition: { type: "spring", stiffness: 300, damping: 24 }
   }
 }
 
@@ -355,16 +354,30 @@ export function DashboardView({ user }: DashboardViewProps) {
   if (authLoading || loading) {
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[80vh] bg-white">
-        <div className="relative h-10 w-10">
+        <div className="relative h-12 w-12">
           <motion.div 
             className="absolute inset-0"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            animate={{ 
+              rotate: 360,
+              scale: [1, 1.1, 1]
+            }} 
+            transition={{ 
+              duration: 1.5, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
           >
-            <Leaf className="h-10 w-10 text-emerald-500" />
+            <Leaf className="h-12 w-12 text-emerald-500" />
           </motion.div>
         </div>
-        <p className="text-emerald-600 font-medium text-sm">Loading your dashboard...</p>
+        <motion.p 
+          className="text-emerald-600 font-medium"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          Loading your sustainable investments...
+        </motion.p>
+        <p className="text-slate-500 text-sm">Growing your impact dashboard</p>
       </div>
     );
   }
@@ -407,93 +420,61 @@ export function DashboardView({ user }: DashboardViewProps) {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6">
-      <div className="mb-6">
-        <DashboardHero 
-          user={user} 
-          profile={authProfile}
-          loading={loading}
-        />
+    <div className="w-full">
+      <div className="rounded-xl overflow-hidden mb-6 relative border border-slate-200 bg-white shadow-md">
+        {/* Decorative top accent */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-blue-400/50 to-transparent z-10" />
+        <div className="absolute top-1 right-0 w-[40%] h-px bg-gradient-to-l from-slate-300/40 to-transparent" />
         
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mt-6">
-          <TabsList className="bg-white border border-slate-200 p-1 mb-6 rounded-lg shadow-sm">
-            <TabsTrigger 
-              value="overview" 
-              className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md px-4 py-1.5 text-sm"
-            >
-              Overview
-            </TabsTrigger>
-            <TabsTrigger 
-              value="investments" 
-              className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-md px-4 py-1.5 text-sm"
-            >
-              Investments
-            </TabsTrigger>
-          </TabsList>
+        <div className="px-4 py-5 sm:p-6">
+          <DashboardHero 
+            user={user} 
+            profile={authProfile}
+            loading={loading}
+          />
           
-          <TabsContent value="overview">
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="space-y-6"
-            >
-              {/* Investment Overview */}
-              <motion.div
-                variants={itemVariants}
-                className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mt-6">
+            <TabsList className="bg-slate-50 border border-slate-200 p-1 mb-5 rounded-lg">
+              <TabsTrigger 
+                value="overview" 
+                className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 rounded-md px-4 py-1.5 text-sm"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2">
-                  {/* Left side: Total investment */}
-                  <div className="p-6 flex flex-col justify-center">
-                    <h3 className="text-sm font-medium text-slate-500 mb-1">Total Investment</h3>
-                    <div className="mb-4">
-                      <span className="text-4xl md:text-5xl font-bold text-emerald-600">
-                        {stats[0]?.value || '$0'}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <div className="text-xs text-slate-500">Companies</div>
-                        <div className="text-xl font-bold text-slate-800">{stats[1]?.value || '0'}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-slate-500">Impact Score</div>
-                        <div className="text-xl font-bold text-slate-800">{stats[2]?.value || '0/10'}</div>
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      onClick={() => router.push("/investments")}
-                      size="sm"
-                      className="w-fit text-sm"
-                    >
-                      Manage Investments
-                    </Button>
-                  </div>
+                Overview
+              </TabsTrigger>
+              <TabsTrigger 
+                value="investments" 
+                className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 rounded-md px-4 py-1.5 text-sm"
+              >
+                Investments
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="overview">
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-6"
+              >
+                {/* Investment Growth Chart */}
+                <div className="rounded-xl border border-slate-200 p-5 shadow-md bg-white relative overflow-hidden">
+                  {/* Subtle accent line */}
+                  <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-emerald-500/30 via-emerald-400/10 to-transparent" />
                   
-                  {/* Right side: Investment chart */}
-                  <div className="border-t md:border-t-0 md:border-l border-slate-100">
-                    <InvestmentOverviewChart />
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Investment Growth Chart */}
-              <motion.div variants={itemVariants} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="p-5">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 relative z-10">
                     <div>
                       <h2 className="text-lg font-bold text-slate-800">Investment Growth</h2>
                       <p className="text-slate-500 text-xs">Track your sustainable investment growth over time</p>
                     </div>
-                    <div className="flex items-center mt-2 md:mt-0">
+                    <div className="flex items-center space-x-2 mt-2 md:mt-0">
                       <span className="text-xs text-slate-500">Last 7 periods</span>
+                      <div className="h-3 w-3 rounded-full bg-emerald-100 flex items-center justify-center">
+                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="h-[250px]">
+                  <div className="h-[250px] relative z-10">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={investmentData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
@@ -504,26 +485,26 @@ export function DashboardView({ user }: DashboardViewProps) {
                         </defs>
                         <XAxis 
                           dataKey="month" 
-                          stroke="#94a3b8"
-                          tick={{ fill: '#64748b' }}
-                          axisLine={{ stroke: '#e2e8f0' }}
-                          tickLine={{ stroke: '#e2e8f0' }}
+                          stroke="#52525b"
+                          tick={{ fill: '#a1a1aa' }}
+                          axisLine={{ stroke: '#3f3f46' }}
+                          tickLine={{ stroke: '#3f3f46' }}
                         />
                         <YAxis 
-                          stroke="#94a3b8"
-                          tick={{ fill: '#64748b' }}
-                          axisLine={{ stroke: '#e2e8f0' }}
-                          tickLine={{ stroke: '#e2e8f0' }}
+                          stroke="#52525b"
+                          tick={{ fill: '#a1a1aa' }}
+                          axisLine={{ stroke: '#3f3f46' }}
+                          tickLine={{ stroke: '#3f3f46' }}
                           tickFormatter={(value) => `$${value}`}
                         />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                            backgroundColor: 'rgba(24, 24, 27, 0.95)',
                             border: '1px solid rgba(16, 185, 129, 0.2)',
                             borderRadius: '6px',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
+                            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
                           }}
-                          labelStyle={{ color: '#334155', fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}
+                          labelStyle={{ color: '#f4f4f5', fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}
                           itemStyle={{ color: '#10b981', fontSize: '12px', padding: '2px 0' }}
                           formatter={(value: number) => [`$${value.toLocaleString()}`, 'Value']}
                         />
@@ -539,80 +520,110 @@ export function DashboardView({ user }: DashboardViewProps) {
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
+                  
+                  {/* Background glow effect */}
+                  <div className="absolute bottom-0 right-[10%] w-[200px] h-[200px] bg-emerald-100 rounded-full blur-[80px] pointer-events-none"></div>
                 </div>
-              </motion.div>
 
-              {/* Secondary Content */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Stats grid - simplified */}
-                <motion.div variants={itemVariants} className="lg:col-span-1">
-                  <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-                    <h3 className="text-base font-semibold text-slate-800 mb-4">Quick Stats</h3>
-                    <div className="space-y-4">
-                      {stats.slice(1, 4).map((stat, index) => (
-                        <div 
-                          key={index}
-                          className="flex items-center p-3 rounded-lg border border-slate-100 bg-slate-50"
-                        >
-                          <div className={`p-2 rounded-md mr-3 text-white bg-gradient-to-br ${stat.color}`}>
-                            {React.cloneElement(stat.icon as React.ReactElement, { className: 'h-4 w-4' })}
+                {/* Analytics Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {/* Left: Stats Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {stats.map((stat, index) => (
+                      <motion.div
+                        key={index}
+                        variants={itemVariants}
+                        className="h-full"
+                      >
+                        <div className="bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 rounded-lg border border-zinc-800/50 p-3 shadow-md hover:border-zinc-700/50 transition-all duration-200 hover:shadow-lg relative overflow-hidden">
+                          {/* Subtle top accent */}
+                          <div className={`absolute top-0 left-0 w-full h-px bg-gradient-to-r ${stat.color} opacity-30`} />
+                          
+                          <div className="flex items-start justify-between mb-2 relative z-10">
+                            <span className="text-xs text-zinc-400 uppercase tracking-wide">{stat.title}</span>
+                            <div className={`p-1 rounded-lg bg-gradient-to-br ${stat.color} bg-opacity-10 shadow-sm`}>
+                              {React.cloneElement(stat.icon as React.ReactElement, { className: 'h-4 w-4' })}
+                            </div>
                           </div>
-                          <div>
-                            <div className="text-sm font-medium text-slate-800">{stat.value}</div>
-                            <div className="text-xs text-slate-500">{stat.title}</div>
-                          </div>
+                          <div className="text-lg font-bold text-white">{stat.value}</div>
+                          <p className="text-xs text-zinc-500 mt-0.5">{stat.description}</p>
                         </div>
-                      ))}
-                    </div>
+                      </motion.div>
+                    ))}
                   </div>
-                </motion.div>
 
-                {/* Watchlist - simplified */}
-                <motion.div variants={itemVariants} className="lg:col-span-2">
-                  <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-full">
-                    <div className="p-4 border-b border-slate-100">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-base font-semibold text-slate-800">Watchlist</h3>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => router.push("/account/watchlist")}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs h-8"
-                        >
-                          View All <ChevronRight className="h-3 w-3 ml-1" />
-                        </Button>
+                  {/* Right: Watchlist */}
+                  <div className="lg:col-span-2">
+                    <div className="bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 rounded-xl border border-zinc-800/50 h-full shadow-lg overflow-hidden hover:border-zinc-700/50 transition-all duration-200 relative">
+                      {/* Decorative top accent */}
+                      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-indigo-600/50 via-indigo-500/10 to-transparent" />
+                      {/* Subtle glow */}
+                      <div className="absolute top-[20%] right-[10%] w-[150px] h-[150px] bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+                      
+                      <div className="p-3 border-b border-zinc-800/50 relative z-10">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h2 className="text-base font-bold text-white">Watchlist</h2>
+                            <p className="text-xs text-zinc-400">Companies you're tracking</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => router.push("/auth/home")}
+                            className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50 px-2 py-1 text-xs rounded-md"
+                          >
+                            View All
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-3 relative z-10">
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="watchlist"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <WatchlistView 
+                              externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
+                              externalLoading={loading}
+                              isPreview={true}
+                              maxItems={3}
+                              onViewAll={() => router.push("/auth/home")}
+                            />
+                          </motion.div>
+                        </AnimatePresence>
                       </div>
                     </div>
-                    <div className="p-4">
-                      <WatchlistView 
-                        externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
-                        externalLoading={loading}
-                        isPreview={true}
-                        maxItems={3}
-                        onViewAll={() => router.push("/account/watchlist")}
-                      />
-                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </TabsContent>
+            
+            <TabsContent value="investments">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key="investments"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 rounded-xl border border-zinc-800/50 shadow-lg p-5 relative overflow-hidden"
+                >
+                  {/* Decorative top accent */}
+                  <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-blue-600/50 via-blue-500/10 to-transparent" />
+                  {/* Subtle glow */}
+                  <div className="absolute bottom-[10%] left-[10%] w-[200px] h-[200px] bg-blue-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+                  
+                  <div className="relative z-10">
+                    <UserInvestments />
                   </div>
                 </motion.div>
-              </div>
-            </motion.div>
-          </TabsContent>
-          
-          <TabsContent value="investments">
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <motion.div
-                variants={itemVariants}
-                className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
-              >
-                <UserInvestments />
-              </motion.div>
-            </motion.div>
-          </TabsContent>
-        </Tabs>
+              </AnimatePresence>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );

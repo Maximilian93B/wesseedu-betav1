@@ -11,6 +11,7 @@ import {
   Sector 
 } from 'recharts';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/hooks/use-auth';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { motion } from 'framer-motion';
@@ -38,7 +39,7 @@ const containerVariants = {
     opacity: 1,
     transition: {
       duration: 0.3,
-      staggerChildren: 0.08
+      staggerChildren: 0.1
     }
   }
 };
@@ -130,7 +131,7 @@ const InvestmentOverviewChart = () => {
           cx={cx}
           cy={cy}
           innerRadius={innerRadius}
-          outerRadius={outerRadius + 4}
+          outerRadius={outerRadius + 8}
           startAngle={startAngle}
           endAngle={endAngle}
           fill={fill}
@@ -141,8 +142,8 @@ const InvestmentOverviewChart = () => {
           cy={cy}
           startAngle={startAngle}
           endAngle={endAngle}
-          innerRadius={outerRadius + 5}
-          outerRadius={outerRadius + 6}
+          innerRadius={outerRadius + 9}
+          outerRadius={outerRadius + 10}
           fill={fill}
         />
       </g>
@@ -152,9 +153,9 @@ const InvestmentOverviewChart = () => {
   const customTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white border border-slate-200 p-2 rounded-md shadow-sm text-slate-700">
-          <p className="text-xs font-medium">{payload[0].name}</p>
-          <p className="font-semibold text-xs" style={{ color: payload[0].payload.color }}>
+        <div className="bg-black/90 border border-zinc-700/50 backdrop-blur-sm p-2 rounded-lg shadow-xl text-white">
+          <p className="text-sm font-medium">{payload[0].name}</p>
+          <p className="font-semibold" style={{ color: payload[0].payload.color }}>
             ${payload[0].value.toLocaleString()}
           </p>
         </div>
@@ -165,26 +166,22 @@ const InvestmentOverviewChart = () => {
   
   const customLegend = ({ payload }: any) => {
     return (
-      <div className="flex flex-col gap-1.5 text-xs text-slate-600">
+      <ul className="flex flex-col gap-1 text-xs text-zinc-400">
         {payload.map((entry: any, index: number) => (
-          <motion.div 
+          <motion.li 
             key={`item-${index}`}
             className="flex items-center"
             variants={itemVariants}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            <div 
-              className="w-2.5 h-2.5 rounded-sm mr-2" 
-              style={{ backgroundColor: entry.color }} 
-            />
-            <div className="flex justify-between w-full">
-              <span className="font-medium">{entry.value}</span>
-              <span className="text-slate-500 ml-3">
-                ${data[index]?.value.toLocaleString()}
-              </span>
-            </div>
-          </motion.div>
+            <div className="w-3 h-3 rounded-sm mr-2" style={{ backgroundColor: entry.color }} />
+            <span>
+              {entry.value} - ${data[index]?.value.toLocaleString()}
+            </span>
+          </motion.li>
         ))}
-      </div>
+      </ul>
     );
   };
   
@@ -196,72 +193,75 @@ const InvestmentOverviewChart = () => {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="h-full"
     >
-      <div className="h-full p-5">
-        <div className="flex items-center mb-4">
-          <PieChartIcon className="h-4 w-4 mr-2 text-blue-500" />
-          <h3 className="text-base font-semibold text-slate-800">Investment Breakdown</h3>
-        </div>
+      <Card className="bg-black/60 backdrop-blur-sm border border-zinc-800/50 shadow-lg overflow-hidden rounded-xl hover:border-zinc-700/50 transition-all duration-200">
+        <CardHeader className="px-5 pt-5 pb-0">
+          <CardTitle className="text-lg font-semibold text-white flex items-center">
+            <PieChartIcon className="h-5 w-5 mr-2 text-purple-400" />
+            Investment Breakdown
+          </CardTitle>
+        </CardHeader>
         
-        {isLoading ? (
-          <div className="flex items-center justify-center h-[180px]">
-            <Loader2 className="h-5 w-5 text-slate-400 animate-spin" />
-          </div>
-        ) : !hasData ? (
-          <motion.div 
-            variants={itemVariants}
-            className="flex flex-col items-center justify-center h-[180px] text-center p-4"
-          >
-            <Database className="h-8 w-8 text-slate-300 mb-2" />
-            <p className="text-slate-500 max-w-[250px] text-sm">
-              Add investments to see your portfolio breakdown here.
-            </p>
-          </motion.div>
-        ) : (
-          <motion.div 
-            variants={itemVariants}
-            className="h-[180px]"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  activeIndex={activeIndex}
-                  activeShape={renderActiveShape}
-                  innerRadius={55}
-                  outerRadius={70}
-                  paddingAngle={3}
-                  dataKey="value"
-                  onMouseEnter={onPieEnter}
-                  onMouseLeave={onPieLeave}
-                  animationBegin={200}
-                  animationDuration={800}
-                >
-                  {data.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={entry.color} 
-                      stroke="rgba(255,255,255,0.8)" 
-                      strokeWidth={1}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={customTooltip} />
-                <Legend
-                  content={customLegend}
-                  layout="vertical"
-                  verticalAlign="middle"
-                  align="right"
-                  wrapperStyle={{ paddingLeft: '10px' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </motion.div>
-        )}
-      </div>
+        <CardContent className="px-5 py-5">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[220px]">
+              <Loader2 className="h-8 w-8 text-zinc-600 animate-spin" />
+            </div>
+          ) : !hasData ? (
+            <motion.div 
+              variants={itemVariants}
+              className="flex flex-col items-center justify-center h-[220px] text-center space-y-3"
+            >
+              <Database className="h-12 w-12 text-zinc-700" />
+              <p className="text-zinc-400 max-w-[250px]">
+                Not enough investment data to visualize. As you invest, your portfolio breakdown will appear here.
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div 
+              variants={itemVariants}
+              className="h-[220px] w-full"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    activeIndex={activeIndex}
+                    activeShape={renderActiveShape}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                    onMouseEnter={onPieEnter}
+                    onMouseLeave={onPieLeave}
+                    animationBegin={200}
+                    animationDuration={1000}
+                  >
+                    {data.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={entry.color} 
+                        stroke="rgba(0,0,0,0.1)" 
+                        strokeWidth={1}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip content={customTooltip} />
+                  <Legend
+                    content={customLegend}
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="right"
+                    wrapperStyle={{ paddingLeft: '10px' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </motion.div>
+          )}
+        </CardContent>
+      </Card>
     </motion.div>
   );
 };
