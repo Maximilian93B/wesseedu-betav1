@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
+import { useAuthGuard } from "@/hooks/use-auth-guard"
 
 interface Company {
   id: string
@@ -322,6 +323,9 @@ function MarketplaceIntroduction() {
 }
 
 export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
+  // This will redirect to login if not authenticated
+  useAuthGuard()
+  
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
@@ -340,6 +344,13 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
       
       if (response.error) {
         console.error("Error in companies response:", response.error)
+        
+        // Handle 401 error by redirecting to login
+        if (response.status === 401) {
+          window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
+          return
+        }
+        
         throw new Error(response.error.toString())
       }
       
