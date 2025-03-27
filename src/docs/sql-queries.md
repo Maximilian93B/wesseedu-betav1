@@ -163,3 +163,182 @@ using ( applicant_id = auth.uid() and status = 'pending' );
 
 ( <ownership_condition> OR current_setting('request.jwt.claims.user_type', true) = 'admin' )
 
+
+// Community Table
+create table public.company_communities (
+  id uuid primary key default uuid_generate_v4(),
+  company_id uuid not null references public.companies(id) on delete cascade,
+  description text,
+  created_at timestamp with time zone default timezone('utc', now()),
+  updated_at timestamp with time zone default timezone('utc', now())
+);
+
+// Community Ambassadors Table
+create table public.community_ambassadors (
+  id uuid primary key default uuid_generate_v4(),
+  community_id uuid not null references public.company_communities(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamp with time zone default timezone('utc', now()),
+  updated_at timestamp with time zone default timezone('utc', now())
+);
+
+// Community Members Table
+create table public.community_members (
+  id uuid primary key default uuid_generate_v4(),
+  community_id uuid not null references public.company_communities(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamp with time zone default timezone('utc', now())
+);
+
+// Community Posts Table
+create table public.community_posts (
+  id uuid primary key default uuid_generate_v4(),
+  community_id uuid not null references public.company_communities(id) on delete cascade,
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  title text not null,
+  content text not null,
+  is_company_update boolean default false,
+  created_at timestamp with time zone default timezone('utc', now()),
+  updated_at timestamp with time zone default timezone('utc', now())
+);
+
+// Unique constraints to prevent duplicate entries
+create unique index unique_community_ambassador on public.community_ambassadors 
+(community_id, user_id);
+
+create unique index unique_community_member on public.community_members 
+(community_id, user_id);
+
+// RLS Policies for Company Communities
+alter table public.company_communities enable row level security;
+
+create policy "Public select on company_communities" on public.company_communities
+for select
+using ( true );
+
+create policy "Allow company owners to insert communities" on public.company_communities
+for insert
+with check (
+  exists (
+    select 1 from public.companies
+    where id = company_id and created_by = auth.uid()
+  )
+);
+
+create policy "Allow company owners to update their communities" on public.company_communities
+for update
+using (
+  exists (
+    select 1 from public.companies
+    where id = company_id and created_by = auth.uid()
+  )
+);
+
+create policy "Allow company owners to delete their communities" on public.company_communities
+for delete
+using (
+  exists (
+    select 1 from public.companies
+    where id = company_id and created_by = auth.uid()
+  )
+);
+
+// RLS Policies for Community Ambassadors
+alter table public.community_ambassadors enable row level security;
+
+create policy "Public select on community_ambassadors" on public.community_ambassadors
+for select
+using ( true );
+
+create policy "Allow company owners to manage ambassadors" on public.community_ambassadors
+for all
+using (
+  exists (
+    select 1 from public.company_communities cc
+    join public.companies c on cc.company_id = c.id
+    where cc.id = community_id and c.created_by = auth.uid()
+  )
+);
+
+// RLS Policies for Community Members
+alter table public.community_members enable row level security;
+
+create policy "Public select on community_members" on public.community_members
+for select
+using ( true );
+
+create policy "Allow users to join communities" on public.community_members
+for insert
+with check ( user_id = auth.uid() );
+
+create policy "Allow users to leave communities" on public.community_members
+for delete
+using ( user_id = auth.uid() );
+
+// RLS Policies for Community Posts
+alter table public.community_posts enable row level security;
+
+create policy "Public select on community_posts" on public.community_posts
+for select
+using ( true );
+
+create policy "Allow company and ambassadors to create posts" on public.community_posts
+for insert
+with check (
+  author_id = auth.uid() and (
+    exists (
+      select 1 from public.company_communities cc
+      join public.companies c on cc.company_id = c.id
+      where cc.id = community_id and c.created_by = auth.uid()
+    ) or exists (
+      select 1 from public.community_ambassadors ca
+      where ca.community_id = community_id and ca.user_id = auth.uid()
+    )
+  )
+);
+
+create policy "Allow post authors to update posts" on public.community_posts
+for update
+using ( author_id = auth.uid() );
+
+create policy "Allow post authors to delete posts" on public.community_posts
+for delete
+using ( author_id = auth.uid() );
+
+// Trigger to update the community_members count in companies table
+create or replace function public.update_company_community_count()
+returns trigger as $$
+begin
+  if (TG_OP = 'INSERT') then
+    update public.companies
+    set community_members = community_members + 1
+    from public.company_communities
+    where companies.id = company_communities.company_id and company_communities.id = NEW.community_id;
+  elsif (TG_OP = 'DELETE') then
+    update public.companies
+    set community_members = community_members - 1
+    from public.company_communities
+    where companies.id = company_communities.company_id and company_communities.id = OLD.community_id;
+  end if;
+  return null;
+end;
+$$ language plpgsql;
+
+create trigger community_members_count_trigger
+after insert or delete on public.community_members
+for each row execute procedure public.update_company_community_count();
+
+// Trigger to automatically create a community when a company is created
+create or replace function public.create_company_community()
+returns trigger as $$
+begin
+  insert into public.company_communities (company_id, description)
+  values (NEW.id, 'Official community for ' || NEW.name);
+  return NEW;
+end;
+$$ language plpgsql;
+
+create trigger company_community_trigger
+after insert on public.companies
+for each row execute procedure public.create_company_community();
+

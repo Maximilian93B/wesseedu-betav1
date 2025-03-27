@@ -17,7 +17,14 @@ const PUBLIC_ROUTES = [
   "/auth/reset-password",
 ]
 
+// Routes that require admin privileges
 const ADMIN_ROUTES = ["/admin"]
+
+// Routes that require authentication (not explicitly listed in PUBLIC_ROUTES)
+// This includes:
+// - /communities/* - Company community pages
+// - /auth/* - Authenticated user pages
+// - /api/* (except public endpoints)
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
@@ -44,6 +51,16 @@ export async function middleware(req: NextRequest) {
     
     if (!user && !isEmailVerification) {
       return NextResponse.redirect(new URL('/auth/login', req.url))
+    }
+    return res
+  }
+
+  // For community routes - require authentication
+  if (pathname.startsWith('/communities')) {
+    if (!user) {
+      const redirectUrl = new URL('/auth/login', req.url)
+      redirectUrl.searchParams.set('redirectTo', pathname)
+      return NextResponse.redirect(redirectUrl)
     }
     return res
   }

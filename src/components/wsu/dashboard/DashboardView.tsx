@@ -1,15 +1,15 @@
 "use client"
 
-import type React from "react"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { BarChart, Users, TrendingUp, Leaf, Globe } from "lucide-react"
-import { motion } from "framer-motion"
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
+import { BarChart, Users, TrendingUp, Leaf, Globe, ChevronRight, ArrowRight } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WatchlistView, useWatchlist } from "./WatchlistView"
 import UserInvestments from "./UserInvestments"
+import { DashboardHero } from "./DashboardHero"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
@@ -48,6 +48,28 @@ interface DashboardViewProps {
   user: any  // You can make this more specific based on your user type
 }
 
+// Variants for animations
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      when: "beforeChildren",
+      staggerChildren: 0.1,
+      duration: 0.4
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+}
+
 export function DashboardView({ user }: DashboardViewProps) {
   const router = useRouter()
   const { profile: authProfile, loading: authLoading } = useAuth()
@@ -60,6 +82,7 @@ export function DashboardView({ user }: DashboardViewProps) {
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [watchlistCompanies, setWatchlistCompanies] = useState<any[]>([])
   const [watchlistLoading, setWatchlistLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<string>("overview")
   
   // Use the shared watchlist hook to avoid duplicate data fetching
   const { 
@@ -176,6 +199,12 @@ export function DashboardView({ user }: DashboardViewProps) {
         setSavedCompanies([]);
       }
       
+      // Process cached investment data
+      processInvestmentsData(cachedData.investments);
+      
+      // Update stats
+      updateStatistics(cachedData);
+      
       return;
     }
     
@@ -215,7 +244,6 @@ export function DashboardView({ user }: DashboardViewProps) {
           companies: item.companies
         }));
         
-        console.log("DashboardView: Transformed saved companies data", transformedCompanies);
         setSavedCompanies(transformedCompanies);
         
         // Also refresh the watchlist data to ensure consistency
@@ -226,101 +254,129 @@ export function DashboardView({ user }: DashboardViewProps) {
       }
       
       // Process investments to create chart data
-      if (data.investments && data.investments.length > 0) {
-        // Group investments by month
-        const investmentsByMonth = data.investments.reduce((acc: Record<string, number>, inv: any) => {
-          const date = new Date(inv.investment_date);
-          const monthYear = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
-          
-          if (!acc[monthYear]) {
-            acc[monthYear] = 0;
-          }
-          
-          acc[monthYear] += parseFloat(inv.amount) || 0;
-          return acc;
-        }, {});
-        
-        // Convert to array format for chart
-        const chartData = Object.entries(investmentsByMonth).map(([month, amount]) => ({
-          month,
-          amount: Number(amount)
-        }));
-        
-        // Sort by date
-        chartData.sort((a, b) => {
-          const dateA = new Date(a.month);
-          const dateB = new Date(b.month);
-          return dateA.getTime() - dateB.getTime();
-        });
-        
-        // Take last 7 months or fill with sample data if less
-        const finalChartData = chartData.length >= 7 
-          ? chartData.slice(-7) 
-          : [...Array(7 - chartData.length).fill(null).map((_, i) => ({
-              month: `Month ${i+1}`,
-              amount: 0
-            })), ...chartData];
-            
-        setInvestmentData(finalChartData);
-      } else {
-        // Use sample data if no investments
-        setInvestmentData([
-          { month: "Jan", amount: 1000 },
-          { month: "Feb", amount: 2200 },
-          { month: "Mar", amount: 1800 },
-          { month: "Apr", amount: 2400 },
-          { month: "May", amount: 3200 },
-          { month: "Jun", amount: 2800 },
-          { month: "Jul", amount: 3600 },
-        ]);
-      }
+      processInvestmentsData(data.investments);
       
       // Update stats
-      setStats([
-        {
-          title: "Total Investments",
-          value: `$${data.profile?.total_investments?.toLocaleString() || '0'}`,
-          description: "Your total investment",
-          icon: <BarChart className="h-6 w-6" />,
-          color: "from-green-400 to-blue-500",
-        },
-        {
-          title: "Sustainable Companies",
-          value: data.stats?.companiesCount?.toString() || "0",
-          description: "Across various sectors",
-          icon: <Leaf className="h-6 w-6" />,
-          color: "from-green-500 to-emerald-600",
-        },
-        {
-          title: "Impact Score",
-          value: `${data.profile?.impact_score || 0}/10`,
-          description: "Based on ESG criteria",
-          icon: <Globe className="h-6 w-6" />,
-          color: "from-blue-400 to-indigo-600",
-        },
-        {
-          title: "Community Members",
-          value: data.stats?.usersCount?.toString() || "0",
-          description: "Active investors",
-          icon: <Users className="h-6 w-6" />,
-          color: "from-purple-400 to-pink-500",
-        },
-      ]);
+      updateStatistics(data);
+      
     } catch (error) {
       console.error("Error in fetchProfileData:", error);
       throw error;
     }
   };
+  
+  const processInvestmentsData = (investments: any[] = []) => {
+    if (investments && investments.length > 0) {
+      // Group investments by month
+      const investmentsByMonth = investments.reduce((acc: Record<string, number>, inv: any) => {
+        const date = new Date(inv.investment_date);
+        const monthYear = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+        
+        if (!acc[monthYear]) {
+          acc[monthYear] = 0;
+        }
+        
+        acc[monthYear] += parseFloat(inv.amount) || 0;
+        return acc;
+      }, {});
+      
+      // Convert to array format for chart
+      const chartData = Object.entries(investmentsByMonth).map(([month, amount]) => ({
+        month,
+        amount: Number(amount)
+      }));
+      
+      // Sort by date
+      chartData.sort((a, b) => {
+        const dateA = new Date(a.month);
+        const dateB = new Date(b.month);
+        return dateA.getTime() - dateB.getTime();
+      });
+      
+      // Take last 7 months or fill with sample data if less
+      const finalChartData = chartData.length >= 7 
+        ? chartData.slice(-7) 
+        : [...Array(7 - chartData.length).fill(null).map((_, i) => ({
+            month: `Month ${i+1}`,
+            amount: 0
+          })), ...chartData];
+          
+      setInvestmentData(finalChartData);
+    } else {
+      // Use sample data if no investments
+      setInvestmentData([
+        { month: "Jan", amount: 1000 },
+        { month: "Feb", amount: 2200 },
+        { month: "Mar", amount: 1800 },
+        { month: "Apr", amount: 2400 },
+        { month: "May", amount: 3200 },
+        { month: "Jun", amount: 2800 },
+        { month: "Jul", amount: 3600 },
+      ]);
+    }
+  };
+  
+  const updateStatistics = (data: any) => {
+    setStats([
+      {
+        title: "Total Investments",
+        value: `$${data.profile?.total_investments?.toLocaleString() || '0'}`,
+        description: "Your total investment",
+        icon: <BarChart className="h-6 w-6" />,
+        color: "from-green-400 to-blue-500",
+      },
+      {
+        title: "Sustainable Companies",
+        value: data.stats?.companiesCount?.toString() || "0",
+        description: "Across various sectors",
+        icon: <Leaf className="h-6 w-6" />,
+        color: "from-green-500 to-emerald-600",
+      },
+      {
+        title: "Impact Score",
+        value: `${data.profile?.impact_score || 0}/10`,
+        description: "Based on ESG criteria",
+        icon: <Globe className="h-6 w-6" />,
+        color: "from-blue-400 to-indigo-600",
+      },
+      {
+        title: "Community Members",
+        value: data.stats?.usersCount?.toString() || "0",
+        description: "Active investors",
+        icon: <Users className="h-6 w-6" />,
+        color: "from-purple-400 to-pink-500",
+      },
+    ]);
+  };
 
   // Show a more informative loading state
   if (authLoading || loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4">
-        <div className="h-10 w-10 animate-spin">
-          <BarChart className="h-10 w-10 text-emerald-400/50" />
+      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[80vh] bg-white">
+        <div className="relative h-12 w-12">
+          <motion.div 
+            className="absolute inset-0"
+            animate={{ 
+              rotate: 360,
+              scale: [1, 1.1, 1]
+            }} 
+            transition={{ 
+              duration: 1.5, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <Leaf className="h-12 w-12 text-slate-600" />
+          </motion.div>
         </div>
-        <p className="text-emerald-400 animate-pulse">Loading dashboard data...</p>
-        <p className="text-zinc-500 text-sm">This may take a few moments</p>
+        <motion.p 
+          className="text-slate-700 font-medium"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          Loading your sustainable investments...
+        </motion.p>
+        <p className="text-slate-500 text-sm">Growing your impact dashboard</p>
       </div>
     );
   }
@@ -328,14 +384,20 @@ export function DashboardView({ user }: DashboardViewProps) {
   // Show error state if there was an error
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4">
-        <p className="text-red-400">{error}</p>
-        <Button 
-          onClick={() => window.location.reload()}
-          className="bg-emerald-500 hover:bg-emerald-400 text-white"
+      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[60vh] bg-white">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
         >
-          Retry
-        </Button>
+          <p className="text-slate-700 mb-4">{error}</p>
+          <Button 
+            onClick={() => window.location.reload()}
+            className="bg-slate-800 hover:bg-slate-700 text-white"
+          >
+            Retry
+          </Button>
+        </motion.div>
       </div>
     );
   }
@@ -344,134 +406,225 @@ export function DashboardView({ user }: DashboardViewProps) {
   if (!user) {
     router.push("/auth/signin");
     return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-zinc-400">Redirecting to login...</p>
+      <div className="flex items-center justify-center p-8 min-h-[60vh] bg-white">
+        <motion.p 
+          className="text-slate-500"
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          Redirecting to login...
+        </motion.p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 bg-black text-white min-h-screen p-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <h2 className="text-4xl font-bold tracking-tight text-white mb-2">Welcome Back, {user?.email}</h2>
-        <p className="text-gray-400">Here's an overview of your sustainable investments and impact.</p>
-      </motion.div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+    <div className="w-full">
+      {/* Simplified outer container with minimal styling */}
+      <div className="relative">
+        <div className="px-5 py-6 md:px-8 md:py-8">
+          <DashboardHero 
+            user={user} 
+            profile={authProfile}
+            loading={loading}
+          />
+          
+          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} 
+            className="mt-8"
           >
-            <Card className="bg-black border-emerald-500/20 border-2 shadow-lg hover:border-emerald-400/40 transition-all duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg font-medium text-white">{stat.title}</CardTitle>
-                <div className="text-emerald-400">{stat.icon}</div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-emerald-400">{stat.value}</div>
-                <p className="text-sm text-gray-400">{stat.description}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+            <TabsList className="mx-auto mb-6 border border-slate-200 bg-white/80 p-1 rounded-full w-auto inline-flex shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)]">
+              <TabsTrigger 
+                value="overview" 
+                className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-800 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm transition-all duration-200"
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger 
+                value="investments" 
+                className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-800 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm transition-all duration-200"
+              >
+                Investments
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="overview">
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-6"
+              >
+                {/* Investment Growth Chart - Modern styling */}
+                <div className="rounded-xl border border-slate-200 p-6 bg-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+                  hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-shadow duration-500 relative overflow-hidden">
+                  {/* Subtle accent line */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-400 to-slate-200/20" />
+                  
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 relative z-10">
+                    <div>
+                      <h2 className="text-lg font-medium text-slate-800">Investment Growth</h2>
+                      <p className="text-slate-500 text-xs">Track your sustainable investment growth over time</p>
+                    </div>
+                    <div className="flex items-center space-x-2 mt-2 md:mt-0">
+                      <span className="text-xs text-slate-500">Last 7 periods</span>
+                      <div className="h-3 w-3 rounded-full bg-slate-100 flex items-center justify-center">
+                        <div className="h-1.5 w-1.5 rounded-full bg-slate-500"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="h-[250px] relative z-10">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={investmentData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#64748b" stopOpacity={0.5} />
+                            <stop offset="100%" stopColor="#64748b" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <XAxis 
+                          dataKey="month" 
+                          stroke="#64748b"
+                          tick={{ fill: '#64748b' }}
+                          axisLine={{ stroke: '#e2e8f0' }}
+                          tickLine={{ stroke: '#e2e8f0' }}
+                        />
+                        <YAxis 
+                          stroke="#64748b"
+                          tick={{ fill: '#64748b' }}
+                          axisLine={{ stroke: '#e2e8f0' }}
+                          tickLine={{ stroke: '#e2e8f0' }}
+                          tickFormatter={(value) => `$${value}`}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: 'white',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '6px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                          labelStyle={{ color: '#334155', fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}
+                          itemStyle={{ color: '#334155', fontSize: '12px', padding: '2px 0' }}
+                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Investment']}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="amount"
+                          stroke="#64748b"
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#investmentGradient)"
+                          activeDot={{ r: 6, stroke: '#64748b', strokeWidth: 2, fill: '#fff' }}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  {/* Background glow effect */}
+                  <div className="absolute bottom-0 right-[10%] w-[200px] h-[200px] bg-slate-100/30 rounded-full blur-[80px] pointer-events-none"></div>
+                </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 bg-black border-emerald-500/20 border-2 shadow-lg hover:border-emerald-400/40 transition-all duration-200">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-white">Investment Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={investmentData}>
-                <defs>
-                  <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis 
-                  dataKey="month" 
-                  stroke="#6b7280"
-                  tick={{ fill: '#6b7280' }}
-                />
-                <YAxis 
-                  stroke="#6b7280"
-                  tick={{ fill: '#6b7280' }}
-                  tickFormatter={(value) => `$${value}`}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#000',
-                    border: '1px solid rgba(16, 185, 129, 0.2)',
-                    borderRadius: '8px',
-                  }}
-                  labelStyle={{ color: '#fff' }}
-                  itemStyle={{ color: '#10b981' }}
-                  formatter={(value: number) => [`$${value}`, 'Investment']}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="amount"
-                  stroke="#10b981"
-                  fillOpacity={1}
-                  fill="url(#investmentGradient)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+                {/* Analytics Grid - Modern styling */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  {/* Left: Stats Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {stats.map((stat, index) => (
+                      <motion.div
+                        key={index}
+                        variants={itemVariants}
+                        className="h-full"
+                      >
+                        <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] 
+                          hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all duration-300 relative overflow-hidden group">
+                          {/* Subtle top accent */}
+                          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-400 to-slate-300/20" />
+                          
+                          <div className="flex items-start justify-between mb-2 relative z-10">
+                            <span className="text-xs text-slate-500 uppercase tracking-wide font-medium">{stat.title}</span>
+                            <div className="p-1.5 rounded-lg bg-slate-50 shadow-sm 
+                              group-hover:scale-110 transition-transform duration-200">
+                              {React.cloneElement(stat.icon as React.ReactElement, { className: 'h-3.5 w-3.5 text-slate-600' })}
+                            </div>
+                          </div>
+                          <div className="text-lg font-bold text-slate-800">{stat.value}</div>
+                          <p className="text-xs text-slate-500 mt-0.5">{stat.description}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
 
-        <Card className="col-span-3 bg-black border-emerald-500/20 border-2 shadow-lg hover:border-emerald-400/40 transition-all duration-200">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-xl font-semibold text-white">Watchlist</CardTitle>
-              <p className="text-sm text-gray-400">Your saved companies</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/auth/home")}
-              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50"
-            >
-              View All
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <WatchlistView 
-              externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
-              externalLoading={loading}
-              isPreview={true}
-              maxItems={3}
-              onViewAll={() => router.push("/auth/home")}
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* New Investments and Watchlist Section */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <UserInvestments />
-        </motion.div>
-      </div>
-
-      <div className="flex justify-between">
-        <Button
-          onClick={() => router.push("/companies")}
-          className="bg-emerald-500 text-white hover:bg-emerald-400 transition-colors duration-200"
-        >
-          Explore Sustainable Companies
-        </Button>
+                  {/* Right: Watchlist - Modern styling */}
+                  <div className="lg:col-span-2">
+                    <div className="bg-white rounded-xl border border-slate-200 h-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+                      hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-shadow duration-500 relative overflow-hidden">
+                      {/* Decorative top accent */}
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-500 via-slate-400 to-transparent" />
+                      
+                      <div className="p-3 border-b border-slate-200 relative z-10">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h2 className="text-base font-medium text-slate-800">Watchlist</h2>
+                            <p className="text-xs text-slate-500">Companies you're tracking</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => router.push("/account/watchlist")}
+                            className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 text-xs rounded-lg"
+                          >
+                            View All
+                            <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-3 relative z-10">
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key="watchlist"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <WatchlistView 
+                              externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
+                              externalLoading={loading}
+                              isPreview={true}
+                              maxItems={3}
+                              onViewAll={() => router.push("/account/watchlist")}
+                            />
+                          </motion.div>
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </TabsContent>
+            
+            <TabsContent value="investments">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key="investments"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+                  hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] p-6 relative overflow-hidden"
+                >
+                  {/* Decorative top accent */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-500 via-slate-400 to-transparent" />
+                  
+                  <div className="relative z-10">
+                    <UserInvestments />
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
 }
-

@@ -203,6 +203,100 @@ export interface Database {
           created_at?: string
         }
       }
+      company_communities: {
+        Row: {
+          id: string
+          company_id: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          description?: string | null
+          updated_at?: string
+        }
+      }
+      community_ambassadors: {
+        Row: {
+          id: string
+          community_id: string
+          user_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          community_id: string
+          user_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          community_id?: string
+          user_id?: string
+          updated_at?: string
+        }
+      }
+      community_members: {
+        Row: {
+          id: string
+          community_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          community_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          community_id?: string
+          user_id?: string
+        }
+      }
+      community_posts: {
+        Row: {
+          id: string
+          community_id: string
+          author_id: string
+          title: string
+          content: string
+          is_company_update: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          community_id: string
+          author_id: string
+          title: string
+          content: string
+          is_company_update?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          community_id?: string
+          author_id?: string
+          title?: string
+          content?: string
+          is_company_update?: boolean
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

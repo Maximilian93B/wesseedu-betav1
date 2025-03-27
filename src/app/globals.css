@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
     --primary: 168 100% 39%;
     --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
     --ring: 168 100% 39%;
     --radius: 0.5rem;
   }
@@ -57,6 +57,23 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  
+  /* Smooth theme transition */
+  html.dark {
+    color-scheme: dark;
+  }
+  
+  html {
+    color-scheme: light;
+  }
+  
+  html, body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  *, *::before, *::after {
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
 }
 
 /* Custom styles for WeSeedU */
@@ -69,45 +86,45 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500;
   }
   
-  /* Cosmic card styling */
+  /* Cosmic card styling - light/dark variants */
   .cosmic-card {
-    @apply relative overflow-hidden rounded-3xl bg-black/80 p-6 sm:p-8 flex flex-col;
-    @apply shadow-[0_0_20px_rgba(139,92,246,0.1)] hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-all duration-700;
-    @apply before:absolute before:inset-0 before:bg-gradient-to-br before:from-purple-500/5 before:via-transparent before:to-teal-500/5 before:opacity-40 before:z-0;
+    @apply relative overflow-hidden rounded-3xl bg-white/90 dark:bg-black/80 p-6 sm:p-8 flex flex-col;
+    @apply shadow-md dark:shadow-[0_0_20px_rgba(139,92,246,0.1)] hover:shadow-lg dark:hover:shadow-[0_0_30px_rgba(139,92,246,0.2)] transition-all duration-700;
+    @apply before:absolute before:inset-0 before:bg-gradient-to-br before:from-slate-100 before:via-transparent before:to-slate-100 dark:before:from-purple-500/5 dark:before:via-transparent dark:before:to-teal-500/5 before:opacity-40 before:z-0;
   }
   
   /* Cosmic accent elements */
   .cosmic-accent-top {
-    @apply absolute -top-32 -right-32 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl z-0;
+    @apply absolute -top-32 -right-32 w-64 h-64 bg-blue-200/20 dark:bg-purple-500/10 rounded-full blur-3xl z-0;
   }
   
   .cosmic-accent-bottom {
-    @apply absolute -bottom-32 -left-32 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl z-0;
+    @apply absolute -bottom-32 -left-32 w-64 h-64 bg-emerald-200/20 dark:bg-teal-500/10 rounded-full blur-3xl z-0;
   }
   
   /* Subtle edge highlight */
   .cosmic-edge-highlight {
-    @apply absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-purple-400/30 to-transparent z-0;
+    @apply absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-slate-300 dark:via-purple-400/30 to-transparent z-0;
   }
   
   /* Card hover glow effect */
   .cosmic-hover-glow {
-    @apply absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 bg-gradient-to-b from-purple-500/10 via-transparent to-teal-500/10;
+    @apply absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 bg-gradient-to-b from-blue-200/10 via-transparent to-emerald-200/10 dark:from-purple-500/10 dark:via-transparent dark:to-teal-500/10;
   }
   
   /* Feature badge */
   .feature-badge {
-    @apply inline-flex items-center space-x-2 bg-teal-500/10 border border-teal-500/20 px-5 py-2 rounded-full;
+    @apply inline-flex items-center space-x-2 bg-emerald-50 dark:bg-teal-500/10 border border-emerald-200 dark:border-teal-500/20 px-5 py-2 rounded-full;
   }
   
   /* Feature badge dot */
   .feature-badge-dot {
-    @apply w-2 h-2 rounded-full bg-teal-500 animate-pulse;
+    @apply w-2 h-2 rounded-full bg-emerald-500 dark:bg-teal-500 animate-pulse;
   }
   
   /* WeSeedU gradient text */
   .weseedu-gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-blue-400 to-teal-400 animate-flow;
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-500 dark:from-teal-400 dark:via-blue-400 dark:to-teal-400 animate-flow;
   }
 }
 
@@ -282,11 +299,12 @@ html {
 /* Add custom utility classes at the end of the file */
 
 @layer utilities {
-  .bg-grid-pattern {
+  /* Remove the grid pattern background that might be causing the flashing effect */
+  /* .bg-grid-pattern {
     background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), 
                      linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
     background-size: 80px 80px;
-  }
+  } */
 }
 
 /* Add animation for shimmer effect */

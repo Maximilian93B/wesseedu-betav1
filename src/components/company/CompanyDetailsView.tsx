@@ -6,7 +6,9 @@ import {
   Download, 
   Building2, 
   Users, 
-  FileText 
+  FileText,
+  Bell,
+  BellOff
 } from "lucide-react";
 import { 
   Card, 
@@ -18,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import SaveCompanyButton from "@/components/company/SaveCompanyButton";
 import PitchDeckDownload from "@/components/company/PitchDeckDownload";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface Company {
   id: string;
@@ -45,6 +49,11 @@ interface Company {
   };
 }
 
+interface CommunityInfo {
+  id: string;
+  isMember: boolean;
+}
+
 interface CompanyDetailsViewProps {
   companyId: string;
   onClose: () => void;
@@ -54,17 +63,41 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [communityInfo, setCommunityInfo] = useState<CommunityInfo | null>(null);
+  const [joiningOrLeaving, setJoiningOrLeaving] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchCompanyData() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/companies/${companyId}`);
-        if (!response.ok) {
+        const response = await fetchWithAuth(`/api/companies/${companyId}`);
+        
+        if (response.error) {
           throw new Error('Failed to fetch company data');
         }
-        const data = await response.json();
-        setCompany(data.company);
+        
+        // Handle different response formats
+        let companyData;
+        if (response.data?.company) {
+          // Format: { company: {...} }
+          companyData = response.data.company;
+        } else if (response.data?.data) {
+          // New format: { data: {...} }
+          companyData = response.data.data;
+        } else if (response.data) {
+          // Simple format: direct data
+          companyData = response.data;
+        } else {
+          throw new Error('Unexpected response format');
+        }
+        
+        setCompany(companyData);
+        
+        // After getting company data, fetch the community info
+        if (companyData) {
+          fetchCompanyCommunity(companyData.id);
+        }
       } catch (err) {
         console.error('Error fetching company data:', err);
         setError('Failed to load company data. Please try again later.');
@@ -78,11 +111,81 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
     }
   }, [companyId]);
 
+  const fetchCompanyCommunity = async (companyId: string) => {
+    try {
+      const response = await fetchWithAuth(`/api/companies/${companyId}/community`);
+      
+      if (response.error) {
+        console.log("No community found or error fetching community");
+        return;
+      }
+      
+      // Handle different response formats
+      let communityData;
+      if (response.data?.data) {
+        communityData = response.data.data;
+      } else {
+        communityData = response.data;
+      }
+      
+      setCommunityInfo(communityData);
+    } catch (error) {
+      console.error('Error fetching company community:', error);
+    }
+  };
+  
+  const handleJoinOrLeave = async () => {
+    if (!communityInfo) return;
+    
+    setJoiningOrLeaving(true);
+    try {
+      const endpoint = communityInfo.isMember 
+        ? `/api/communities/${communityInfo.id}/leave` 
+        : `/api/communities/${communityInfo.id}/join`;
+      
+      const response = await fetchWithAuth(endpoint, {
+        method: 'POST',
+      });
+      
+      if (response.error) {
+        throw new Error(communityInfo.isMember ? 'Failed to leave community' : 'Failed to join community');
+      }
+      
+      // Update the community info
+      setCommunityInfo({
+        ...communityInfo,
+        isMember: !communityInfo.isMember
+      });
+      
+      toast({
+        title: 'Success',
+        description: communityInfo.isMember 
+          ? 'You have left the community' 
+          : 'You have joined the community',
+      });
+    } catch (error) {
+      console.error('Error joining/leaving community:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to process your request. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setJoiningOrLeaving(false);
+    }
+  };
+
   // Show loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black">
-        <p className="text-white text-xl">Loading company details...</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-white">
+        <div className="relative mb-8">
+          <div className="w-16 h-16 border-4 border-slate-200 rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-slate-600 rounded-full 
+            animate-spin absolute top-0 left-0 border-t-transparent"></div>
+        </div>
+        <p className="text-slate-700 font-medium mb-2">Loading</p>
+        <p className="text-slate-500 text-sm">Retrieving company details...</p>
       </div>
     );
   }
@@ -90,9 +193,19 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
   // Show error state
   if (error || !company) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-black">
-        <p className="text-white text-xl mb-4">{error || 'Company not found'}</p>
-        <Button onClick={onClose} variant="outline">
+      <div className="flex flex-col items-center justify-center h-screen bg-white">
+        <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center 
+          mb-8 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+          <Building2 className="h-10 w-10 text-slate-600" />
+        </div>
+        <h3 className="text-slate-800 text-xl font-medium mb-2">
+          {error || 'Company not found'}
+        </h3>
+        <p className="text-slate-500 mb-8 max-w-md text-center">
+          We couldn't find the company you're looking for. It may have been removed or there might be a temporary issue.
+        </p>
+        <Button onClick={onClose} variant="outline" className="border-slate-300 text-slate-700 
+          hover:bg-slate-50 px-5 py-2.5 rounded-lg">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Companies
         </Button>
@@ -106,20 +219,25 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: "100%" }}
       transition={{ type: "spring", stiffness: 80, damping: 17 }}
-      className="absolute inset-0 bg-black overflow-y-auto"
+      className="absolute inset-0 bg-white overflow-y-auto"
     >
-      <div className="min-h-screen bg-black">
-        {/* Hero section with enhanced background */}
+      <div className="min-h-screen bg-white">
+        {/* Hero section with monochromatic background */}
         <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-emerald-900/20 via-emerald-900/10 to-black z-0">
-            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-white z-0">
+            <div className="absolute inset-0 opacity-[0.02]" 
+              style={{ 
+                backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
+                backgroundSize: "40px 40px"
+              }} 
+            />
           </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
             <div className="flex items-center justify-between mb-8">
               <Button
                 onClick={() => onClose()}
                 variant="ghost"
-                className="hover:bg-white/5 text-zinc-400 hover:text-emerald-400 transition-colors duration-200"
+                className="hover:bg-slate-50 text-slate-500 hover:text-slate-700 transition-colors duration-200"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Companies
@@ -143,11 +261,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="relative w-40 h-40 md:w-56 md:h-56 rounded-2xl overflow-hidden 
-                  border-4 border-white/10 bg-[#0A0A0A] flex-shrink-0 shadow-xl shadow-emerald-900/20
+                className="relative w-40 h-40 md:w-56 md:h-56 rounded-xl overflow-hidden 
+                  border border-slate-200 bg-white flex-shrink-0 shadow-[0_4px_20px_rgba(0,0,0,0.03)]
                   group"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-white opacity-0 
                   group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
                 {company?.image_url ? (
                   <Image
@@ -159,12 +277,12 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                     priority
                   />
                 ) : (
-                  <div className="w-full h-full bg-emerald-400/10 
+                  <div className="w-full h-full bg-slate-100 
                     flex items-center justify-center">
-                    <Building2 className="h-20 w-20 text-emerald-400" />
+                    <Building2 className="h-20 w-20 text-slate-600" />
                   </div>
                 )}
-                <div className="absolute inset-0 ring-2 ring-white/5 rounded-2xl"></div>
+                <div className="absolute inset-0 ring-1 ring-slate-200 rounded-xl"></div>
               </motion.div>
               
               <div className="flex-grow min-w-0">
@@ -175,22 +293,42 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                   className="flex flex-wrap gap-4 mb-6"
                 >
                   <Badge variant="outline" 
-                    className="px-4 py-1.5 border-emerald-400/20 bg-emerald-400/10 
-                      text-emerald-400 hover:bg-emerald-400/20 transition-colors duration-200">
+                    className="px-4 py-1.5 border-slate-300 bg-slate-50
+                      text-slate-700 hover:bg-slate-100 transition-colors duration-200">
                     <Users className="h-4 w-4 mr-2" />
                     {company?.community_members?.toLocaleString() || '0'}
                   </Badge>
                   <Badge variant="outline" 
-                    className="px-4 py-1.5 border-emerald-400/20 bg-emerald-400/10 
-                      text-emerald-400 hover:bg-emerald-400/20 transition-colors duration-200">
+                    className="px-4 py-1.5 border-slate-300 bg-slate-50
+                      text-slate-700 hover:bg-slate-100 transition-colors duration-200">
                     Score: {company?.score || 0}/100
                   </Badge>
                   {company?.sustainability_data?.construction && (
                     <Badge variant="outline" 
-                      className="px-4 py-1.5 border-emerald-400/20 bg-emerald-400/10 
-                        text-emerald-400 hover:bg-emerald-400/20 transition-colors duration-200">
+                      className="px-4 py-1.5 border-slate-300 bg-slate-50
+                        text-slate-700 hover:bg-slate-100 transition-colors duration-200">
                       {company.sustainability_data.construction}
                     </Badge>
+                  )}
+                  
+                  {/* Add Join Community Button */}
+                  {communityInfo && (
+                    <Button
+                      onClick={handleJoinOrLeave}
+                      className={communityInfo.isMember 
+                        ? "bg-slate-700 hover:bg-slate-800 text-white" 
+                        : "bg-slate-900 hover:bg-slate-800 text-white"}
+                      disabled={joiningOrLeaving || !communityInfo.id}
+                    >
+                      {joiningOrLeaving ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      ) : communityInfo.isMember ? (
+                        <BellOff className="h-4 w-4 mr-2" />
+                      ) : (
+                        <Bell className="h-4 w-4 mr-2" />
+                      )}
+                      {communityInfo.isMember ? 'Leave Community' : 'Join Community'}
+                    </Button>
                   )}
                 </motion.div>
                 
@@ -198,8 +336,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-5xl lg:text-6xl font-bold bg-gradient-to-r 
-                    from-emerald-300 via-white to-emerald-200 bg-clip-text text-transparent 
+                  className="text-5xl lg:text-6xl font-bold text-slate-800
                     mb-6 leading-tight"
                 >
                   {company?.name || 'Company'}
@@ -209,7 +346,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="text-xl text-zinc-300 leading-relaxed max-w-3xl"
+                  className="text-xl text-slate-600 leading-relaxed max-w-3xl"
                 >
                   {company?.description || 'No description available'}
                 </motion.p>
@@ -220,36 +357,54 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="space-y-24">
-            {/* Mission Statement Card with enhanced styling */}
+            {/* Mission Statement Card with monochromatic styling */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-0 overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent" />
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600" />
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-400/50 via-emerald-400/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-400/50 via-emerald-400/10 to-transparent" />
+              <Card 
+                className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+                style={{ 
+                  backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
+                }}
+              >
+                {/* Subtle texture pattern */}
+                <div className="absolute inset-0 opacity-[0.02]" 
+                  style={{ 
+                    backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
+                    backgroundSize: "40px 40px"
+                  }} 
+                />
+                
+                {/* Top edge shadow line */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+                
+                {/* Left accent */}
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-slate-400 to-slate-500"></div>
+                
                 <CardContent className="p-10 relative z-10">
                   <div className="max-w-3xl mx-auto text-center">
-                    <h3 className="text-2xl font-medium text-white mb-6">Our Mission</h3>
-                    <p className="text-zinc-300 italic text-2xl leading-relaxed font-light">
+                    <h3 className="text-2xl font-medium text-slate-800 mb-6">Our Mission</h3>
+                    <p className="text-slate-600 italic text-2xl leading-relaxed font-light">
                       "{company?.mission_statement || 'No mission statement available'}"
                     </p>
                   </div>
                 </CardContent>
+                
+                {/* Bottom shadow */}
+                <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
               </Card>
             </motion.div>
 
-            {/* KPI Section with enhanced cards */}
+            {/* KPI Section Cards */}
             <section>
               <motion.h2
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="text-3xl font-bold text-white mb-10 border-l-4 border-emerald-400 pl-4"
+                className="text-3xl font-bold text-slate-800 mb-10 border-l-4 border-slate-500 pl-4"
               >
                 Key Performance Indicators
               </motion.h2>
@@ -262,24 +417,23 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5 
-                      hover:border-emerald-500/30 transition-all duration-300 h-full
-                      hover:shadow-lg hover:shadow-emerald-900/20 group relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 
-                        group-hover:opacity-100 transition-opacity duration-500"></div>
-                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-400/30 via-emerald-400/5 to-transparent 
+                    <Card className="bg-white border border-slate-200
+                      hover:border-slate-300 transition-all duration-300 h-full
+                      hover:shadow-[0_10px_30px_rgb(0,0,0,0.06)] shadow-[0_4px_20px_rgba(0,0,0,0.03)] group relative overflow-hidden rounded-xl">
+                      {/* Top edge accent */}
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30 
                         opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                       <CardContent className="p-6 flex flex-col justify-between h-full relative z-10">
-                        <p className="text-zinc-400 capitalize mb-2 truncate group-hover:text-emerald-300 transition-colors">
+                        <p className="text-slate-500 capitalize mb-2 truncate group-hover:text-slate-700 transition-colors">
                           {key.replace(/_/g, " ")}
                         </p>
                         <div>
-                          <p className="text-3xl md:text-4xl font-bold text-emerald-400 mb-1 group-hover:text-white transition-colors">
+                          <p className="text-3xl md:text-4xl font-bold text-slate-700 mb-1 group-hover:text-slate-800 transition-colors">
                             {key === 'profit_margin' 
                               ? `${(value * 100).toFixed(0)}%` 
                               : `$${value?.toLocaleString() || '0'}`}
                           </p>
-                          <p className="text-sm text-zinc-500">
+                          <p className="text-sm text-slate-500">
                             {key === 'funding' ? 'Total raised' : '+15% from previous year'}
                           </p>
                         </div>
@@ -296,7 +450,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="text-3xl font-bold text-white mb-10 border-l-4 border-emerald-400 pl-4"
+                className="text-3xl font-bold text-slate-800 mb-10 border-l-4 border-slate-500 pl-4"
               >
                 Sustainability Impact
               </motion.h2>
@@ -313,29 +467,29 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5 
-                        hover:border-emerald-500/30 transition-all duration-300 overflow-hidden relative">
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-emerald-900/30" />
+                      <Card className="bg-white border border-slate-200
+                        hover:border-slate-300 transition-all duration-300 overflow-hidden relative">
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-900/30" />
                         <div 
-                          className="absolute bottom-0 left-0 h-1 bg-emerald-400 transition-all duration-700" 
+                          className="absolute bottom-0 left-0 h-1 bg-slate-400 transition-all duration-700" 
                           style={{ width: `${Math.min(value, 100)}%` }}
                         />
                         <CardContent className="p-8">
                           <div className="flex flex-col items-center text-center mb-6">
-                            <span className="text-5xl font-bold text-emerald-400 mb-2">
+                            <span className="text-5xl font-bold text-slate-700 mb-2">
                               {value}
                             </span>
-                            <p className="text-zinc-400 capitalize text-lg">
+                            <p className="text-slate-500 capitalize text-lg">
                               {key.replace(/_/g, " ")} Score
                             </p>
                           </div>
-                          <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden">
+                          <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                             <motion.div 
                               initial={{ width: 0 }}
                               whileInView={{ width: `${Math.min(value, 100)}%` }}
                               viewport={{ once: true }}
                               transition={{ duration: 1, delay: 0.5 }}
-                              className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2.5 rounded-full" 
+                              className="bg-gradient-to-r from-slate-400 to-slate-600 h-2.5 rounded-full" 
                             />
                           </div>
                         </CardContent>
@@ -354,11 +508,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                     viewport={{ once: true }}
                     transition={{ delay: 0.1 }}
                   >
-                    <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5 h-full
-                      hover:border-emerald-500/20 transition-all duration-300 relative overflow-hidden">
-                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-400/30 via-emerald-400/5 to-transparent"></div>
-                      <CardHeader className="pb-2 border-b border-white/5">
-                        <CardTitle className="text-xl text-emerald-300">Key Features</CardTitle>
+                    <Card className="bg-white border border-slate-200 h-full
+                      hover:border-slate-300 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-slate-300 via-slate-200 to-transparent"></div>
+                      <CardHeader className="pb-2 border-b border-slate-200">
+                        <CardTitle className="text-xl text-slate-700">Key Features</CardTitle>
                       </CardHeader>
                       <CardContent className="p-6">
                         <ul className="space-y-3">
@@ -370,11 +524,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                               viewport={{ once: true }}
                               transition={{ delay: index * 0.1 }}
                               className="flex items-center gap-3 p-4 
-                              rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                              rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
                             >
-                              <div className="w-2 h-2 rounded-full bg-emerald-400 
+                              <div className="w-2 h-2 rounded-full bg-slate-400 
                                 flex-shrink-0" />
-                              <span className="text-zinc-300 capitalize">{feature}</span>
+                              <span className="text-slate-700 capitalize">{feature}</span>
                             </motion.li>
                           ))}
                         </ul>
@@ -390,11 +544,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                     viewport={{ once: true }}
                     transition={{ delay: 0.2 }}
                   >
-                    <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5 h-full
-                      hover:border-emerald-500/20 transition-all duration-300 relative overflow-hidden">
-                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-400/30 via-emerald-400/5 to-transparent"></div>
-                      <CardHeader className="pb-2 border-b border-white/5">
-                        <CardTitle className="text-xl text-emerald-300">Materials Used</CardTitle>
+                    <Card className="bg-white border border-slate-200 h-full
+                      hover:border-slate-300 transition-all duration-300 relative overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-slate-300 via-slate-200 to-transparent"></div>
+                      <CardHeader className="pb-2 border-b border-slate-200">
+                        <CardTitle className="text-xl text-slate-700">Materials Used</CardTitle>
                       </CardHeader>
                       <CardContent className="p-6">
                         <ul className="space-y-3">
@@ -406,11 +560,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                               viewport={{ once: true }}
                               transition={{ delay: index * 0.1 }}
                               className="flex items-center gap-3 p-4 
-                              rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                              rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
                             >
-                              <div className="w-2 h-2 rounded-full bg-emerald-400 
+                              <div className="w-2 h-2 rounded-full bg-slate-400 
                                 flex-shrink-0" />
-                              <span className="text-zinc-300">{material}</span>
+                              <span className="text-slate-700">{material}</span>
                             </motion.li>
                           ))}
                         </ul>
@@ -431,17 +585,17 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                       viewport={{ once: true }}
                       transition={{ delay: 0.3 }}
                     >
-                      <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5
-                        hover:border-emerald-500/20 transition-all duration-300 overflow-hidden">
+                      <Card className="bg-white border border-slate-200
+                        hover:border-slate-300 transition-all duration-300 overflow-hidden">
                         <CardContent className="p-6 flex items-center gap-6">
-                          <div className="w-16 h-16 rounded-full bg-emerald-400/10 flex items-center justify-center flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="w-16 h-16 rounded-full bg-slate-400/10 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                           </div>
                           <div>
-                            <h3 className="text-xl font-medium text-white mb-1">Energy Positive</h3>
-                            <p className="text-zinc-400">
+                            <h3 className="text-xl font-medium text-slate-700 mb-1">Energy Positive</h3>
+                            <p className="text-slate-500">
                               This company produces more energy than it consumes, contributing clean energy back to the grid.
                             </p>
                           </div>
@@ -457,17 +611,17 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                       viewport={{ once: true }}
                       transition={{ delay: 0.4 }}
                     >
-                      <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5
-                        hover:border-emerald-500/20 transition-all duration-300 overflow-hidden">
+                      <Card className="bg-white border border-slate-200
+                        hover:border-slate-300 transition-all duration-300 overflow-hidden">
                         <CardContent className="p-6 flex items-center gap-6">
-                          <div className="w-16 h-16 rounded-full bg-emerald-400/10 flex items-center justify-center flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="w-16 h-16 rounded-full bg-slate-400/10 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                           </div>
                           <div>
-                            <h3 className="text-xl font-medium text-white mb-1">Carbon Footprint</h3>
-                            <p className="text-zinc-400">
+                            <h3 className="text-xl font-medium text-slate-700 mb-1">Carbon Footprint</h3>
+                            <p className="text-slate-500">
                               {company?.sustainability_data?.carbon_footprint ? 
                                 `${company.sustainability_data.carbon_footprint.charAt(0).toUpperCase() + 
                                 company.sustainability_data.carbon_footprint.slice(1)} carbon impact compared to industry standards.`
@@ -488,7 +642,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="text-3xl font-bold text-white mb-10 border-l-4 border-emerald-400 pl-4"
+                className="text-3xl font-bold text-slate-800 mb-10 border-l-4 border-slate-500 pl-4"
               >
                 Market Analysis
               </motion.h2>
@@ -499,11 +653,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                   viewport={{ once: true }}
                   transition={{ delay: 0.1 }}
                 >
-                  <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5 h-full
-                    hover:border-emerald-500/20 transition-all duration-300 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-400/30 via-emerald-400/5 to-transparent"></div>
-                    <CardHeader className="pb-2 border-b border-white/5">
-                      <CardTitle className="text-xl text-emerald-300">Market Position</CardTitle>
+                  <Card className="bg-white border border-slate-200
+                    hover:border-slate-300 transition-all duration-300 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-slate-300 via-slate-200 to-transparent"></div>
+                    <CardHeader className="pb-2 border-b border-slate-200">
+                      <CardTitle className="text-xl text-slate-700">Market Position</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 space-y-4">
                       {[
@@ -518,10 +672,10 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                           viewport={{ once: true }}
                           transition={{ delay: index * 0.1 }}
                           className="flex items-center justify-between 
-                          p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                          p-4 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
                         >
-                          <span className="text-zinc-300">{item.label}</span>
-                          <span className="text-emerald-400 font-medium text-lg">{item.value}</span>
+                          <span className="text-slate-500">{item.label}</span>
+                          <span className="text-slate-700 font-medium text-lg">{item.value}</span>
                         </motion.div>
                       ))}
                     </CardContent>
@@ -534,11 +688,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5 h-full
-                    hover:border-emerald-500/20 transition-all duration-300 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-400/30 via-emerald-400/5 to-transparent"></div>
-                    <CardHeader className="pb-2 border-b border-white/5">
-                      <CardTitle className="text-xl text-emerald-300">Competitive Advantage</CardTitle>
+                  <Card className="bg-white border border-slate-200
+                    hover:border-slate-300 transition-all duration-300 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-slate-300 via-slate-200 to-transparent"></div>
+                    <CardHeader className="pb-2 border-b border-slate-200">
+                      <CardTitle className="text-xl text-slate-700">Competitive Advantage</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                       <ul className="space-y-3">
@@ -554,11 +708,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
                             className="flex items-center gap-3 p-4 
-                            rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                            rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
                           >
-                            <div className="w-2 h-2 rounded-full bg-emerald-400 
+                            <div className="w-2 h-2 rounded-full bg-slate-400 
                               flex-shrink-0" />
-                            <span className="text-zinc-300">{item}</span>
+                            <span className="text-slate-700">{item}</span>
                           </motion.li>
                         ))}
                       </ul>
@@ -575,7 +729,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  className="text-3xl font-bold text-white mb-10 border-l-4 border-emerald-400 pl-4"
+                  className="text-3xl font-bold text-slate-800 mb-10 border-l-4 border-slate-500 pl-4"
                 >
                   Gallery
                 </motion.h2>
@@ -587,10 +741,10 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                       viewport={{ once: true }}
                       transition={{ duration: 0.5 }}
                     >
-                      <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5 overflow-hidden
-                        hover:border-emerald-500/20 transition-all duration-300 group">
-                        <CardHeader className="pb-2 border-b border-white/5">
-                          <CardTitle className="text-xl text-emerald-300">Our Team</CardTitle>
+                      <Card className="bg-white border border-slate-200
+                        hover:border-slate-300 transition-all duration-300 group">
+                        <CardHeader className="pb-2 border-b border-slate-200">
+                          <CardTitle className="text-xl text-slate-700">Our Team</CardTitle>
                         </CardHeader>
                         <CardContent className="p-0">
                           <div className="relative w-full h-80 overflow-hidden">
@@ -616,10 +770,10 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: 0.2 }}
                     >
-                      <Card className="bg-gradient-to-br from-[#0A0A0A] to-[#111] border-2 border-white/5 overflow-hidden
-                        hover:border-emerald-500/20 transition-all duration-300 group">
-                        <CardHeader className="pb-2 border-b border-white/5">
-                          <CardTitle className="text-xl text-emerald-300">Our Product</CardTitle>
+                      <Card className="bg-white border border-slate-200
+                        hover:border-slate-300 transition-all duration-300 group">
+                        <CardHeader className="pb-2 border-b border-slate-200">
+                          <CardTitle className="text-xl text-slate-700">Our Product</CardTitle>
                         </CardHeader>
                         <CardContent className="p-0">
                           <div className="relative w-full h-80 overflow-hidden">
@@ -648,15 +802,29 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
               viewport={{ once: true }}
               className="mt-24"
             >
-              <div className="relative overflow-hidden rounded-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/30 to-black"></div>
-                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-5 mix-blend-overlay"></div>
+              <div 
+                className="relative overflow-hidden rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+                style={{ 
+                  backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
+                }}
+              >
+                {/* Subtle texture pattern */}
+                <div className="absolute inset-0 opacity-[0.02]" 
+                  style={{ 
+                    backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
+                    backgroundSize: "40px 40px"
+                  }} 
+                />
+                
+                {/* Top edge shadow line */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+                
                 <div className="relative z-10 px-8 py-16 md:py-20">
                   <div className="max-w-3xl mx-auto text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-6">
                       Ready to Support {company?.name || 'this company'}?
                     </h2>
-                    <p className="text-xl text-zinc-300 mb-10 leading-relaxed">
+                    <p className="text-xl text-slate-600 mb-10 leading-relaxed">
                       Join our community of investors and help fund sustainable innovation that makes a difference.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -666,10 +834,31 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                           companyName={company.name || 'company'} 
                         />
                       )}
+                      {communityInfo && (
+                        <Button
+                          onClick={handleJoinOrLeave}
+                          className={communityInfo.isMember 
+                            ? "border-slate-700 text-slate-800 hover:bg-slate-800/10 px-8 py-6 text-lg h-auto" 
+                            : "border-slate-900 text-slate-800 hover:bg-slate-800/10 px-8 py-6 text-lg h-auto"}
+                          variant="outline"
+                          disabled={joiningOrLeaving || !communityInfo.id}
+                        >
+                          {joiningOrLeaving ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-800 mr-2"></div>
+                          ) : communityInfo.isMember ? (
+                            <BellOff className="h-5 w-5 mr-2" />
+                          ) : (
+                            <Bell className="h-5 w-5 mr-2" />
+                          )}
+                          {communityInfo.isMember ? 'Leave Community' : 'Join Community'}
+                        </Button>
+                      )}
                       <Button
                         onClick={() => company && company.id ? window.location.href = `/admin/companies/${company.id}` : null}
                         variant="outline"
-                        className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 px-8 py-6 text-lg h-auto"
+                        className="border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 
+                          shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)] 
+                          transition-all duration-300 px-8 py-6 text-lg h-auto"
                       >
                         <FileText className="h-5 w-5 mr-2" />
                         View Full Details
@@ -677,6 +866,9 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                     </div>
                   </div>
                 </div>
+                
+                {/* Bottom shadow */}
+                <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
               </div>
             </motion.section>
 
@@ -686,11 +878,11 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="mt-24 border-t border-white/5 pt-8"
+              className="mt-24 border-t border-slate-200 pt-8"
             >
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden border border-white/10">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden border border-slate-200">
                     {company?.image_url ? (
                       <Image
                         src={company?.image_url || ''}
@@ -700,14 +892,14 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                         sizes="48px"
                       />
                     ) : (
-                      <div className="w-full h-full bg-emerald-400/10 flex items-center justify-center">
-                        <Building2 className="h-6 w-6 text-emerald-400" />
+                      <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                        <Building2 className="h-6 w-6 text-slate-600" />
                       </div>
                     )}
                   </div>
                   <div>
-                    <p className="text-white font-medium">{company?.name || 'Company'}</p>
-                    <p className="text-zinc-500 text-sm">Last updated: {new Date().toLocaleDateString()}</p>
+                    <p className="text-slate-800 font-medium">{company?.name || 'Company'}</p>
+                    <p className="text-slate-500 text-sm">Last updated: {new Date().toLocaleDateString()}</p>
                   </div>
                 </div>
                 
@@ -715,7 +907,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                   <Button
                     onClick={() => onClose()}
                     variant="ghost"
-                    className="hover:bg-white/5 text-zinc-400 hover:text-emerald-400"
+                    className="hover:bg-slate-50 text-slate-500 hover:text-slate-700"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to Companies

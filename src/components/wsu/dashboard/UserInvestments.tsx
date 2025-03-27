@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -41,10 +44,20 @@ import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, BadgeInfo, LineChart, ArrowRight, AlertTriangle, Lightbulb } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
+import { motion } from 'framer-motion';
+import {
+  Bar,
+  BarChart as RechartsBarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Company {
   id: string;
@@ -62,11 +75,36 @@ interface Investment {
   };
 }
 
+interface ChartData {
+  month: string;
+  amount: number;
+}
+
 const formSchema = z.object({
   company_id: z.string().min(1, "Company is required"),
   amount: z.string().min(1, "Amount is required"),
   notes: z.string().optional(),
 });
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
 
 const UserInvestments = () => {
   const [investments, setInvestments] = useState<Investment[]>([]);
@@ -74,6 +112,8 @@ const UserInvestments = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [totalInvested, setTotalInvested] = useState(0);
   const [open, setOpen] = useState(false);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [hasError, setHasError] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -88,19 +128,25 @@ const UserInvestments = () => {
   });
 
   useEffect(() => {
-    // Only fetch data when authentication is confirmed
-    if (!authLoading) {
-      if (user) {
-        fetchInvestments();
-        fetchCompanies();
-      } else {
-        // Set not loading and empty data when no user
-        setIsLoading(false);
-        setInvestments([]);
-        setTotalInvested(0);
-        // Redirect to login if not authenticated
-        router.push('/auth/signin');
-      }
+    if (!authLoading && user) {
+      fetchInvestments();
+      fetchCompanies();
+      
+      // Set a timeout to exit loading state after 5 seconds
+      const timeoutId = setTimeout(() => {
+        if (isLoading) {
+          setIsLoading(false);
+          setHasError(true);
+        }
+      }, 5000);
+      
+      return () => clearTimeout(timeoutId);
+    } else if (!authLoading && !user) {
+      setIsLoading(false);
+      setInvestments([]);
+      setTotalInvested(0);
+      // Redirect to login if not authenticated
+      router.push('/auth/signin');
     }
   }, [authLoading, user, router]);
 
@@ -114,46 +160,56 @@ const UserInvestments = () => {
     
     try {
       setIsLoading(true);
-      console.log("UserInvestments: Fetching investment data from API");
+      setHasError(false);
       
-      const response = await fetchWithAuth('/api/auth/profile');
+      const response = await fetchWithAuth('/api/protected/investments');
       
-      if (!response.data) {
-        console.warn("UserInvestments: No profile data returned");
-        setInvestments([]);
-        setTotalInvested(0);
-        return;
+      if (response.error) {
+        throw new Error(response.error.toString());
       }
       
-      console.log("UserInvestments: Profile data fetched successfully", response.data);
+      // Transform data for the chart - group by month
+      const investmentData = response.data || [];
+      setInvestments(investmentData);
       
-      // Extract investments from the profile response
-      const investmentsData = response.data.investments || [];
+      // Process data for chart
+      const groupedByMonth: Record<string, number> = {};
       
-      // Transform the data to match your interface if needed
-      const formattedData = investmentsData.map((item: any) => ({
-        ...item,
-        companies: item.companies as { id: string; name: string }
+      investmentData.forEach((inv: Investment) => {
+        const date = new Date(inv.investment_date);
+        const monthYear = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        
+        if (!groupedByMonth[monthYear]) {
+          groupedByMonth[monthYear] = 0;
+        }
+        
+        groupedByMonth[monthYear] += inv.amount;
+      });
+      
+      // Convert to array format for recharts
+      const chartDataArray = Object.entries(groupedByMonth).map(([month, amount]) => ({
+        month,
+        amount
       }));
-
-      setInvestments(formattedData);
+      
+      // Sort by date
+      chartDataArray.sort((a, b) => {
+        const dateA = new Date(a.month);
+        const dateB = new Date(b.month);
+        return dateA.getTime() - dateB.getTime();
+      });
+      
+      setChartData(chartDataArray);
       
       // Calculate total invested
-      const total = formattedData.reduce((sum: number, investment: any) => {
-        return sum + parseFloat(investment.amount.toString());
+      const total = chartDataArray.reduce((sum: number, investment: any) => {
+        return sum + investment.amount;
       }, 0) || 0;
       
       setTotalInvested(total);
     } catch (error) {
       console.error('Error fetching investments:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load investments. Please try again.",
-        variant: "destructive"
-      });
-      // Set empty data on error
-      setInvestments([]);
-      setTotalInvested(0);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -161,21 +217,17 @@ const UserInvestments = () => {
 
   const fetchCompanies = async () => {
     try {
-      console.log("UserInvestments: Fetching companies data");
       const response = await fetchWithAuth('/api/companies');
       
       if (response.error) {
-        console.error("Error in companies response:", response.error);
         throw new Error(response.error.toString());
       }
       
       if (!response.data) {
-        console.warn("No companies data returned from API");
         setCompanies([]);
         return;
       }
       
-      console.log(`UserInvestments: Successfully fetched ${response.data.length} companies`);
       setCompanies(response.data);
     } catch (error) {
       console.error('Error fetching companies:', error);
@@ -229,147 +281,148 @@ const UserInvestments = () => {
     }
   };
 
-  return (
-    <Card className="bg-[#0A0A0A] border-2 border-white/5 transition-all duration-300">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-1 bg-gradient-to-b from-emerald-400 to-teal-600 rounded-full"></div>
-            <h3 className="text-xl font-semibold">Your Investments</h3>
-          </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-700">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Investment
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-zinc-900 border-zinc-700 text-white">
-              <DialogHeader>
-                <DialogTitle>Add Investment</DialogTitle>
-                <DialogDescription className="text-zinc-400">
-                  Record a new investment in a sustainable company.
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="company_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a company" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {companies.map(company => (
-                              <SelectItem key={company.id} value={company.id}>
-                                {company.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Amount ($)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="Enter amount" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="notes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Notes</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Optional notes" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <DialogFooter>
-                    <Button type="submit">Save</Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+  // Function to format date in a more readable format
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(date);
+  };
+
+  const navigateToInvestments = () => {
+    router.push('/investments');
+  };
+
+  const customTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white border border-slate-200 backdrop-blur-sm p-2 rounded-lg 
+          shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-slate-800">
+          <p className="text-sm font-medium">{payload[0].payload.month}</p>
+          <p className="text-slate-700 font-semibold">
+            ${payload[0].value.toLocaleString()}
+          </p>
         </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <Card 
+        className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+          hover:shadow-[0_10px_30px_rgb(0,0,0,0.06)] transition-all duration-500"
+        style={{ 
+          backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
+        }}
+      >
+        {/* Subtle texture pattern for depth */}
+        <div className="absolute inset-0 opacity-[0.02]" 
+          style={{ 
+            backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
+            backgroundSize: "40px 40px"
+          }} 
+        />
         
-        {isLoading ? (
-          <div className="flex items-center justify-center h-40">
-            <div className="animate-pulse text-zinc-500">Loading investments...</div>
-          </div>
-        ) : investments.length > 0 ? (
-          <div className="rounded-lg border border-zinc-800 overflow-hidden">
-            <Table>
-              <TableHeader className="bg-zinc-900">
-                <TableRow className="hover:bg-zinc-900/80 border-zinc-800">
-                  <TableHead className="text-zinc-400">Company</TableHead>
-                  <TableHead className="text-zinc-400 text-right">Amount</TableHead>
-                  <TableHead className="text-zinc-400">Date</TableHead>
-                  <TableHead className="text-zinc-400">Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {investments.map(investment => (
-                  <TableRow key={investment.id} className="hover:bg-zinc-900/50 border-zinc-800">
-                    <TableCell className="font-medium">{investment.companies.name}</TableCell>
-                    <TableCell className="text-right text-emerald-400 font-semibold">
-                      ${parseFloat(investment.amount.toString()).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-zinc-400">
-                      {new Date(investment.investment_date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-zinc-400">{investment.notes || '-'}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-40 text-center space-y-4 bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
-            <p className="text-zinc-400">No investments found. Start investing to track your portfolio!</p>
-            <Button 
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white"
-              onClick={() => setOpen(true)}
+        {/* Top edge shadow line for definition */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+        
+        {/* Inner shadow effects for depth */}
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
+        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
+        
+        <CardHeader className="px-5 pt-5 pb-0 relative z-10">
+          <CardTitle className="text-lg font-medium text-slate-800 flex items-center">
+            <LineChart className="h-5 w-5 mr-2 text-slate-600" />
+            Investment Activity
+          </CardTitle>
+        </CardHeader>
+        
+        <CardContent className="px-5 py-5 relative z-10">
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-[180px] w-full bg-slate-100" />
+            </div>
+          ) : hasError ? (
+            <motion.div 
+              variants={itemVariants}
+              className="flex flex-col items-center justify-center h-[180px] text-center space-y-3"
             >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Your First Investment
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              <AlertTriangle className="h-12 w-12 text-slate-400" />
+              <p className="text-slate-600 max-w-[250px]">
+                We couldn't load your investment data. Please try again later.
+              </p>
+            </motion.div>
+          ) : chartData.length === 0 ? (
+            <motion.div 
+              variants={itemVariants}
+              className="flex flex-col items-center justify-center h-[180px] text-center space-y-3"
+            >
+              <Lightbulb className="h-12 w-12 text-slate-400" />
+              <p className="text-slate-600 max-w-[250px]">
+                You haven't made any investments yet. Ready to start your impact journey?
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div 
+              variants={itemVariants}
+              className="h-[180px] w-full"
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsBarChart data={chartData} margin={{ top: 5, right: 5, bottom: 20, left: 0 }}>
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#64748b', fontSize: 12 }}
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#64748b', fontSize: 12 }}
+                    tickFormatter={(value) => `$${value}`}
+                  />
+                  <Tooltip 
+                    content={customTooltip}
+                    cursor={{ fill: 'rgba(100, 116, 139, 0.05)' }}
+                  />
+                  <Bar 
+                    dataKey="amount" 
+                    fill="url(#colorGradient)" 
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={50}
+                  />
+                  <defs>
+                    <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#64748b" stopOpacity={0.7}/>
+                    </linearGradient>
+                  </defs>
+                </RechartsBarChart>
+              </ResponsiveContainer>
+            </motion.div>
+          )}
+        </CardContent>
+        
+        <CardFooter className="px-5 py-4 border-t border-slate-200 bg-slate-50/80 relative z-10">
+          <Button 
+            variant="ghost" 
+            className="ml-auto text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+            onClick={navigateToInvestments}
+          >
+            View All Investments
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </CardFooter>
+      </Card>
+    </motion.div>
   );
 };
 

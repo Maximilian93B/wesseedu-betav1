@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useState } from "react"
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
+import { useToast } from "@/hooks/use-toast"
 
 interface PitchDeckDownloadProps {
   companyId: string
@@ -11,23 +13,31 @@ interface PitchDeckDownloadProps {
 
 export default function PitchDeckDownload({ companyId, companyName, variant = 'default' }: PitchDeckDownloadProps) {
   const [isDownloading, setIsDownloading] = useState(false)
+  const { toast } = useToast()
   
   const handleDownload = async () => {
     try {
       setIsDownloading(true)
-      const response = await fetch(`/api/companies/${companyId}/pitch-deck`)
+      const response = await fetchWithAuth(`/api/companies/${companyId}/pitch-deck`)
       
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Download failed')
+      if (response.error) {
+        throw new Error(response.error || 'Download failed')
       }
       
-      const data = await response.json()
+      // Handle different possible response formats
+      let downloadData;
+      if (response.data?.url) {
+        downloadData = response.data;
+      } else if (response.data?.data?.url) {
+        downloadData = response.data.data;
+      } else {
+        throw new Error('No download URL available')
+      }
       
-      if (data.url) {
+      if (downloadData.url) {
         const link = document.createElement('a')
-        link.href = data.url
-        link.download = data.fileName || `${companyName}-pitch-deck.pdf`
+        link.href = downloadData.url
+        link.download = downloadData.fileName || `${companyName}-pitch-deck.pdf`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -36,6 +46,11 @@ export default function PitchDeckDownload({ companyId, companyName, variant = 'd
       }
     } catch (error) {
       console.error('Download failed:', error)
+      toast({
+        title: "Error",
+        description: "Failed to download pitch deck. Please try again.",
+        variant: "destructive"
+      })
     } finally {
       setIsDownloading(false)
     }
@@ -46,8 +61,8 @@ export default function PitchDeckDownload({ companyId, companyName, variant = 'd
       onClick={handleDownload}
       variant={variant === 'outline' ? 'outline' : 'default'}
       className={variant === 'outline' 
-        ? "border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 transition-all duration-200" 
-        : "bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 text-lg h-auto"}
+        ? "border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-800 transition-all duration-200" 
+        : "bg-slate-900 hover:bg-slate-800 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 px-8 py-6 text-lg h-auto rounded-lg"}
       disabled={isDownloading}
     >
       <Download className={variant === 'outline' ? "h-4 w-4 mr-2" : "h-5 w-5 mr-2"} />

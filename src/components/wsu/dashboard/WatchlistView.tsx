@@ -1,14 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ExternalLink, Bookmark, TrendingUp, BarChart } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
+import { Skeleton } from "@/components/ui/skeleton"
+import Link from 'next/link'
+import Image from 'next/image'
+import { ArrowRight } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
@@ -23,6 +27,7 @@ interface WatchlistCompany {
     score: number
     pitch_deck_url: string
     sustainability_data: any
+    logo_url?: string
   } | null
 }
 
@@ -41,7 +46,8 @@ export function useWatchlist() {
   const { user, loading: authLoading } = useAuth()
   const { toast } = useToast()
 
-  const fetchWatchlistCompanies = async () => {
+  // Use useCallback to memoize the function
+  const fetchWatchlistCompanies = useCallback(async () => {
     if (authLoading) {
       console.log("useWatchlist: Auth is still loading, waiting...")
       return
@@ -56,50 +62,9 @@ export function useWatchlist() {
     try {
       console.log("useWatchlist: Starting fetch, setting loading to true")
       setLoading(true)
-      console.log(`useWatchlist: Fetching watchlist data from API for user ${user.id}`)
       
-      // First try to get data from the profile API which includes saved companies
-      console.log("useWatchlist: Trying to fetch from profile API first")
-      const profileResponse = await fetchWithAuth('/api/auth/profile', {
-        cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      })
-      
-      if (profileResponse.data && profileResponse.data.savedCompanies) {
-        console.log(`useWatchlist: Found ${profileResponse.data.savedCompanies.length} saved companies in profile data`)
-        
-        // Transform the data to match the WatchlistCompany interface
-        const transformedCompanies = profileResponse.data.savedCompanies.map((item: any) => ({
-          id: item.id,
-          company_id: item.company_id,
-          companies: item.companies
-        }))
-        
-        console.log("useWatchlist: Setting watchlist companies from profile data")
-        setWatchlistCompanies(transformedCompanies)
-        setLoading(false)
-        
-        // Log how many companies have valid company data
-        const validCompanies = transformedCompanies.filter((item: WatchlistCompany) => item.companies !== null)
-        console.log(`useWatchlist: ${validCompanies.length} of ${transformedCompanies.length} items have valid company data`)
-        
-        // Log the company IDs for debugging
-        const companyIds = transformedCompanies.map((item: WatchlistCompany) => item.company_id)
-        console.log(`useWatchlist: Company IDs in watchlist: ${JSON.stringify(companyIds)}`)
-        
-        return
-      }
-      
-      // Fallback to the watchlist API
-      console.log("useWatchlist: No saved companies in profile data, falling back to watchlist API")
-      
-      // Use a dedicated watchlist endpoint instead of profile
-      const response = await fetchWithAuth('/api/protected/watchlist', {
-        // Add cache-busting query parameter to prevent caching
+      // Use the correct API endpoint that matches your route
+      const response = await fetchWithAuth('/api/user/watchlist', {
         cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
@@ -148,7 +113,7 @@ export function useWatchlist() {
       console.log("useWatchlist: Setting loading to false")
       setLoading(false)
     }
-  }
+  }, [user?.id, authLoading, toast]); // Only depend on these values
 
   const handleRemoveFromWatchlist = async (companyId: string) => {
     if (!user?.id) return
@@ -156,13 +121,12 @@ export function useWatchlist() {
     try {
       console.log("Removing company from watchlist:", companyId)
       
-      // Call the API to remove the company from watchlist
-      const response = await fetchWithAuth('/api/protected/watchlist/remove', {
-        method: 'POST',
+      // Call the correct API endpoint
+      const response = await fetchWithAuth(`/api/user/watchlist/${companyId}`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ companyId }),
+        }
       })
       
       console.log("Remove response:", response)
@@ -189,35 +153,29 @@ export function useWatchlist() {
   }
 
   useEffect(() => {
-    if (!authLoading) {
-      console.log("useWatchlist: Auth loading complete, user:", user ? "logged in" : "not logged in")
-      if (user) {
-        console.log(`useWatchlist: User authenticated (${user.email}), fetching watchlist data`)
-        fetchWatchlistCompanies()
-        
-        // Set a timeout to exit loading state after 10 seconds
-        const timeoutId = setTimeout(() => {
-          if (loading) {
-            console.log("useWatchlist: Loading timeout reached, forcing exit from loading state")
-            setLoading(false)
-            setWatchlistCompanies([])
-            toast({
-              title: "Loading Timeout",
-              description: "Could not load watchlist data in a reasonable time. Please try again later.",
-              variant: "destructive"
-            })
-          }
-        }, 10000)
-        
-        return () => clearTimeout(timeoutId)
-      } else {
-        console.log("useWatchlist: No user, setting loading to false")
-        setLoading(false)
-      }
+    if (!authLoading && user) {
+      console.log(`useWatchlist: User authenticated (${user.email}), fetching watchlist data`)
+      fetchWatchlistCompanies()
+      
+      // Set a timeout to exit loading state after 10 seconds
+      const timeoutId = setTimeout(() => {
+        if (loading) {
+          console.log("useWatchlist: Loading timeout reached, forcing exit from loading state")
+          setLoading(false)
+          setWatchlistCompanies([])
+          toast({
+            title: "Loading Timeout",
+            description: "Could not load watchlist data in a reasonable time. Please try again later.",
+            variant: "destructive"
+          })
+        }
+      }, 10000)
+      
+      return () => clearTimeout(timeoutId)
     } else {
-      console.log("useWatchlist: Auth is still loading, waiting for authentication to complete")
+      setLoading(false)
     }
-  }, [authLoading, user])
+  }, [authLoading, user]); // Remove fetchWatchlistCompanies from dependencies
 
   return {
     watchlistCompanies,
@@ -253,15 +211,15 @@ export function WatchlistView({
   const watchlistCompanies = externalData || hookWatchlistCompanies
   const loading = externalLoading !== undefined ? externalLoading : hookLoading
 
-  // Force a refresh of the data when the component mounts
+  // Fix the useEffect to prevent infinite loops
   useEffect(() => {
-    if (!externalData) {
+    if (!externalData && !loading) {
       console.log("WatchlistView: No external data provided, fetching data from hook");
       fetchWatchlistCompanies();
     } else {
-      console.log(`WatchlistView: Using external data (${externalData.length} items)`);
+      console.log(`WatchlistView: Using external data or already loading`);
     }
-  }, [externalData, fetchWatchlistCompanies]);
+  }, [externalData, loading]); // Remove fetchWatchlistCompanies from dependencies
 
   // Test function to check if API routes are working
   const testApiConnection = async () => {
@@ -315,34 +273,25 @@ export function WatchlistView({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center py-8">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin">
-            <Bookmark className="h-10 w-10 text-emerald-400/50" />
+          <div className="relative h-10 w-10">
+            <motion.div 
+              className="absolute inset-0"
+              animate={{ 
+                rotate: 360,
+                opacity: [0.5, 1, 0.5]
+              }} 
+              transition={{ 
+                duration: 1.5, 
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <Bookmark className="h-10 w-10 text-slate-600" />
+            </motion.div>
           </div>
-          <p className="text-zinc-400 animate-pulse">Loading watchlist companies...</p>
-          
-          {/* Debug buttons */}
-          <div className="flex gap-2 mt-4">
-            <button 
-              onClick={fetchWatchlistCompanies}
-              className="text-xs text-zinc-500 hover:text-zinc-400 p-1"
-            >
-              Retry loading
-            </button>
-            <button 
-              onClick={testApiConnection}
-              className="text-xs text-zinc-500 hover:text-zinc-400 p-1"
-            >
-              Test API
-            </button>
-            <button 
-              onClick={debugState}
-              className="text-xs text-zinc-500 hover:text-zinc-400 p-1"
-            >
-              Debug State
-            </button>
-          </div>
+          <p className="text-slate-700 text-sm font-medium">Loading watchlist...</p>
         </div>
       </div>
     )
@@ -358,25 +307,18 @@ export function WatchlistView({
 
   if (displayCompanies.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-60 p-8">
-        <Bookmark className="h-12 w-12 text-zinc-700 mb-4" />
-        <p className="text-zinc-400 text-center text-lg mb-4">Your watchlist is empty.</p>
-        <div className="flex gap-2">
+      <div className="flex flex-col items-center justify-center h-60 py-8">
+        <div className="bg-white p-8 rounded-xl border border-slate-200 text-center max-w-md mx-auto shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+          <Bookmark className="h-10 w-10 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-700 text-center text-lg mb-4">Your watchlist is empty</p>
+          <p className="text-slate-500 text-sm mb-6">Start tracking sustainable companies to monitor your impact</p>
           <Button 
             variant="outline" 
             onClick={() => window.location.href = '/companies'}
-            className="border-emerald-500/20 text-emerald-400 
-              hover:bg-emerald-500/10 hover:border-emerald-500/30 mt-2"
+            className="bg-white border-slate-300 text-slate-700 
+              hover:bg-slate-50 hover:border-slate-400"
           >
-            Explore Companies
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={debugState}
-            className="border-zinc-500/20 text-zinc-400 
-              hover:bg-zinc-500/10 hover:border-zinc-500/30 mt-2"
-          >
-            Debug
+            Browse Companies
           </Button>
         </div>
       </div>
@@ -384,90 +326,175 @@ export function WatchlistView({
   }
 
   return (
-    <div className="space-y-4">
-      {isPreview && validCompanies.length > maxItems && (
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold text-white">Watchlist</h3>
-          {onViewAll && (
-            <Button 
-              variant="ghost" 
-              onClick={onViewAll}
-              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50"
-            >
-              View All
-            </Button>
-          )}
-        </div>
-      )}
+    <Card className="bg-white border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] 
+      hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] overflow-hidden rounded-lg 
+      hover:border-slate-300 transition-all duration-200">
+      <CardHeader className="px-5 pt-5 pb-0">
+        <CardTitle className="text-lg font-medium text-slate-800 flex items-center">
+          <Bookmark className="h-5 w-5 mr-2 text-slate-600" />
+          Watchlist
+        </CardTitle>
+      </CardHeader>
       
-      <div className="space-y-4">
-        {displayCompanies.map((company) => (
-          <div
-            key={company.id}
-            className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4"
+      <CardContent className="px-5 py-5">
+        {loading ? (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-4"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-emerald-400" />
+            <div className="flex items-center justify-center py-6 text-slate-500">
+              <Bookmark className="h-5 w-5 mr-2 animate-spin" />
+              <span>Loading your watchlist...</span>
+            </div>
+            <Skeleton className="h-16 w-full bg-slate-100" />
+            <Skeleton className="h-16 w-full bg-slate-100" />
+            <Skeleton className="h-16 w-full bg-slate-100" />
+          </motion.div>
+        ) : watchlistCompanies.length === 0 ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col items-center justify-center py-12 space-y-4 text-center"
+          >
+            <Bookmark className="h-12 w-12 text-slate-300" />
+            <div>
+              <p className="text-slate-600 mb-2">Your watchlist is empty</p>
+              <p className="text-slate-500 text-sm max-w-[250px] mx-auto">
+                Add companies you're interested in following to your watchlist
+              </p>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              asChild
+              className="mt-4 border-slate-300 hover:bg-slate-50 text-slate-700"
+            >
+              <Link href="/companies">
+                Browse Companies
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </motion.div>
+        ) : (
+          <motion.div 
+            className="space-y-3"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <AnimatePresence>
+              {displayCompanies.map((company) => (
+                <motion.div
+                  key={company.id}
+                  variants={itemVariants}
+                  exit={{ opacity: 0, y: -10 }}
+                  whileHover={{ scale: 1.01 }}
+                  className="flex items-center p-3 rounded-lg border border-slate-200 bg-white 
+                    shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)] 
+                    transition-all duration-200 hover:border-slate-300 hover:bg-slate-50/50"
+                >
+                  {company.companies?.logo_url ? (
+                    <div className="h-10 w-10 bg-slate-100 rounded-full mr-3 overflow-hidden border border-slate-200 flex items-center justify-center">
+                      <Image 
+                        src={company.companies.logo_url} 
+                        alt={company.companies?.name || "Company logo"}
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                      />
                     </div>
+                  ) : (
+                    <div className="h-10 w-10 bg-slate-100 rounded-full mr-3 border border-slate-200 flex items-center justify-center">
+                      <span className="text-slate-500 text-sm font-medium">
+                        {company.companies?.name?.substring(0, 2).toUpperCase() || "CO"}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-sm font-medium text-slate-800 truncate">{company.companies?.name || "Unknown Company"}</h3>
+                      <Link 
+                        href={`/companies/${company.companies?.id || ""}`}
+                        className="ml-2 text-slate-400 hover:text-slate-700 transition-colors"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
+                    </div>
+                    <div className="text-xs text-slate-500">{company.companies?.description || company.companies?.mission_statement || "No description available."}</div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">
-                      {company.companies?.name || "Unknown Company"}
-                    </h3>
-                    <p className="text-sm text-zinc-400 mt-1 line-clamp-2">
-                      {company.companies?.description || company.companies?.mission_statement || "No description available."}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
+                  
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded">
-                          <BarChart className="w-3 h-3 text-emerald-400" />
-                          <span className="text-xs font-medium text-emerald-400">
-                            {company.companies?.score || 0}
-                          </span>
+                        <div className="ml-2 px-2 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+                          {company.companies?.score || 0}/10
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Impact Score</p>
+                      <TooltipContent className="bg-white border border-slate-200 text-slate-800 shadow-lg">
+                        <div className="text-xs">
+                          <div className="font-medium mb-1">ESG Impact Score</div>
+                          <div className="text-slate-600">Higher score indicates better environmental and social governance</div>
+                        </div>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.location.href = `/companies/${company.companies?.id}`}
-                    className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50 h-8 w-8 p-0"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveFromWatchlist(company.company_id)}
-                    className="text-zinc-400 hover:text-zinc-300 hover:bg-zinc-800/50 h-8 w-8 p-0"
-                  >
-                    <Bookmark className="h-4 w-4 fill-current" />
-                  </Button>
-                </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            
+            {displayCompanies.length > 0 && (
+              <div className="flex justify-end mt-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  asChild
+                  className="text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                >
+                  <Link href="/account/watchlist">
+                    Manage Watchlist
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+            )}
+          </motion.div>
+        )}
+      </CardContent>
+    </Card>
   )
-} 
+}
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
+
+const getScoreColor = (score: number) => {
+  return "text-slate-700";
+};
+
+const getScoreBg = (score: number) => {
+  if (score >= 80) return "bg-slate-200";
+  if (score >= 60) return "bg-slate-100";
+  if (score >= 40) return "bg-slate-100";
+  if (score >= 20) return "bg-slate-100";
+  return "bg-slate-100";
+}; 

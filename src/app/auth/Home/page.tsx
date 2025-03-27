@@ -1,249 +1,393 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp, BarChart, Search, Bookmark } from "lucide-react"
-import { NewsSection } from "@/components/wsu/dashboard/NewsSection"
-import { SidebarAds } from "@/components/advertising/SidebarAds"
-import { AnimatePresence } from "framer-motion"
-import { DashboardView } from "@/components/wsu/dashboard/DashboardView"
-import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
-import CompaniesView from "@/components/company/CompaniesView"
-import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
-import { WatchlistView, useWatchlist } from "@/components/wsu/dashboard/WatchlistView"
+import { useState, useEffect, Suspense, useRef, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { AuthProvider, useAuth } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
+import { useWatchlist } from "@/components/wsu/dashboard/WatchlistView"
+import Head from "next/head"
+import dynamic from "next/dynamic"
+
+// Import home page specific components
+import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
+import { SectionTransition } from "@/components/wsu/dashboard/SectionTransition"
+
+// Import new modularized components from barrel file
+import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
+
+// Placeholder component for lazy loading
+const LazyLoadingPlaceholder = () => (
+  <div className="flex justify-center items-center min-h-[50vh] bg-white">
+    <LoadingScreen />
+  </div>
+)
+
+// Dynamically import heavier components
+const DashboardViewDynamic = dynamic(
+  () => import("@/components/wsu/dashboard/DashboardView").then(mod => ({ default: mod.DashboardView })), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
+
+const WatchlistViewDynamic = dynamic(
+  () => import("@/components/wsu/dashboard/WatchlistView").then(mod => ({ default: mod.WatchlistView })), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
+
+const CompaniesViewDynamic = dynamic(
+  () => import("@/components/company/CompaniesView"), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
+
+const CompanyDetailsViewDynamic = dynamic(
+  () => import("@/components/company/CompanyDetailsView").then(mod => ({ default: mod.CompanyDetailsView })), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
+
+const CommunitiesViewDynamic = dynamic(
+  () => import("@/components/community/CommunitiesView").then(mod => ({ default: mod.CommunitiesView })), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
+
+const CommunityDetailsViewDynamic = dynamic(
+  () => import("@/components/community/CommunityDetailsView"), 
+  { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
+)
+
+// Dynamically import home page components
+const HomeHeroDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.HomeHero })), 
+  { ssr: true }
+)
+
+const QuickActionsDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.QuickActions })), 
+  { ssr: true }
+)
+
+const HowItWorksDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.HowItWorks })), 
+  { ssr: true }
+)
+
+const PlatformImpactDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.PlatformImpact })), 
+  { ssr: true }
+)
+
+const FeaturedContentDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.FeaturedContent })), 
+  { ssr: true }
+)
+
+const CallToActionDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.CallToAction })), 
+  { ssr: true }
+)
+
+const GrowthHeroDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.GrowthHero })), 
+  { ssr: true }
+)
+
+const DataVizTransitionDynamic = dynamic(
+  () => import("@/components/wsu/dashboard/DataVizTransition").then(mod => ({ default: mod.DataVizTransition })), 
+  { ssr: false }
+)
 
 function HomePageContent() {
   const { user, profile, loading, signOut } = useAuth()
-  const [currentView, setCurrentView] = useState<'home' | 'dashboard' | 'companies' | 'company-details' | 'saved'>('home')
+  const [currentView, setCurrentView] = useState<
+    'home' | 'dashboard' | 'companies' | 'company-details' | 'saved' | 'communities' | 'community-details'
+  >('home')
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null)
   const [localLoading, setLocalLoading] = useState(true)
   const { toast } = useToast()
+  const router = useRouter()
+  
+  // Track whether we've shown the loading timeout toast
+  const hasShownTimeoutToastRef = useRef(false)
   
   // Use the shared watchlist hook to avoid duplicate data fetching
   const { watchlistCompanies, loading: watchlistLoading } = useWatchlist()
 
   // Add a timeout to ensure we don't get stuck in loading state
   useEffect(() => {
+    // Flag to track component mount state for preventing memory leaks
+    let isMounted = true;
+    
+    // If auth loading is already complete, update local loading state immediately
+    if (!loading && isMounted) {
+      setLocalLoading(false);
+    }
+    
     // Set a timeout to force loading to false after 5 seconds
     const timeoutId = setTimeout(() => {
-      if (localLoading) {
-        console.warn('HomePage: Loading timeout reached, forcing loading to false')
-        setLocalLoading(false)
+      if (isMounted && localLoading) {
+        setLocalLoading(false);
         
-        // Show a toast to inform the user
-        toast({
-          title: "Loading timeout",
-          description: "Some data might not be available. Please refresh if needed.",
-          variant: "default"
-        })
+        // Only show toast if we actually had to force the loading state change
+        // and we haven't shown it yet
+        if (loading && !hasShownTimeoutToastRef.current) {
+          hasShownTimeoutToastRef.current = true;
+          toast({
+            title: "Loading timeout",
+            description: "Some data might not be available. Please refresh if needed.",
+            variant: "default"
+          });
+        }
       }
-    }, 5000)
+    }, 5000);
 
-    // If auth loading completes, update local loading state
-    if (!loading) {
-      setLocalLoading(false)
-      clearTimeout(timeoutId)
+    // Cleanup function to prevent memory leaks and cancel timeout
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [loading]); // Only depend on auth loading state, not localLoading
+
+  const handleNavigation = useCallback((view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => {
+    if (view === 'home') {
+      setCurrentView('home')
+    } else if (view === 'dashboard') {
+      setCurrentView('dashboard')
+    } else if (view === 'companies') {
+      setCurrentView('companies')
+    } else if (view === 'saved') {
+      setCurrentView('saved')
+    } else if (view === 'communities') {
+      // Use router to navigate to the communities page instead of changing view
+      router.push('/communities')
     }
+  }, [router]);
 
-    return () => clearTimeout(timeoutId)
-  }, [loading, localLoading, toast])
+  const handleCompanySelect = useCallback((id: string) => {
+    setSelectedCompanyId(id);
+    setCurrentView('company-details');
+  }, []);
 
-  const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved') => {
-    setCurrentView(view)
-    setSelectedCompanyId(null)
-  }
+  const handleCommunitySelect = useCallback((id: string) => {
+    setSelectedCommunityId(id);
+    setCurrentView('community-details');
+  }, []);
 
-  // Show loading state with a better UI
+  // Show loading state
   if (localLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-gray-400">
-        <div className="w-12 h-12 border-t-2 border-emerald-500 rounded-full animate-spin mb-4"></div>
-        <p>Loading your dashboard...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   // If no user after loading completes, show login message
   if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-gray-400">
-        <p className="mb-4">You need to be logged in to view this page</p>
-        <Button 
-          onClick={() => window.location.href = '/auth/login'}
-          className="bg-emerald-500 hover:bg-emerald-400 text-white"
-        >
-          Go to Login
-        </Button>
-      </div>
-    )
+    return <LoginRequired />
   }
 
-  // Prepare stats from profile data with default values if data is missing
-  const stats = [
-    {
-      title: "Your Investment",
-      value: `$${profile?.total_investments?.toLocaleString() || '0'}`,
-      icon: <TrendingUp className="h-10 w-10 text-emerald-400" />,
-    },
-    {
-      title: "Impact Score",
-      value: `${profile?.impact_score || '0'}/10`,
-      icon: <BarChart className="h-10 w-10 text-emerald-400" />,
-    },
-  ];
-
   return (
-    <div className="flex flex-col min-h-screen bg-black relative overflow-hidden">
-      <HomePageNav
-        currentView={currentView}
-        onNavigate={(view) => {
-          setCurrentView(view)
-          setSelectedCompanyId(null)
+    <>
+      <div 
+        className="flex flex-col min-h-screen relative overflow-hidden max-w-[100vw]"
+        style={{ 
+          backgroundImage: "linear-gradient(to right top, #ebebeb, #eeeef0, #f1f2f5, #f4f5fa, #f6f9ff)" 
         }}
-        onSignOut={signOut}
-      />
-      
-      {/* Background glows */}
-      <div className="absolute left-[10%] top-0 w-[900px] h-[900px] 
-        bg-emerald-500/5 blur-[150px] rounded-full 
-        pointer-events-none"></div>
-      
-      <div className="absolute right-[5%] bottom-0 w-[800px] h-[800px] 
-        bg-emerald-500/5 blur-[130px] rounded-full 
-        pointer-events-none"></div>
-
-      <div className="absolute left-[40%] top-[40%] w-[600px] h-[600px] 
-        bg-emerald-400/3 blur-[100px] rounded-full 
-        pointer-events-none"></div>
-
-      {/* Main layout with sidebars */}
-      <div className="flex flex-1 relative">
-        {/* Left Sidebar - Ads */}
-        <SidebarAds />
+      >
+        <HomePageNav
+          currentView={currentView}
+          onNavigate={handleNavigation}
+          onSignOut={signOut}
+        />
         
-        {/* Main Content - centered between sidebars */}
-        <main className="flex-1 ml-80 mr-80 relative">
-          {/* Home content */}
-          <div className={currentView === 'home' ? 'block' : 'hidden'}>
-            <div className="max-w-5xl mx-auto px-4 py-8">
-              {/* Welcome Section */}
-              <section className="mb-12">
-                <div className="space-y-4 text-center">
-                  <span className="inline-block text-emerald-400 text-sm font-medium tracking-wider uppercase 
-                    bg-emerald-400/10 px-4 py-1 rounded-full border border-emerald-400/20">
-                    Welcome Back
-                  </span>
-                  <h1 className="relative">
-                    <span className="absolute -inset-1 blur-2xl bg-gradient-to-r from-emerald-400/20 
-                      via-white/5 to-emerald-400/20 animate-pulse"></span>
-                    <span className="relative text-4xl md:text-5xl lg:text-6xl font-bold 
-                      bg-gradient-to-r from-zinc-200 via-white to-zinc-300 bg-clip-text 
-                      text-transparent tracking-tight leading-tight">
-                      Your Gateway to <br className="hidden sm:block" />
-                      <span className="text-emerald-400">Sustainable</span> Investments
-                    </span>
-                  </h1>
-                  <p className="max-w-2xl mx-auto text-zinc-400 text-lg md:text-xl leading-relaxed font-light">
-                    Make an impact while growing your portfolio with our 
-                    <span className="text-emerald-400 font-normal"> innovative platform</span>
-                  </p>
+        {/* Simplified background effects - with light colors for better performance */}
+        <div 
+          className="absolute left-[5%] top-[-5%] w-[600px] h-[600px] 
+            bg-gradient-to-br from-blue-100 to-emerald-50 blur-[100px] rounded-full 
+            pointer-events-none opacity-50"
+          aria-hidden="true"
+        ></div>
+        
+        {/* Main Layout - with overflow handling for mobile */}
+        <div className="flex-1 relative overflow-x-hidden">
+          {/* Main Content */}
+          <main className="w-full">
+            {currentView === 'home' && (
+              <>
+                {/* Hero Section - now light */}
+                <div className="bg-transparent relative">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-16">
+                    <Suspense fallback={<div className="h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
+                      <HomeHeroDynamic 
+                        profile={profile} 
+                        onNavigate={handleNavigation} 
+                      />
+                      
+                      {/* QuickActions */}
+                      <div className="mt-8 md:mt-16 relative">
+                        <QuickActionsDynamic onNavigate={handleNavigation} />
+                      </div>
+                    </Suspense>
+                  </div>
                 </div>
-              </section>
 
-              {/* Stats Cards */}
-              <section className="mb-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {stats.map((stat, index) => (
-                    <Card key={index} className="bg-zinc-900/50 border-2 border-white/5 hover:border-emerald-500/20 
-                      transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-zinc-400 text-sm font-normal">{stat.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex items-center justify-between">
-                        <span className="text-2xl font-bold text-white">{stat.value}</span>
-                        {stat.icon}
-                      </CardContent>
-                    </Card>
-                  ))}
+                {/* Transition - now light-to-white */}
+                <SectionTransition direction="light-to-white" />
+
+                {/* WHITE SECTION 1: How It Works */}
+                <div className="bg-white py-16 md:py-24 relative">
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                    <Suspense fallback={<div className="h-[200px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+                      <HowItWorksDynamic />
+                      <div className="mt-16 md:mt-24">
+                        <PlatformImpactDynamic />
+                      </div>
+                    </Suspense>
+                  </div>
                 </div>
-              </section>
 
-              {/* Quick Actions */}
-              <section className="mb-12">
-                <h2 className="text-xl font-semibold text-white mb-6">Quick Actions</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Button 
-                    onClick={() => handleNavigation('companies')}
-                    className="flex items-center justify-center gap-3 h-16 bg-zinc-900/50 border-2 border-white/5 
-                      hover:border-emerald-500/20 hover:bg-zinc-900 transition-all duration-300 
-                      hover:shadow-lg hover:shadow-emerald-500/5"
-                  >
-                    <Search className="h-5 w-5 text-emerald-400" />
-                    <span className="text-white">Explore Companies</span>
-                  </Button>
+                {/* DataViz with integrated wave transition */}
+                <Suspense fallback={<div className="h-[400px] bg-slate-50 flex items-center justify-center"><LoadingScreen /></div>}>
+                  <DataVizTransitionDynamic />
+                </Suspense>
+                
+                {/* FeaturedContent Section - now with light colors */}
+                <div className="relative">
+                  {/* Simple split background container */}
+                  <div className="flex flex-col md:flex-row">
+                    <div className="w-full md:w-1/2 bg-blue-50"></div>
+                    <div className="w-full md:w-1/2 bg-white"></div>
+                  </div>
                   
-                  <Button 
-                    onClick={() => handleNavigation('saved')}
-                    className="flex items-center justify-center gap-3 h-16 bg-zinc-900/50 border-2 border-white/5 
-                      hover:border-emerald-500/20 hover:bg-zinc-900 transition-all duration-300 
-                      hover:shadow-lg hover:shadow-emerald-500/5"
-                  >
-                    <Bookmark className="h-5 w-5 text-emerald-400" />
-                    <span className="text-white">View Watchlist</span>
-                  </Button>
+                  {/* Content container */}
+                  <div className="absolute inset-0">
+                    <Suspense fallback={<div className="h-full flex items-center justify-center py-12 bg-white"><LoadingScreen /></div>}>
+                      <FeaturedContentDynamic />
+                    </Suspense>
+                  </div>
+                  
+                  {/* Fixed height container - adjusted for mobile */}
+                  <div className="h-[600px] sm:h-[660px] md:h-[720px] lg:h-[800px]"></div>
                 </div>
-              </section>
-            </div>
-          </div>
+                
+                {/* GrowthHero Section - now light */}
+                <div className="relative bg-gradient-to-b from-slate-50 to-white">
+                  <Suspense fallback={<div className="h-[70vh] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+                    <GrowthHeroDynamic 
+                      onAction={() => handleNavigation('companies')} 
+                      actionButtonText="Start Investing Today"
+                    />
+                  </Suspense>
+                </div>
+                
+                {/* Call to Action */}
+                <div className="bg-slate-50 pt-12 pb-16 sm:pt-16 sm:pb-20 relative overflow-hidden">
+                  {/* Subtle accent glow element */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-emerald-100 rounded-full blur-3xl pointer-events-none"></div>
+                  
+                  {/* Content container */}
+                  <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-8 relative z-10">
+                    <Suspense fallback={<div className="h-[150px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+                      <CallToActionDynamic onNavigate={handleNavigation} />
+                    </Suspense>
+                  </div>
+                </div>
+              </>
+            )}
 
-          {/* Dashboard overlay */}
-          {currentView === 'dashboard' && (
-            <DashboardView user={user} />
-          )}
+            {/* Dashboard overlay */}
+            {currentView === 'dashboard' && (
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <DashboardViewDynamic user={user} />
+                </Suspense>
+              </div>
+            )}
 
-          {/* Companies overlay */}
-          {currentView === 'companies' && (
-            <CompaniesView 
-              onCompanySelect={(id: string) => {
-                setSelectedCompanyId(id)
-                setCurrentView('company-details')
-              }}
-            />
-          )}
+            {/* Companies overlay */}
+            {currentView === 'companies' && (
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <CompaniesViewDynamic 
+                    onCompanySelect={handleCompanySelect}
+                  />
+                </Suspense>
+              </div>
+            )}
 
-          {/* Company details overlay */}
-          {currentView === 'company-details' && selectedCompanyId && (
-            <CompanyDetailsView 
-              companyId={selectedCompanyId}
-              onClose={() => {
-                setSelectedCompanyId(null)
-                setCurrentView('companies')
-              }}
-            />
-          )}
+            {/* Company details overlay */}
+            {currentView === 'company-details' && selectedCompanyId && (
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <CompanyDetailsViewDynamic 
+                    companyId={selectedCompanyId}
+                    onClose={() => {
+                      setSelectedCompanyId(null)
+                      setCurrentView('companies')
+                    }}
+                  />
+                </Suspense>
+              </div>
+            )}
 
-          {/* Watchlist overlay (previously SavedCompaniesView) */}
-          {currentView === 'saved' && (
-            <WatchlistView 
-              externalData={watchlistCompanies}
-              externalLoading={watchlistLoading}
-            />
-          )}
-        </main>
+            {/* Communities overlay */}
+            {currentView === 'communities' && (
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <CommunitiesViewDynamic 
+                    onCommunitySelect={handleCommunitySelect}
+                  />
+                </Suspense>
+              </div>
+            )}
 
-        {/* Right Sidebar - News */}
-        <NewsSection />
+            {/* Community details overlay */}
+            {currentView === 'community-details' && selectedCommunityId && (
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <CommunityDetailsViewDynamic
+                    community={{
+                      id: selectedCommunityId,
+                      isMember: false,
+                      description: null,
+                      created_at: new Date().toISOString(),
+                      companies: {
+                        id: selectedCommunityId,
+                        name: 'Loading...',
+                        description: null,
+                        mission_statement: null,
+                        score: 0,
+                        image_url: null
+                      }
+                    }}
+                    onBack={() => {
+                      setSelectedCommunityId(null)
+                      setCurrentView('communities')
+                    }}
+                  />
+                </Suspense>
+              </div>
+            )}
+
+            {/* Watchlist overlay */}
+            {currentView === 'saved' && (
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+                  <WatchlistViewDynamic 
+                    externalData={watchlistCompanies}
+                    externalLoading={watchlistLoading}
+                  />
+                </Suspense>
+              </div>
+            )}
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
 export default function HomePage() {
   return (
     <AuthProvider>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      </Head>
       <HomePageContent />
     </AuthProvider>
   )

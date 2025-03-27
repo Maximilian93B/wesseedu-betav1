@@ -20,6 +20,11 @@ const routes = [
     href: "/companies",
   },
   {
+    label: "Communities",
+    icon: Users,
+    href: "/communities",
+  },
+  {
     label: "Community",
     icon: Users,
     href: "/auth/dashboard/community",
