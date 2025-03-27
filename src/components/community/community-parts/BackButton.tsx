@@ -18,9 +18,9 @@ export const BackButton = ({ onBack, variants }: BackButtonProps) => {
         variant="outline" 
         size="sm" 
         onClick={onBack}
-        className="mb-6 bg-white dark:bg-slate-900 backdrop-blur-sm border-slate-200 dark:border-slate-800 hover:bg-orange-50 dark:hover:bg-orange-950/30 hover:border-orange-200 dark:hover:border-orange-800 text-slate-700 dark:text-slate-300 hover:text-orange-600 dark:hover:text-orange-500 transition-colors"
+        className="mb-6 bg-white dark:bg-slate-900 backdrop-blur-sm border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-200 transition-colors shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
       >
-        <ArrowLeft className="h-4 w-4 mr-2 text-orange-500 dark:text-orange-600" />
+        <ArrowLeft className="h-4 w-4 mr-2 text-slate-600 dark:text-slate-400" />
         Back to Communities
       </MemoizedButton>
     </motion.div>

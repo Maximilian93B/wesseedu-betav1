@@ -288,10 +288,10 @@ export function WatchlistView({
                 ease: "easeInOut"
               }}
             >
-              <Bookmark className="h-10 w-10 text-emerald-400" />
+              <Bookmark className="h-10 w-10 text-slate-600" />
             </motion.div>
           </div>
-          <p className="text-emerald-400/80 text-sm font-medium">Loading watchlist...</p>
+          <p className="text-slate-700 text-sm font-medium">Loading watchlist...</p>
         </div>
       </div>
     )
@@ -308,15 +308,15 @@ export function WatchlistView({
   if (displayCompanies.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-60 py-8">
-        <div className="bg-black/40 backdrop-blur-sm p-8 rounded-xl border border-zinc-800/50 text-center max-w-md mx-auto">
-          <Bookmark className="h-10 w-10 text-zinc-700 mx-auto mb-4" />
-          <p className="text-zinc-300 text-center text-lg mb-4">Your watchlist is empty</p>
-          <p className="text-zinc-500 text-sm mb-6">Start tracking sustainable companies to monitor your impact</p>
+        <div className="bg-white p-8 rounded-xl border border-slate-200 text-center max-w-md mx-auto shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+          <Bookmark className="h-10 w-10 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-700 text-center text-lg mb-4">Your watchlist is empty</p>
+          <p className="text-slate-500 text-sm mb-6">Start tracking sustainable companies to monitor your impact</p>
           <Button 
             variant="outline" 
             onClick={() => window.location.href = '/companies'}
-            className="bg-black/60 border-emerald-500/30 text-emerald-400 
-              hover:bg-emerald-500/10 hover:border-emerald-500/40"
+            className="bg-white border-slate-300 text-slate-700 
+              hover:bg-slate-50 hover:border-slate-400"
           >
             Browse Companies
           </Button>
@@ -326,10 +326,12 @@ export function WatchlistView({
   }
 
   return (
-    <Card className="bg-black/60 backdrop-blur-sm border border-zinc-800/50 shadow-lg overflow-hidden rounded-xl hover:border-zinc-700/50 transition-all duration-200">
+    <Card className="bg-white border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] 
+      hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] overflow-hidden rounded-lg 
+      hover:border-slate-300 transition-all duration-200">
       <CardHeader className="px-5 pt-5 pb-0">
-        <CardTitle className="text-lg font-semibold text-white flex items-center">
-          <Bookmark className="h-5 w-5 mr-2 text-amber-400" />
+        <CardTitle className="text-lg font-medium text-slate-800 flex items-center">
+          <Bookmark className="h-5 w-5 mr-2 text-slate-600" />
           Watchlist
         </CardTitle>
       </CardHeader>
@@ -341,13 +343,13 @@ export function WatchlistView({
             animate={{ opacity: 1 }}
             className="space-y-4"
           >
-            <div className="flex items-center justify-center py-6 text-zinc-500">
+            <div className="flex items-center justify-center py-6 text-slate-500">
               <Bookmark className="h-5 w-5 mr-2 animate-spin" />
               <span>Loading your watchlist...</span>
             </div>
-            <Skeleton className="h-16 w-full bg-zinc-900/40" />
-            <Skeleton className="h-16 w-full bg-zinc-900/40" />
-            <Skeleton className="h-16 w-full bg-zinc-900/40" />
+            <Skeleton className="h-16 w-full bg-slate-100" />
+            <Skeleton className="h-16 w-full bg-slate-100" />
+            <Skeleton className="h-16 w-full bg-slate-100" />
           </motion.div>
         ) : watchlistCompanies.length === 0 ? (
           <motion.div 
@@ -356,10 +358,10 @@ export function WatchlistView({
             transition={{ duration: 0.3 }}
             className="flex flex-col items-center justify-center py-12 space-y-4 text-center"
           >
-            <Bookmark className="h-12 w-12 text-zinc-700" />
+            <Bookmark className="h-12 w-12 text-slate-300" />
             <div>
-              <p className="text-zinc-400 mb-2">Your watchlist is empty</p>
-              <p className="text-zinc-500 text-sm max-w-[250px] mx-auto">
+              <p className="text-slate-600 mb-2">Your watchlist is empty</p>
+              <p className="text-slate-500 text-sm max-w-[250px] mx-auto">
                 Add companies you're interested in following to your watchlist
               </p>
             </div>
@@ -367,7 +369,7 @@ export function WatchlistView({
             <Button 
               variant="outline" 
               asChild
-              className="mt-4 border-amber-500/20 hover:bg-amber-950/20 text-amber-400"
+              className="mt-4 border-slate-300 hover:bg-slate-50 text-slate-700"
             >
               <Link href="/companies">
                 Browse Companies
@@ -389,10 +391,12 @@ export function WatchlistView({
                   variants={itemVariants}
                   exit={{ opacity: 0, y: -10 }}
                   whileHover={{ scale: 1.01 }}
-                  className="flex items-center p-3 rounded-lg border border-zinc-800/50 bg-black/50 backdrop-blur-sm transition-all duration-200 hover:border-zinc-700/80 hover:bg-zinc-900/10"
+                  className="flex items-center p-3 rounded-lg border border-slate-200 bg-white 
+                    shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)] 
+                    transition-all duration-200 hover:border-slate-300 hover:bg-slate-50/50"
                 >
                   {company.companies?.logo_url ? (
-                    <div className="h-10 w-10 bg-zinc-800 rounded-full mr-3 overflow-hidden border border-zinc-700/50 flex items-center justify-center">
+                    <div className="h-10 w-10 bg-slate-100 rounded-full mr-3 overflow-hidden border border-slate-200 flex items-center justify-center">
                       <Image 
                         src={company.companies.logo_url} 
                         alt={company.companies?.name || "Company logo"}
@@ -402,8 +406,8 @@ export function WatchlistView({
                       />
                     </div>
                   ) : (
-                    <div className="h-10 w-10 bg-zinc-900 rounded-full mr-3 border border-zinc-800 flex items-center justify-center">
-                      <span className="text-zinc-400 text-sm font-medium">
+                    <div className="h-10 w-10 bg-slate-100 rounded-full mr-3 border border-slate-200 flex items-center justify-center">
+                      <span className="text-slate-500 text-sm font-medium">
                         {company.companies?.name?.substring(0, 2).toUpperCase() || "CO"}
                       </span>
                     </div>
@@ -411,28 +415,28 @@ export function WatchlistView({
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-medium text-white truncate">{company.companies?.name || "Unknown Company"}</h3>
+                      <h3 className="text-sm font-medium text-slate-800 truncate">{company.companies?.name || "Unknown Company"}</h3>
                       <Link 
                         href={`/companies/${company.companies?.id || ""}`}
-                        className="ml-2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                        className="ml-2 text-slate-400 hover:text-slate-700 transition-colors"
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Link>
                     </div>
-                    <div className="text-xs text-zinc-500">{company.companies?.description || company.companies?.mission_statement || "No description available."}</div>
+                    <div className="text-xs text-slate-500">{company.companies?.description || company.companies?.mission_statement || "No description available."}</div>
                   </div>
                   
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className={`ml-2 px-2 py-1 rounded-md text-xs font-medium ${getScoreBg(company.companies?.score || 0)} ${getScoreColor(company.companies?.score || 0)}`}>
+                        <div className="ml-2 px-2 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
                           {company.companies?.score || 0}/10
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent className="bg-black/90 border border-zinc-700 text-white">
+                      <TooltipContent className="bg-white border border-slate-200 text-slate-800 shadow-lg">
                         <div className="text-xs">
                           <div className="font-medium mb-1">ESG Impact Score</div>
-                          <div className="text-zinc-400">Higher score indicates better environmental and social governance</div>
+                          <div className="text-slate-600">Higher score indicates better environmental and social governance</div>
                         </div>
                       </TooltipContent>
                     </Tooltip>
@@ -447,7 +451,7 @@ export function WatchlistView({
                   variant="ghost" 
                   size="sm" 
                   asChild
-                  className="text-amber-400 hover:text-amber-300 hover:bg-amber-950/30"
+                  className="text-slate-600 hover:text-slate-800 hover:bg-slate-100"
                 >
                   <Link href="/account/watchlist">
                     Manage Watchlist
@@ -484,17 +488,13 @@ const itemVariants = {
 };
 
 const getScoreColor = (score: number) => {
-  if (score >= 80) return "text-emerald-400";
-  if (score >= 60) return "text-green-400";
-  if (score >= 40) return "text-yellow-400";
-  if (score >= 20) return "text-orange-400";
-  return "text-red-400";
+  return "text-slate-700";
 };
 
 const getScoreBg = (score: number) => {
-  if (score >= 80) return "bg-emerald-500/10";
-  if (score >= 60) return "bg-green-500/10";
-  if (score >= 40) return "bg-yellow-500/10";
-  if (score >= 20) return "bg-orange-500/10";
-  return "bg-red-500/10";
+  if (score >= 80) return "bg-slate-200";
+  if (score >= 60) return "bg-slate-100";
+  if (score >= 40) return "bg-slate-100";
+  if (score >= 20) return "bg-slate-100";
+  return "bg-slate-100";
 }; 

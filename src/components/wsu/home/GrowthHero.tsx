@@ -33,7 +33,7 @@ export function GrowthHero({
   actionButtonText = "Start Investing Today" 
 }: GrowthHeroProps) {
   return (
-    <section className="relative w-full h-screen overflow-hidden bg-black">
+    <section className="relative w-full h-screen overflow-hidden bg-slate-900">
       {/* Background Image with Next Image */}
       <div className="absolute inset-0 z-0">
         <Image 
@@ -59,10 +59,10 @@ export function GrowthHero({
           {/* Accent element - matching the screenshot styling */}
           <motion.div 
             className="inline-flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full 
-              border border-emerald-500/30 bg-emerald-900/20"
+              border border-slate-500/30 bg-slate-700/20"
             variants={itemVariants}
           >
-            <span className="text-sm font-medium text-emerald-400">Financial Freedom</span>
+            <span className="text-sm font-medium text-slate-300">Financial Freedom</span>
           </motion.div>
           
           {/* Main Heading - using the exact text and styling from screenshot */}
@@ -73,7 +73,7 @@ export function GrowthHero({
             <span className="text-white">
               Let your finances grow with{" "}
             </span>
-            <span className="block mt-2 md:mt-3 text-emerald-400">
+            <span className="block mt-2 md:mt-3 text-slate-300">
               WeSeedU
             </span>
           </motion.h1>
@@ -93,8 +93,8 @@ export function GrowthHero({
           >
             <Button
               onClick={onAction}
-              className="px-8 py-6 bg-emerald-600 hover:bg-emerald-500
-                text-white shadow-lg shadow-emerald-800/30
+              className="px-8 py-6 bg-slate-700 hover:bg-slate-600
+                text-white shadow-[0_4px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.3)]
                 text-base font-medium rounded-lg transition-all duration-300 group"
             >
               {actionButtonText}

@@ -198,8 +198,8 @@ export default function SaveCompanyButton({
       className={cn(
         "hover:bg-transparent transition-colors duration-200",
         isSaved 
-          ? "text-emerald-500 dark:text-emerald-400" 
-          : "text-slate-400 dark:text-slate-500 hover:text-emerald-500 dark:hover:text-emerald-400",
+          ? "text-slate-700 dark:text-slate-200" 
+          : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300",
         (isLoading || authLoading) && "opacity-50 cursor-not-allowed",
         className
       )}
@@ -207,7 +207,7 @@ export default function SaveCompanyButton({
       <Heart 
         className={cn(
           "h-5 w-5 transition-all duration-300",
-          isSaved && "fill-emerald-500 dark:fill-emerald-400 scale-110"
+          isSaved && "fill-slate-700 dark:fill-slate-300 scale-110"
         )} 
       />
     </Button>

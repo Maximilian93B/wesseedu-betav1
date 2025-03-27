@@ -42,17 +42,17 @@ export const CommunityTabs = ({
     <motion.div variants={variants} className="space-y-6">
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-white dark:bg-slate-900 backdrop-blur-sm border border-slate-200 dark:border-slate-800 p-1 rounded-xl shadow-sm">
+        <TabsList className="bg-white backdrop-blur-sm border border-slate-200 p-1 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <TabsTrigger 
             value="about"
-            className="data-[state=active]:bg-slate-50 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-slate-800 dark:data-[state=active]:text-slate-200 rounded-lg text-slate-600 dark:text-slate-400"
+            className="data-[state=active]:bg-slate-50 data-[state=active]:text-slate-800 rounded-lg text-slate-600"
           >
             About
           </TabsTrigger>
           
           <TabsTrigger 
             value="updates"
-            className="data-[state=active]:bg-slate-50 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-slate-800 dark:data-[state=active]:text-slate-200 rounded-lg text-slate-600 dark:text-slate-400"
+            className="data-[state=active]:bg-slate-50 data-[state=active]:text-slate-800 rounded-lg text-slate-600"
           >
             Updates
           </TabsTrigger>
@@ -60,7 +60,7 @@ export const CommunityTabs = ({
           {hasAmbassadors && (
             <TabsTrigger 
               value="ambassadors"
-              className="data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-900/30 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 rounded-lg text-slate-600 dark:text-slate-400"
+              className="data-[state=active]:bg-slate-50 data-[state=active]:text-slate-700 rounded-lg text-slate-600"
             >
               <Award className="h-3 w-3 mr-1" />
               Ambassadors
@@ -69,7 +69,7 @@ export const CommunityTabs = ({
           
           <TabsTrigger 
             value="investors"
-            className="data-[state=active]:bg-slate-50 dark:data-[state=active]:bg-slate-800 data-[state=active]:text-slate-800 dark:data-[state=active]:text-slate-200 rounded-lg text-slate-600 dark:text-slate-400"
+            className="data-[state=active]:bg-slate-50 data-[state=active]:text-slate-800 rounded-lg text-slate-600"
           >
             <Users className="h-3 w-3 mr-1" />
             Investors

@@ -13,31 +13,31 @@ const fadeInUpVariant = {
   }
 }
 
-export function PlatformImpact() {
+export function PlatformImpact() { 
   // Platform metrics for the impact section
   const platformMetrics = [
     {
       title: "Total Sustainable Investments",
       value: "$142M+",
-      icon: <DollarSign className="h-6 w-6 text-emerald-400" />,
+      icon: <DollarSign className="h-6 w-6 text-slate-600" />,
       change: "+18% this year"
     },
     {
       title: "Carbon Footprint Reduced",
       value: "87K tons",
-      icon: <Leaf className="h-6 w-6 text-emerald-400" />,
+      icon: <Leaf className="h-6 w-6 text-slate-600" />,
       change: "+12% this quarter" 
     },
     {
       title: "Companies Supported",
       value: "214+",
-      icon: <Globe className="h-6 w-6 text-emerald-400" />,
+      icon: <Globe className="h-6 w-6 text-slate-600" />,
       change: "+32 in 2023"
     },
     {
       title: "Emissions Averted",
       value: "54K tons",
-      icon: <TrendingDown className="h-6 w-6 text-emerald-400" />,
+      icon: <TrendingDown className="h-6 w-6 text-slate-600" />,
       change: "+21% this year"
     }
   ]
@@ -50,8 +50,8 @@ export function PlatformImpact() {
       variants={fadeInUpVariant}
       className="mb-0"
     >
-      <h2 className="text-2xl font-semibold text-zinc-900 mb-6 flex items-center">
-        <span className="border-b-2 border-emerald-600 pb-1">Our Collective Impact</span>
+      <h2 className="text-2xl font-semibold text-slate-800 mb-6 flex items-center">
+        <span className="border-b-2 border-slate-500 pb-1">Our Collective Impact</span>
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -60,17 +60,17 @@ export function PlatformImpact() {
             key={index}
             whileHover={{ y: -5 }}
             transition={{ type: "spring", stiffness: 300, damping: 15 }}
-            className="bg-white border border-zinc-100 rounded-xl p-6 hover:shadow-md hover:border-emerald-100 transition-all duration-500"
+            className="bg-white border border-slate-200 rounded-xl p-6 hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:border-slate-300 transition-all duration-500"
           >
             <div className="flex flex-col mb-4">
-              <div className="p-2.5 bg-emerald-50 rounded-lg inline-flex w-fit border border-emerald-100 mb-3">
+              <div className="p-2.5 bg-slate-100 rounded-lg inline-flex w-fit border border-slate-200 mb-3">
                 {metric.icon}
               </div>
-              <h3 className="text-sm font-medium text-zinc-700">{metric.title}</h3>
+              <h3 className="text-sm font-medium text-slate-700">{metric.title}</h3>
             </div>
             <div>
-              <p className="text-3xl font-bold text-zinc-900">{metric.value}</p>
-              <span className="text-xs text-emerald-600">{metric.change}</span>
+              <p className="text-3xl font-bold text-slate-800">{metric.value}</p>
+              <span className="text-xs text-slate-600">{metric.change}</span>
             </div>
           </motion.div>
         ))}

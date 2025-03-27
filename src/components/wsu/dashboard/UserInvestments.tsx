@@ -298,9 +298,10 @@ const UserInvestments = () => {
   const customTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-black/90 border border-zinc-700/50 backdrop-blur-sm p-2 rounded-lg shadow-xl text-white">
+        <div className="bg-white border border-slate-200 backdrop-blur-sm p-2 rounded-lg 
+          shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-slate-800">
           <p className="text-sm font-medium">{payload[0].payload.month}</p>
-          <p className="text-emerald-400 font-semibold">
+          <p className="text-slate-700 font-semibold">
             ${payload[0].value.toLocaleString()}
           </p>
         </div>
@@ -315,26 +316,47 @@ const UserInvestments = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <Card className="bg-black/60 backdrop-blur-sm border border-zinc-800/50 shadow-lg overflow-hidden rounded-xl hover:border-zinc-700/50 transition-all duration-200">
-        <CardHeader className="px-5 pt-5 pb-0">
-          <CardTitle className="text-lg font-semibold text-white flex items-center">
-            <LineChart className="h-5 w-5 mr-2 text-blue-400" />
+      <Card 
+        className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+          hover:shadow-[0_10px_30px_rgb(0,0,0,0.06)] transition-all duration-500"
+        style={{ 
+          backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
+        }}
+      >
+        {/* Subtle texture pattern for depth */}
+        <div className="absolute inset-0 opacity-[0.02]" 
+          style={{ 
+            backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
+            backgroundSize: "40px 40px"
+          }} 
+        />
+        
+        {/* Top edge shadow line for definition */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+        
+        {/* Inner shadow effects for depth */}
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
+        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
+        
+        <CardHeader className="px-5 pt-5 pb-0 relative z-10">
+          <CardTitle className="text-lg font-medium text-slate-800 flex items-center">
+            <LineChart className="h-5 w-5 mr-2 text-slate-600" />
             Investment Activity
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="px-5 py-5">
+        <CardContent className="px-5 py-5 relative z-10">
           {isLoading ? (
             <div className="space-y-4">
-              <Skeleton className="h-[180px] w-full bg-zinc-900/40" />
+              <Skeleton className="h-[180px] w-full bg-slate-100" />
             </div>
           ) : hasError ? (
             <motion.div 
               variants={itemVariants}
               className="flex flex-col items-center justify-center h-[180px] text-center space-y-3"
             >
-              <AlertTriangle className="h-12 w-12 text-amber-500/70" />
-              <p className="text-zinc-400 max-w-[250px]">
+              <AlertTriangle className="h-12 w-12 text-slate-400" />
+              <p className="text-slate-600 max-w-[250px]">
                 We couldn't load your investment data. Please try again later.
               </p>
             </motion.div>
@@ -343,8 +365,8 @@ const UserInvestments = () => {
               variants={itemVariants}
               className="flex flex-col items-center justify-center h-[180px] text-center space-y-3"
             >
-              <Lightbulb className="h-12 w-12 text-amber-500/70" />
-              <p className="text-zinc-400 max-w-[250px]">
+              <Lightbulb className="h-12 w-12 text-slate-400" />
+              <p className="text-slate-600 max-w-[250px]">
                 You haven't made any investments yet. Ready to start your impact journey?
               </p>
             </motion.div>
@@ -359,17 +381,17 @@ const UserInvestments = () => {
                     dataKey="month" 
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#9ca3af', fontSize: 12 }}
+                    tick={{ fill: '#64748b', fontSize: 12 }}
                   />
                   <YAxis 
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#9ca3af', fontSize: 12 }}
+                    tick={{ fill: '#64748b', fontSize: 12 }}
                     tickFormatter={(value) => `$${value}`}
                   />
                   <Tooltip 
                     content={customTooltip}
-                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                    cursor={{ fill: 'rgba(100, 116, 139, 0.05)' }}
                   />
                   <Bar 
                     dataKey="amount" 
@@ -379,8 +401,8 @@ const UserInvestments = () => {
                   />
                   <defs>
                     <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#22c55e" stopOpacity={0.8}/>
-                      <stop offset="100%" stopColor="#15803d" stopOpacity={0.6}/>
+                      <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.9}/>
+                      <stop offset="100%" stopColor="#64748b" stopOpacity={0.7}/>
                     </linearGradient>
                   </defs>
                 </RechartsBarChart>
@@ -389,10 +411,10 @@ const UserInvestments = () => {
           )}
         </CardContent>
         
-        <CardFooter className="px-5 py-4 border-t border-zinc-800/40 bg-black/30">
+        <CardFooter className="px-5 py-4 border-t border-slate-200 bg-slate-50/80 relative z-10">
           <Button 
             variant="ghost" 
-            className="ml-auto text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30"
+            className="ml-auto text-slate-700 hover:text-slate-900 hover:bg-slate-100"
             onClick={navigateToInvestments}
           >
             View All Investments

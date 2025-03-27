@@ -22,16 +22,16 @@ export function CommunitiesGrid({
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={`skeleton-${index}`} className="relative overflow-hidden">
-            <Skeleton className="h-[350px] w-full bg-gradient-to-b from-zinc-900/60 via-zinc-900/80 to-black/80 rounded-xl border border-zinc-800/50 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.3)]" />
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600/40 via-indigo-500/5 to-transparent" />
+          <div key={`skeleton-${index}`} className="relative overflow-hidden rounded-2xl">
+            <Skeleton className="h-[350px] w-full bg-gradient-to-b from-slate-100 via-slate-50 to-white/80 rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]" />
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30" />
             <div className="absolute bottom-0 left-0 right-0 p-6">
-              <Skeleton className="h-6 w-2/3 bg-zinc-800/40 rounded-md mb-3" />
-              <Skeleton className="h-4 w-full bg-zinc-800/30 rounded-md mb-2" />
-              <Skeleton className="h-4 w-4/5 bg-zinc-800/30 rounded-md mb-3" />
+              <Skeleton className="h-6 w-2/3 bg-slate-100/70 rounded-md mb-3" />
+              <Skeleton className="h-4 w-full bg-slate-100/60 rounded-md mb-2" />
+              <Skeleton className="h-4 w-4/5 bg-slate-100/60 rounded-md mb-3" />
               <div className="flex gap-2 mt-4">
-                <Skeleton className="h-7 w-16 bg-zinc-800/40 rounded-md" />
-                <Skeleton className="h-7 w-20 bg-zinc-800/40 rounded-md" />
+                <Skeleton className="h-7 w-16 bg-slate-100/70 rounded-md" />
+                <Skeleton className="h-7 w-20 bg-slate-100/70 rounded-md" />
               </div>
             </div>
           </div>
@@ -43,18 +43,40 @@ export function CommunitiesGrid({
   // Empty state with premium design
   if (filteredCommunities.length === 0) {
     return (
-      <div className="py-16 text-center bg-gradient-to-b from-black/80 to-zinc-900/30 border border-zinc-800/40 rounded-xl shadow-[0_10px_50px_-12px_rgba(0,0,0,0.25)]">
-        <div className="max-w-md mx-auto">
-          <div className="w-16 h-16 bg-gradient-to-br from-zinc-900 to-black rounded-full mx-auto flex items-center justify-center mb-6 border border-zinc-800/40 shadow-[0_8px_16px_rgba(0,0,0,0.4)]">
-            <AlertCircle className="h-8 w-8 text-indigo-500 drop-shadow-[0_1px_2px_rgba(99,102,241,0.3)]" />
+      <div 
+        className="py-16 text-center border border-slate-200 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative"
+        style={{ 
+          backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
+        }}
+      >
+        {/* Subtle texture pattern for depth */}
+        <div className="absolute inset-0 opacity-[0.02]" 
+          style={{ 
+            backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
+            backgroundSize: "40px 40px"
+          }} 
+        />
+        
+        {/* Top edge shadow line for definition */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+        
+        {/* Inner shadow effects for depth */}
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
+        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
+        
+        <div className="max-w-md mx-auto relative z-10">
+          <div className="w-16 h-16 bg-slate-50 rounded-full mx-auto flex items-center justify-center mb-6 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+            <AlertCircle className="h-8 w-8 text-slate-600" />
           </div>
-          <h3 className="text-xl font-medium text-white mb-4 drop-shadow-sm">No communities available</h3>
-          <p className="text-zinc-400 mb-8 max-w-sm mx-auto">
+          <h3 className="text-xl font-medium text-slate-800 mb-4">No communities available</h3>
+          <p className="text-slate-600 mb-8 max-w-sm mx-auto">
             Contact your administrator to request access to private equity communities or adjust your search filters.
           </p>
           <Button 
             onClick={clearFilters}
-            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white border-none shadow-[0_8px_16px_rgba(0,0,0,0.2)]"
+            className="bg-slate-900 hover:bg-slate-800 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)]
+              hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out 
+              hover:translate-y-[-2px] rounded-lg px-6 py-3"
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset filters

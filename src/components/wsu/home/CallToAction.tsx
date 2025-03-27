@@ -1,86 +1,99 @@
-import { motion } from "framer-motion"
+"use client"
+
 import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
+import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
-interface CallToActionProps {
-  onNavigate: (view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => void;
-}
-
-// Animation variants for staggered animations
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
+  visible: { 
     opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
-      ease: "easeOut"
+    transition: { 
+      staggerChildren: 0.08,
+      duration: 0.3
     }
   }
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
     opacity: 1,
-    y: 0,
-    transition: { 
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1]
-    }
+    transition: { type: "spring", stiffness: 300, damping: 24 }
   }
+}
+
+interface CallToActionProps {
+  onNavigate?: (view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => void;
 }
 
 export function CallToAction({ onNavigate }: CallToActionProps) {
   return (
-    <motion.section
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      variants={containerVariants}
-      className="py-12 md:py-16 bg-gradient-to-b from-white to-slate-50 rounded-2xl shadow-sm my-8"
-    >
-      <div className="max-w-4xl mx-auto text-center px-4">
-        {/* Section heading */}
-        <motion.h2 
-          className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 tracking-tight"
-          variants={itemVariants}
-        >
-          <span className="bg-gradient-to-r from-emerald-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent">
-            Ready to make sustainable investments?
-          </span>
-        </motion.h2>
-        
-        {/* Description */}
-        <motion.p 
-          className="text-slate-600 mb-14 max-w-2xl mx-auto text-lg leading-relaxed"
-          variants={itemVariants}
-        >
-          Join thousands of forward-thinking investors who are building wealth 
-          while supporting businesses committed to a sustainable future.
-        </motion.p>
-        
-        {/* Single, focused call to action button */}
+    <div className="relative py-20 bg-slate-800 overflow-hidden">
+      {/* Diagonal highlight streak */}
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-slate-700/50 rotate-45 blur-xl"></div>
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-slate-700/50 rotate-45 blur-xl"></div>
+      
+      {/* Subtle dot pattern overlay */}
+      <div className="absolute inset-0 opacity-[0.08]" 
+        style={{ 
+          backgroundImage: `radial-gradient(circle at 20px 20px, white 1px, transparent 0)`,
+          backgroundSize: "40px 40px"
+        }} 
+      />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
-          variants={itemVariants}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.2 }}
-          className="inline-block"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={containerVariants}
+          className="max-w-4xl mx-auto text-center"
         >
-          <Button 
-            onClick={() => onNavigate('companies')}
-            className="px-8 py-6 bg-gradient-to-r from-blue-500 to-emerald-500 
-              hover:from-blue-400 hover:to-emerald-400 text-white text-base font-medium 
-              rounded-lg shadow-md hover:shadow-lg
-              transition-all duration-300 group border-0"
-            size="lg"
+          <motion.h2 
+            variants={itemVariants}
+            className="text-3xl md:text-4xl font-bold text-white mb-6"
           >
-            <span>Start investing today</span>
-            <ArrowRight className="ml-3 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-          </Button>
+            Ready to make an impact with your investments?
+          </motion.h2>
+          
+          <motion.p 
+            variants={itemVariants}
+            className="text-slate-300 text-lg mb-10 max-w-2xl mx-auto"
+          >
+            Join thousands of investors who are building wealth while creating positive change in the world.
+          </motion.p>
+          
+          <motion.div 
+            variants={itemVariants}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <Button 
+              className="bg-white text-slate-800 font-medium px-8 py-6 rounded-lg text-lg
+                shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)]
+                transition-all duration-300 ease-out hover:translate-y-[-2px]"
+              asChild
+            >
+              <Link href="/auth/signup">
+                Get Started <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="border-slate-600 bg-transparent text-white hover:bg-slate-700 
+                font-medium px-8 py-6 rounded-lg text-lg
+                shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.3)]
+                transition-all duration-300 ease-out hover:translate-y-[-2px]"
+              asChild
+            >
+              <Link href="/about">Learn More</Link>
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
-    </motion.section>
+    </div>
   )
 }

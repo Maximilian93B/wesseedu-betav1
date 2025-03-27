@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { BarChart, Users, TrendingUp, Leaf, Globe, ChevronRight } from "lucide-react"
+import { BarChart, Users, TrendingUp, Leaf, Globe, ChevronRight, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -367,11 +366,11 @@ export function DashboardView({ user }: DashboardViewProps) {
               ease: "easeInOut"
             }}
           >
-            <Leaf className="h-12 w-12 text-emerald-500" />
+            <Leaf className="h-12 w-12 text-slate-600" />
           </motion.div>
         </div>
         <motion.p 
-          className="text-emerald-600 font-medium"
+          className="text-slate-700 font-medium"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
@@ -391,10 +390,10 @@ export function DashboardView({ user }: DashboardViewProps) {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-red-500 mb-4">{error}</p>
+          <p className="text-slate-700 mb-4">{error}</p>
           <Button 
             onClick={() => window.location.reload()}
-            className="bg-emerald-500 hover:bg-emerald-400 text-white"
+            className="bg-slate-800 hover:bg-slate-700 text-white"
           >
             Retry
           </Button>
@@ -421,29 +420,28 @@ export function DashboardView({ user }: DashboardViewProps) {
 
   return (
     <div className="w-full">
-      <div className="rounded-xl overflow-hidden mb-6 relative border border-slate-200 bg-white shadow-md">
-        {/* Decorative top accent */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-blue-400/50 to-transparent z-10" />
-        <div className="absolute top-1 right-0 w-[40%] h-px bg-gradient-to-l from-slate-300/40 to-transparent" />
-        
-        <div className="px-4 py-5 sm:p-6">
+      {/* Simplified outer container with minimal styling */}
+      <div className="relative">
+        <div className="px-5 py-6 md:px-8 md:py-8">
           <DashboardHero 
             user={user} 
             profile={authProfile}
             loading={loading}
           />
           
-          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mt-6">
-            <TabsList className="bg-slate-50 border border-slate-200 p-1 mb-5 rounded-lg">
+          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} 
+            className="mt-8"
+          >
+            <TabsList className="mx-auto mb-6 border border-slate-200 bg-white/80 p-1 rounded-full w-auto inline-flex shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)]">
               <TabsTrigger 
                 value="overview" 
-                className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 rounded-md px-4 py-1.5 text-sm"
+                className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-800 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm transition-all duration-200"
               >
                 Overview
               </TabsTrigger>
               <TabsTrigger 
                 value="investments" 
-                className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 rounded-md px-4 py-1.5 text-sm"
+                className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-800 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm transition-all duration-200"
               >
                 Investments
               </TabsTrigger>
@@ -456,20 +454,21 @@ export function DashboardView({ user }: DashboardViewProps) {
                 animate="visible"
                 className="space-y-6"
               >
-                {/* Investment Growth Chart */}
-                <div className="rounded-xl border border-slate-200 p-5 shadow-md bg-white relative overflow-hidden">
+                {/* Investment Growth Chart - Modern styling */}
+                <div className="rounded-xl border border-slate-200 p-6 bg-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+                  hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-shadow duration-500 relative overflow-hidden">
                   {/* Subtle accent line */}
-                  <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-emerald-500/30 via-emerald-400/10 to-transparent" />
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-400 to-slate-200/20" />
                   
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 relative z-10">
                     <div>
-                      <h2 className="text-lg font-bold text-slate-800">Investment Growth</h2>
+                      <h2 className="text-lg font-medium text-slate-800">Investment Growth</h2>
                       <p className="text-slate-500 text-xs">Track your sustainable investment growth over time</p>
                     </div>
                     <div className="flex items-center space-x-2 mt-2 md:mt-0">
                       <span className="text-xs text-slate-500">Last 7 periods</span>
-                      <div className="h-3 w-3 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+                      <div className="h-3 w-3 rounded-full bg-slate-100 flex items-center justify-center">
+                        <div className="h-1.5 w-1.5 rounded-full bg-slate-500"></div>
                       </div>
                     </div>
                   </div>
@@ -479,100 +478,102 @@ export function DashboardView({ user }: DashboardViewProps) {
                       <AreaChart data={investmentData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity={0.6} />
-                            <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity={0} />
+                            <stop offset="0%" stopColor="#64748b" stopOpacity={0.5} />
+                            <stop offset="100%" stopColor="#64748b" stopOpacity={0} />
                           </linearGradient>
                         </defs>
                         <XAxis 
                           dataKey="month" 
-                          stroke="#52525b"
-                          tick={{ fill: '#a1a1aa' }}
-                          axisLine={{ stroke: '#3f3f46' }}
-                          tickLine={{ stroke: '#3f3f46' }}
+                          stroke="#64748b"
+                          tick={{ fill: '#64748b' }}
+                          axisLine={{ stroke: '#e2e8f0' }}
+                          tickLine={{ stroke: '#e2e8f0' }}
                         />
                         <YAxis 
-                          stroke="#52525b"
-                          tick={{ fill: '#a1a1aa' }}
-                          axisLine={{ stroke: '#3f3f46' }}
-                          tickLine={{ stroke: '#3f3f46' }}
+                          stroke="#64748b"
+                          tick={{ fill: '#64748b' }}
+                          axisLine={{ stroke: '#e2e8f0' }}
+                          tickLine={{ stroke: '#e2e8f0' }}
                           tickFormatter={(value) => `$${value}`}
                         />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: 'rgba(24, 24, 27, 0.95)',
-                            border: '1px solid rgba(16, 185, 129, 0.2)',
+                            backgroundColor: 'white',
+                            border: '1px solid #e2e8f0',
                             borderRadius: '6px',
-                            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)'
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                           }}
-                          labelStyle={{ color: '#f4f4f5', fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}
-                          itemStyle={{ color: '#10b981', fontSize: '12px', padding: '2px 0' }}
-                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Value']}
+                          labelStyle={{ color: '#334155', fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}
+                          itemStyle={{ color: '#334155', fontSize: '12px', padding: '2px 0' }}
+                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Investment']}
                         />
                         <Area
                           type="monotone"
                           dataKey="amount"
-                          stroke="#10b981"
+                          stroke="#64748b"
                           strokeWidth={2}
                           fillOpacity={1}
                           fill="url(#investmentGradient)"
-                          activeDot={{ r: 5, stroke: '#10b981', strokeWidth: 2, fill: '#fff' }}
+                          activeDot={{ r: 6, stroke: '#64748b', strokeWidth: 2, fill: '#fff' }}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                   
                   {/* Background glow effect */}
-                  <div className="absolute bottom-0 right-[10%] w-[200px] h-[200px] bg-emerald-100 rounded-full blur-[80px] pointer-events-none"></div>
+                  <div className="absolute bottom-0 right-[10%] w-[200px] h-[200px] bg-slate-100/30 rounded-full blur-[80px] pointer-events-none"></div>
                 </div>
 
-                {/* Analytics Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Analytics Grid - Modern styling */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                   {/* Left: Stats Grid */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     {stats.map((stat, index) => (
                       <motion.div
                         key={index}
                         variants={itemVariants}
                         className="h-full"
                       >
-                        <div className="bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 rounded-lg border border-zinc-800/50 p-3 shadow-md hover:border-zinc-700/50 transition-all duration-200 hover:shadow-lg relative overflow-hidden">
+                        <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] 
+                          hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all duration-300 relative overflow-hidden group">
                           {/* Subtle top accent */}
-                          <div className={`absolute top-0 left-0 w-full h-px bg-gradient-to-r ${stat.color} opacity-30`} />
+                          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-400 to-slate-300/20" />
                           
                           <div className="flex items-start justify-between mb-2 relative z-10">
-                            <span className="text-xs text-zinc-400 uppercase tracking-wide">{stat.title}</span>
-                            <div className={`p-1 rounded-lg bg-gradient-to-br ${stat.color} bg-opacity-10 shadow-sm`}>
-                              {React.cloneElement(stat.icon as React.ReactElement, { className: 'h-4 w-4' })}
+                            <span className="text-xs text-slate-500 uppercase tracking-wide font-medium">{stat.title}</span>
+                            <div className="p-1.5 rounded-lg bg-slate-50 shadow-sm 
+                              group-hover:scale-110 transition-transform duration-200">
+                              {React.cloneElement(stat.icon as React.ReactElement, { className: 'h-3.5 w-3.5 text-slate-600' })}
                             </div>
                           </div>
-                          <div className="text-lg font-bold text-white">{stat.value}</div>
-                          <p className="text-xs text-zinc-500 mt-0.5">{stat.description}</p>
+                          <div className="text-lg font-bold text-slate-800">{stat.value}</div>
+                          <p className="text-xs text-slate-500 mt-0.5">{stat.description}</p>
                         </div>
                       </motion.div>
                     ))}
                   </div>
 
-                  {/* Right: Watchlist */}
+                  {/* Right: Watchlist - Modern styling */}
                   <div className="lg:col-span-2">
-                    <div className="bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 rounded-xl border border-zinc-800/50 h-full shadow-lg overflow-hidden hover:border-zinc-700/50 transition-all duration-200 relative">
+                    <div className="bg-white rounded-xl border border-slate-200 h-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+                      hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-shadow duration-500 relative overflow-hidden">
                       {/* Decorative top accent */}
-                      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-indigo-600/50 via-indigo-500/10 to-transparent" />
-                      {/* Subtle glow */}
-                      <div className="absolute top-[20%] right-[10%] w-[150px] h-[150px] bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-500 via-slate-400 to-transparent" />
                       
-                      <div className="p-3 border-b border-zinc-800/50 relative z-10">
-                        <div className="flex items-start justify-between">
+                      <div className="p-3 border-b border-slate-200 relative z-10">
+                        <div className="flex items-center justify-between">
                           <div>
-                            <h2 className="text-base font-bold text-white">Watchlist</h2>
-                            <p className="text-xs text-zinc-400">Companies you're tracking</p>
+                            <h2 className="text-base font-medium text-slate-800">Watchlist</h2>
+                            <p className="text-xs text-slate-500">Companies you're tracking</p>
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => router.push("/auth/home")}
-                            className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/50 px-2 py-1 text-xs rounded-md"
+                            onClick={() => router.push("/account/watchlist")}
+                            className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 text-xs rounded-lg"
                           >
                             View All
+                            <ArrowRight className="ml-1 h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </div>
@@ -590,7 +591,7 @@ export function DashboardView({ user }: DashboardViewProps) {
                               externalLoading={loading}
                               isPreview={true}
                               maxItems={3}
-                              onViewAll={() => router.push("/auth/home")}
+                              onViewAll={() => router.push("/account/watchlist")}
                             />
                           </motion.div>
                         </AnimatePresence>
@@ -609,12 +610,11 @@ export function DashboardView({ user }: DashboardViewProps) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 rounded-xl border border-zinc-800/50 shadow-lg p-5 relative overflow-hidden"
+                  className="bg-white rounded-xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+                  hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] p-6 relative overflow-hidden"
                 >
                   {/* Decorative top accent */}
-                  <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-blue-600/50 via-blue-500/10 to-transparent" />
-                  {/* Subtle glow */}
-                  <div className="absolute bottom-[10%] left-[10%] w-[200px] h-[200px] bg-blue-500/5 rounded-full blur-[80px] pointer-events-none"></div>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-500 via-slate-400 to-transparent" />
                   
                   <div className="relative z-10">
                     <UserInvestments />

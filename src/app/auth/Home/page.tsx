@@ -44,7 +44,7 @@ const CompanyDetailsViewDynamic = dynamic(
 )
 
 const CommunitiesViewDynamic = dynamic(
-  () => import("@/components/community/CommunitiesView"), 
+  () => import("@/components/community/CommunitiesView").then(mod => ({ default: mod.CommunitiesView })), 
   { ssr: true, loading: () => <LazyLoadingPlaceholder /> }
 )
 
@@ -183,7 +183,12 @@ function HomePageContent() {
 
   return (
     <>
-      <div className="flex flex-col min-h-screen bg-white relative overflow-hidden max-w-[100vw]">
+      <div 
+        className="flex flex-col min-h-screen relative overflow-hidden max-w-[100vw]"
+        style={{ 
+          backgroundImage: "linear-gradient(to right top, #ebebeb, #eeeef0, #f1f2f5, #f4f5fa, #f6f9ff)" 
+        }}
+      >
         <HomePageNav
           currentView={currentView}
           onNavigate={handleNavigation}
@@ -205,7 +210,7 @@ function HomePageContent() {
             {currentView === 'home' && (
               <>
                 {/* Hero Section - now light */}
-                <div className="bg-gradient-to-b from-white to-slate-50 relative">
+                <div className="bg-transparent relative">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-16">
                     <Suspense fallback={<div className="h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
                       <HomeHeroDynamic 
@@ -287,8 +292,8 @@ function HomePageContent() {
 
             {/* Dashboard overlay */}
             {currentView === 'dashboard' && (
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8 bg-white">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <DashboardViewDynamic user={user} />
                 </Suspense>
               </div>
@@ -296,8 +301,8 @@ function HomePageContent() {
 
             {/* Companies overlay */}
             {currentView === 'companies' && (
-              <div className="py-4 md:py-6 bg-white">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <CompaniesViewDynamic 
                     onCompanySelect={handleCompanySelect}
                   />
@@ -307,8 +312,8 @@ function HomePageContent() {
 
             {/* Company details overlay */}
             {currentView === 'company-details' && selectedCompanyId && (
-              <div className="py-4 md:py-6 bg-white">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <CompanyDetailsViewDynamic 
                     companyId={selectedCompanyId}
                     onClose={() => {
@@ -322,8 +327,8 @@ function HomePageContent() {
 
             {/* Communities overlay */}
             {currentView === 'communities' && (
-              <div className="py-4 md:py-6 bg-white">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <CommunitiesViewDynamic 
                     onCommunitySelect={handleCommunitySelect}
                   />
@@ -333,8 +338,8 @@ function HomePageContent() {
 
             {/* Community details overlay */}
             {currentView === 'community-details' && selectedCommunityId && (
-              <div className="py-4 md:py-6 bg-white">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <CommunityDetailsViewDynamic
                     community={{
                       id: selectedCommunityId,
@@ -361,8 +366,8 @@ function HomePageContent() {
 
             {/* Watchlist overlay */}
             {currentView === 'saved' && (
-              <div className="py-4 md:py-6 bg-white">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+              <div className="py-4 md:py-6 bg-transparent">
+                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <WatchlistViewDynamic 
                     externalData={watchlistCompanies}
                     externalLoading={watchlistLoading}

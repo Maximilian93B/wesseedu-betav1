@@ -1,53 +1,113 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
-import { Sparkles } from "lucide-react"
+import { motion } from "framer-motion"
+import Link from "next/link"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.08,
+      duration: 0.3
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+}
 
 interface HomeHeroProps {
-  profile: any;
-  onNavigate: (view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => void;
+  profile?: any;
+  onNavigate?: (view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => void;
 }
 
 export function HomeHero({ profile, onNavigate }: HomeHeroProps) {
   return (
-    <section className="mb-20 pt-8">
-      <div className="space-y-5 text-center">
-        <div className="flex justify-center mb-4">
-          <span className="inline-flex items-center gap-2 text-emerald-600 text-sm font-medium tracking-wider uppercase 
-            bg-emerald-50 px-5 py-1.5 rounded-full border border-emerald-200 shadow-sm">
-            <Sparkles className="h-3.5 w-3.5" /> Welcome Back, {profile?.name || profile?.username || profile?.full_name || 'Investor'} <Sparkles className="h-3.5 w-3.5" />
+    <div className="relative overflow-hidden pb-20 rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mx-4"
+      style={{ 
+        backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
+      }}
+    >
+      {/* Background subtle dot texture */}
+      <div className="absolute inset-0 opacity-[0.02]" 
+        style={{ 
+          backgroundImage: `radial-gradient(circle at 20px 20px, #64748b 1px, transparent 0)`,
+          backgroundSize: "40px 40px"
+        }} 
+      />
+      
+      {/* Top edge highlight */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+      
+      {/* Inner shadow effects for depth */}
+      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
+      
+      <motion.div 
+        className="container max-w-5xl mx-auto px-4 pt-16 md:pt-24 text-center relative z-10"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        {/* Highlight badge */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <span className="inline-flex items-center bg-slate-800 px-3 py-1 rounded-full text-xs font-medium
+            text-white tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-white mr-1.5"></span>
+            SUSTAINABLE INVESTING
           </span>
-        </div>
-        <h1>
-          <span className="text-4xl md:text-5xl lg:text-7xl font-bold 
-            bg-gradient-to-r from-slate-700 via-slate-900 to-slate-800 bg-clip-text 
-            text-transparent tracking-tight leading-tight">
-            Your Investment <br className="hidden sm:block" />
-            <span className="bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent">Dashboard</span>
-          </span>
-        </h1>
-        <p className="max-w-2xl mx-auto text-slate-600 text-lg md:text-xl leading-relaxed font-light">
-          Track your portfolio, discover opportunities, and manage your 
-          <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent font-normal"> sustainable investments</span>
-        </p>
+        </motion.div>
         
-        <div className="flex justify-center gap-4 mt-8">
-          <Button
-            onClick={() => onNavigate('dashboard')}
-            className="px-8 py-6 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-400 hover:to-blue-400
-              text-white text-base font-medium rounded-lg transition-all duration-300 shadow-md"
+        <motion.h1 
+          variants={itemVariants}
+          className="text-4xl md:text-6xl font-black tracking-tight text-slate-800 leading-tight mb-6"
+        >
+          Invest in a <span className="relative">
+            brighter future
+            <span className="absolute -bottom-1 left-0 w-full h-1 bg-slate-600"></span>
+          </span>
+        </motion.h1>
+        
+        <motion.p 
+          variants={itemVariants}
+          className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed"
+        >
+          Join a community of investors dedicated to making positive change through sustainable and impactful investment opportunities.
+        </motion.p>
+        
+        <motion.div 
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+        >
+          <Button 
+            className="bg-slate-900 text-white font-medium px-8 py-6 rounded-lg text-lg
+              shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)]
+              hover:bg-slate-800 transition-all duration-300 ease-out hover:translate-y-[-2px]"
+            asChild
           >
-            View My Dashboard
+            <Link href="/auth/signup">Get Started</Link>
           </Button>
-          <Button
-            onClick={() => onNavigate('companies')}
-            variant="outline"
-            className="px-8 py-6 border-slate-200 text-slate-700 hover:text-emerald-600
-              hover:bg-slate-50 hover:border-emerald-200 text-base font-medium
-              rounded-lg transition-all duration-300 shadow-sm"
+          
+          <Button 
+            variant="outline" 
+            className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-800 
+              font-medium px-8 py-6 rounded-lg text-lg
+              shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)]
+              transition-all duration-300 ease-out hover:translate-y-[-2px] hover:border-slate-300"
+            asChild
           >
-            Explore Investments
+            <Link href="/about">Learn More</Link>
           </Button>
-        </div>
-      </div>
-    </section>
+        </motion.div>
+      </motion.div>
+    </div>
   )
 } 

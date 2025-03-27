@@ -105,9 +105,9 @@ export function FeaturedContent() {
 
   return (
     <div className="flex flex-col md:flex-row h-full w-full pb-10 md:pb-16 lg:pb-20">
-      {/* LEFT SIDE - Text content on black background */}
-      <div className="w-full md:w-1/2 bg-black text-white flex items-start pt-16 md:pt-20 lg:pt-24 pb-20 md:pb-24 lg:pb-32">
-        <div className="max-w-xl mx-auto px-10 md:px-14 lg:px-16 xl:px-20">
+      {/* LEFT SIDE - Text content on slate background */}
+      <div className="w-full md:w-1/2 bg-slate-900 text-white flex items-center justify-center pt-16 md:pt-20 lg:pt-24 pb-20 md:pb-24 lg:pb-32">
+        <div className="max-w-xl w-full px-10 md:px-14 lg:px-16 xl:px-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -115,13 +115,13 @@ export function FeaturedContent() {
             transition={{ duration: 0.6 }}
             className="space-y-8 md:space-y-10 lg:space-y-12"
           >
-            <div className="inline-flex items-center gap-2 mb-2 px-4 py-1.5 rounded-full border border-emerald-800 bg-emerald-900/30">
-              <span className="text-xs font-medium text-emerald-300">Featured</span>
+            <div className="inline-flex items-center gap-2 mb-2 px-4 py-1.5 rounded-full border border-slate-700 bg-slate-800/50">
+              <span className="text-xs font-medium text-slate-300">Featured</span>
             </div>
             
-            {/* Updated heading to match the image - split text and solid color */}
-            <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-[1.1]">
-              <span className="text-emerald-400 block">
+            {/* Updated heading with improved alignment */}
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1]">
+              <span className="text-white block">
                 Discover<br />
                 Sustainable<br />
                 Investment<br />
@@ -129,13 +129,13 @@ export function FeaturedContent() {
               </span>
             </h2>
             
-            <p className="text-zinc-300 text-lg md:text-xl leading-relaxed max-w-2xl">
+            <p className="text-slate-300 text-lg md:text-xl leading-relaxed max-w-2xl">
               Access premium insights and curated sustainable investment options that align your financial goals with positive environmental and social impact.
             </p>
             
             <div className="pt-6 md:pt-8">
               <Button
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-7 py-6 h-auto text-base"
+                className="bg-slate-700 hover:bg-slate-600 text-white px-7 py-6 h-auto text-base shadow-[0_4px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.3)]"
                 onClick={() => router.push('/dashboard')}
               >
                 Get Started
@@ -146,18 +146,18 @@ export function FeaturedContent() {
         </div>
       </div>
       
-      {/* RIGHT SIDE - Card carousel on white background - ENHANCED IMPLEMENTATION */}
+      {/* RIGHT SIDE - Card carousel */}
       <div 
-        className="w-full md:w-1/2 bg-white flex items-stretch relative overflow-hidden rounded-xl"
+        className="w-full md:w-1/2 bg-white flex items-stretch relative overflow-hidden"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         aria-roledescription="carousel"
         aria-label="Featured content carousel"
       >
-        <div className="w-full h-full p-6 md:p-8 lg:p-10">
-          {/* Carousel container with improved animation */}
-          <div className="relative h-full overflow-hidden rounded-xl shadow-lg border border-white/10">
+        <div className="w-full h-full p-0">
+          {/* Carousel container with improved alignment */}
+          <div className="relative h-full overflow-hidden">
             {/* Slides with AnimatePresence for better transitions */}
             <AnimatePresence custom={direction} initial={false} mode="wait">
               <motion.div
@@ -189,18 +189,18 @@ export function FeaturedContent() {
                     />
                   </div>
                   
-                  {/* Content positioned over the image - styled to match the screenshot */}
+                  {/* Content positioned over the image - better aligned with screenshot */}
                   <div className="h-full flex flex-col justify-center px-10 sm:px-14 md:px-16 lg:px-20 relative z-20 text-white">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.2 }}
                     >
-                      {/* Green line accent matching the screenshot */}
-                      <div className="h-1 w-16 bg-emerald-500 mb-8"></div>
+                      {/* Accent line */}
+                      <div className="h-1 w-16 bg-white mb-8"></div>
                       
                       {/* Title - larger and more prominent */}
-                      <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 drop-shadow-lg">
+                      <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-lg">
                         {cards[activeSlide].title}
                       </h3>
                       
@@ -209,10 +209,10 @@ export function FeaturedContent() {
                         {cards[activeSlide].description}
                       </p>
                       
-                      {/* Link styled as in screenshot */}
+                      {/* Link styled */}
                       <a 
                         href={cards[activeSlide].linkHref}
-                        className="inline-flex items-center text-emerald-400 hover:text-emerald-300 font-medium text-base group"
+                        className="inline-flex items-center text-white font-medium text-base group"
                       >
                         {cards[activeSlide].linkText}
                         <ChevronRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
@@ -223,7 +223,7 @@ export function FeaturedContent() {
               </motion.div>
             </AnimatePresence>
             
-            {/* Navigation dots styled to match the screenshot */}
+            {/* Navigation dots */}
             <div 
               className="absolute bottom-8 left-0 right-0 flex justify-center space-x-3 z-30"
               role="tablist"
@@ -236,14 +236,14 @@ export function FeaturedContent() {
                   aria-selected={activeSlide === i}
                   aria-label={`Go to slide ${i + 1}`}
                   className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                    activeSlide === i ? "bg-emerald-500" : "bg-white/40 hover:bg-white/60"
+                    activeSlide === i ? "bg-slate-400" : "bg-white/40 hover:bg-white/60"
                   }`}
                   onClick={() => setActiveSlide(i)}
                 />
               ))}
             </div>
             
-            {/* Navigation arrows styled to match the screenshot */}
+            {/* Navigation arrows */}
             <button 
               className="absolute top-1/2 left-4 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm
                 flex items-center justify-center text-white hover:bg-white/50 
@@ -253,9 +253,10 @@ export function FeaturedContent() {
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
+            
             <button 
               className="absolute top-1/2 right-4 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm
-                flex items-center justify-center text-white hover:bg-white/50 
+                flex items-center justify-center text-white hover:bg-white/50
                 transition-all duration-300 z-30 hover:scale-110 focus:outline-none"
               onClick={nextSlide}
               aria-label="Next slide"
