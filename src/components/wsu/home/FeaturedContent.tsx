@@ -70,7 +70,7 @@ export function FeaturedContent() {
       description: "Stay informed on sustainable investing trends with curated news and expert analysis.",
       linkText: "Browse Latest News",
       linkHref: "/news",
-      imageSrc: "/images/pexels-aboodi-18620005.jpg", 
+      imageSrc: "/images/pexels-googledeepmind-17485678.jpg", 
       imageAlt: "Sustainable investing news analytics dashboard"
     },
     {
@@ -78,7 +78,7 @@ export function FeaturedContent() {
       description: "Discover sustainable businesses with strong ESG scores and positive environmental impact.",
       linkText: "Explore Companies",
       linkHref: "/companies",
-      imageSrc: "/images/pexels-jahoo-388415.jpg",
+      imageSrc: "/images/pexels-pavel-danilyuk-8438975.jpg",
       imageAlt: "Sustainable companies ranking chart"
     },
     {
@@ -86,7 +86,7 @@ export function FeaturedContent() {
       description: "Track how your portfolio contributes to sustainability goals and compare against benchmarks.",
       linkText: "Track Your Impact",
       linkHref: "/impact",
-      imageSrc: "/images/pexels-jahoo-388415.jpg",
+      imageSrc: "/images/pexels-fabien-burgue-1052232-2052521.jpg",
       imageAlt: "Environmental impact tracking dashboard"
     }
   ];
@@ -104,10 +104,10 @@ export function FeaturedContent() {
   }, [activeSlide]);
 
   return (
-    <div className="flex flex-col md:flex-row h-full w-full pb-10 md:pb-16 lg:pb-20">
-      {/* LEFT SIDE - Text content on slate background */}
-      <div className="w-full md:w-1/2 bg-slate-900 text-white flex items-center justify-center pt-16 md:pt-20 lg:pt-24 pb-20 md:pb-24 lg:pb-32">
-        <div className="max-w-xl w-full px-10 md:px-14 lg:px-16 xl:px-20">
+    <div className="flex flex-col md:flex-row h-full w-full">
+      {/* LEFT SIDE - Text content that integrates with blue-50 background */}
+      <div className="w-full md:w-1/2 bg-black text-white flex items-center justify-center py-16 md:py-20 lg:py-24">
+        <div className="max-w-xl w-full px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -115,18 +115,15 @@ export function FeaturedContent() {
             transition={{ duration: 0.6 }}
             className="space-y-8 md:space-y-10 lg:space-y-12"
           >
-            <div className="inline-flex items-center gap-2 mb-2 px-4 py-1.5 rounded-full border border-slate-700 bg-slate-800/50">
+            <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full border border-slate-700 bg-slate-800/50">
               <span className="text-xs font-medium text-slate-300">Featured</span>
             </div>
             
-            {/* Updated heading with improved alignment */}
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1]">
-              <span className="text-white block">
-                Discover<br />
-                Sustainable<br />
-                Investment<br />
-                Opportunities
-              </span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.2]">
+              <span className="text-white block mb-2">Discover</span>
+              <span className="text-white block mb-2">Sustainable</span>
+              <span className="text-white block mb-2">Investment</span>
+              <span className="text-white block">Opportunities</span>
             </h2>
             
             <p className="text-slate-300 text-lg md:text-xl leading-relaxed max-w-2xl">
@@ -135,18 +132,18 @@ export function FeaturedContent() {
             
             <div className="pt-6 md:pt-8">
               <Button
-                className="bg-slate-700 hover:bg-slate-600 text-white px-7 py-6 h-auto text-base shadow-[0_4px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.3)]"
+                className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-6 h-auto text-base shadow-[0_4px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.3)]"
                 onClick={() => router.push('/dashboard')}
               >
                 Get Started
-                <ArrowUpRight className="ml-2 h-5 w-5" />
+                <ArrowUpRight className="ml-3 h-5 w-5" />
               </Button>
             </div>
           </motion.div>
         </div>
       </div>
       
-      {/* RIGHT SIDE - Card carousel */}
+      {/* RIGHT SIDE - Card carousel - integrates with white background */}
       <div 
         className="w-full md:w-1/2 bg-white flex items-stretch relative overflow-hidden"
         onTouchStart={onTouchStart}
@@ -190,32 +187,32 @@ export function FeaturedContent() {
                   </div>
                   
                   {/* Content positioned over the image - better aligned with screenshot */}
-                  <div className="h-full flex flex-col justify-center px-10 sm:px-14 md:px-16 lg:px-20 relative z-20 text-white">
+                  <div className="h-full flex flex-col justify-center px-12 sm:px-16 md:px-20 lg:px-24 relative z-20 text-white">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.2 }}
                     >
                       {/* Accent line */}
-                      <div className="h-1 w-16 bg-white mb-8"></div>
+                      <div className="h-1.5 w-20 bg-white mb-10"></div>
                       
                       {/* Title - larger and more prominent */}
-                      <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-lg">
+                      <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 drop-shadow-lg">
                         {cards[activeSlide].title}
                       </h3>
                       
                       {/* Description - improved readability */}
-                      <p className="text-base md:text-lg mb-10 leading-relaxed max-w-md drop-shadow-lg">
+                      <p className="text-base md:text-lg mb-12 leading-relaxed max-w-md drop-shadow-lg">
                         {cards[activeSlide].description}
                       </p>
                       
                       {/* Link styled */}
                       <a 
                         href={cards[activeSlide].linkHref}
-                        className="inline-flex items-center text-white font-medium text-base group"
+                        className="inline-flex items-center text-white font-medium text-lg group"
                       >
                         {cards[activeSlide].linkText}
-                        <ChevronRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                        <ChevronRight className="ml-3 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                       </a>
                     </motion.div>
                   </div>
@@ -225,7 +222,7 @@ export function FeaturedContent() {
             
             {/* Navigation dots */}
             <div 
-              className="absolute bottom-8 left-0 right-0 flex justify-center space-x-3 z-30"
+              className="absolute bottom-10 left-0 right-0 flex justify-center space-x-4 z-30"
               role="tablist"
               aria-label="Carousel pagination"
             >
@@ -235,7 +232,7 @@ export function FeaturedContent() {
                   role="tab"
                   aria-selected={activeSlide === i}
                   aria-label={`Go to slide ${i + 1}`}
-                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
                     activeSlide === i ? "bg-slate-400" : "bg-white/40 hover:bg-white/60"
                   }`}
                   onClick={() => setActiveSlide(i)}
@@ -245,7 +242,7 @@ export function FeaturedContent() {
             
             {/* Navigation arrows */}
             <button 
-              className="absolute top-1/2 left-4 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm
+              className="absolute top-1/2 left-6 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm
                 flex items-center justify-center text-white hover:bg-white/50 
                 transition-all duration-300 z-30 hover:scale-110 focus:outline-none"
               onClick={prevSlide}
@@ -255,7 +252,7 @@ export function FeaturedContent() {
             </button>
             
             <button 
-              className="absolute top-1/2 right-4 -translate-y-1/2 w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm
+              className="absolute top-1/2 right-6 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm
                 flex items-center justify-center text-white hover:bg-white/50
                 transition-all duration-300 z-30 hover:scale-110 focus:outline-none"
               onClick={nextSlide}

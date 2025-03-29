@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Zap, RefreshCw, Globe, TrendingUp, BarChart3, Rocket, ArrowRight, DollarSign, LineChart, Users, CheckCircle, ArrowDown, Shield } from "lucide-react"
+import { Zap, RefreshCw, Globe, TrendingUp, Rocket, ArrowRight, DollarSign, LineChart, Users, Shield } from "lucide-react"
 import { CompanyCard } from "@/components/wsu/marketplace/CompanyCard"
 import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
 import { motion, AnimatePresence } from "framer-motion"
@@ -9,6 +9,7 @@ import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { useAuthGuard } from "@/hooks/use-auth-guard"
+import { CompaniesViewHero } from "@/components/company/CompaniesViewHero"
 
 interface Company {
   id: string
@@ -33,109 +34,6 @@ interface Company {
 interface CompaniesViewProps {
   onCompanySelect: (id: string) => void
 }
-
-
-
-const MarketplaceHeader = () => {
-  return (
-    <div className="relative w-full overflow-hidden mb-16 rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]
-      hover:shadow-[0_10px_30px_rgb(0,0,0,0.06)] transition-shadow duration-500"
-      style={{ 
-        backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-      }}
-    >
-      {/* Subtle texture pattern for depth */}
-      <div className="absolute inset-0 opacity-[0.02]" 
-        style={{ 
-          backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-          backgroundSize: "40px 40px"
-        }} 
-      />
-      
-      {/* Top edge shadow line for definition */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
-      
-      {/* Inner shadow effects for depth */}
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
-      
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center space-y-4"
-        >
-          <div className="inline-flex items-center justify-center gap-2 px-5 py-2 mb-8 rounded-full bg-slate-50 border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-            <Zap className="h-4 w-4 text-slate-600" />
-            <span className="text-sm font-medium text-slate-700">
-              Discover Sustainable Investments
-            </span>
-          </div>
-          
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
-            <span className="text-slate-800">
-              Sustainable
-            </span>
-            <br />
-            <span className="text-slate-700">
-              Investment Marketplace
-            </span>
-          </h1>
-          
-          <div className="max-w-3xl mx-auto mt-8">
-            <p className="text-xl text-slate-600 leading-relaxed">
-              Connect with innovative sustainable companies making real-world impact while generating competitive financial returns.
-            </p>
-          </div>
-          
-          {/* Stats bar */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="flex flex-wrap justify-center gap-x-12 gap-y-8 mt-16 pt-6 border-t border-slate-200"
-          >
-            {[
-              { label: "Verified Companies", value: "200+", icon: <CheckCircle className="h-5 w-5 text-slate-600" /> },
-              { label: "Average Return", value: "24%", icon: <BarChart3 className="h-5 w-5 text-slate-600" /> },
-              { label: "Active Investors", value: "30K+", icon: <Users className="h-5 w-5 text-slate-600" /> },
-              { label: "Sustainable Impact", value: "High", icon: <Globe className="h-5 w-5 text-slate-600" /> }
-            ].map((stat, index) => (
-              <div key={index} className="flex items-center gap-3.5 px-4">
-                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-                  {stat.icon}
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-2xl font-bold text-slate-800">{stat.value}</span>
-                  <span className="text-sm text-slate-500">{stat.label}</span>
-                </div>
-              </div>
-            ))}
-          </motion.div>
-          
-          {/* Animated arrow indicator */}
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              delay: 0.6,
-              repeat: Infinity,
-              repeatType: "reverse",
-              duration: 1.2
-            }}
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 mt-16"
-          >
-            <ArrowDown className="h-6 w-6 text-slate-500/70" />
-          </motion.div>
-        </motion.div>
-      </div>
-      
-      {/* Bottom shadow effect */}
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
-    </div>
-  );
-};
 
 
 
@@ -451,8 +349,8 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
             className="absolute inset-0 bg-white overflow-y-auto"
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 pb-24 relative z-10">
-              {/* MarketplaceHeader and MarketplaceIntroduction components */}
-              <MarketplaceHeader />
+              {/* Replace MarketplaceHeader with CompaniesViewHero */}
+              <CompaniesViewHero />
               <MarketplaceIntroduction />
               
               {/* Title for companies section */}

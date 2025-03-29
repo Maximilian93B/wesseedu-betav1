@@ -9,17 +9,17 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15
+      staggerChildren: 0.08
     }
   }
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { y: 20, opacity: 0 },
   visible: {
-    opacity: 1,
     y: 0,
-    transition: { duration: 0.6 }
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
   }
 }
 
@@ -33,74 +33,134 @@ export function GrowthHero({
   actionButtonText = "Start Investing Today" 
 }: GrowthHeroProps) {
   return (
-    <section className="relative w-full h-screen overflow-hidden bg-slate-900">
-      {/* Background Image with Next Image */}
-      <div className="absolute inset-0 z-0">
-        <Image 
-          src="/images/pexels-jahoo-388415.jpg" // Path to your image (place in public/images folder)
-          alt="Financial growth background"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover opacity-70"
-          style={{ objectPosition: "center" }}
-        />
-  
-      </div>
+    <section className="relative w-full min-h-screen overflow-hidden bg-white">
+      {/* Subtle texture pattern for depth */}
+      <div 
+        className="absolute inset-0 opacity-[0.05]" 
+        style={{ 
+          backgroundImage: `radial-gradient(circle at 20px 20px, #64748b 1px, transparent 0)`,
+          backgroundSize: "40px 40px"
+        }} 
+      />
       
-      {/* Content positioned over the background */}
-      <div className="relative z-20 flex flex-col items-center justify-center h-full px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          className="text-center max-w-4xl mx-auto"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-        >
-          {/* Accent element - matching the screenshot styling */}
-          <motion.div 
-            className="inline-flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full 
-              border border-slate-500/30 bg-slate-700/20"
-            variants={itemVariants}
-          >
-            <span className="text-sm font-medium text-slate-300">Financial Freedom</span>
-          </motion.div>
+      {/* Content container */}
+      <div className="container max-w-7xl mx-auto px-4 py-16 md:py-24 relative z-10 
+                      flex flex-col md:flex-row items-center justify-between gap-12">
+        
+        {/* Text Content with floating-style shadows */}
+        <div className="relative md:max-w-[55%] w-full pt-4">
+          {/* Enhanced bottom shadows for floating effect */}
+          <div className="absolute -bottom-12 w-[100%] h-[40px] mx-auto left-0 right-0
+                          bg-slate-900/25 blur-xl rounded-full"></div>
+          <div className="absolute -bottom-8 w-[90%] h-[25px] mx-auto left-0 right-0
+                          bg-slate-900/35 blur-lg rounded-full"></div>
+          <div className="absolute -bottom-5 w-[75%] h-[15px] mx-auto left-0 right-0
+                          bg-slate-900/45 blur-md rounded-full"></div>
           
-          {/* Main Heading - using the exact text and styling from screenshot */}
-          <motion.h1 
-            className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 tracking-tight leading-tight"
-            variants={itemVariants}
-          >
-            <span className="text-white">
-              Let your finances grow with{" "}
-            </span>
-            <span className="block mt-2 md:mt-3 text-slate-300">
-              WeSeedU
-            </span>
-          </motion.h1>
+          {/* Subtle glow accent */}
+          <div className="absolute top-[5%] right-[5%] w-[150px] h-[80px] 
+                          bg-blue-100/40 rounded-full blur-xl"></div>
           
-          {/* Subheading - matching the screenshot text */}
-          <motion.p 
-            className="text-base md:text-lg lg:text-xl text-white/80 mb-12 max-w-3xl mx-auto"
-            variants={itemVariants}
-          >
-            Discover sustainable investment opportunities that grow your wealth while making a positive impact on the world.
-          </motion.p>
-          
-          {/* CTA Button - matching the screenshot button */}
-          <motion.div
-            variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
-          >
-            <Button
-              onClick={onAction}
-              className="px-8 py-6 bg-slate-700 hover:bg-slate-600
-                text-white shadow-[0_4px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.3)]
-                text-base font-medium rounded-lg transition-all duration-300 group"
+          {/* Text content */}
+          <div className="relative z-10 text-center md:text-left">
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
             >
-              {actionButtonText}
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-            </Button>
-          </motion.div>
+              {/* Accent element */}
+              <motion.div variants={itemVariants} className="mb-6">
+                <span className="inline-flex items-center bg-green-500 px-3 py-1 rounded-full text-xs font-medium
+                                 text-white tracking-wider shadow-[0_2px_5px_rgba(0,0,0,0.1)]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white mr-1.5"></span>
+                  FINANCIAL GROWTH
+                </span>
+              </motion.div>
+              
+              {/* Main Heading */}
+              <motion.h1 
+                className="text-4xl md:text-5xl font-bold mb-6 tracking-tight leading-tight text-slate-900"
+                variants={itemVariants}
+              >
+                Let your finances grow with{" "}
+                <span className="block mt-2 md:mt-3 relative">
+                  WeSeedU
+                </span>
+              </motion.h1>
+              
+              {/* Subheading */}
+              <motion.p 
+                className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto md:mx-0 leading-relaxed"
+                variants={itemVariants}
+              >
+                Discover sustainable investment opportunities that grow your wealth while making a positive impact on the world.
+              </motion.p>
+              
+              {/* CTA Button */}
+              <motion.div
+                variants={itemVariants}
+                className="flex justify-center md:justify-start"
+              >
+                <Button
+                  onClick={onAction}
+                  className="bg-slate-900 text-white font-medium px-8 py-6 rounded-lg text-lg
+                             shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_25px_rgba(0,0,0,0.25)]
+                             hover:bg-slate-800 transition-all duration-300 ease-out hover:translate-y-[-3px] group"
+                >
+                  {actionButtonText}
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                </Button>
+              </motion.div>
+            </motion.div>
+            
+            {/* Light reflections */}
+            <div className="absolute top-[10%] left-[5%] w-[120px] h-[60px] 
+                           bg-white/50 rounded-full blur-md mix-blend-overlay"></div>
+          </div>
+        </div>
+        
+        {/* Image Element with subtle floating effect */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1,
+            y: [0, -3, 0]  // Subtle movement range
+          }}
+          transition={{ 
+            duration: 0.6, 
+            delay: 0.3,
+            y: { 
+              duration: 3,
+              repeat: Infinity,
+              repeatType: "loop",
+              ease: "easeInOut",
+              times: [0, 0.5, 1]
+            }
+          }}
+          className="mt-12 md:mt-0 flex-shrink-0 relative pt-4"
+        >
+          {/* Enhanced bottom shadows */}
+          <div className="absolute -bottom-12 w-[100%] h-[40px] mx-auto left-0 right-0
+                          bg-slate-900/25 blur-xl rounded-full"></div>
+          <div className="absolute -bottom-8 w-[90%] h-[25px] mx-auto left-0 right-0
+                          bg-slate-900/35 blur-lg rounded-full"></div>
+          <div className="absolute -bottom-5 w-[75%] h-[15px] mx-auto left-0 right-0
+                          bg-slate-900/45 blur-md rounded-full"></div>
+                         
+
+          {/* Image */}
+          <div className="relative">
+            <Image 
+              src="/sustainable-development.png"
+              alt="Financial growth chart showing stacked coins with golden upward trend"
+              width={450}
+              height={450}
+              priority
+              className="relative z-10 drop-shadow-md"
+            />
+          </div>
+
         </motion.div>
       </div>
     </section>

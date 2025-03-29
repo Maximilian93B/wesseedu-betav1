@@ -226,8 +226,12 @@ function HomePageContent() {
                   </div>
                 </div>
 
-                {/* Transition - now light-to-white */}
-                <SectionTransition direction="light-to-white" />
+
+                {/* DataViz with integrated wave transition */}
+                <Suspense fallback={<div className="h-[400px] bg-slate-50 flex items-center justify-center"><LoadingScreen /></div>}>
+                  <DataVizTransitionDynamic />
+                </Suspense>
+
 
                 {/* WHITE SECTION 1: How It Works */}
                 <div className="bg-white py-16 md:py-24 relative">
@@ -241,11 +245,7 @@ function HomePageContent() {
                   </div>
                 </div>
 
-                {/* DataViz with integrated wave transition */}
-                <Suspense fallback={<div className="h-[400px] bg-slate-50 flex items-center justify-center"><LoadingScreen /></div>}>
-                  <DataVizTransitionDynamic />
-                </Suspense>
-                
+
                 {/* FeaturedContent Section - now with light colors */}
                 <div className="relative">
                   {/* Simple split background container */}
@@ -256,7 +256,7 @@ function HomePageContent() {
                   
                   {/* Content container */}
                   <div className="absolute inset-0">
-                    <Suspense fallback={<div className="h-full flex items-center justify-center py-12 bg-white"><LoadingScreen /></div>}>
+                    <Suspense fallback={<div className="h-full flex items-center justify-center py-12"><LoadingScreen /></div>}>
                       <FeaturedContentDynamic />
                     </Suspense>
                   </div>
@@ -267,25 +267,12 @@ function HomePageContent() {
                 
                 {/* GrowthHero Section - now light */}
                 <div className="relative bg-gradient-to-b from-slate-50 to-white">
-                  <Suspense fallback={<div className="h-[70vh] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+                  <Suspense fallback={<div className="h-[30vh] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
                     <GrowthHeroDynamic 
                       onAction={() => handleNavigation('companies')} 
                       actionButtonText="Start Investing Today"
                     />
                   </Suspense>
-                </div>
-                
-                {/* Call to Action */}
-                <div className="bg-slate-50 pt-12 pb-16 sm:pt-16 sm:pb-20 relative overflow-hidden">
-                  {/* Subtle accent glow element */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-emerald-100 rounded-full blur-3xl pointer-events-none"></div>
-                  
-                  {/* Content container */}
-                  <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-8 relative z-10">
-                    <Suspense fallback={<div className="h-[150px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
-                      <CallToActionDynamic onNavigate={handleNavigation} />
-                    </Suspense>
-                  </div>
                 </div>
               </>
             )}

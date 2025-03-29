@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import Image from "next/image"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -52,60 +53,77 @@ export function HomeHero({ profile, onNavigate }: HomeHeroProps) {
       <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
       
       <motion.div 
-        className="container max-w-5xl mx-auto px-4 pt-16 md:pt-24 text-center relative z-10"
+        className="container max-w-5xl mx-auto px-4 pt-16 md:pt-24 text-center md:text-left relative z-10 
+                  flex flex-col md:flex-row items-center justify-between"
         initial="hidden"
         animate="visible"
         variants={containerVariants}
       >
-        {/* Highlight badge */}
-        <motion.div variants={itemVariants} className="mb-6">
-          <span className="inline-flex items-center bg-slate-800 px-3 py-1 rounded-full text-xs font-medium
-            text-white tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-white mr-1.5"></span>
-            SUSTAINABLE INVESTING
-          </span>
-        </motion.div>
+        <div className="md:max-w-[60%]">
+          {/* Highlight badge */}
+          <motion.div variants={itemVariants} className="mb-6">
+            <span className="inline-flex items-center bg-slate-800 px-3 py-1 rounded-full text-xs font-medium
+              text-white tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-white mr-1.5"></span>
+              SUSTAINABLE INVESTING
+            </span>
+          </motion.div>
+          
+          <motion.h1 
+            variants={itemVariants}
+            className="text-4xl md:text-6xl font-black tracking-tight text-slate-800 leading-tight mb-6"
+          >
+            Invest in a <span className="relative">
+              brighter future
+              <span className="absolute -bottom-1 left-0 w-full h-1 bg-slate-600"></span>
+            </span>
+          </motion.h1>
+          
+          <motion.p 
+            variants={itemVariants}
+            className="text-lg md:text-xl text-slate-600 mx-auto md:mx-0 mb-10 leading-relaxed"
+          >
+            Join a community of investors dedicated to making positive change through sustainable and impactful investment opportunities.
+          </motion.p>
+          
+          <motion.div 
+            variants={itemVariants}
+            className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"
+          >
+            <Button 
+              className="bg-slate-900 text-white font-medium px-8 py-6 rounded-lg text-lg
+                shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)]
+                hover:bg-slate-800 transition-all duration-300 ease-out hover:translate-y-[-2px]"
+              asChild
+            >
+              <Link href="/auth/signup">Get Started</Link>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-800 
+                font-medium px-8 py-6 rounded-lg text-lg
+                shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)]
+                transition-all duration-300 ease-out hover:translate-y-[-2px] hover:border-slate-300"
+              asChild
+            >
+              <Link href="/about">Learn More</Link>
+            </Button>
+          </motion.div>
+        </div>
         
-        <motion.h1 
-          variants={itemVariants}
-          className="text-4xl md:text-6xl font-black tracking-tight text-slate-800 leading-tight mb-6"
-        >
-          Invest in a <span className="relative">
-            brighter future
-            <span className="absolute -bottom-1 left-0 w-full h-1 bg-slate-600"></span>
-          </span>
-        </motion.h1>
-        
-        <motion.p 
-          variants={itemVariants}
-          className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed"
-        >
-          Join a community of investors dedicated to making positive change through sustainable and impactful investment opportunities.
-        </motion.p>
-        
+        {/* Dollar Coins Image */}
         <motion.div 
           variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="mt-12 md:mt-0 md:ml-8 flex-shrink-0"
         >
-          <Button 
-            className="bg-slate-900 text-white font-medium px-8 py-6 rounded-lg text-lg
-              shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)]
-              hover:bg-slate-800 transition-all duration-300 ease-out hover:translate-y-[-2px]"
-            asChild
-          >
-            <Link href="/auth/signup">Get Started</Link>
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-800 
-              font-medium px-8 py-6 rounded-lg text-lg
-              shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)]
-              transition-all duration-300 ease-out hover:translate-y-[-2px] hover:border-slate-300"
-            asChild
-          >
-            <Link href="/about">Learn More</Link>
-          </Button>
+          <Image
+            src="/rocket.png"
+            alt="Stack of dollar coins"
+            width={280}
+            height={280}
+            className="drop-shadow-2xl"
+          />
         </motion.div>
       </motion.div>
     </div>
