@@ -316,36 +316,33 @@ const UserInvestments = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <Card 
-        className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]
-          hover:shadow-[0_10px_30px_rgb(0,0,0,0.06)] transition-all duration-500"
-        style={{ 
-          backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-        }}
-      >
-        {/* Subtle texture pattern for depth */}
-        <div className="absolute inset-0 opacity-[0.02]" 
+      <div className="rounded-xl border border-slate-200 bg-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+        hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-shadow duration-500 relative overflow-hidden">
+        {/* Decorative top accent */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-500 via-slate-400 to-transparent" />
+        
+        {/* Subtle texture pattern for depth - minimal */}
+        <div className="absolute inset-0 opacity-[0.01]" 
           style={{ 
-            backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-            backgroundSize: "40px 40px"
+            backgroundImage: `radial-gradient(circle at 30px 30px, #94a3b8 0.5px, transparent 0)`,
+            backgroundSize: "60px 60px"
           }} 
         />
         
-        {/* Top edge shadow line for definition */}
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+        {/* Subtle gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-slate-50/50 opacity-90" />
         
-        {/* Inner shadow effects for depth */}
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
+        {/* Background glow effect */}
+        <div className="absolute bottom-0 right-[10%] w-[200px] h-[200px] bg-slate-100/30 rounded-full blur-[80px] pointer-events-none"></div>
         
-        <CardHeader className="px-5 pt-5 pb-0 relative z-10">
-          <CardTitle className="text-lg font-medium text-slate-800 flex items-center">
-            <LineChart className="h-5 w-5 mr-2 text-slate-600" />
+        <CardHeader className="px-6 pt-6 pb-0 relative z-10">
+          <CardTitle className="text-base font-medium text-slate-800 flex items-center">
+            <LineChart className="h-4 w-4 mr-2.5 text-slate-600" />
             Investment Activity
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="px-5 py-5 relative z-10">
+        <CardContent className="px-6 py-6 relative z-10">
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-[180px] w-full bg-slate-100" />
@@ -411,17 +408,17 @@ const UserInvestments = () => {
           )}
         </CardContent>
         
-        <CardFooter className="px-5 py-4 border-t border-slate-200 bg-slate-50/80 relative z-10">
+        <CardFooter className="px-6 py-5 border-t border-slate-100 bg-slate-50/30 relative z-10">
           <Button 
             variant="ghost" 
-            className="ml-auto text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+            className="ml-auto text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 text-sm"
             onClick={navigateToInvestments}
           >
             View All Investments
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ml-2 h-3.5 w-3.5" />
           </Button>
         </CardFooter>
-      </Card>
+      </div>
     </motion.div>
   );
 };

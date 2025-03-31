@@ -48,13 +48,13 @@ export function GrowthHero({
                       flex flex-col md:flex-row items-center justify-between gap-12">
         
         {/* Text Content with floating-style shadows */}
-        <div className="relative md:max-w-[55%] w-full pt-4">
+        <div className="relative md:max-w-[55%] w-full pt-4 pb-16">
           {/* Enhanced bottom shadows for floating effect */}
-          <div className="absolute -bottom-12 w-[100%] h-[40px] mx-auto left-0 right-0
+          <div className="absolute -bottom-16 w-[100%] h-[50px] mx-auto left-0 right-0
                           bg-slate-900/25 blur-xl rounded-full"></div>
-          <div className="absolute -bottom-8 w-[90%] h-[25px] mx-auto left-0 right-0
+          <div className="absolute -bottom-12 w-[90%] h-[35px] mx-auto left-0 right-0
                           bg-slate-900/35 blur-lg rounded-full"></div>
-          <div className="absolute -bottom-5 w-[75%] h-[15px] mx-auto left-0 right-0
+          <div className="absolute -bottom-8 w-[75%] h-[20px] mx-auto left-0 right-0
                           bg-slate-900/45 blur-md rounded-full"></div>
           
           {/* Subtle glow accent */}
@@ -99,13 +99,13 @@ export function GrowthHero({
               {/* CTA Button */}
               <motion.div
                 variants={itemVariants}
-                className="flex justify-center md:justify-start"
+                className="flex justify-center md:justify-start relative z-20"
               >
                 <Button
                   onClick={onAction}
                   className="bg-slate-900 text-white font-medium px-8 py-6 rounded-lg text-lg
-                             shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_12px_25px_rgba(0,0,0,0.25)]
-                             hover:bg-slate-800 transition-all duration-300 ease-out hover:translate-y-[-3px] group"
+                             shadow-sm hover:shadow-md
+                             hover:bg-slate-800 transition-all duration-300 ease-out hover:translate-y-[-2px] group"
                 >
                   {actionButtonText}
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
@@ -138,14 +138,14 @@ export function GrowthHero({
               times: [0, 0.5, 1]
             }
           }}
-          className="mt-12 md:mt-0 flex-shrink-0 relative pt-4"
+          className="mt-12 md:mt-0 flex-shrink-0 relative pt-4 pb-16"
         >
           {/* Enhanced bottom shadows */}
-          <div className="absolute -bottom-12 w-[100%] h-[40px] mx-auto left-0 right-0
+          <div className="absolute -bottom-16 w-[100%] h-[50px] mx-auto left-0 right-0
                           bg-slate-900/25 blur-xl rounded-full"></div>
-          <div className="absolute -bottom-8 w-[90%] h-[25px] mx-auto left-0 right-0
+          <div className="absolute -bottom-12 w-[90%] h-[35px] mx-auto left-0 right-0
                           bg-slate-900/35 blur-lg rounded-full"></div>
-          <div className="absolute -bottom-5 w-[75%] h-[15px] mx-auto left-0 right-0
+          <div className="absolute -bottom-8 w-[75%] h-[20px] mx-auto left-0 right-0
                           bg-slate-900/45 blur-md rounded-full"></div>
                          
 

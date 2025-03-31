@@ -20,7 +20,7 @@ export function CompaniesViewHero() {
   
   return (
     <div className="relative w-full overflow-hidden mb-16 rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]
-      hover:shadow-[0_10px_30px_rgb(0,0,0,0.06)] transition-shadow duration-500"
+      hover:shadow-[0_10px_30px_rgb(0,0,0,0.06)] transition-shadow duration-500 mt-8"
       style={{ 
         backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
       }}
@@ -40,7 +40,7 @@ export function CompaniesViewHero() {
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
       
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-20 pb-28">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-32">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
           {/* Text content - Left side */}
           <div className="lg:max-w-[55%] text-center lg:text-left">

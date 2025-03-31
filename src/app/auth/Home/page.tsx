@@ -10,7 +10,7 @@ import dynamic from "next/dynamic"
 
 // Import home page specific components
 import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
-import { SectionTransition } from "@/components/wsu/dashboard/SectionTransition"
+import { SectionTransition } from "@/components/ui/effects/SectionTrans"
 
 // Import new modularized components from barrel file
 import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
@@ -227,23 +227,24 @@ function HomePageContent() {
                 </div>
 
 
-                {/* DataViz with integrated wave transition */}
-                <Suspense fallback={<div className="h-[400px] bg-slate-50 flex items-center justify-center"><LoadingScreen /></div>}>
-                  <DataVizTransitionDynamic />
-                </Suspense>
 
-
-                {/* WHITE SECTION 1: How It Works */}
-                <div className="bg-white py-16 md:py-24 relative">
+                {/* WHITE SECTION 1: How It Works - adjust padding top */}
+                <div className="bg-white pt-20 pb-16 md:pt-24 md:pb-24 relative mt-[-5px]"> {/* Increased top padding and slight negative margin */}
                   <div className="max-w-7xl mx-auto px-4 sm:px-6">
                     <Suspense fallback={<div className="h-[200px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
                       <HowItWorksDynamic />
-                      <div className="mt-16 md:mt-24">
-                        <PlatformImpactDynamic />
-                      </div>
                     </Suspense>
                   </div>
                 </div>
+
+
+
+                {/* DataViz with integrated wave transition - adjust padding bottom */}
+                <Suspense fallback={<div className="h-[400px] bg-slate-50 flex items-center justify-center"><LoadingScreen /></div>}>
+                  <div className="pb-0"> {/* Remove any bottom padding */}
+                    <DataVizTransitionDynamic />
+                  </div>
+                </Suspense>
 
 
                 {/* FeaturedContent Section - now with light colors */}
