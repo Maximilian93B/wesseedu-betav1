@@ -1,43 +1,37 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { CosmicCard } from "./CosmicCard"
 import { VettingStep } from "./types"
 
-// Modern simplified vetting card with clean design
+// Vetting card component using Green Apple styling
 export function VettingCard({ step, index }: { step: VettingStep; index: number }) {
   return (
-    <CosmicCard 
-      className="h-full"
-      style={{ transitionDelay: `${index * 100}ms` }}
-    >
-      <div className="flex flex-col space-y-4">
-        {/* Icon section with improved gradient styling */}
-        <div className="flex h-10 w-10 items-center justify-center rounded-full 
-            bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 
-            text-purple-400 ring-1 ring-purple-500/20 shadow-md relative">
-          {/* Subtle backdrop glow */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/10 via-transparent to-teal-500/10 opacity-40"></div>
+    <div className="bg-white shadow-[0_8px_30px_rgba(0,0,0,0.08)] rounded-xl p-5 border border-white/20 hover:shadow-[0_10px_30px_rgba(0,0,0,0.12)] transition-shadow duration-300 h-full">
+      <div className="flex flex-col">
+        {/* Number and icon */}
+        <div className="flex items-start mb-4">
+          <div className="flex-shrink-0 mr-3">
+            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-medium">
+              {index + 1}
+            </div>
+          </div>
           
-          <motion.div
-            whileHover={{ rotate: 5 }}
-            transition={{ duration: 0.2 }}
-            className="relative z-10"
-          >
+          <div className="text-green-600 mt-1">
             {step.icon}
-          </motion.div>
+          </div>
         </div>
         
-        {/* Content section with enhanced typography */}
+        {/* Content */}
         <div>
-          <h3 className="mb-2 text-lg font-semibold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-teal-400 transition-all duration-300">
-            {index + 1}. {step.title}
+          <h3 className="text-green-800 font-medium mb-2">
+            {step.title}
           </h3>
-          <p className="text-sm text-gray-300 group-hover:text-gray-200 transition-colors duration-300">
+          
+          <p className="text-sm text-green-700/80">
             {step.description}
           </p>
         </div>
       </div>
-    </CosmicCard>
+    </div>
   );
 } 

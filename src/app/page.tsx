@@ -5,7 +5,7 @@ import { Navigation } from "@/components/wsu/Nav"
 import { HeroSection } from "@/components/wsu/Marketing/HeroSection"
 import { CardSection } from "@/components/wsu/Marketing/CardSection"
 import { PartnersAndVetting } from "@/components/wsu/Marketing/PartnersAndVetting/index"
-import { ProblemSolutionFlow } from "@/components/wsu/Marketing/ProblemSolutionFlow"
+import { MoneyWorthSection } from "@/components/wsu/Marketing/MoneyWorthSection"
 import { KeyFeatures } from "@/components/wsu/Marketing/KeyFeatures"
 import { ImpactSection } from "@/components/wsu/Marketing/ImpactSection"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
@@ -14,15 +14,15 @@ import { useRouter, usePathname } from "next/navigation"
 // Monochromatic styled loading component
 const SectionLoader = () => (
   <div className="w-full h-[50vh] flex items-center justify-center">
-    <div className="relative w-full max-w-4xl h-64 rounded-xl overflow-hidden bg-white/90 backdrop-blur-sm border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+    <div className="relative w-full max-w-4xl h-64 rounded-xl overflow-hidden bg-white/90 backdrop-blur-sm border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
       {/* Animated gradient background */}
       <div className="absolute inset-0" 
         style={{ 
-          backgroundImage: "linear-gradient(to bottom right, #ffffff, #eee4da)" 
+          backgroundImage: "linear-gradient(to right top, rgba(255,255,255,0.95), rgba(255,255,255,0.85))" 
         }}></div>
       
       {/* Subtle grid pattern */}
-      <div className="absolute inset-0 opacity-[0.02]" 
+      <div className="absolute inset-0 opacity-[0.03]" 
         style={{
           backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
           backgroundSize: '40px 40px'
@@ -34,25 +34,25 @@ const SectionLoader = () => (
         <div className="flex flex-col items-center">
           <div className="relative h-20 w-20">
             {/* Multiple spinning circles */}
-            <div className="absolute inset-0 rounded-full border-t-2 border-l-2 border-slate-600 animate-spin" style={{ animationDuration: '1.5s' }}></div>
-            <div className="absolute inset-1 rounded-full border-r-2 border-b-2 border-slate-500 animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
-            <div className="absolute inset-2 rounded-full border-t-2 border-r-2 border-slate-400 animate-spin" style={{ animationDuration: '2.5s' }}></div>
+            <div className="absolute inset-0 rounded-full border-t-2 border-l-2 border-green-600 animate-spin" style={{ animationDuration: '1.5s' }}></div>
+            <div className="absolute inset-1 rounded-full border-r-2 border-b-2 border-green-500 animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
+            <div className="absolute inset-2 rounded-full border-t-2 border-r-2 border-green-400 animate-spin" style={{ animationDuration: '2.5s' }}></div>
             
             {/* Logo */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-slate-800 font-bold text-lg">
+              <div className="text-green-800 font-bold text-lg">
                 WSU
               </div>
             </div>
           </div>
           
-          <div className="mt-6 text-slate-700 text-sm font-medium tracking-wider uppercase">
+          <div className="mt-6 text-green-700 text-sm font-medium tracking-wider uppercase">
             Loading Content
           </div>
           
           {/* Loading progress bar */}
-          <div className="mt-4 w-48 h-1 bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full bg-slate-800 animate-pulse-slow rounded-full" 
+          <div className="mt-4 w-48 h-1 bg-green-100 rounded-full overflow-hidden">
+            <div className="h-full bg-green-600 animate-pulse-slow rounded-full" 
               style={{ 
                 width: '70%',
                 animationDuration: '2s'
@@ -119,7 +119,7 @@ export default function LandingPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden" style={{
-      background: 'linear-gradient(to bottom right, #ffffff, #eee4da)'
+      background: 'linear-gradient(115deg, #70f570, #49c628)'
     }}>
       {/* Global animation styles */}
       <style jsx global>{`
@@ -183,7 +183,7 @@ export default function LandingPage() {
         }
       `}</style>
       
-      {/* Navigation Component - Positioned above all content with scroll functionality */}
+      {/* Navigation Component */}
       {isMounted && <Navigation scrollToSection={scrollToSection} currentPath={pathname} />}
       
       {/* Scroll progress indicator */}
@@ -192,16 +192,16 @@ export default function LandingPage() {
         style={{ scaleX, transformOrigin: "0%" }}
       />
       
-      {/* Content container with higher z-index and smooth scrolling - optimized animations */}
+      {/* Content container */}
       <motion.main 
         ref={containerRef}
-        className={`relative w-full h-screen mx-auto max-w-screen-2xl flex flex-col transition-all duration-1000 ease-out hide-scrollbar overflow-y-scroll ${
+        className={`relative w-full h-screen flex flex-col transition-all duration-1000 ease-out hide-scrollbar overflow-y-scroll ${
           contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}
         style={{ 
           zIndex: 10, 
           position: 'relative',
-          willChange: 'opacity, transform', // Hardware acceleration hint
+          willChange: 'opacity, transform',
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -214,7 +214,7 @@ export default function LandingPage() {
         {/* Hero Section */}
         <div 
           id="hero-section" 
-          className="min-h-screen flex items-center justify-center pt-28 md:pt-32 lg:pt-36" 
+          className="min-h-screen flex items-center justify-center pt-28 md:pt-32 lg:pt-36 mb-36 md:mb-48 lg:mb-60" 
           style={{ 
             zIndex: 20, 
             position: 'relative',
@@ -223,40 +223,34 @@ export default function LandingPage() {
           <HeroSection />
         </div>
     
-        {/* Progressively load sections with better performance using priority loading */}
+        {/* Card Section - No width constraints, full viewport section */}
         <Suspense fallback={<SectionLoader />}>
-          <section id="card-section" className="pt-24 pb-24 md:pb-36 flex justify-center px-4 sm:px-6 lg:px-8">
+          <section id="card-section" className="min-h-screen w-full mb-48 md:mb-48 lg:mb-60">
             <CardSection />
           </section>
         </Suspense>
 
-        {/* Remaining sections with improved loading strategies */}
-        <LazyLoadSection id="partners-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+        {/* Remaining sections - Adjusted for consistency with increased spacing */}
+        <LazyLoadSection id="partners-section" className="w-full py-36 md:py-48 lg:py-60 mb-48 md:mt-48 lg:mt-60">
           <Suspense fallback={<SectionLoader />}>
-            <PartnersAndVetting />
+            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
+              <PartnersAndVetting />
+            </div>
           </Suspense>
         </LazyLoadSection>
 
-        {/* Problem Solution Flow */}
-        <LazyLoadSection id="solution-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+            {/* Money Worth Section */}
+            <LazyLoadSection id="solution-section" className="w-full py-36 md:py-48 lg:py-60 mb-36 md:mb-48 lg:mb-60">
           <Suspense fallback={<SectionLoader />}>
-            <ProblemSolutionFlow />
+            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
+              <MoneyWorthSection />
+            </div>
           </Suspense>
         </LazyLoadSection>
 
-        {/* Impact Section */}
-        <LazyLoadSection id="impact-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
-          <Suspense fallback={<SectionLoader />}>
-            <ImpactSection />
-          </Suspense>
-        </LazyLoadSection>
-
-        {/* Key Features */}
-        <LazyLoadSection id="features-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
-          <Suspense fallback={<SectionLoader />}>
-            <KeyFeatures />
-          </Suspense>
-        </LazyLoadSection>
+  
+        {/* Extra padding at bottom for cleaner scroll experience */}
+        <div className="h-36 md:h-48 lg:h-60"></div>
       </motion.main>
     </div>
   )
@@ -284,7 +278,7 @@ function LazyLoadSection({ id, className, children }: { id: string, className?: 
           observer.disconnect(); // Only need to observe once
         }
       },
-      { threshold: 0.1, rootMargin: '100px 0px' } // Start loading when within 100px of viewport
+      { threshold: 0.1, rootMargin: '200px 0px' } // Increased margin to load sections earlier
     );
     
     observer.observe(sectionRef.current);
@@ -293,7 +287,7 @@ function LazyLoadSection({ id, className, children }: { id: string, className?: 
 
   return (
     <section id={id} className={className} ref={sectionRef}>
-      {isVisible ? children : <div className="min-h-[50vh]" />}
+      {isVisible ? children : <div className="min-h-[60vh]" />} {/* Increased minimum height for placeholder */}
     </section>
   );
 }

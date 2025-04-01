@@ -32,7 +32,7 @@ export const CARDS: CardData[] = [
     featured: true,
     stats: [
       { value: '20', label: 'Startups' },
-      { value: '92%', label: ' ESG Satisfaction' },
+      { value: '92%', label: 'ESG Satisfaction' },
       { value: '$2.4M', label: 'Invested' }
     ]
   },

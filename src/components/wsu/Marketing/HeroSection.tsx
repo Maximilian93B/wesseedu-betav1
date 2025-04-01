@@ -93,7 +93,7 @@ export function HeroSection() {
           
           <motion.div variants={itemVariants} className="overflow-hidden relative mb-8">
             <motion.h1 
-              className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-[1.15]"
+              className="text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.15]"
             >
               Your money's<br /><span className="relative inline-block">
                 worth more
@@ -107,7 +107,7 @@ export function HeroSection() {
           
           <motion.p 
             variants={itemVariants}
-            className="text-slate-600 text-xl leading-relaxed mb-16 max-w-xl font-light" // Increased bottom margin
+            className="text-white text-xl leading-relaxed mb-16 max-w-xl font-light" // Increased bottom margin
           >
             Get the most out of your money with smart investing products and personalized advice to build long-term wealth.
           </motion.p>
@@ -149,22 +149,22 @@ export function HeroSection() {
             {/* Feature 1 */}
             <div className="flex flex-col group">
               <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-6 rounded-full transition-all duration-300 group-hover:w-16"></div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-4">Low fees meet higher yields</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">Your money's always making more with low-fee investing and high-interest savings.</p>
+              <h3 className="text-xl font-semibold text-white mb-4">Low fees meet higher yields</h3>
+              <p className="text-white text-sm leading-relaxed">Your money's always making more with low-fee investing and high-interest savings.</p>
             </div>
             
             {/* Feature 2 */}
             <div className="flex flex-col group">
               <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-6 rounded-full transition-all duration-300 group-hover:w-16"></div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-4">Unmatched access</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">Get sophisticated investment opportunities traditionally reserved for industry insiders.</p>
+              <h3 className="text-xl font-semibold text-white mb-4">Unmatched access</h3>
+              <p className="text-white text-sm leading-relaxed">Get sophisticated investment opportunities traditionally reserved for industry insiders.</p>
             </div>
             
             {/* Feature 3 */}
             <div className="flex flex-col group">
               <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-6 rounded-full transition-all duration-300 group-hover:w-16"></div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-4">Smart & simple</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">In just a few taps, set your financial goals in motion with our easy-to-use products.</p>
+              <h3 className="text-xl font-semibold text-white mb-4">Smart & simple</h3>
+              <p className="text-white text-sm leading-relaxed">In just a few taps, set your financial goals in motion with our easy-to-use products.</p>
             </div>
           </motion.div>
         </div>
@@ -286,7 +286,7 @@ export function HeroSection() {
                   animate={{ translateX: ["120%", "-120%"] }}
                   transition={{ duration: 4, repeat: Infinity, repeatType: "loop", ease: "linear", delay: 2 }}
                 />
-                <span className="text-slate-800 font-bold text-3xl">W</span>
+                <span className="text-white font-bold text-3xl">W</span>
               </div>
             </motion.div>
             
@@ -326,7 +326,7 @@ export function HeroSection() {
                   transition={{ duration: 4, repeat: Infinity, repeatType: "loop", ease: "linear", delay: 1.5 }}
                 />
                 
-                <span className="text-slate-800 font-bold text-3xl relative z-10">$</span>
+                <span className="text-white font-bold text-3xl relative z-10">$</span>
               </div>
             </motion.div>
             
@@ -346,7 +346,7 @@ export function HeroSection() {
           className="flex flex-col items-center focus:outline-none group"
           aria-label="View more content"
         >
-          <p className="text-slate-600 text-sm font-medium mb-4 group-hover:text-slate-800 transition-colors">
+          <p className="text-white text-sm font-medium mb-4 group-hover:text-slate-800 transition-colors">
             Scroll for more
           </p>
           <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center
