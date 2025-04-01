@@ -8,23 +8,24 @@ import { PartnersAndVetting } from "@/components/wsu/Marketing/PartnersAndVettin
 import { ProblemSolutionFlow } from "@/components/wsu/Marketing/ProblemSolutionFlow"
 import { KeyFeatures } from "@/components/wsu/Marketing/KeyFeatures"
 import { ImpactSection } from "@/components/wsu/Marketing/ImpactSection"
-import CosmicBackground from "@/components/ui/backgrounds/CosmicBeamsBackground"
-import GridRadiatingBackground from "@/components/ui/backgrounds/GridRadiatingBackground"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import { useRouter, usePathname } from "next/navigation"
 
-// WeSeedU styled loading component
+// Monochromatic styled loading component
 const SectionLoader = () => (
   <div className="w-full h-[50vh] flex items-center justify-center">
-    <div className="relative w-full max-w-4xl h-64 rounded-xl overflow-hidden bg-black/30 backdrop-blur-sm border border-purple-500/20">
+    <div className="relative w-full max-w-4xl h-64 rounded-xl overflow-hidden bg-white/90 backdrop-blur-sm border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
       {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-teal-500/20 to-purple-600/20 animate-pulse-slow"></div>
+      <div className="absolute inset-0" 
+        style={{ 
+          backgroundImage: "linear-gradient(to bottom right, #ffffff, #eee4da)" 
+        }}></div>
       
       {/* Subtle grid pattern */}
-      <div className="absolute inset-0 opacity-10" 
+      <div className="absolute inset-0 opacity-[0.02]" 
         style={{
-          backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)',
-          backgroundSize: '20px 20px'
+          backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
+          backgroundSize: '40px 40px'
         }}>
       </div>
       
@@ -33,25 +34,25 @@ const SectionLoader = () => (
         <div className="flex flex-col items-center">
           <div className="relative h-20 w-20">
             {/* Multiple spinning circles */}
-            <div className="absolute inset-0 rounded-full border-t-2 border-l-2 border-purple-500 animate-spin" style={{ animationDuration: '1.5s' }}></div>
-            <div className="absolute inset-1 rounded-full border-r-2 border-b-2 border-teal-500 animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
-            <div className="absolute inset-2 rounded-full border-t-2 border-r-2 border-emerald-500 animate-spin" style={{ animationDuration: '2.5s' }}></div>
+            <div className="absolute inset-0 rounded-full border-t-2 border-l-2 border-slate-600 animate-spin" style={{ animationDuration: '1.5s' }}></div>
+            <div className="absolute inset-1 rounded-full border-r-2 border-b-2 border-slate-500 animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
+            <div className="absolute inset-2 rounded-full border-t-2 border-r-2 border-slate-400 animate-spin" style={{ animationDuration: '2.5s' }}></div>
             
-            {/* WeSeedU logo */}
+            {/* Logo */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-white font-bold text-lg bg-gradient-to-r from-purple-500 via-teal-400 to-emerald-500 bg-clip-text text-transparent">
+              <div className="text-slate-800 font-bold text-lg">
                 WSU
               </div>
             </div>
           </div>
           
-          <div className="mt-6 text-white text-sm font-medium tracking-wider uppercase">
-            Growing Innovation
+          <div className="mt-6 text-slate-700 text-sm font-medium tracking-wider uppercase">
+            Loading Content
           </div>
           
           {/* Loading progress bar */}
-          <div className="mt-4 w-48 h-1 bg-black/30 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-purple-500 to-teal-500 animate-pulse-slow rounded-full" 
+          <div className="mt-4 w-48 h-1 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-full bg-slate-800 animate-pulse-slow rounded-full" 
               style={{ 
                 width: '70%',
                 animationDuration: '2s'
@@ -113,11 +114,13 @@ export default function LandingPage() {
     }
   }
 
-  // Add scroll progress indicator (optional)
+  // Add scroll progress indicator
   const scaleX = useTransform(smoothScrollProgress, [0, 1], [0, 1])
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="relative min-h-screen w-full overflow-hidden" style={{
+      background: 'linear-gradient(to bottom right, #ffffff, #eee4da)'
+    }}>
       {/* Global animation styles */}
       <style jsx global>{`
         @keyframes rotate-slow {
@@ -185,35 +188,9 @@ export default function LandingPage() {
       
       {/* Scroll progress indicator */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-teal-500 z-50"
+        className="fixed top-0 left-0 right-0 h-1 bg-slate-800 z-50"
         style={{ scaleX, transformOrigin: "0%" }}
       />
-      
-      {isMounted && (
-        <>
-          <div 
-            className="fixed inset-0 z-0"
-            style={{ 
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.45) 100%)',
-              pointerEvents: 'none',
-              willChange: 'opacity',
-              opacity: contentVisible ? 1 : 0,
-              transition: 'opacity 0.6s ease-out' // Slightly longer for smoother transition
-            }}
-          ></div>
-          
-          {/* Replace StarryBackground with GridRadiatingBackground */}
-          {typeof window !== 'undefined' && (
-            <>
-              <GridRadiatingBackground />
-              {/* Only render CosmicBackground on more powerful devices that don't have reduced motion preferences */}
-              {!window.matchMedia('(prefers-reduced-motion: reduce)').matches && !isMobile() && (
-                <CosmicBackground />
-              )}
-            </>
-          )}
-        </>
-      )}
       
       {/* Content container with higher z-index and smooth scrolling - optimized animations */}
       <motion.main 
@@ -229,20 +206,18 @@ export default function LandingPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ 
-          duration: 1.0, // Slower animation for smoother appearance and better performance
-          ease: [0.25, 0.1, 0.25, 1.0] // Custom cubic bezier for more natural motion
+          duration: 1.0, 
+          ease: [0.25, 0.1, 0.25, 1.0]
         }}
         exit={{ opacity: 0 }}
       >
-        {/* Hero Section with spacing adjusted for cresting planet effect */}
+        {/* Hero Section */}
         <div 
           id="hero-section" 
-          className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8" 
+          className="min-h-screen flex items-center justify-center pt-28 md:pt-32 lg:pt-36" 
           style={{ 
             zIndex: 20, 
             position: 'relative',
-            paddingBottom: '5vh',
-            paddingTop: '5vh',
           }}
         >
           <HeroSection />
@@ -262,7 +237,6 @@ export default function LandingPage() {
           </Suspense>
         </LazyLoadSection>
 
-
         {/* Problem Solution Flow */}
         <LazyLoadSection id="solution-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
           <Suspense fallback={<SectionLoader />}>
@@ -270,14 +244,12 @@ export default function LandingPage() {
           </Suspense>
         </LazyLoadSection>
 
-
-    {/* Use IntersectionObserver-based lazy loading for sections that aren't immediately visible */}
-    <LazyLoadSection id="impact-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
+        {/* Impact Section */}
+        <LazyLoadSection id="impact-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
           <Suspense fallback={<SectionLoader />}>
             <ImpactSection />
           </Suspense>
         </LazyLoadSection>
-
 
         {/* Key Features */}
         <LazyLoadSection id="features-section" className="py-24 md:py-36 flex justify-center px-4 sm:px-6 lg:px-8">
