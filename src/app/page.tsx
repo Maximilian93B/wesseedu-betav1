@@ -218,7 +218,7 @@ export default function LandingPage() {
         </Suspense>
 
         {/* Sustainable Impact Section */}
-        <LazyLoadSection id="sustainable-impact-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32">
+        <LazyLoadSection id="sustainable-impact-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32 bg-white">
           <Suspense fallback={<SectionLoader />}>
             <SustainableImpactSection />
           </Suspense>

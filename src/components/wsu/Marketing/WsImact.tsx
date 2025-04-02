@@ -38,48 +38,77 @@ export function SustainableImpactSection() {
       className="relative z-10"
     >
       <div className="flex flex-col lg:flex-row min-h-[80vh] mx-auto max-w-screen-2xl">
-        {/* Left content - Text */}
+        {/* Left content - Text in Green Container */}
         <div className="w-full lg:w-1/2 flex flex-col p-6 sm:p-8 lg:p-10 xl:p-12">
-          {/* Subtle accent line */}
-          <motion.div variants={itemVariants} className="w-20 h-1 bg-gradient-to-r from-white to-transparent rounded-full mb-6"></motion.div>
-          
-          <motion.h2 
+          <motion.div 
             variants={itemVariants}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6"
+            className="rounded-2xl p-8 shadow-[0_12px_40px_rgba(0,0,0,0.25)] border border-white/20 relative overflow-hidden"
+            style={{ 
+              backgroundImage: "linear-gradient(115deg, #70f570, #49c628)" 
+            }}
           >
-            Your Money <span className="relative">
-              <span className="relative z-10">Changes</span>
-              <span className="absolute bottom-1 left-0 w-full h-[6px] bg-gradient-to-r from-[#70f570]/70 to-[#49c628]/50 rounded-full"></span>
-            </span>
-            <br /> 
-            Tomorrow
-          </motion.h2>
-          
-          <motion.div variants={itemVariants} className="mb-8">
-            <p className="text-white text-lg leading-relaxed mb-4">
-              In today's rapidly changing world, where climate challenges and social inequities persist, WeSeedU offers a revolutionary approach to financial investment. We've reimagined what it means to grow your wealth—creating a platform where financial returns and positive global impact aren't competing goals, but complementary outcomes of thoughtful investing.
-            </p>
+            {/* Subtle texture pattern for depth */}
+            <div className="absolute inset-0 opacity-[0.04]" 
+              style={{ 
+                backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
+                backgroundSize: "40px 40px"
+              }} 
+            />
             
-            <p className="text-white text-lg leading-relaxed">
-              Through our carefully curated portfolio of sustainable projects, we direct capital toward innovative solutions addressing our planet's most pressing challenges. From renewable energy infrastructure and conservation initiatives to community development programs, every investment you make contributes to measurable, transparent change that benefits both current and future generations.
-            </p>
-          </motion.div>
-      
-          <motion.div variants={itemVariants} className="mt-auto">
-            <Button
-              asChild
-              size="lg"
-              className="bg-white hover:bg-slate-50 text-green-700 shadow-md hover:shadow-lg 
-                transition-all duration-300 ease-out hover:translate-y-[-2px] rounded-lg w-full 
-                sm:w-auto px-6 py-5"
+            {/* Inner shadow effects for depth */}
+            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white/20 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/10 to-transparent"></div>
+            
+            {/* Side inner shadows for curved effect */}
+            <div className="absolute top-0 left-0 h-full w-16 bg-gradient-to-r from-white/10 to-transparent"></div>
+            <div className="absolute top-0 right-0 h-full w-16 bg-gradient-to-l from-black/10 to-transparent"></div>
+            
+            {/* Top edge highlight for definition */}
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-white/40 via-white/70 to-white/40"></div>
+            
+            {/* Bottom edge shadow */}
+            <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-black/10 via-black/20 to-black/10"></div>
+            
+            <motion.div variants={itemVariants} className="w-20 h-1 bg-gradient-to-r from-white to-transparent rounded-full mb-6"></motion.div>
+            
+            <motion.h2 
+              variants={itemVariants}
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6"
             >
-              <Link href="/sustainable-investments">
-                <span className="flex items-center text-base font-medium">
-                  Learn more about our impact
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
-                </span>
-              </Link>
-            </Button>
+              Your Money <span className="relative">
+                <span className="relative z-10">Changes</span>
+                <span className="absolute bottom-1 left-0 w-full h-[6px] bg-white/30 rounded-full"></span>
+              </span>
+              <br /> 
+              Tomorrow
+            </motion.h2>
+            
+            <motion.div variants={itemVariants} className="mb-8 relative z-10">
+              <p className="text-white/90 text-lg leading-relaxed mb-4">
+                In today's rapidly changing world, where climate challenges and social inequities persist, WeSeedU offers a revolutionary approach to financial investment. We've reimagined what it means to grow your wealth—creating a platform where financial returns and positive global impact aren't competing goals, but complementary outcomes of thoughtful investing.
+              </p>
+              
+              <p className="text-white/90 text-lg leading-relaxed">
+                Through our carefully curated portfolio of sustainable projects, we direct capital toward innovative solutions addressing our planet's most pressing challenges. From renewable energy infrastructure and conservation initiatives to community development programs, every investment you make contributes to measurable, transparent change that benefits both current and future generations.
+              </p>
+            </motion.div>
+        
+            <motion.div variants={itemVariants} className="mt-auto relative z-10">
+              <Button
+                asChild
+                size="lg"
+                className="bg-white hover:bg-slate-50 text-green-700 shadow-[0_4px_10px_rgba(0,0,0,0.1)]
+                  hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out 
+                  hover:translate-y-[-2px] rounded-lg w-full sm:w-auto px-6 py-5"
+              >
+                <Link href="/sustainable-investments">
+                  <span className="flex items-center text-base font-medium">
+                    Learn more about our impact
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+                  </span>
+                </Link>
+              </Button>
+            </motion.div>
           </motion.div>
         </div>
         
@@ -122,4 +151,4 @@ export function SustainableImpactSection() {
       </div>
     </motion.div>
   )
-}
+} 

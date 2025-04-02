@@ -1,10 +1,8 @@
 import type { Metadata } from "next"
 import SupabaseProviders from "./providers"
-import { Navigation } from "@/components/wsu/Nav"
 import "./globals.css"
 import React from "react"
 import { headers } from 'next/headers'
-import { Footer } from "@/components/wsu/Marketing/Footer"
 import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
