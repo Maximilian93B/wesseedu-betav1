@@ -6,7 +6,7 @@ import Image from "next/image"
 import { ArrowRight, Shield, BarChart2, FileCheck, CheckCircle } from "lucide-react"
 import { motion, useInView, useScroll, useTransform } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ACCOUNTING_FIRMS, VETTING_STEPS } from "./data"
+import { VETTING_STEPS } from "./data"
 import dynamic from "next/dynamic"
 import "./animations.css"
 

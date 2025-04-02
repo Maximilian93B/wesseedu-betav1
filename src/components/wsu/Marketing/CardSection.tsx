@@ -107,7 +107,7 @@ export function CardSection() {
   }, []);
   
   return (
-    <div className="w-full min-h-screen relative py-16 md:py-24 lg:py-32">
+    <div className="w-full relative py-12 md:py-16 lg:py-20">
       {/* Green Apple gradient background */}
       <div className="absolute inset-0"></div>
       
@@ -115,22 +115,26 @@ export function CardSection() {
       <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-white/10 rounded-full blur-[120px] -z-10"></div>
       <div className="absolute bottom-1/4 left-1/4 w-[600px] h-[600px] bg-white/10 rounded-full blur-[120px] -z-10"></div>
       
-      <div ref={sectionRef} id="card-section" className="relative min-h-[80vh] w-full flex flex-col justify-center items-center">
-        {/* Header Section - Adjusted spacing and alignment */}
+      <div 
+        ref={sectionRef} 
+        id="card-section-content" 
+        className="relative w-full flex flex-col justify-center items-center"
+      >
+        {/* Header Section */}
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
-          className="w-full text-center mb-12 md:mb-16 px-4 max-w-3xl mx-auto"
+          className="w-full text-center mb-12 px-4 max-w-3xl mx-auto"
         >
-          {/* Header Badge - More space above title */}
+          {/* Header Badge */}
           <motion.div variants={itemVariants} className="inline-block mb-6">
             <span className="inline-flex items-center px-3.5 py-1.5 text-xs font-medium rounded-full bg-white/90 text-green-700 border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
               Platform Testing - Now open
             </span>
           </motion.div>
           
-          {/* Main Heading - Larger and properly centered */}
+          {/* Main Heading */}
           <motion.h2 
             variants={itemVariants} 
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.15] mb-6"
@@ -138,7 +142,7 @@ export function CardSection() {
             Your Gateway to Impact Investing
           </motion.h2>
           
-          {/* Subheading - Better wrapping */}
+          {/* Subheading */}
           <motion.p 
             variants={itemVariants}
             className="text-sm sm:text-base text-white/90 max-w-2xl mx-auto mb-12"
@@ -146,7 +150,7 @@ export function CardSection() {
             Join our community of impact investors gaining early access to high-potential sustainable startups.
           </motion.p>
           
-          {/* Trust indicators - Improved spacing and layout */}
+          {/* Trust indicators */}
           <motion.div 
             variants={itemVariants}
             className="flex flex-wrap justify-center gap-x-10 md:gap-x-16 gap-y-4 w-full"
@@ -172,12 +176,11 @@ export function CardSection() {
           </motion.div>
         </motion.div>
 
-        {/* Standardized card (exact clone of the image) */}
-        <div className="w-full max-w-[520px] mx-auto px-4 relative">
-          {/* Carousel area */}
+        {/* Card carousel container with fixed height */}
+        <div className="w-full max-w-[520px] mx-auto px-4 relative mb-8">
           <div 
             ref={carouselRef}
-            className="relative h-[600px] mx-auto"
+            className="relative h-[550px] mx-auto"
             onMouseDown={handleDragStart}
             onMouseMove={handleDragMove}
             onMouseUp={handleDragEnd}
@@ -188,21 +191,16 @@ export function CardSection() {
           >
             <AnimatePresence initial={false}>
               {CARDS.map((card, index) => {
-                // Calculate position relative to active index
                 const position = (index - activeIndex + CARDS.length) % CARDS.length;
-                // Create normalized position: -1 (left), 0 (center), 1 (right)
                 const normalizedPosition = position <= CARDS.length / 2 ? position : position - CARDS.length;
                 
-                // Show up to 2 cards on each side
                 const visible = Math.abs(normalizedPosition) <= 2;
                 if (!visible) return null;
                 
-                // Card styling based on position
                 const zIndex = 20 - Math.abs(normalizedPosition) * 5;
                 const scale = normalizedPosition === 0 ? 1 : 0.85 - Math.abs(normalizedPosition) * 0.1;
                 const opacity = normalizedPosition === 0 ? 1 : 0.7 - Math.abs(normalizedPosition) * 0.2;
                 
-                // Position cards in a fan layout
                 const xPosition = normalizedPosition === 0 ? 0 : `${normalizedPosition * 60}%`;
                 const yPosition = normalizedPosition === 0 ? 0 : 25 * Math.abs(normalizedPosition);
                 
@@ -237,7 +235,6 @@ export function CardSection() {
                       transition: { duration: 0.2 }
                     }}
                   >
-                    {/* Pass normalizedPosition === 0 as isActive to ensure only center card gets active styling */}
                     <MarketingCard card={card} index={index} isActive={normalizedPosition === 0} />
                   </motion.div>
                 );
@@ -261,7 +258,7 @@ export function CardSection() {
         </div>
         
         {/* Bottom note/footer */}
-        <div className="w-full text-center mt-12 md:mt-16">
+        <div className="w-full text-center mt-6 mb-4">
           <p className="text-xs text-white/80 flex flex-wrap items-center justify-center gap-2">
             <span className="inline-flex items-center px-2.5 py-1 bg-white/10 text-white border border-white/20 rounded-full">
               <span className="h-1.5 w-1.5 rounded-full bg-white mr-1.5"></span>

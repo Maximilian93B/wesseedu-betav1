@@ -6,11 +6,11 @@ import { HeroSection } from "@/components/wsu/Marketing/HeroSection"
 import { CardSection } from "@/components/wsu/Marketing/CardSection"
 import { PartnersAndVetting } from "@/components/wsu/Marketing/PartnersAndVetting/index"
 import { MoneyWorthSection } from "@/components/wsu/Marketing/MoneyWorthSection"
-import { KeyFeatures } from "@/components/wsu/Marketing/KeyFeatures"
-import { ImpactSection } from "@/components/wsu/Marketing/ImpactSection"
+import { EarnAsYouGrow } from "@/components/wsu/Marketing/EarnAsYouGrow"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import { useRouter, usePathname } from "next/navigation"
-
+import { GrowFooter } from "@/components/wsu/Marketing/GrowFooter"
+import { SustainableImpactSection } from "@/components/wsu/Marketing/WsImact"
 // Monochromatic styled loading component
 const SectionLoader = () => (
   <div className="w-full h-[50vh] flex items-center justify-center">
@@ -26,8 +26,7 @@ const SectionLoader = () => (
         style={{
           backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
           backgroundSize: '40px 40px'
-        }}>
-      </div>
+        }}></div>
       
       {/* Loading indicator */}
       <div className="absolute inset-0 flex items-center justify-center">
@@ -40,9 +39,7 @@ const SectionLoader = () => (
             
             {/* Logo */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-green-800 font-bold text-lg">
-                WSU
-              </div>
+              <div className="text-green-800 font-bold text-lg">WSU</div>
             </div>
           </div>
           
@@ -56,8 +53,7 @@ const SectionLoader = () => (
               style={{ 
                 width: '70%',
                 animationDuration: '2s'
-              }}>
-            </div>
+              }}></div>
           </div>
         </div>
       </div>
@@ -72,11 +68,8 @@ export default function LandingPage() {
   
   // Ensure component is mounted before rendering dynamic content
   useEffect(() => {
-    // First mount the component
     setIsMounted(true);
     
-    // Then after a short delay, make content visible
-    // This ensures the DOM is ready before animations start
     const timer = setTimeout(() => {
       setContentVisible(true);
     }, 200);
@@ -166,20 +159,17 @@ export default function LandingPage() {
           animation: float-orbit 90s ease-in-out infinite;
         }
         
-        /* Smooth scrolling for the entire site */
         html {
           scroll-behavior: smooth;
         }
         
-        /* Hide scrollbar for Chrome, Safari and Opera */
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }
         
-        /* Hide scrollbar for IE, Edge and Firefox */
         .hide-scrollbar {
-          -ms-overflow-style: none;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
       
@@ -214,24 +204,28 @@ export default function LandingPage() {
         {/* Hero Section */}
         <div 
           id="hero-section" 
-          className="min-h-screen flex items-center justify-center pt-28 md:pt-32 lg:pt-36 mb-36 md:mb-48 lg:mb-60" 
-          style={{ 
-            zIndex: 20, 
-            position: 'relative',
-          }}
+          className="min-h-screen flex items-center justify-center pt-20 md:pt-24 lg:pt-28 mb-20 md:mb-24 lg:mb-32" 
+          style={{ zIndex: 20, position: 'relative' }}
         >
           <HeroSection />
         </div>
-    
-        {/* Card Section - No width constraints, full viewport section */}
+     
+        {/* Card Section */}
         <Suspense fallback={<SectionLoader />}>
-          <section id="card-section" className="min-h-screen w-full mb-48 md:mb-48 lg:mb-60">
+          <section id="card-section" className="w-full mb-20 md:mb-24 lg:mb-32">
             <CardSection />
           </section>
         </Suspense>
 
-        {/* Remaining sections - Adjusted for consistency with increased spacing */}
-        <LazyLoadSection id="partners-section" className="w-full py-36 md:py-48 lg:py-60 mb-48 md:mt-48 lg:mt-60">
+        {/* Sustainable Impact Section */}
+        <LazyLoadSection id="sustainable-impact-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32">
+          <Suspense fallback={<SectionLoader />}>
+            <SustainableImpactSection />
+          </Suspense>
+        </LazyLoadSection>
+
+        {/* Partners Section */}
+        <LazyLoadSection id="partners-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32">
           <Suspense fallback={<SectionLoader />}>
             <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
               <PartnersAndVetting />
@@ -239,18 +233,29 @@ export default function LandingPage() {
           </Suspense>
         </LazyLoadSection>
 
-            {/* Money Worth Section */}
-            <LazyLoadSection id="solution-section" className="w-full py-36 md:py-48 lg:py-60 mb-36 md:mb-48 lg:mb-60">
+        {/* Solution Section */}
+        <LazyLoadSection id="solution-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32" style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}>
           <Suspense fallback={<SectionLoader />}>
-            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
+            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mb-16">
               <MoneyWorthSection />
+            </div>
+            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
+              <EarnAsYouGrow />
             </div>
           </Suspense>
         </LazyLoadSection>
 
-  
-        {/* Extra padding at bottom for cleaner scroll experience */}
-        <div className="h-36 md:h-48 lg:h-60"></div>
+        {/* Grow Footer Section */}
+        <LazyLoadSection id="grow-footer-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32">
+          <Suspense fallback={<SectionLoader />}>
+            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
+              <GrowFooter />
+            </div>
+          </Suspense>
+        </LazyLoadSection>
+
+        {/* Footer spacing */}
+        <div className="h-20 md:h-24 lg:h-28"></div>
       </motion.main>
     </div>
   )
@@ -260,11 +265,11 @@ export default function LandingPage() {
 function isMobile() {
   if (typeof window === 'undefined') return false;
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    window.innerWidth < 768; // Consider tablets and small screens as mobile for performance
+    window.innerWidth < 768;
 }
 
 // Lazy loading component that only renders when scrolled into view
-function LazyLoadSection({ id, className, children }: { id: string, className?: string, children: React.ReactNode }) {
+function LazyLoadSection({ id, className, children, style }: { id: string, className?: string, children: React.ReactNode, style?: React.CSSProperties }) {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -275,10 +280,10 @@ function LazyLoadSection({ id, className, children }: { id: string, className?: 
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          observer.disconnect(); // Only need to observe once
+          observer.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: '200px 0px' } // Increased margin to load sections earlier
+      { threshold: 0.1, rootMargin: '150px 0px' }
     );
     
     observer.observe(sectionRef.current);
@@ -286,8 +291,8 @@ function LazyLoadSection({ id, className, children }: { id: string, className?: 
   }, []);
 
   return (
-    <section id={id} className={className} ref={sectionRef}>
-      {isVisible ? children : <div className="min-h-[60vh]" />} {/* Increased minimum height for placeholder */}
+    <section id={id} className={className} ref={sectionRef} style={style}>
+      {isVisible ? children : <div className="min-h-[50vh]" />}
     </section>
   );
 }
