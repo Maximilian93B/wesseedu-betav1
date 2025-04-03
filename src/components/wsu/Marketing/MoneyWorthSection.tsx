@@ -28,15 +28,61 @@ const itemVariants = {
   }
 }
 
-const floatingVariants = {
-  initial: { y: 0 },
+// Simplified falling animation with cleaner positioning
+const fallingBounceVariants = {
+  initial: { 
+    y: -400,
+    opacity: 0
+  },
   animate: { 
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring", 
+      stiffness: 180, 
+      damping: 15
+    }
+  }
+}
+
+// Gentle hover effect after landing
+const hoverVariants = {
+  initial: { y: 0 },
+  animate: {
     y: [0, -8, 0],
     transition: {
-      duration: 8,
+      y: {
+        repeat: Infinity,
+        duration: 2.5,
+        ease: "easeInOut",
+        repeatType: "reverse"
+      }
+    }
+  }
+}
+
+// Shadow animation that follows the hover effect
+const shadowVariants = {
+  initial: { opacity: 0.25, scale: 1 },
+  animate: {
+    opacity: [0.25, 0.35, 0.25],
+    scale: [1, 0.95, 1],
+    transition: {
       repeat: Infinity,
-      repeatType: "reverse",
-      ease: "easeInOut"
+      duration: 2.5,
+      ease: "easeInOut",
+      repeatType: "reverse"
+    }
+  }
+}
+
+// Base shadow animation
+const baseShadowVariants = {
+  initial: { opacity: 0 },
+  animate: {
+    opacity: 0.30,
+    transition: {
+      duration: 1.2
     }
   }
 }
@@ -58,7 +104,7 @@ const shimmerAnimation = {
 
 export function MoneyWorthSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
   
   return (
     <div ref={sectionRef} className="relative w-full overflow-hidden py-12 md:py-16">
@@ -68,9 +114,9 @@ export function MoneyWorthSection() {
         variants={containerVariants}
         className="w-full px-4 sm:px-6 lg:px-8"
       >
-        <div className="max-w-7xl mx-auto flex flex-col items-center gap-8">
-          {/* Text content - more compact */}
-          <div className="w-full max-w-md flex flex-col items-center text-center relative">
+        <div className="max-w-5xl mx-auto flex flex-col items-center gap-2">
+          {/* Text content */}
+          <div className="w-full flex flex-col items-center text-center relative mb-10">
             <motion.div variants={itemVariants} className="overflow-hidden relative mb-4">
               <motion.h2 
                 className="text-4xl md:text-6xl font-bold text-white tracking-tight leading-[1.15]"
@@ -94,7 +140,7 @@ export function MoneyWorthSection() {
             
             <motion.div 
               variants={itemVariants}
-              className="mb-8"
+              className="mb-2"
             >
               <Button
                 asChild
@@ -113,105 +159,71 @@ export function MoneyWorthSection() {
             </motion.div>
           </div>
           
-          {/* Coins animation - smaller and more compact */}
-          <motion.div 
-            className="w-full max-w-sm flex justify-center"
-            variants={itemVariants}
-          >
-            <div className="relative w-full h-[300px]">
-              {/* Background glow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-transparent to-slate-50/20 rounded-full blur-3xl opacity-50"></div>
+          {/* Coin container - increased image size */}
+          <div className="relative w-full h-[380px] flex items-center justify-center">
+            {/* Base large shadow for 3D depth effect */}
+            <motion.div
+              className="absolute bottom-0 left-[20%] right-[20%] h-40 bg-gradient-to-t from-black/30 to-transparent blur-xl rounded-[50%] transform -translate-y-16"
+              initial="initial"
+              animate={isInView ? "animate" : "initial"}
+              variants={baseShadowVariants}
+            ></motion.div>
+            
+            {/* Additional middle shadow layer */}
+            <motion.div
+              className="absolute bottom-0 left-[25%] right-[25%] h-24 bg-black/25 blur-lg rounded-[50%] transform -translate-y-20"
+              initial="initial"
+              animate={isInView ? "animate" : "initial"}
+              variants={baseShadowVariants}
+            ></motion.div>
+            
+            {/* Main coin stack - increased size */}
+            <motion.div 
+              className="absolute bottom-[8%] w-[280px] h-[330px] z-10"
+              variants={itemVariants}
+            >
+              {/* Enhanced multi-layered shadows */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-0">
+                {/* Primary shadow - larger and more diffused */}
+                <motion.div 
+                  className="w-[250px] h-[24px] rounded-[50%] bg-slate-400/25 blur-xl"
+                  initial="initial"
+                  animate={isInView ? "animate" : "initial"}
+                  variants={shadowVariants}
+                ></motion.div>
+                
+                {/* Secondary shadow - smaller and darker */}
+                <motion.div 
+                  className="w-[180px] h-[15px] rounded-[50%] bg-slate-600/30 blur-md mt-[-5px] mx-auto"
+                  initial="initial"
+                  animate={isInView ? "animate" : "initial"}
+                  variants={shadowVariants}
+                ></motion.div>
+              </div>
               
-              {/* Main coin - W logo */}
-              <motion.div 
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140px] h-[140px] z-30"
+              {/* Coin image with animation */}
+              <motion.div
                 initial="initial"
-                animate="animate"
-                variants={floatingVariants}
+                animate={isInView ? "animate" : "initial"}
+                variants={fallingBounceVariants}
+                className="w-full h-full relative z-10"
               >
-                <div className="relative w-full h-full rounded-full bg-gradient-to-br from-[#e9d48e] to-[#c9b26d] flex items-center justify-center shadow-xl">
-                  <div className="absolute inset-0 rounded-full border border-white/10"></div>
-                  <motion.div 
-                    className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full rounded-full"
-                    animate={{ translateX: ["100%", "-100%"] }}
-                    transition={{ duration: 4, repeat: Infinity, repeatType: "loop", ease: "linear", delay: 1.5 }}
+                <motion.div 
+                  className="w-full h-full"
+                  variants={hoverVariants}
+                  animate={isInView ? "animate" : "initial"}
+                >
+                  <Image
+                    src="/falling-gold-coins.png"
+                    alt="Gold coins"
+                    fill
+                    className="object-contain"
+                    priority
                   />
-                  <span className="text-white font-bold text-5xl">W</span>
-                </div>
+                </motion.div>
               </motion.div>
-              
-              {/* Ethereum coin */}
-              <motion.div 
-                className="absolute top-[15%] left-[10%] w-[80px] h-[80px] z-20"
-                animate={{ 
-                  y: [0, -8, 0],
-                  rotate: [0, 5, 0, -2, 0],
-                }}
-                transition={{
-                  y: { duration: 9, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 0.5 },
-                  rotate: { duration: 13, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1 }
-                }}
-              >
-                <div className="relative w-full h-full rounded-full bg-gradient-to-br from-[#a891d9] to-[#7f67a9] flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-2xl">Ξ</span>
-                </div>
-              </motion.div>
-              
-              {/* Bitcoin coin */}
-              <motion.div 
-                className="absolute top-[30%] right-[5%] w-[90px] h-[90px] z-20"
-                animate={{ 
-                  y: [0, -10, 0],
-                  rotate: [0, -3, 0, 1, 0],
-                }}
-                transition={{
-                  y: { duration: 11, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1.5 },
-                  rotate: { duration: 15, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 0.5 }
-                }}
-              >
-                <div className="relative w-full h-full rounded-full bg-gradient-to-br from-[#f7a741] to-[#e89421] flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-2xl">₿</span>
-                </div>
-              </motion.div>
-              
-              {/* Dollar coin */}
-              <motion.div 
-                className="absolute bottom-[15%] left-[15%] w-[85px] h-[85px] z-20"
-                animate={{ 
-                  y: [0, -8, 0],
-                  rotate: [0, 2, 0, -1, 0],
-                }}
-                transition={{
-                  y: { duration: 8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1 },
-                  rotate: { duration: 12, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1.2 }
-                }}
-              >
-                <div className="relative w-full h-full rounded-full bg-gradient-to-br from-[#8fc27b] to-[#5fa049] flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-2xl">$</span>
-                </div>
-              </motion.div>
-              
-              {/* Euro coin */}
-              <motion.div 
-                className="absolute bottom-[25%] right-[15%] w-[70px] h-[70px] z-20"
-                animate={{ 
-                  y: [0, -6, 0],
-                  rotate: [0, -2, 0, 1, 0],
-                }}
-                transition={{
-                  y: { duration: 7, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 0.7 },
-                  rotate: { duration: 10, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1.8 }
-                }}
-              >
-                <div className="relative w-full h-full rounded-full bg-gradient-to-br from-[#78a9d1] to-[#5485b0] flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-2xl">€</span>
-                </div>
-              </motion.div>
-              
-              {/* Enhanced shadow/ground effect */}
-              <div className="absolute bottom-[5%] left-[10%] right-[10%] h-[15px] rounded-[50%] bg-slate-300/10 blur-xl z-0"></div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </motion.div>
     </div>

@@ -53,14 +53,15 @@ const floatingVariants = {
 const shimmerAnimation = {
   hidden: { opacity: 0 },
   visible: { 
-    opacity: [0, 0.6, 0],
-    x: [0, 140, 280],
+    opacity: [0, 0.4, 0.1, 0],
+    x: [0, 100, 200, 300],
+    scale: [1, 1.02, 1.01, 1],
     transition: {
       repeat: Infinity,
       repeatType: "loop",
-      duration: 4,
-      ease: "easeInOut",
-      delay: 1
+      duration: 3.2,
+      ease: [0.43, 0.13, 0.23, 0.96], // Custom cubic bezier for sleek motion
+      delay: 0.5
     }
   }
 }
@@ -119,6 +120,7 @@ export function BigFourVetting() {
   const y1 = useTransform(scrollYProgress, [0, 1], [0, -30]);
   const y2 = useTransform(scrollYProgress, [0, 1], [0, 30]);
   const rotate = useTransform(scrollYProgress, [0, 1], [0, 5]);
+  const xScrollMotion = useTransform(scrollYProgress, [0, 1], [0, -50]);
 
   // Icon mapping for the firm types
   const iconMap = {
@@ -161,29 +163,27 @@ export function BigFourVetting() {
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center justify-between">
           {/* Left content - Text and process info */}
           <div className="w-full lg:w-[40%] flex flex-col relative">
-            {/* Enhanced accent elements */}
-            <div className="absolute left-0 top-0 w-40 h-1.5 bg-gradient-to-r from-white via-green-200 to-transparent rounded-full"></div>
-            <div className="absolute left-0 top-3 w-24 h-0.5 bg-gradient-to-r from-white/60 to-transparent rounded-full"></div>
-            <div className="absolute -left-8 top-6 w-12 h-12 bg-white/10 rounded-full blur-[30px]"></div>
-            
-            <motion.div variants={itemVariants} className="overflow-hidden relative mb-8">
-              <motion.h2 
-                className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.15]"
-              >
-                Vetted by the<br />
-                <span className="relative inline-block bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-green-100">
+          
+          <motion.div variants={itemVariants} className="overflow-hidden relative mb-8">
+              <motion.h2 className="relative">
+                <span className="block text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-1">
+                  Vetted by the
+                </span>
+                <span className="relative inline-block text-3xl sm:text-4xl md:text-5xl font-extrabold 
+                  bg-clip-text text-transparent bg-gradient-to-b from-white via-white/90 to-transparent">
                   Big Four
-                  <motion.span 
-                    className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/50 to-transparent rounded-lg"
+                  <motion.div 
+                    className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-lg backdrop-blur-[1px]"
                     variants={shimmerAnimation}
-                  ></motion.span>
+                    style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' }}
+                  ></motion.div>
                 </span>
               </motion.h2>
             </motion.div>
             
             <motion.p 
               variants={itemVariants}
-              className="text-white/95 text-base sm:text-lg leading-relaxed mb-10 max-w-lg"
+              className="text-white text-base sm:text-lg leading-relaxed mb-10 max-w-lg font-medium drop-shadow-md"
             >
               Every startup on our platform is rigorously vetted by one of the Big Four accounting firms to ensure real sustainability impact.
             </motion.p>
@@ -199,27 +199,27 @@ export function BigFourVetting() {
                     transition={{ delay: 0.3 + index * 0.2, duration: 0.6 }}
                     className="flex items-center gap-5 group hover:translate-x-1 transition-transform duration-300"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/20 to-green-400/30 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/30 group-hover:bg-white/30 transition-colors duration-300 shadow-lg">
-                      <span className="text-white font-semibold text-sm">{index + 1}</span>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/30 to-green-400/40 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/40 group-hover:bg-white/40 transition-colors duration-300 shadow-lg">
+                      <span className="text-white font-bold text-sm drop-shadow-sm">{index + 1}</span>
                     </div>
                     <div>
-                      <h4 className="text-white font-medium text-base sm:text-lg">{step.title}</h4>
-                      <p className="text-white/80 text-xs sm:text-sm mt-1">{step.description}</p>
+                      <h4 className="text-white font-semibold text-base sm:text-lg drop-shadow-md">{step.title}</h4>
+                      <p className="text-white text-xs sm:text-sm mt-1 drop-shadow-sm">{step.description}</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
             
-            {/* Stats */}
-            <motion.div variants={itemVariants} className="flex gap-6 mb-10">
-              <div className="bg-gradient-to-br from-white/15 to-green-500/20 backdrop-blur-md rounded-xl px-5 py-4 text-center border border-white/20 shadow-xl hover:scale-105 transition-transform duration-300">
-                <p className="text-2xl sm:text-3xl font-bold text-white mb-1">13%</p>
-                <p className="text-xs sm:text-sm text-white/90">Approval Rate</p>
+                      {/* Stats */}
+                      <motion.div variants={itemVariants} className="flex gap-6 mb-10">
+              <div className="bg-gradient-to-br from-white/20 to-green-500/30 backdrop-blur-md rounded-xl px-5 py-4 text-center border border-white/30 shadow-xl hover:scale-105 transition-transform duration-300">
+                <p className="text-2xl sm:text-3xl font-extrabold text-white mb-1 drop-shadow-md">13%</p>
+                <p className="text-xs sm:text-sm text-white font-medium">Approval Rate</p>
               </div>
-              <div className="bg-gradient-to-br from-white/15 to-green-500/20 backdrop-blur-md rounded-xl px-5 py-4 text-center border border-white/20 shadow-xl hover:scale-105 transition-transform duration-300">
-                <p className="text-2xl sm:text-3xl font-bold text-white mb-1">87%</p>
-                <p className="text-xs sm:text-sm text-white/90">Positive Impact</p>
+              <div className="bg-gradient-to-br from-white/20 to-green-500/30 backdrop-blur-md rounded-xl px-5 py-4 text-center border border-white/30 shadow-xl hover:scale-105 transition-transform duration-300">
+                <p className="text-2xl sm:text-3xl font-extrabold text-white mb-1 drop-shadow-md">87%</p>
+                <p className="text-xs sm:text-sm text-white font-medium">Positive Impact</p>
               </div>
             </motion.div>
             
@@ -231,9 +231,9 @@ export function BigFourVetting() {
             >
               <Button
                 asChild
-                className="bg-gradient-to-r from-white to-green-50 hover:from-green-50 hover:to-white text-green-700 shadow-[0_10px_30px_rgba(0,0,0,0.15)]
-                  hover:shadow-[0_12px_40px_rgba(0,0,0,0.2)] transition-all duration-300 ease-out 
-                  hover:translate-y-[-3px] rounded-xl px-7 py-6 text-sm font-medium group"
+                className="bg-gradient-to-r from-white to-green-50 hover:from-green-50 hover:to-white text-green-800 shadow-[0_10px_30px_rgba(0,0,0,0.2)]
+                  hover:shadow-[0_12px_40px_rgba(0,0,0,0.25)] transition-all duration-300 ease-out 
+                  hover:translate-y-[-3px] rounded-xl px-7 py-6 text-sm font-semibold group"
               >
                 <Link href="/company-vetting">
                   <span className="relative z-10 flex items-center">
@@ -300,7 +300,7 @@ export function BigFourVetting() {
                 >
                   <Lottie
                     animationData={iconAnimation}
-                    loop={true}
+                    loop={false}
                     autoplay={true}
                     className="w-full h-full"
                     lottieRef={lottieRef}
@@ -344,7 +344,7 @@ export function BigFourVetting() {
                   transition={{ duration: 2, delay: 0.6 }}
                   className="absolute bottom-0 left-[20%] w-20 h-20 bg-white/20 rounded-full blur-[40px] z-[-10]"
                   style={{
-                    x: isMobile ? 0 : useTransform(scrollYProgress, [0, 1], [0, -50])
+                    x: isMobile ? 0 : xScrollMotion
                   }}
                 ></motion.div>
               </motion.div>
