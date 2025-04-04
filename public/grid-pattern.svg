@@ -1,9 +1,0 @@
-<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-  <path d="M0 0h40v40H0z" fill="none" />
-  <path d="M0 0h1v40H0z" fill="rgba(255, 255, 255, 0.05)" />
-  <path d="M39 0h1v40h-1z" fill="rgba(255, 255, 255, 0.05)" />
-  <path d="M0 0h40v1H0z" fill="rgba(255, 255, 255, 0.05)" />
-  <path d="M0 39h40v1H0z" fill="rgba(255, 255, 255, 0.05)" />
-  <path d="M20 0h1v40h-1z" fill="rgba(255, 255, 255, 0.03)" />
-  <path d="M0 20h40v1H0z" fill="rgba(255, 255, 255, 0.03)" />
-</svg> 
