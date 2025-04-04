@@ -83,10 +83,11 @@ export function HeroSection() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="w-full max-w-7xl mx-auto px-8 py-32 lg:py-40" // Increased padding for more breathing room
+      className="w-full max-w-7xl mx-auto px-8 py-32 lg:py-40" 
     >
-      <div className="flex flex-col lg:flex-row gap-20 lg:gap-28 items-center"> {/* Increased gap for more space */}
-        {/* Left content - Text and CTA - Simplified */}
+      {/* Top section: Two-column layout with main content */}
+      <div className="flex flex-col lg:flex-row gap-20 lg:gap-28 items-center">
+        {/* Left column: Text and CTA */}
         <div className="w-full lg:w-1/2 flex flex-col relative">
           {/* Subtle accent line */}
           <div className="absolute left-0 top-0 w-20 h-1 bg-gradient-to-r from-slate-300 to-transparent rounded-full"></div>
@@ -107,69 +108,35 @@ export function HeroSection() {
           
           <motion.p 
             variants={itemVariants}
-            className="text-white text-xl leading-relaxed mb-16 max-w-xl font-light" // Increased bottom margin
+            className="text-white text-xl leading-relaxed mb-16 max-w-xl font-light"
           >
             Get the most out of your money with smart investing products and personalized advice to build long-term wealth.
           </motion.p>
           
           <motion.div 
             variants={itemVariants}
-            className="mb-24" // Increased bottom margin substantially
           >
-            <Button
+          <Button
               asChild
               size="lg"
-              className="group bg-slate-900 hover:bg-slate-800 text-white shadow-[0_4px_10px_rgba(0,0,0,0.07)]
+              className="group text-white shadow-[0_4px_10px_rgba(0,0,0,0.07)]
                 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out 
                 hover:translate-y-[-2px] rounded-xl px-10 py-7 font-medium relative overflow-hidden"
+              style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}
             >
               <Link href="/auth/signup">
                 <span className="relative z-10 flex items-center justify-center">
                   Get started
-                  <Sparkles className="h-4 w-4 ml-1.5 opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
                   <span className="relative z-10 ml-2 transform group-hover:translate-x-1 transition-transform duration-300">
                     <ArrowRight className="h-5 w-5" />
                   </span>
                 </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-slate-800 to-slate-900 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></span>
               </Link>
             </Button>
           </motion.div>
-          
-          {/* Feature points - simplified with more spacing */}
-          <motion.div 
-            variants={itemVariants}
-            className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12" // Increased gap
-          >
-            {/* Simplified divider with less visual weight */}
-            <div className="col-span-full mb-12"> {/* Increased bottom margin */}
-              <div className="w-full h-[1px] bg-gradient-to-r from-slate-200 via-slate-100 to-transparent"></div>
-            </div>
-            
-            {/* Feature 1 */}
-            <div className="flex flex-col group">
-              <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-6 rounded-full transition-all duration-300 group-hover:w-16"></div>
-              <h3 className="text-xl font-semibold text-white mb-4">Low fees meet higher yields</h3>
-              <p className="text-white text-sm leading-relaxed">Your money's always making more with low-fee investing and high-interest savings.</p>
-            </div>
-            
-            {/* Feature 2 */}
-            <div className="flex flex-col group">
-              <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-6 rounded-full transition-all duration-300 group-hover:w-16"></div>
-              <h3 className="text-xl font-semibold text-white mb-4">Unmatched access</h3>
-              <p className="text-white text-sm leading-relaxed">Get sophisticated investment opportunities traditionally reserved for industry insiders.</p>
-            </div>
-            
-            {/* Feature 3 */}
-            <div className="flex flex-col group">
-              <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-6 rounded-full transition-all duration-300 group-hover:w-16"></div>
-              <h3 className="text-xl font-semibold text-white mb-4">Smart & simple</h3>
-              <p className="text-white text-sm leading-relaxed">In just a few taps, set your financial goals in motion with our easy-to-use products.</p>
-            </div>
-          </motion.div>
         </div>
         
-        {/* Right content - Simplified floating elements with more space */}
+        {/* Right column: Illustrations */}
         <motion.div 
           className="w-full lg:w-1/2 flex justify-center lg:justify-end"
           variants={itemVariants}
@@ -336,39 +303,35 @@ export function HeroSection() {
         </motion.div>
       </div>
       
-      {/* Enhanced scroll indicator - more subtle and minimal */}
-      <motion.div
-        variants={itemVariants}
-        className="absolute bottom-16 left-1/2 -translate-x-1/2" // Moved down for more space
-      >
-        <button 
-          onClick={scrollToNextSection}
-          className="flex flex-col items-center focus:outline-none group"
-          aria-label="View more content"
-        >
-          <p className="text-white text-sm font-medium mb-4 group-hover:text-slate-800 transition-colors">
-            Scroll for more
-          </p>
-          <div className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center
-            group-hover:border-slate-300 group-hover:shadow-[0_4px_10px_rgba(0,0,0,0.05)]
-            transition-all duration-300 relative overflow-hidden">
-            <ArrowRight className="h-4 w-4 text-slate-500 transform rotate-90 group-hover:text-slate-700 transition-colors" />
-            
-            {/* Subtle pulse animation - more gentle */}
-            <motion.div 
-              className="absolute inset-0 bg-slate-50 rounded-full"
-              animate={{
-                scale: [0.9, 1.02, 0.9],
-                opacity: [0, 0.1, 0],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
+      {/* Middle section: Minimal divider with almost no spacing */}
+      <motion.div variants={itemVariants} className="w-full my-0">
+        <div className="w-full h-[1px] bg-gradient-to-r from-slate-200 via-slate-100/50 to-transparent"></div>
+      </motion.div>
+      
+      {/* Bottom section: Ultra-tight feature layout */}
+      <motion.div variants={itemVariants} className="w-full mt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-2 gap-y-1">
+          {/* Feature 1 */}
+          <div className="flex flex-col group">
+            <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-3 rounded-full transition-all duration-300 group-hover:w-16"></div>
+            <h3 className="text-xl font-semibold text-white mb-1">Low fees meet higher yields</h3>
+            <p className="text-white text-sm leading-relaxed">Your money's always making more with low-fee investing and high-interest savings.</p>
           </div>
-        </button>
+          
+          {/* Feature 2 */}
+          <div className="flex flex-col group">
+            <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-3 rounded-full transition-all duration-300 group-hover:w-16"></div>
+            <h3 className="text-xl font-semibold text-white mb-1">Unmatched access</h3>
+            <p className="text-white text-sm leading-relaxed">Get sophisticated investment opportunities traditionally reserved for industry insiders.</p>
+          </div>
+          
+          {/* Feature 3 */}
+          <div className="flex flex-col group">
+            <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-3 rounded-full transition-all duration-300 group-hover:w-16"></div>
+            <h3 className="text-xl font-semibold text-white mb-1">Smart & simple</h3>
+            <p className="text-white text-sm leading-relaxed">In just a few taps, set your financial goals in motion with our easy-to-use products.</p>
+          </div>
+        </div>
       </motion.div>
     </motion.div>
   )

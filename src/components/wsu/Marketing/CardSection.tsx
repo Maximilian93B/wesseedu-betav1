@@ -128,8 +128,11 @@ export function CardSection() {
           className="w-full text-center mb-12 px-4 max-w-3xl mx-auto"
         >
           {/* Header Badge */}
-          <motion.div variants={itemVariants} className="inline-block mb-6">
-            <span className="inline-flex items-center px-3.5 py-1.5 text-xs font-medium rounded-full bg-white/90 text-green-700 border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+                   {/* Header Badge */}
+                   <motion.div variants={itemVariants} className="inline-block mb-6" >
+            <span className="inline-flex items-center px-3.5 py-1.5 text-xs font-medium rounded-full text-white border border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.03)]"
+              style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}
+            >
               Platform Testing - Now open
             </span>
           </motion.div>

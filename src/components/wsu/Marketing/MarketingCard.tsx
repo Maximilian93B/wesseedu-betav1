@@ -110,6 +110,9 @@ export function MarketingCard({ card, index, isActive = false }: { card: CardDat
       {/* Card accent - top bar */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-300/20"></div>
       
+      {/* Raspberry blue accent - bottom border */}
+      <div className="absolute bottom-0 left-0 w-full h-1" style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}></div>
+      
       {/* Hover state glow effect */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-700 bg-gradient-to-b from-white/5 to-transparent"></div>
       <div className="absolute -inset-[2px] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500 shadow-[0_0_15px_rgba(255,255,255,0.3)] rounded-2xl blur-sm"></div>
@@ -219,13 +222,14 @@ function CardFooter({ card, index }: { card: CardData; index?: number }) {
   
   return (
     <div>
-      {/* Button with Green Apple styling */}
+      {/* Button with Raspberry Blue styling */}
       <div className="space-y-3">
         <Button 
           asChild 
-          className="w-full bg-white hover:bg-slate-50 text-green-700 shadow-[0_4px_10px_rgba(0,0,0,0.1)]
+          className="w-full text-white font-medium shadow-[0_4px_10px_rgba(0,0,0,0.1)]
             hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out 
             hover:translate-y-[-2px] rounded-lg py-2.5"
+          style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}
         >
           <Link href={card.buttonHref || '#'}>
             <span className="flex items-center justify-center">

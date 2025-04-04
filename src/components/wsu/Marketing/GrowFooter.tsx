@@ -36,8 +36,8 @@ export function GrowFooter({
   actionButtonText = "Start Investing Today" 
 }: GrowFooterProps) {
   return (
-    <div className="container max-w-7xl mx-auto px-4 py-16 md:py-24 relative z-10 
-                    flex flex-col md:flex-row items-center justify-between gap-12">
+    <div 
+      className="container max-w-7xl mx-auto px-4 py-16 md:py-24 relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
       
       {/* Text Content */}
       <div className="relative md:max-w-[55%] w-full">
@@ -73,14 +73,13 @@ export function GrowFooter({
               variants={itemVariants}
               className="flex justify-center md:justify-start relative z-20"
             >
-              <Button
-                onClick={onAction}
-                className="bg-white hover:bg-slate-50 text-green-700 font-medium px-8 py-6 rounded-lg text-lg
-                           shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)]
-                           transition-all duration-300 ease-out hover:translate-y-[-2px] group"
-              >
-                {actionButtonText}
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+            <Button
+              onClick={onAction}
+              className="text-white font-medium px-8 py-6 rounded-lg text-lg"
+              style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}
+            >
+              {actionButtonText}
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
               </Button>
             </motion.div>
           </motion.div>

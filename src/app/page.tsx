@@ -9,9 +9,11 @@ import { MoneyWorthSection } from "@/components/wsu/Marketing/MoneyWorthSection"
 import { EarnAsYouGrow } from "@/components/wsu/Marketing/EarnAsYouGrow"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import { useRouter, usePathname } from "next/navigation"
-import { GrowFooter } from "@/components/wsu/Marketing/GrowFooter"
 import { SustainableImpactSection } from "@/components/wsu/Marketing/WsImact"
-// Monochromatic styled loading component
+import { GrowFooter } from "@/components/wsu/Marketing/GrowFooter"
+import { StartupApplicationSection } from "@/components/wsu/Marketing/StartupApplicationSection"
+
+
 const SectionLoader = () => (
   <div className="w-full h-[50vh] flex items-center justify-center">
     <div className="relative w-full max-w-4xl h-64 rounded-xl overflow-hidden bg-white/90 backdrop-blur-sm border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
@@ -217,24 +219,25 @@ export default function LandingPage() {
           </section>
         </Suspense>
 
-        {/* Sustainable Impact Section */}
-        <LazyLoadSection id="sustainable-impact-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32 bg-white">
-          <Suspense fallback={<SectionLoader />}>
-            <SustainableImpactSection />
-          </Suspense>
-        </LazyLoadSection>
 
-        {/* Partners Section */}
-        <LazyLoadSection id="partners-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32">
+
+       
           <Suspense fallback={<SectionLoader />}>
             <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
               <PartnersAndVetting />
             </div>
           </Suspense>
-        </LazyLoadSection>
+    
+
+        {/* Sustainable Impact Section */}
+        <div id="sustainable-impact-section" className="w-full">
+          <SustainableImpactSection />
+        </div>
+
 
         {/* Solution Section */}
-        <LazyLoadSection id="solution-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32" style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}>
+        <LazyLoadSection id="solution-section" className="w-full pt-0 md:pt-0 lg:pt-0 pb-20 md:pb-24 lg:pb-20 mt-0" 
+          style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}>
           <Suspense fallback={<SectionLoader />}>
             <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mb-16">
               <MoneyWorthSection />
@@ -242,20 +245,17 @@ export default function LandingPage() {
             <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
               <EarnAsYouGrow />
             </div>
-          </Suspense>
-        </LazyLoadSection>
-
-        {/* Grow Footer Section */}
-        <LazyLoadSection id="grow-footer-section" className="w-full py-20 md:py-24 lg:py-28 mb-20 md:mb-24 lg:mb-32">
-          <Suspense fallback={<SectionLoader />}>
-            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
-              <GrowFooter />
+            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mt-16">
+              <StartupApplicationSection />
             </div>
           </Suspense>
+          <Suspense fallback={<SectionLoader />}>
+            <GrowFooter />
+          </Suspense>
+
         </LazyLoadSection>
 
-        {/* Footer spacing */}
-        <div className="h-20 md:h-24 lg:h-28"></div>
+      
       </motion.main>
     </div>
   )

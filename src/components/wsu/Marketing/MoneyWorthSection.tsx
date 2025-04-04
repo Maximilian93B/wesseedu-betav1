@@ -28,45 +28,12 @@ const itemVariants = {
   }
 }
 
-// Simplified falling animation with cleaner positioning
-const fallingBounceVariants = {
-  initial: { 
-    y: -400,
-    opacity: 0
-  },
-  animate: { 
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: "spring", 
-      stiffness: 180, 
-      damping: 15
-    }
-  }
-}
-
-// Gentle hover effect after landing
-const hoverVariants = {
-  initial: { y: 0 },
-  animate: {
-    y: [0, -8, 0],
-    transition: {
-      y: {
-        repeat: Infinity,
-        duration: 2.5,
-        ease: "easeInOut",
-        repeatType: "reverse"
-      }
-    }
-  }
-}
-
-// Shadow animation that follows the hover effect
+// Shadow animation that follows the hover effect with enhanced realism
 const shadowVariants = {
-  initial: { opacity: 0.25, scale: 1 },
+  initial: { opacity: 0, scale: 1 },
   animate: {
-    opacity: [0.25, 0.35, 0.25],
-    scale: [1, 0.95, 1],
+    opacity: [0.15, 0.25, 0.15],
+    scale: [1, 0.98, 1],
     transition: {
       repeat: Infinity,
       duration: 2.5,
@@ -76,13 +43,63 @@ const shadowVariants = {
   }
 }
 
-// Base shadow animation
+// Base shadow animation with improved realism
 const baseShadowVariants = {
   initial: { opacity: 0 },
   animate: {
-    opacity: 0.30,
+    opacity: 0.35,
     transition: {
       duration: 1.2
+    }
+  }
+}
+
+// Enhanced falling animation with better physics
+const fallingBounceVariants = {
+  initial: { 
+    y: -450,
+    opacity: 0,
+    rotate: 5
+  },
+  animate: { 
+    y: 0,
+    opacity: 1,
+    rotate: 0,
+    transition: {
+      type: "spring", 
+      stiffness: 150, 
+      damping: 15,
+      mass: 1.2
+    }
+  }
+}
+
+// Optimized hover effect for more natural movement
+const hoverVariants = {
+  initial: { y: 0 },
+  animate: {
+    y: [0, -10, 0],
+    transition: {
+      y: {
+        repeat: Infinity,
+        duration: 3,
+        ease: "easeInOut",
+        repeatType: "reverse"
+      }
+    }
+  }
+}
+
+// Coin shine effect animation
+const shineEffectVariants = {
+  initial: { opacity: 0 },
+  animate: {
+    opacity: [0, 0.7, 0],
+    transition: {
+      repeat: Infinity,
+      duration: 3.5,
+      ease: "easeInOut",
+      repeatDelay: 1.5
     }
   }
 }
@@ -160,18 +177,18 @@ export function MoneyWorthSection() {
           </div>
           
           {/* Coin container - increased image size */}
-          <div className="relative w-full h-[380px] flex items-center justify-center">
-            {/* Base large shadow for 3D depth effect */}
+          <div className="relative w-full h-[420px] flex items-center justify-center">
+            {/* Base large shadow for 3D depth effect - positioned lower */}
             <motion.div
-              className="absolute bottom-0 left-[20%] right-[20%] h-40 bg-gradient-to-t from-black/30 to-transparent blur-xl rounded-[50%] transform -translate-y-16"
+              className="absolute bottom-[-5px] left-[16%] right-[16%] h-40 bg-gradient-to-t from-black/40 to-transparent blur-xl rounded-[50%]"
               initial="initial"
               animate={isInView ? "animate" : "initial"}
               variants={baseShadowVariants}
             ></motion.div>
             
-            {/* Additional middle shadow layer */}
+            {/* Additional middle shadow layer - positioned lower */}
             <motion.div
-              className="absolute bottom-0 left-[25%] right-[25%] h-24 bg-black/25 blur-lg rounded-[50%] transform -translate-y-20"
+              className="absolute bottom-[-2px] left-[22%] right-[22%] h-24 bg-black/30 blur-lg rounded-[50%]"
               initial="initial"
               animate={isInView ? "animate" : "initial"}
               variants={baseShadowVariants}
@@ -179,14 +196,14 @@ export function MoneyWorthSection() {
             
             {/* Main coin stack - increased size */}
             <motion.div 
-              className="absolute bottom-[8%] w-[280px] h-[330px] z-10"
+              className="absolute bottom-[6%] w-[340px] h-[400px] z-10"
               variants={itemVariants}
             >
-              {/* Enhanced multi-layered shadows */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-0">
+              {/* Enhanced multi-layered shadows - positioned lower */}
+              <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 z-0">
                 {/* Primary shadow - larger and more diffused */}
                 <motion.div 
-                  className="w-[250px] h-[24px] rounded-[50%] bg-slate-400/25 blur-xl"
+                  className="w-[320px] h-[32px] rounded-[50%] bg-slate-500/20 blur-xl"
                   initial="initial"
                   animate={isInView ? "animate" : "initial"}
                   variants={shadowVariants}
@@ -194,14 +211,14 @@ export function MoneyWorthSection() {
                 
                 {/* Secondary shadow - smaller and darker */}
                 <motion.div 
-                  className="w-[180px] h-[15px] rounded-[50%] bg-slate-600/30 blur-md mt-[-5px] mx-auto"
+                  className="w-[230px] h-[22px] rounded-[50%] bg-slate-700/25 blur-md mt-[-8px] mx-auto"
                   initial="initial"
                   animate={isInView ? "animate" : "initial"}
                   variants={shadowVariants}
                 ></motion.div>
               </div>
               
-              {/* Coin image with animation */}
+              {/* Coin image with enhanced animation */}
               <motion.div
                 initial="initial"
                 animate={isInView ? "animate" : "initial"}
