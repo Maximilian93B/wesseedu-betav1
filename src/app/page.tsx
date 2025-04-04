@@ -230,23 +230,23 @@ export default function LandingPage() {
     
 
         {/* Sustainable Impact Section */}
-        <div id="sustainable-impact-section" className="w-full">
+        <LazyLoadSection id="sustainable-impact-section" className="w-full">
           <SustainableImpactSection />
-        </div>
+        </LazyLoadSection>
 
 
         {/* Solution Section */}
         <LazyLoadSection id="solution-section" className="w-full pt-0 md:pt-0 lg:pt-0 pb-20 md:pb-24 lg:pb-20 mt-0" 
           style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}>
           <Suspense fallback={<SectionLoader />}>
-            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mb-16">
-              <MoneyWorthSection />
+          <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mt-16">
+              <StartupApplicationSection />
             </div>
             <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
               <EarnAsYouGrow />
             </div>
-            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mt-16">
-              <StartupApplicationSection />
+            <div className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mb-16">
+              <MoneyWorthSection />
             </div>
           </Suspense>
           <Suspense fallback={<SectionLoader />}>

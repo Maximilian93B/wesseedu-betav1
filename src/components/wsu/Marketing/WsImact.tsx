@@ -31,20 +31,8 @@ const itemVariants = {
 export function SustainableImpactSection() {
   return (
     <div className="relative min-h-[800px] w-full">
-      {/* Split background that stretches full height and width */}
-      <div className="absolute inset-0 w-full h-full">
-        <div className="absolute top-0 left-0 w-1/2 h-full bg-white"></div>
-        <div 
-          className="absolute top-0 right-0 w-1/2 h-full" 
-          style={{ 
-            background: 'linear-gradient(115deg, #70f570, #49c628)'
-          }}
-        ></div>
-      </div>
-      
-      {/* Divider line */}
-      <div className="absolute top-0 bottom-0 left-1/2 w-[1px] bg-gradient-to-b from-white/0 via-white/40 to-white/0"></div>
-      
+      {/* Full green apple background */}
+    
       <motion.div 
         initial="hidden"
         whileInView="visible"
@@ -58,7 +46,7 @@ export function SustainableImpactSection() {
             variants={itemVariants} 
             className="hidden md:block absolute left-[5%] top-[15rem] transform -rotate-90 origin-center"
           >
-            <span className="text-slate-400 tracking-widest text-sm font-medium uppercase">Root Preview</span>
+            <span className="text-white/70 tracking-widest text-sm font-medium uppercase">Root Preview</span>
           </motion.div>
           
           <motion.div 
@@ -68,45 +56,27 @@ export function SustainableImpactSection() {
             <span className="text-white/70 tracking-widest text-sm font-medium uppercase"> Thrive Content</span>
           </motion.div>
 
-          {/* Marketing Header - split color text effect */}
+          {/* Marketing Header - white text for green background */}
           <motion.div 
             variants={itemVariants} 
             className="relative mx-auto mb-16 max-w-5xl z-20 px-8 sm:px-12 py-10 text-center"
           >
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 bg-clip-text text-transparent" 
-                style={{ 
-                  backgroundImage: 'linear-gradient(90deg, #49c628 45%, #ffffff 55%, #ffffff 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-white">
               Sustainable Investing Insights
             </h2>
-            <p className="text-lg max-w-2xl text-bold mx-auto bg-clip-text text-transparent" 
-               style={{ 
-                 backgroundImage: 'linear-gradient(90deg, rgba(73, 198, 40, 0.9) 45%, rgb(255, 255, 255) 55%, rgb(255, 255, 255) 100%)',
-                 WebkitBackgroundClip: 'text',
-                 WebkitTextFillColor: 'transparent',
-                 backgroundClip: 'text'
-               }}>
+            <p className="text-lg max-w-2xl text-bold mx-auto text-white/90">
               Get exclusive access to expert analysis, market trends, and investment opportunities when you join WeSeedU.
             </p>
           </motion.div>
 
           {/* Content Grid with precise alignment - full width layout */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Center dot indicator */}
-     
             
             {/* Left side: Article Previews */}
             <motion.div variants={itemVariants} className="space-y-6 pr-0 md:pr-10 pt-4">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg md:text-xl font-bold text-slate-800">Latest Articles</h3>
-                <span className="text-xs text-slate-500 px-2 py-1 bg-slate-100 rounded-md whitespace-nowrap">Free Preview</span>
-              </div>
-              
+       
               {/* Featured Article Preview */}
-              <div className="bg-white rounded-lg overflow-hidden border border-slate-200 group hover:shadow-md transition-shadow duration-300">
+              <div className="bg-white rounded-lg overflow-hidden border border-white/20 group hover:shadow-md transition-shadow duration-300">
                 <div className="relative h-48 sm:h-64 overflow-hidden">
                   <div className="absolute top-3 left-3 z-20">
                     <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-white bg-green-600">
@@ -139,7 +109,7 @@ export function SustainableImpactSection() {
               {/* More Articles Preview */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Article Preview 1 */}
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-slate-200 hover:shadow transition-shadow h-full flex flex-col">
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-white/20 hover:shadow transition-shadow h-full flex flex-col">
                   <div className="relative h-32 sm:h-36 overflow-hidden flex-shrink-0">
                     <Image 
                       src="/images/pexels-pavel-danilyuk-8438975.jpg"
@@ -163,7 +133,7 @@ export function SustainableImpactSection() {
                 </div>
 
                 {/* Article Preview 2 */}
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-slate-200 hover:shadow transition-shadow h-full flex flex-col">
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-white/20 hover:shadow transition-shadow h-full flex flex-col">
                   <div className="relative h-32 sm:h-36 overflow-hidden flex-shrink-0">
                     <Image 
                       src="/images/pexels-googledeepmind-17485678.jpg"
@@ -190,12 +160,6 @@ export function SustainableImpactSection() {
 
             {/* Right side: Member Content */}
             <motion.div variants={itemVariants} className="pl-0 md:pl-10 pt-4">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-extrabold text-white tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]">Member Library</h3>
-                <span className="text-xs font-bold text-white px-3 py-1.5 bg-white/15 rounded-md border border-white/30 whitespace-nowrap shadow-sm">
-                  Thrive Content
-                </span>
-              </div>
                
               {/* Premium Content Card */}
               <div className="rounded-xl p-5 sm:p-7 shadow-lg border border-white/25 relative overflow-hidden h-full bg-white/10 backdrop-blur-sm">

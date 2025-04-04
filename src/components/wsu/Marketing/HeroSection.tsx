@@ -40,22 +40,6 @@ const floatingVariants = {
   }
 }
 
-// Subtle shimmer with reduced intensity
-const shimmerAnimation = {
-  hidden: { opacity: 0 },
-  visible: { 
-    opacity: [0, 0.5, 0],
-    x: [0, 100, 200],
-    transition: {
-      repeat: Infinity,
-      repeatType: "loop",
-      duration: 3.5,
-      ease: "easeInOut",
-      delay: 1.5
-    }
-  }
-}
-
 export function HeroSection() {
   // Detect if reduced motion is preferred
   const prefersReducedMotion = useReducedMotion();
@@ -66,14 +50,6 @@ export function HeroSection() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const scrollToNextSection = () => {
-    // Smooth scroll to the next section
-    const cardSection = document.getElementById('card-section');
-    if (cardSection) {
-      cardSection.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-    }
-  };
 
   // Don't render animations until component is mounted
   if (!isMounted) return null;
@@ -96,11 +72,10 @@ export function HeroSection() {
             <motion.h1 
               className="text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.15]"
             >
-              Your money's<br /><span className="relative inline-block">
-                worth more
+              Grow a<br /><span className="relative inline-block">
+                 Sustainable Future
                 <motion.span 
-                  className="absolute inset-0 w-full bg-gradient-to-r from-transparent via-slate-200/40 to-transparent rounded-lg"
-                  variants={shimmerAnimation}
+                  className="absolute inset-0 w-full  rounded-lg"
                 ></motion.span>
               </span>
             </motion.h1>
@@ -110,7 +85,7 @@ export function HeroSection() {
             variants={itemVariants}
             className="text-white text-xl leading-relaxed mb-16 max-w-xl font-light"
           >
-            Get the most out of your money with smart investing products and personalized advice to build long-term wealth.
+            Join the movement to build a greener tomorrow through sustainable investments that benefit both your finances and our planet.
           </motion.p>
           
           <motion.div 
@@ -126,7 +101,7 @@ export function HeroSection() {
             >
               <Link href="/auth/signup">
                 <span className="relative z-10 flex items-center justify-center">
-                  Get started
+                  Plant your seed
                   <span className="relative z-10 ml-2 transform group-hover:translate-x-1 transition-transform duration-300">
                     <ArrowRight className="h-5 w-5" />
                   </span>
@@ -135,26 +110,26 @@ export function HeroSection() {
             </Button>
           </motion.div>
         </div>
-        
         {/* Right column: Illustrations */}
-        <motion.div 
+             {/* Right column: Illustrations */}
+             <motion.div 
           className="w-full lg:w-1/2 flex justify-center lg:justify-end"
           variants={itemVariants}
         >
-          <div className="relative w-full max-w-lg h-[500px] md:h-[600px]"> {/* Increased height for more space */}
+          <div className="relative w-full max-w-lg h-[500px] md:h-[600px]">
             {/* Subtle backdrop gradient - lightened */}
             <div className="absolute inset-0 bg-gradient-to-br from-transparent to-slate-50/30 rounded-full blur-3xl"></div>
             
             {/* Large Earth Globe - simplified animations */}
             <motion.div 
-              className="absolute right-20 top-24 w-[320px] h-[320px] z-10 drop-shadow-xl" // Increased size, adjusted position
+              className="absolute right-20 top-24 w-[400px] h-[400px] z-10 drop-shadow-xl"
               initial="initial"
               animate="animate"
               variants={{
                 ...floatingVariants,
                 animate: { 
                   y: [0, -10, 0],
-                  rotate: [0, 0.5, 0, -0.5, 0], // Reduced rotation for subtlety
+                  rotate: [0, 0.5, 0, -0.5, 0],
                   transition: {
                     y: {
                       duration: 10, // Slower animation
@@ -183,118 +158,7 @@ export function HeroSection() {
               
               {/* Subtle glow behind globe - reduced intensity */}
               <div className="absolute inset-0 -z-10 bg-slate-200/20 rounded-full blur-xl transform scale-90"></div>
-              
-              {/* Coin stack on top of globe - simplified animation */}
-              <motion.div 
-                className="absolute -top-[60px] right-[100px] w-[70px] h-[70px]"
-                animate={{ 
-                  y: [0, -7, 0],
-                  rotate: [0, 3, 0], // Reduced rotation
-                  transition: {
-                    y: {
-                      duration: 6, // Slower animation
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      ease: "easeInOut",
-                      delay: 1
-                    },
-                    rotate: {
-                      duration: 8,
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                      ease: "easeInOut",
-                      delay: 0.5
-                    }
-                  }
-                }}
-                whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
-              >
-                <Image
-                  src="/dollar-coins.png"
-                  alt="Coin stack"
-                  fill
-                  style={{ objectFit: 'contain' }}
-                  priority
-                />
-                <div className="absolute inset-0 -z-10 bg-yellow-400/5 rounded-full blur-xl"></div>
-              </motion.div>
-            </motion.div>
             
-            {/* Small Earth Globe - removed from this cleaner design to reduce visual clutter */}
-            
-            {/* W Square - refined with more subtlety */}
-            <motion.div 
-              className="absolute bottom-32 left-20 w-[100px] h-[100px] z-30 shadow-lg rounded-2xl overflow-hidden" // Repositioned
-              animate={{ 
-                y: [0, -12, 0],
-                rotate: [0, 1, 0, -1, 0], // Reduced rotation
-                transition: {
-                  y: {
-                    duration: 9,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
-                    delay: 1.5
-                  },
-                  rotate: {
-                    duration: 12,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut"
-                  }
-                }
-              }}
-              whileHover={{ scale: 1.05, rotate: 3, transition: { duration: 0.4 } }}
-            >
-              <div className="relative w-full h-full bg-gradient-to-br from-[#f5e9c9] to-[#e5d5a8] rounded-2xl flex items-center justify-center overflow-hidden">
-                {/* Shimmer effect - simplified */}
-                <motion.div 
-                  className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full"
-                  animate={{ translateX: ["120%", "-120%"] }}
-                  transition={{ duration: 4, repeat: Infinity, repeatType: "loop", ease: "linear", delay: 2 }}
-                />
-                <span className="text-white font-bold text-3xl">W</span>
-              </div>
-            </motion.div>
-            
-            {/* Gold Coin - refined with more subtlety */}
-            <motion.div 
-              className="absolute right-20 bottom-20 w-[110px] h-[110px] z-30" // Repositioned
-              animate={{ 
-                y: [0, -14, 0],
-                rotate: [0, 5, 0, -2, 0], // Reduced rotation
-                transition: {
-                  y: {
-                    duration: 9,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
-                    delay: 0.5
-                  },
-                  rotate: {
-                    duration: 13,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
-                    delay: 1
-                  }
-                }
-              }}
-              whileHover={{ scale: 1.08, rotate: 8, transition: { duration: 0.4 } }}
-            >
-              <div className="relative w-full h-full rounded-full bg-gradient-to-br from-[#e9d48e] to-[#c9b26d] flex items-center justify-center shadow-lg">
-                {/* Subtle ring highlight */}
-                <div className="absolute inset-0 rounded-full border border-white/10"></div>
-                
-                {/* Shimmer effect - simplified */}
-                <motion.div 
-                  className="absolute inset-0 w-[200%] h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full rounded-full"
-                  animate={{ translateX: ["100%", "-100%"] }}
-                  transition={{ duration: 4, repeat: Infinity, repeatType: "loop", ease: "linear", delay: 1.5 }}
-                />
-                
-                <span className="text-white font-bold text-3xl relative z-10">$</span>
-              </div>
             </motion.div>
             
             {/* Enhanced shadow/ground effect - lighter and more subtle */}

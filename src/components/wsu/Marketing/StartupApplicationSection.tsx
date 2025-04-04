@@ -194,7 +194,7 @@ export function StartupApplicationSection() {
                     className="relative"
                   >
                     <Image
-                      src="/rocket-launch-3d-illustration.png"
+                      src="/investment.png"
                       alt="Sustainable Business Funding"
                       width={440}
                       height={440}
