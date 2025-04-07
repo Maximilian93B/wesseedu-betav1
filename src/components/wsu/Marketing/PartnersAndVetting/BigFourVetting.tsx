@@ -11,6 +11,7 @@ import "./animations.css"
 
 // Import just the Lottie animation
 import iconAnimation from "@/../../public/Fintech.json"
+import type { LottieRefCurrentProps } from "lottie-react"
 
 // Dynamically import Lottie with SSR disabled
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false })
@@ -71,8 +72,11 @@ export function BigFourVetting() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.15 });
   const [isMobile, setIsMobile] = useState(false);
-  const lottieRef = useRef(null);
+  const lottieRef = useRef<LottieRefCurrentProps>(null);
+  // Track if animation is centered in viewport
+  const [isCentered, setIsCentered] = useState(false);
   const [animationVisible, setAnimationVisible] = useState(false);
+  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   
   // Check for mobile screen size
   useEffect(() => {
@@ -99,17 +103,37 @@ export function BigFourVetting() {
     };
   }, []);
   
+  // Observer to detect when component is centered in viewport
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Check if the component is at least 50% visible (centered)
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          setIsCentered(true);
+          // Start animation after detection
+          setTimeout(() => {
+            setAnimationVisible(true);
+          }, 300);
+          // Once centered and animation started, disconnect observer
+          observer.disconnect();
+        }
+      },
+      { threshold: [0.5], rootMargin: '0px' }
+    );
+    
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+  
   // Effect to handle animation visibility when scrolled into view
   useEffect(() => {
-    if (isInView) {
-      // Delay the animation start for a smoother sequence
-      const timer = setTimeout(() => {
-        setAnimationVisible(true);
-      }, 300);
-      
-      return () => clearTimeout(timer);
+    if (isInView && !isCentered) {
+      // Only set initial visibility for elements other than the animation
+      setAnimationVisible(false);
     }
-  }, [isInView]);
+  }, [isInView, isCentered]);
   
   // Parallax scrolling effect
   const { scrollYProgress } = useScroll({
@@ -129,6 +153,23 @@ export function BigFourVetting() {
     compliance: <FileCheck className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />,
     growth: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
   };
+
+  // Effect to trigger animation when visible
+  useEffect(() => {
+    if (animationVisible && lottieRef.current) {
+      // Play the animation when it becomes visible
+      lottieRef.current.play();
+    }
+  }, [animationVisible]);
+
+  // On component cleanup
+  useEffect(() => {
+    return () => {
+      if (lottieRef.current) {
+        if (lottieRef.current.pause) lottieRef.current.pause();
+      }
+    };
+  }, []);
 
   return (
     <div 
@@ -301,12 +342,16 @@ export function BigFourVetting() {
                   <Lottie
                     animationData={iconAnimation}
                     loop={false}
-                    autoplay={true}
+                    autoplay={false}
                     className="w-full h-full"
                     lottieRef={lottieRef}
                     rendererSettings={{
                       preserveAspectRatio: 'xMidYMid slice'
                     }}
+                    onError={() => console.error("Failed to load animation")}
+                    onComplete={() => setIsAnimationLoaded(true)}
+                    // Use initialSegment to pause at first frame
+                    initialSegment={!animationVisible ? [0, 1] : undefined}
                   />
                 </motion.div>
                 

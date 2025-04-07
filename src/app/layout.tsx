@@ -11,6 +11,13 @@ export const metadata: Metadata = {
     "Connect with exclusive opportunities to support top-tier sustainable companies that drive impactful innovation.",
   keywords: ["sustainable investing", "impact investing", "ESG", "startup funding"],
   authors: [{ name: "WeSeedU Team" }],
+  viewport: "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover",
+  themeColor: "#49c628",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "WeSeedU"
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -54,21 +61,22 @@ export default function RootLayout({
   const isAuthPage = pathname.includes('/auth') || referer.includes('/auth')
   
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-sans antialiased")}>
+    <html lang="en" suppressHydrationWarning className="text-base">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
+      <body className={cn("min-h-screen bg-background font-sans antialiased text-base touch-manipulation")}>
         <SupabaseProviders>
-       
-            <div className="relative flex min-h-screen flex-col">
-              {/* Only show Navigation if NOT on any auth page */}
-              {!isAuthPage && (
-                <div className="relative z-10">
-                 
-                </div>
-              )}
-              <main className="flex-1 relative z-0">{children}</main>
-             
-            </div>
-       
+          <div className="relative flex min-h-screen flex-col">
+            {/* Only show Navigation if NOT on any auth page */}
+            {!isAuthPage && (
+              <div className="relative z-10">
+                {/* Navigation goes here */}
+              </div>
+            )}
+            <main className="flex-1 relative z-0">{children}</main>
+          </div>
         </SupabaseProviders>
       </body>
     </html>

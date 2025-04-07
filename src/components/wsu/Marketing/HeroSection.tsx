@@ -65,25 +65,25 @@ export function HeroSection() {
       <div className="flex flex-col lg:flex-row gap-20 lg:gap-28 items-center">
         {/* Left column: Text and CTA */}
         <div className="w-full lg:w-1/2 flex flex-col relative">
-          {/* Subtle accent line */}
-          <div className="absolute left-0 top-0 w-20 h-1 bg-gradient-to-r from-slate-300 to-transparent rounded-full"></div>
           
           <motion.div variants={itemVariants} className="overflow-hidden relative mb-8">
             <motion.h1 
-              className="text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.15]"
+              className="text-4xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text tracking-tight leading-[1.15]"
+              style={{ 
+                backgroundImage: 'linear-gradient(135deg, #ffffff, #f0f8ff, #ffffff)',
+                WebkitBackgroundClip: 'text',
+                textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3)',
+
+              }}
             >
-              Grow a<br /><span className="relative inline-block">
-                 Sustainable Future
-                <motion.span 
-                  className="absolute inset-0 w-full  rounded-lg"
-                ></motion.span>
-              </span>
+              Grow a<br />
+              Sustainable Future
             </motion.h1>
           </motion.div>
           
           <motion.p 
             variants={itemVariants}
-            className="text-white text-xl leading-relaxed mb-16 max-w-xl font-light"
+            className=" text-white text-xl leading-relaxed mb-16 max-w-xl font-light"
           >
             Join the movement to build a greener tomorrow through sustainable investments that benefit both your finances and our planet.
           </motion.p>
@@ -117,12 +117,12 @@ export function HeroSection() {
           variants={itemVariants}
         >
           <div className="relative w-full max-w-lg h-[500px] md:h-[600px]">
-            {/* Subtle backdrop gradient - lightened */}
-            <div className="absolute inset-0 bg-gradient-to-br from-transparent to-slate-50/30 rounded-full blur-3xl"></div>
+            {/* Enhanced backdrop gradient for depth */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/5 via-transparent to-slate-100/40 rounded-full blur-3xl"></div>
             
-            {/* Large Earth Globe - simplified animations */}
+            {/* Large Earth Globe - enhanced with better 3D effects */}
             <motion.div 
-              className="absolute right-20 top-24 w-[400px] h-[400px] z-10 drop-shadow-xl"
+              className="absolute right-20 top-24 w-[400px] h-[400px] z-10"
               initial="initial"
               animate="animate"
               variants={{
@@ -148,28 +148,51 @@ export function HeroSection() {
               }}
               whileHover={{ scale: 1.02, transition: { duration: 0.4 } }}
             >
-              <Image
-                src="/sustainability.png"
-                alt="Earth globe"
-                fill
-                style={{ objectFit: 'contain' }}
-                priority
-              />
+              {/* Radiant outer glow */}
+              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-500/20 to-cyan-400/20 rounded-full blur-3xl transform scale-110"></div>
               
-              {/* Subtle glow behind globe - reduced intensity */}
-              <div className="absolute inset-0 -z-10 bg-slate-200/20 rounded-full blur-xl transform scale-90"></div>
-            
+              {/* Atmospheric glow - bright side */}
+              <div className="absolute -right-5 top-5 w-20 h-20 bg-blue-400/30 rounded-full blur-xl"></div>
+              
+              {/* Image with enhanced drop shadow */}
+              <div className="relative w-full h-full drop-shadow-[0_15px_35px_rgba(0,0,0,0.35)]">
+                <Image
+                  src="/sustainability.png"
+                  alt="Earth globe"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                  priority
+                />
+              </div>
+              
+              {/* Inner glow effect */}
+              <div className="absolute inset-0 -z-5 bg-gradient-to-tr from-emerald-400/10 via-transparent to-blue-400/20 rounded-full blur-lg transform scale-95 mix-blend-screen"></div>
+              
+              {/* Highlight reflection on top side */}
+              <div className="absolute top-10 right-24 w-32 h-10 bg-cyan-300/20 rounded-full blur-xl transform rotate-[30deg] mix-blend-screen"></div>
             </motion.div>
             
-            {/* Enhanced shadow/ground effect - lighter and more subtle */}
-            <div className="absolute bottom-[-10px] left-20 right-20 h-[25px] rounded-[50%] bg-slate-300/5 blur-2xl z-0"></div>
+            {/* Enhanced 3D shadow effect */}
+            <div className="absolute bottom-0 left-20 right-20 h-6 bg-gradient-to-b from-slate-900/5 to-slate-900/15 rounded-[50%] blur-xl z-0 transform scale-x-90"></div>
+            
+            {/* Secondary subtle shadow for more depth */}
+            <div className="absolute bottom-[-5px] left-24 right-24 h-4 bg-slate-900/10 rounded-[60%] blur-md z-0"></div>
           </div>
         </motion.div>
       </div>
       
       {/* Middle section: Minimal divider with almost no spacing */}
-      <motion.div variants={itemVariants} className="w-full my-0">
-        <div className="w-full h-[1px] bg-gradient-to-r from-slate-200 via-slate-100/50 to-transparent"></div>
+      <motion.div variants={itemVariants} className="w-full my-0 mb-10">
+        <div className="relative w-full">
+          {/* Main line with shadow for 3D effect */}
+          <div className="w-full h-[2px] bg-gradient-to-r from-white via-white/80 to-transparent rounded-full shadow-[0_1px_2px_rgba(255,255,255,0.7)]"></div>
+          
+          {/* Subtle highlight line above */}
+          <div className="absolute -top-[1px] w-full h-[1px] bg-gradient-to-r from-white/20 via-white/10 to-transparent rounded-full"></div>
+          
+          {/* Shadow line below */}
+          <div className="absolute top-[2px] w-3/4 h-[1px] bg-gradient-to-r from-slate-400/30 via-slate-400/10 to-transparent rounded-full"></div>
+        </div>
       </motion.div>
       
       {/* Bottom section: Ultra-tight feature layout */}

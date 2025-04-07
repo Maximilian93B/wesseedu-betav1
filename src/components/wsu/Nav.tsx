@@ -183,11 +183,15 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
     <>
       {/* Main navigation bar */}
       <nav 
-        className={`w-full z-50 fixed top-0 transition-all duration-300 ${
+        className={`w-full z-50 fixed top-0 transition-all duration-300 px-2 sm:px-4 md:px-6 ${
           hasScrolled 
-            ? 'backdrop-blur-md bg-black/30 border-b border-emerald-500/20 dark:backdrop-blur-md dark:bg-black/30 dark:border-emerald-500/20' 
-            : 'backdrop-blur-sm bg-black/10 dark:backdrop-blur-sm dark:bg-black/10'
+            ? 'backdrop-blur-md bg-white/10 border-b border-white/20 shadow-lg dark:bg-black/10 dark:border-emerald-500/10' 
+            : 'backdrop-blur-sm bg-transparent dark:bg-transparent'
         }`}
+        style={{ 
+          background: 'linear-gradient(115deg, #49c628, #70f570)',
+          boxShadow: '0 4px 6px -1px rgba(255, 255, 255, 0.2), 0 8px 32px -8px rgba(0, 0, 0, 0.15)'
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -213,7 +217,7 @@ export function Navigation({ scrollToSection, currentPath = '/' }: NavigationPro
             <Button 
               variant="ghost" 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/30 md:hidden"
+              className="text-white hover:text-white hover:bg-white/20 md:hidden p-2 rounded-full border border-white/30"
               aria-label="Toggle navigation menu"
             >
               {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}

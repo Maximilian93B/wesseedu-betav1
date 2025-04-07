@@ -88,12 +88,29 @@ export default function LandingPage() {
     container: containerRef
   })
   
+  // Enhanced mobile detection with device characteristics
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  
+  useEffect(() => {
+    // Check if this is a mobile device on mount
+    setIsMobileDevice(isMobile());
+    
+    // Add event listener for orientation changes
+    const handleResize = () => {
+      setIsMobileDevice(isMobile());
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Optimization for mobile - adjust animation params based on device
+  const springConfig = isMobileDevice 
+    ? { damping: 25, mass: 0.8, stiffness: 120 } // More stable for mobile
+    : { damping: 20, mass: 0.5, stiffness: 100 }; // Original for desktop
+    
   // Create smooth scrolling effect with spring physics
-  const smoothScrollProgress = useSpring(scrollYProgress, {
-    damping: 20,
-    mass: 0.5,
-    stiffness: 100
-  })
+  const smoothScrollProgress = useSpring(scrollYProgress, springConfig);
   
   const router = useRouter()
   const pathname = usePathname()
@@ -114,7 +131,7 @@ export default function LandingPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden" style={{
-      background: 'linear-gradient(115deg, #70f570, #49c628)'
+      background: 'linear-gradient(115deg, #49c628)'
     }}>
       {/* Global animation styles */}
       <style jsx global>{`
@@ -173,6 +190,33 @@ export default function LandingPage() {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
+        
+        /* Optimize animations for mobile */
+        @media (max-width: 768px) {
+          .animate-subtle-rotate {
+            animation: animate-subtle-rotate 180s linear infinite; /* Slower on mobile */
+          }
+          
+          .animate-float-orbit {
+            animation: float-orbit 120s ease-in-out infinite; /* Slower on mobile */
+          }
+          
+          .animate-pulse-slow {
+            animation: pulse-slow 10s ease-in-out infinite; /* Slower on mobile */
+          }
+        }
+        
+        /* Fix touch action issues */
+        * {
+          -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Improve scrolling on iOS */
+        @supports (-webkit-touch-callout: none) {
+          .main-content {
+            -webkit-overflow-scrolling: touch;
+          }
+        }
       `}</style>
       
       {/* Navigation Component */}
@@ -184,21 +228,22 @@ export default function LandingPage() {
         style={{ scaleX, transformOrigin: "0%" }}
       />
       
-      {/* Content container */}
+      {/* Content container - optimize for mobile */}
       <motion.main 
         ref={containerRef}
-        className={`relative w-full h-screen flex flex-col transition-all duration-1000 ease-out hide-scrollbar overflow-y-scroll ${
+        className={`main-content relative w-full h-screen flex flex-col transition-all duration-700 ease-out hide-scrollbar overflow-y-scroll ${
           contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}
         style={{ 
           zIndex: 10, 
           position: 'relative',
           willChange: 'opacity, transform',
+          touchAction: 'pan-y', // Optimize touch behavior
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ 
-          duration: 1.0, 
+          duration: isMobileDevice ? 0.8 : 1.0, // Faster animation on mobile 
           ease: [0.25, 0.1, 0.25, 1.0]
         }}
         exit={{ opacity: 0 }}
@@ -229,12 +274,6 @@ export default function LandingPage() {
           </Suspense>
     
 
-        {/* Sustainable Impact Section */}
-        <LazyLoadSection id="sustainable-impact-section" className="w-full">
-          <SustainableImpactSection />
-        </LazyLoadSection>
-
-
         {/* Solution Section */}
         <LazyLoadSection id="solution-section" className="w-full pt-0 md:pt-0 lg:pt-0 pb-20 md:pb-24 lg:pb-20 mt-0" 
           style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}>
@@ -250,28 +289,42 @@ export default function LandingPage() {
             </div>
           </Suspense>
           <Suspense fallback={<SectionLoader />}>
-            <GrowFooter />
+          <SustainableImpactSection />
+
+          <GrowFooter />
           </Suspense>
-
         </LazyLoadSection>
-
-      
       </motion.main>
     </div>
   )
 }
 
-// Helper function to detect mobile devices
+// Helper function to detect mobile devices - enhanced version
 function isMobile() {
   if (typeof window === 'undefined') return false;
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    window.innerWidth < 768;
+  
+  // Check for mobile user agent
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Check for mobile screen size
+  const isMobileScreen = window.innerWidth < 768;
+  
+  // Check for touch capability
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  
+  // Consider it mobile if either condition is true
+  return isMobileUA || (isMobileScreen && isTouchDevice);
 }
 
-// Lazy loading component that only renders when scrolled into view
+// Optimize LazyLoadSection for mobile
 function LazyLoadSection({ id, className, children, style }: { id: string, className?: string, children: React.ReactNode, style?: React.CSSProperties }) {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  
+  useEffect(() => {
+    setIsMobileDevice(isMobile());
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -283,12 +336,15 @@ function LazyLoadSection({ id, className, children, style }: { id: string, class
           observer.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: '150px 0px' }
+      { 
+        threshold: isMobileDevice ? 0.05 : 0.1, // Lower threshold on mobile
+        rootMargin: isMobileDevice ? '300px 0px' : '150px 0px' // Larger rootMargin on mobile
+      }
     );
     
     observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [isMobileDevice]);
 
   return (
     <section id={id} className={className} ref={sectionRef} style={style}>
