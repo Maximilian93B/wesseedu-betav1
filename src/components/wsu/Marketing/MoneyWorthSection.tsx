@@ -4,8 +4,25 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import Image from "next/image"
+
+// Detect mobile for animation optimizations
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  return isMobile;
+}
 
 // Animation variants
 const containerVariants = {
@@ -122,9 +139,86 @@ const shimmerAnimation = {
 export function MoneyWorthSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
+  const isMobile = useIsMobile();
   
+  // Animation variants - simplified for mobile
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: isMobile ? 0.08 : 0.12,
+        duration: isMobile ? 0.5 : 0.6
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 15, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        type: "spring", 
+        stiffness: isMobile ? 150 : 200, 
+        damping: isMobile ? 25 : 22 
+      }
+    }
+  };
+
+  // Simplified shadow animation for mobile
+  const shadowVariants = {
+    initial: { opacity: 0, scale: 1 },
+    animate: {
+      opacity: [0.15, 0.25, 0.15],
+      scale: [1, isMobile ? 0.99 : 0.98, 1],
+      transition: {
+        repeat: Infinity,
+        duration: isMobile ? 3 : 2.5,
+        ease: "easeInOut",
+        repeatType: "reverse"
+      }
+    }
+  };
+
+  // Simplified falling animation for mobile
+  const fallingBounceVariants = {
+    initial: { 
+      y: isMobile ? -300 : -450,
+      opacity: 0,
+      rotate: isMobile ? 3 : 5
+    },
+    animate: { 
+      y: 0,
+      opacity: 1,
+      rotate: 0,
+      transition: {
+        type: "spring", 
+        stiffness: isMobile ? 120 : 150, 
+        damping: isMobile ? 18 : 15,
+        mass: isMobile ? 1 : 1.2
+      }
+    }
+  };
+
+  // Optimized hover effect
+  const hoverVariants = {
+    initial: { y: 0 },
+    animate: {
+      y: [0, isMobile ? -6 : -10, 0],
+      transition: {
+        y: {
+          repeat: Infinity,
+          duration: isMobile ? 4 : 3,
+          ease: "easeInOut",
+          repeatType: "reverse"
+        }
+      }
+    }
+  };
+
   return (
-    <div ref={sectionRef} className="relative w-full overflow-hidden py-12 md:py-16">
+    <div ref={sectionRef} className="relative w-full overflow-hidden py-8 sm:py-12 md:py-16">
       <motion.div
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
@@ -133,24 +227,20 @@ export function MoneyWorthSection() {
       >
         <div className="max-w-5xl mx-auto flex flex-col items-center gap-2">
           {/* Text content */}
-          <div className="w-full flex flex-col items-center text-center relative mb-10">
+          <div className="w-full flex flex-col items-center text-center relative mb-8 sm:mb-10">
             <motion.div variants={itemVariants} className="overflow-hidden relative mb-4">
               <motion.h2 
-                className="text-4xl md:text-6xl font-bold text-white tracking-tight leading-[1.15]"
+                className="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tight leading-[1.15]"
               >
                 Show your<br /><span className="relative inline-block">
                   money its worth
-                  <motion.span 
-                    className="absolute inset-0 w-full bg-gradient-to-r from-transparent via-slate-200/40 to-transparent rounded-lg"
-                    variants={shimmerAnimation}
-                  ></motion.span>
                 </span>
               </motion.h2>
             </motion.div>
             
             <motion.p 
               variants={itemVariants}
-              className="text-white/90 text-lg leading-relaxed mb-6 max-w-md" 
+              className="text-white/90 text-base sm:text-lg leading-relaxed mb-6 max-w-[280px] sm:max-w-md" 
             >
               Join the 3 million Canadians choosing Wealthsimple as a trusted place to invest, trade, save, and more.
             </motion.p>
@@ -161,10 +251,10 @@ export function MoneyWorthSection() {
             >
               <Button
                 asChild
-                size="default"
+                size={isMobile ? "default" : "default"}
                 className="bg-white hover:bg-slate-50 text-green-700 shadow-[0_4px_10px_rgba(0,0,0,0.07)]
                   hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out
-                  hover:translate-y-[-2px] rounded-lg px-6 py-2 font-medium relative overflow-hidden group"
+                  hover:translate-y-[-2px] rounded-lg px-4 sm:px-6 py-2 font-medium relative overflow-hidden group"
               >
                 <Link href="/get-started" className="relative z-10 flex items-center justify-center">
                   Get started
@@ -176,49 +266,33 @@ export function MoneyWorthSection() {
             </motion.div>
           </div>
           
-          {/* Coin container - increased image size */}
-          <div className="relative w-full h-[420px] flex items-center justify-center">
-            {/* Base large shadow for 3D depth effect - positioned lower */}
+          {/* Coin container - adaptive height */}
+          <div className="relative w-full h-[280px] sm:h-[350px] md:h-[420px] flex items-center justify-center">
+            {/* Base shadow for 3D depth effect - positioned for better mobile view */}
             <motion.div
-              className="absolute bottom-[-5px] left-[16%] right-[16%] h-40 bg-gradient-to-t from-black/40 to-transparent blur-xl rounded-[50%]"
+              className="absolute bottom-[-5px] left-[20%] right-[20%] sm:left-[16%] sm:right-[16%] h-20 sm:h-40 bg-gradient-to-t from-black/40 to-transparent blur-xl rounded-[50%]"
               initial="initial"
               animate={isInView ? "animate" : "initial"}
-              variants={baseShadowVariants}
+              variants={shadowVariants}
             ></motion.div>
             
-            {/* Additional middle shadow layer - positioned lower */}
-            <motion.div
-              className="absolute bottom-[-2px] left-[22%] right-[22%] h-24 bg-black/30 blur-lg rounded-[50%]"
-              initial="initial"
-              animate={isInView ? "animate" : "initial"}
-              variants={baseShadowVariants}
-            ></motion.div>
-            
-            {/* Main coin stack - increased size */}
+            {/* Main coin stack - adaptive sizing */}
             <motion.div 
-              className="absolute bottom-[6%] w-[340px] h-[400px] z-10"
+              className="absolute bottom-[6%] w-[250px] sm:w-[340px] h-[280px] sm:h-[400px] z-10"
               variants={itemVariants}
             >
-              {/* Enhanced multi-layered shadows - positioned lower */}
+              {/* Enhanced multi-layered shadows - simplified for mobile */}
               <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 z-0">
-                {/* Primary shadow - larger and more diffused */}
+                {/* Primary shadow - adaptive sizing */}
                 <motion.div 
-                  className="w-[320px] h-[32px] rounded-[50%] bg-slate-500/20 blur-xl"
-                  initial="initial"
-                  animate={isInView ? "animate" : "initial"}
-                  variants={shadowVariants}
-                ></motion.div>
-                
-                {/* Secondary shadow - smaller and darker */}
-                <motion.div 
-                  className="w-[230px] h-[22px] rounded-[50%] bg-slate-700/25 blur-md mt-[-8px] mx-auto"
+                  className="w-[220px] sm:w-[320px] h-[22px] sm:h-[32px] rounded-[50%] bg-slate-500/20 blur-xl"
                   initial="initial"
                   animate={isInView ? "animate" : "initial"}
                   variants={shadowVariants}
                 ></motion.div>
               </div>
               
-              {/* Coin image with enhanced animation */}
+              {/* Coin image with motion optimized for mobile */}
               <motion.div
                 initial="initial"
                 animate={isInView ? "animate" : "initial"}

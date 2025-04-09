@@ -73,9 +73,7 @@ export function BigFourVetting() {
   const isInView = useInView(sectionRef, { once: true, amount: 0.15 });
   const [isMobile, setIsMobile] = useState(false);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
-  // Track if animation is centered in viewport
-  const [isCentered, setIsCentered] = useState(false);
-  const [animationVisible, setAnimationVisible] = useState(false);
+  // Simplified state - only track if animation is loaded
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   
   // Check for mobile screen size
@@ -103,38 +101,6 @@ export function BigFourVetting() {
     };
   }, []);
   
-  // Observer to detect when component is centered in viewport
-  useEffect(() => {
-    if (!sectionRef.current) return;
-    
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // Check if the component is at least 50% visible (centered)
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-          setIsCentered(true);
-          // Start animation after detection
-          setTimeout(() => {
-            setAnimationVisible(true);
-          }, 300);
-          // Once centered and animation started, disconnect observer
-          observer.disconnect();
-        }
-      },
-      { threshold: [0.5], rootMargin: '0px' }
-    );
-    
-    observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
-  
-  // Effect to handle animation visibility when scrolled into view
-  useEffect(() => {
-    if (isInView && !isCentered) {
-      // Only set initial visibility for elements other than the animation
-      setAnimationVisible(false);
-    }
-  }, [isInView, isCentered]);
-  
   // Parallax scrolling effect
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -153,23 +119,6 @@ export function BigFourVetting() {
     compliance: <FileCheck className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />,
     growth: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
   };
-
-  // Effect to trigger animation when visible
-  useEffect(() => {
-    if (animationVisible && lottieRef.current) {
-      // Play the animation when it becomes visible
-      lottieRef.current.play();
-    }
-  }, [animationVisible]);
-
-  // On component cleanup
-  useEffect(() => {
-    return () => {
-      if (lottieRef.current) {
-        if (lottieRef.current.pause) lottieRef.current.pause();
-      }
-    };
-  }, []);
 
   return (
     <div 
@@ -252,8 +201,8 @@ export function BigFourVetting() {
               </div>
             </motion.div>
             
-                      {/* Stats */}
-                      <motion.div variants={itemVariants} className="flex gap-6 mb-10">
+            {/* Stats */}
+            <motion.div variants={itemVariants} className="flex gap-6 mb-10">
               <div className="bg-gradient-to-br from-white/20 to-green-500/30 backdrop-blur-md rounded-xl px-5 py-4 text-center border border-white/30 shadow-xl hover:scale-105 transition-transform duration-300">
                 <p className="text-2xl sm:text-3xl font-extrabold text-white mb-1 drop-shadow-md">13%</p>
                 <p className="text-xs sm:text-sm text-white font-medium">Approval Rate</p>
@@ -286,111 +235,68 @@ export function BigFourVetting() {
             </motion.div>
           </div>
           
-          {/* Right content - Enhanced Lottie animation */}
+          {/* Right content - Static Lottie animation */}
           <motion.div 
             className="w-full lg:w-[60%] flex justify-center lg:justify-end"
             variants={itemVariants}
             style={{ rotate: isMobile ? 0 : rotate }}
           >
             <div className="relative w-full h-[400px] sm:h-[460px] md:h-[540px] lg:h-[600px] flex items-center justify-center">
-              {/* Main animation container with enhanced size */}
+              {/* Simplified static animation container */}
               <motion.div 
                 className="relative w-[380px] h-[380px] sm:w-[450px] sm:h-[450px] md:w-[520px] md:h-[520px] lg:w-[600px] lg:h-[600px] z-10"
-                initial="initial"
-                animate="animate"
-                variants={{
-                  ...floatingVariants,
-                  animate: { 
-                    y: [0, -20, 0],
-                    rotate: [0, 2, 0, -2, 0],
-                    transition: {
-                      y: {
-                        duration: 12,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                        ease: "easeInOut"
-                      },
-                      rotate: {
-                        duration: 16,
-                        repeat: Infinity,
-                        repeatType: "reverse",
-                        ease: "easeInOut"
-                      }
-                    }
-                  }
+                initial={{ y: 0 }}
+                animate={{ y: [-5, 5, -5] }}
+                transition={{
+                  duration: 12,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut"
                 }}
               >
-                {/* Enhanced Lottie animation with 3D effects */}
+                {/* Static Lottie animation */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ 
-                    opacity: animationVisible ? 1 : 0, 
-                    scale: animationVisible ? 1.05 : 0.9,
-                    y: animationVisible ? 0 : 20 
+                    opacity: isInView ? 1 : 0, 
+                    scale: isInView ? 1 : 0.9,
                   }}
                   transition={{ 
-                    duration: 1, 
-                    ease: "easeOut", 
-                    delay: 0.2
+                    duration: 0.8, 
+                    ease: "easeOut"
                   }}
-                  className="w-full h-full transform perspective-[2000px] hover:rotate-y-8 hover:scale-105 transition-all duration-700"
+                  className="w-full h-full"
                   style={{
-                    filter: "drop-shadow(0 30px 50px rgba(0, 200, 0, 0.25))",
-                    transformStyle: "preserve-3d"
+                    filter: "drop-shadow(0 30px 50px rgba(0, 200, 0, 0.25))"
                   }}
                 >
                   <Lottie
                     animationData={iconAnimation}
                     loop={false}
-                    autoplay={false}
+                    autoplay={true}
                     className="w-full h-full"
                     lottieRef={lottieRef}
                     rendererSettings={{
                       preserveAspectRatio: 'xMidYMid slice'
                     }}
-                    onError={() => console.error("Failed to load animation")}
                     onComplete={() => setIsAnimationLoaded(true)}
-                    // Use initialSegment to pause at first frame
-                    initialSegment={!animationVisible ? [0, 1] : undefined}
                   />
                 </motion.div>
                 
-                {/* Primary glow effect - brighter for green theme */}
+                {/* Primary glow effect */}
                 <motion.div 
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ 
-                    opacity: animationVisible ? 0.75 : 0, 
-                    scale: animationVisible ? 1.6 : 0.8 
-                  }}
-                  transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: isInView ? 0.6 : 0 }}
+                  transition={{ duration: 1, ease: "easeOut" }}
                   className="absolute inset-0 -z-10 bg-gradient-to-r from-green-300/50 to-green-600/50 rounded-full blur-[140px] transform"
                 ></motion.div>
                 
-                {/* Secondary depth layer */}
+                {/* Secondary glow effect */}
                 <motion.div
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: animationVisible ? 0.4 : 0 }}
-                  transition={{ duration: 1.5, delay: 0.4 }}
+                  animate={{ opacity: isInView ? 0.4 : 0 }}
+                  transition={{ duration: 1.2 }}
                   className="absolute -inset-16 -z-20 bg-gradient-radial from-green-400/30 to-transparent rounded-full blur-[80px]"
-                ></motion.div>
-                
-                {/* Additional accent highlight */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: animationVisible ? 0.65 : 0 }}
-                  transition={{ duration: 1.8, delay: 0.5 }}
-                  className="absolute -top-20 -right-20 w-40 h-40 bg-blue-300/30 rounded-full blur-[60px] z-[-15]"
-                ></motion.div>
-                
-                {/* Subtle motion tracking element */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: animationVisible ? 0.5 : 0 }}
-                  transition={{ duration: 2, delay: 0.6 }}
-                  className="absolute bottom-0 left-[20%] w-20 h-20 bg-white/20 rounded-full blur-[40px] z-[-10]"
-                  style={{
-                    x: isMobile ? 0 : xScrollMotion
-                  }}
                 ></motion.div>
               </motion.div>
             </div>

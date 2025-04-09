@@ -125,7 +125,7 @@ export function StartupApplicationSection() {
             </h2>
             
             <p className="text-white/90 text-xl max-w-2xl mx-auto leading-relaxed mt-6">
-              WeSeedUs connects innovative sustainable startups with impact investors and UN funding opportunities.
+              WeSeedU connects innovative sustainable startups with impact investors and UN funding opportunities.
             </p>
           </motion.div>
           
@@ -229,7 +229,7 @@ export function StartupApplicationSection() {
             >
               <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-8">
                 <span className="relative inline-block">
-                  Why Choose WeSeedUs
+                  Why Choose WeSeedU
                   <motion.div 
                     initial={{ width: "0%" }}
                     animate={isInView ? { width: "100%" } : { width: "0%" }}

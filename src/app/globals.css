@@ -316,3 +316,91 @@ html {
 .animate-shimmer {
   animation: shimmer 2s infinite;
 }
+
+/* Parallax and Animation Styles */
+@keyframes rotate-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes animate-subtle-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-subtle-rotate {
+  animation: animate-subtle-rotate 120s linear infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.32; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.8; filter: blur(1px); }
+  50% { opacity: 1; filter: blur(2px); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 6s ease-in-out infinite;
+}
+
+@keyframes float-orbit {
+  0%, 100% { transform: translateX(-5%) translateY(0); }
+  25% { transform: translateX(0) translateY(3%); }
+  50% { transform: translateX(5%) translateY(0); }
+  75% { transform: translateX(0) translateY(-3%); }
+}
+
+.animate-float-orbit {
+  animation: float-orbit 90s ease-in-out infinite;
+}
+
+/* Force hardware acceleration on all animated elements */
+.parallax-section {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Optimize animations for mobile */
+@media (max-width: 768px) {
+  .animate-subtle-rotate {
+    animation: animate-subtle-rotate 180s linear infinite; /* Slower on mobile */
+  }
+  
+  .animate-float-orbit {
+    animation: float-orbit 120s ease-in-out infinite; /* Slower on mobile */
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse-slow 10s ease-in-out infinite; /* Slower on mobile */
+  }
+}
+
+/* Fix touch action issues */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Improve scrolling on iOS */
+@supports (-webkit-touch-callout: none) {
+  .main-content {
+    -webkit-overflow-scrolling: touch;
+  }
+}
