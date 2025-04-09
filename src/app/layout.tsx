@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     "Connect with exclusive opportunities to support top-tier sustainable companies that drive impactful innovation.",
   keywords: ["sustainable investing", "impact investing", "ESG", "startup funding"],
   authors: [{ name: "WeSeedU Team" }],
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover",
+  viewport: "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, viewport-fit=cover, user-scalable=yes",
   themeColor: "#49c628",
   appleWebApp: {
     capable: true,
@@ -65,6 +65,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <meta name="HandheldFriendly" content="true" />
       </head>
       <body className={cn("min-h-screen bg-background font-sans antialiased text-base touch-manipulation")}>
         <SupabaseProviders>

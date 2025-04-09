@@ -59,44 +59,36 @@ export function HeroSection() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="w-full max-w-7xl mx-auto px-8 py-32 lg:py-40" 
+      className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-24 lg:py-40" 
     >
-      {/* Top section: Two-column layout with main content */}
-      <div className="flex flex-col lg:flex-row gap-20 lg:gap-28 items-center">
+      <div className="flex flex-col lg:flex-row lg:gap-28 items-center">
         {/* Left column: Text and CTA */}
         <div className="w-full lg:w-1/2 flex flex-col relative">
           
-          <motion.div variants={itemVariants} className="overflow-hidden relative mb-8">
+          <motion.div variants={itemVariants} className="overflow-hidden relative mb-4 sm:mb-8">
+            {/* Text visible on all screens, no transparent text effects on mobile */}
             <motion.h1 
-              className="text-4xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text tracking-tight leading-[1.15]"
-              style={{ 
-                backgroundImage: 'linear-gradient(135deg, #ffffff, #f0f8ff, #ffffff)',
-                WebkitBackgroundClip: 'text',
-                textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3)',
-
-              }}
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.15] text-white"
             >
-              Grow a<br />
-              Sustainable Future
+              Grow a<br className="hidden sm:block" />
+              <span className="sm:hidden"> </span>Sustainable Future
             </motion.h1>
           </motion.div>
           
           <motion.p 
             variants={itemVariants}
-            className=" text-white text-xl leading-relaxed mb-16 max-w-xl font-light"
+            className="text-white text-sm sm:text-base md:text-xl leading-relaxed mb-6 sm:mb-16 max-w-xl font-light"
           >
             Join the movement to build a greener tomorrow through sustainable investments that benefit both your finances and our planet.
           </motion.p>
           
-          <motion.div 
-            variants={itemVariants}
-          >
-          <Button
+          <motion.div variants={itemVariants} className="mb-8 sm:mb-0">
+            <Button
               asChild
               size="lg"
               className="group text-white shadow-[0_4px_10px_rgba(0,0,0,0.07)]
                 hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out 
-                hover:translate-y-[-2px] rounded-xl px-10 py-7 font-medium relative overflow-hidden"
+                hover:translate-y-[-2px] rounded-xl px-6 sm:px-10 py-5 sm:py-7 font-medium relative overflow-hidden w-44 sm:w-auto"
               style={{ background: 'linear-gradient(to top, #00b4db, #0083b0)' }}
             >
               <Link href="/auth/signup">
@@ -110,19 +102,19 @@ export function HeroSection() {
             </Button>
           </motion.div>
         </div>
-        {/* Right column: Illustrations */}
-             {/* Right column: Illustrations */}
-             <motion.div 
-          className="w-full lg:w-1/2 flex justify-center lg:justify-end"
+        
+        {/* Image Container - HIDDEN on mobile */}
+        <motion.div 
+          className="hidden sm:flex w-full lg:w-1/2 justify-center lg:justify-end lg:mt-0"
           variants={itemVariants}
         >
-          <div className="relative w-full max-w-lg h-[500px] md:h-[600px]">
+          <div className="relative w-full max-w-sm md:max-w-lg h-[400px] md:h-[500px]">
             {/* Enhanced backdrop gradient for depth */}
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/5 via-transparent to-slate-100/40 rounded-full blur-3xl"></div>
             
-            {/* Large Earth Globe - enhanced with better 3D effects */}
+            {/* Earth Globe */}
             <motion.div 
-              className="absolute right-20 top-24 w-[400px] h-[400px] z-10"
+              className="absolute right-10 md:right-20 top-16 md:top-24 w-[300px] md:w-[400px] h-[300px] md:h-[400px] z-10"
               initial="initial"
               animate="animate"
               variants={{
@@ -132,9 +124,9 @@ export function HeroSection() {
                   rotate: [0, 0.5, 0, -0.5, 0],
                   transition: {
                     y: {
-                      duration: 10, // Slower animation
+                      duration: 10,
                       repeat: Infinity,
-                      repeatType: "reverse",
+                      repeatType: "reverse", 
                       ease: "easeInOut"
                     },
                     rotate: {
@@ -146,7 +138,6 @@ export function HeroSection() {
                   }
                 }
               }}
-              whileHover={{ scale: 1.02, transition: { duration: 0.4 } }}
             >
               {/* Radiant outer glow */}
               <div className="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-500/20 to-cyan-400/20 rounded-full blur-3xl transform scale-110"></div>
@@ -172,50 +163,51 @@ export function HeroSection() {
               <div className="absolute top-10 right-24 w-32 h-10 bg-cyan-300/20 rounded-full blur-xl transform rotate-[30deg] mix-blend-screen"></div>
             </motion.div>
             
-            {/* Enhanced 3D shadow effect */}
+            {/* Shadow effects */}
             <div className="absolute bottom-0 left-20 right-20 h-6 bg-gradient-to-b from-slate-900/5 to-slate-900/15 rounded-[50%] blur-xl z-0 transform scale-x-90"></div>
-            
-            {/* Secondary subtle shadow for more depth */}
             <div className="absolute bottom-[-5px] left-24 right-24 h-4 bg-slate-900/10 rounded-[60%] blur-md z-0"></div>
           </div>
         </motion.div>
       </div>
       
-      {/* Middle section: Minimal divider with almost no spacing */}
-      <motion.div variants={itemVariants} className="w-full my-0 mb-10">
+      {/* Divider - styled differently for mobile */}
+      <motion.div variants={itemVariants} className="w-full my-6 sm:my-0 sm:mb-10 sm:mt-6">
         <div className="relative w-full">
-          {/* Main line with shadow for 3D effect */}
-          <div className="w-full h-[2px] bg-gradient-to-r from-white via-white/80 to-transparent rounded-full shadow-[0_1px_2px_rgba(255,255,255,0.7)]"></div>
+          {/* Mobile: Full width white line */}
+          <div className="sm:hidden w-full h-[1px] bg-white/80"></div>
           
-          {/* Subtle highlight line above */}
-          <div className="absolute -top-[1px] w-full h-[1px] bg-gradient-to-r from-white/20 via-white/10 to-transparent rounded-full"></div>
-          
-          {/* Shadow line below */}
-          <div className="absolute top-[2px] w-3/4 h-[1px] bg-gradient-to-r from-slate-400/30 via-slate-400/10 to-transparent rounded-full"></div>
+          {/* Desktop: Gradient divider (hidden on mobile) */}
+          <div className="hidden sm:block w-full h-[2px] bg-gradient-to-r from-white via-white/80 to-transparent rounded-full shadow-[0_1px_2px_rgba(255,255,255,0.7)]"></div>
+          <div className="hidden sm:block absolute -top-[1px] w-full h-[1px] bg-gradient-to-r from-white/20 via-white/10 to-transparent rounded-full"></div>
+          <div className="hidden sm:block absolute top-[2px] w-3/4 h-[1px] bg-gradient-to-r from-slate-400/30 via-slate-400/10 to-transparent rounded-full"></div>
         </div>
       </motion.div>
       
-      {/* Bottom section: Ultra-tight feature layout */}
+      {/* Feature section - same as before */}
       <motion.div variants={itemVariants} className="w-full mt-1">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-2 gap-y-1">
+        <div className="sm:grid sm:grid-cols-3 sm:gap-x-2 sm:gap-y-1">
           {/* Feature 1 */}
-          <div className="flex flex-col group">
+          <div className="flex flex-col group mb-6 sm:mb-0">
             <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-3 rounded-full transition-all duration-300 group-hover:w-16"></div>
-            <h3 className="text-xl font-semibold text-white mb-1">Low fees meet higher yields</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-1">Low fees meet higher yields</h3>
             <p className="text-white text-sm leading-relaxed">Your money's always making more with low-fee investing and high-interest savings.</p>
+            {/* Mobile-only divider between features */}
+            <div className="sm:hidden w-full h-[1px] bg-white/30 mt-6"></div>
           </div>
           
           {/* Feature 2 */}
-          <div className="flex flex-col group">
+          <div className="flex flex-col group mb-6 sm:mb-0">
             <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-3 rounded-full transition-all duration-300 group-hover:w-16"></div>
-            <h3 className="text-xl font-semibold text-white mb-1">Unmatched access</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-1">Unmatched access</h3>
             <p className="text-white text-sm leading-relaxed">Get sophisticated investment opportunities traditionally reserved for industry insiders.</p>
+            {/* Mobile-only divider between features */}
+            <div className="sm:hidden w-full h-[1px] bg-white/30 mt-6"></div>
           </div>
           
           {/* Feature 3 */}
           <div className="flex flex-col group">
             <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-3 rounded-full transition-all duration-300 group-hover:w-16"></div>
-            <h3 className="text-xl font-semibold text-white mb-1">Smart & simple</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-1">Smart & simple</h3>
             <p className="text-white text-sm leading-relaxed">In just a few taps, set your financial goals in motion with our easy-to-use products.</p>
           </div>
         </div>
