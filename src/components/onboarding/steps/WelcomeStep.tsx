@@ -1,6 +1,42 @@
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, CheckCircle, Sprout } from "lucide-react"
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.12,
+      duration: 0.6,
+      ease: "easeOut"
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: 15, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 170, damping: 20 }
+  }
+}
+
+const pulseVariants = {
+  initial: { scale: 1 },
+  animate: { 
+    scale: [1, 1.05, 1],
+    opacity: [1, 0.8, 1],
+    transition: {
+      duration: 2.5,
+      repeat: Infinity,
+      repeatType: "reverse",
+      ease: "easeInOut"
+    }
+  }
+}
 
 interface WelcomeStepProps {
   onNext: () => void
@@ -8,75 +44,105 @@ interface WelcomeStepProps {
 
 export default function WelcomeStep({ onNext }: WelcomeStepProps) {
   return (
-    <div className="space-y-6 py-4">
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="space-y-8 py-6"
+    >
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        variants={itemVariants}
+        className="text-center mb-10"
       >
-        <h2 className="text-3xl font-bold text-center mb-2 text-white">
-          Welcome to{" "}
-          <span className="bg-gradient-to-r from-teal-400 via-purple-400 to-teal-400 text-transparent bg-clip-text animate-flow">
-            WeSeedU
-          </span>
+        <div className="mx-auto w-20 h-20 mb-6 relative">
+          <div className="absolute -inset-2 bg-gradient-to-r from-green-400/30 to-white/30 rounded-full blur-md"></div>
+          <div className="absolute inset-0 bg-green-50/20 rounded-full animate-ping opacity-30 duration-1000 delay-300"></div>
+          <div className="p-4 bg-gradient-to-br from-white to-green-50 rounded-full flex items-center justify-center relative shadow-xl">
+            <Sprout className="h-9 w-9 text-green-600" />
+          </div>
+        </div>
+        <h2 className="text-3xl font-semibold text-black mb-3">
+          Welcome to <span className="bg-gradient-to-r from-green-600 via-[#49c628] to-[#70f570] text-transparent bg-clip-text">WeSeedU</span>
         </h2>
-        <p className="text-center text-white/70 mb-8">
-          Let's get you set up to start your sustainable investment journey
+        <p className="text-black/70 max-w-md mx-auto">
+          We're excited to help you set up your sustainable investment portfolio that aligns with your values.
+        </p>
+      </motion.div>
+
+      <motion.div
+        variants={itemVariants}
+        className="bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-black/5 shadow-lg"
+      >
+        <p className="text-black mb-4">
+          We'll guide you through a quick setup process to personalize your investment experience. This will only take a few minutes to complete.
+        </p>
+        <p className="text-black">
+          Get ready to discover opportunities that match both your financial goals and environmental values.
         </p>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="space-y-4"
+        transition={{ 
+          type: "spring", 
+          stiffness: 100, 
+          damping: 15,
+          delay: 0.2 
+        }}
+        className="pt-6"
       >
-        <div className="bg-white/5 p-6 rounded-xl border border-white/10 backdrop-blur-sm">
-          <h3 className="font-medium mb-3 text-white">What to expect:</h3>
-          <ul className="space-y-3 text-white/70">
-            {[
-              "Complete your personal profile",
-              "Select your sustainable investment interests",
-              "Choose your membership tier",
-              "Start exploring sustainable investment opportunities"
-            ].map((item, index) => (
-              <motion.li 
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + (index * 0.1) }}
-                className="flex items-start space-x-3"
-              >
-                <div className="w-5 h-5 rounded-full bg-gradient-to-r from-teal-400 to-purple-400 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-xs text-white font-bold">{index + 1}</span>
+        <div className="relative">
+          <div className="absolute -inset-0.5 bg-gradient-to-br from-green-400/50 to-white/50 opacity-70 rounded-xl blur-md"></div>
+          
+          <Button 
+            onClick={onNext} 
+            className="relative w-full bg-white hover:bg-slate-50 
+              text-black font-medium border border-black/10
+              shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)]
+              transition-all duration-300 ease-out 
+              hover:translate-y-[-2px] rounded-xl py-6 h-auto text-base group z-10"
+            size="lg"
+          >
+            <motion.div
+              variants={pulseVariants}
+              initial="initial"
+              animate="animate"
+              className="absolute inset-0 bg-gradient-to-r from-green-100/30 to-white/30 rounded-xl blur-[1px] z-0"
+            />
+            <span className="relative z-10 flex items-center">
+              Let's get started 
+              <ArrowRight className="ml-2 h-4 w-4 transform group-hover:translate-x-1 transition-transform duration-300" />
+            </span>
+          </Button>
+        </div>
+        
+        {/* Feature points with improved styling */}
+        <div className="mt-6 space-y-4 bg-white/90 backdrop-blur-sm rounded-xl p-5 border border-black/5 shadow-sm">
+          <h3 className="text-black font-medium text-sm">During this setup, we'll:</h3>
+          {[
+            "Create your personalized investment profile",
+            "Understand your sustainable interests",
+            "Set up your preferred membership level",
+            "Prepare personalized investment opportunities"
+          ].map((item, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 + (index * 0.1) }}
+              className="flex items-start space-x-3 group"
+            >
+              <div className="flex-shrink-0 mt-0.5">
+                <div className="w-5 h-5 rounded-full flex items-center justify-center bg-green-100 group-hover:bg-green-200 transition-colors duration-300">
+                  <CheckCircle className="w-3 h-3 text-green-600" />
                 </div>
-                <span>{item}</span>
-              </motion.li>
-            ))}
-          </ul>
+              </div>
+              <span className="text-sm text-black">{item}</span>
+            </motion.div>
+          ))}
         </div>
       </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="pt-4"
-      >
-        <Button 
-          onClick={onNext} 
-          className="w-full group relative text-white border-white/20 hover:border-white/40 
-            backdrop-blur-sm px-8 py-6 h-auto text-base
-            bg-gradient-to-r from-white/10 to-white/5
-            hover:from-white/20 hover:to-white/10
-            shadow-lg shadow-teal-500/10
-            hover:shadow-teal-500/20
-            transition-all duration-300 ease-in-out"
-          size="lg"
-        >
-          Let's Get Started <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-        </Button>
-      </motion.div>
-    </div>
+    </motion.div>
   )
 } 

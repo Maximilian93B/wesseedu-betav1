@@ -250,7 +250,7 @@ export function SustainableImpactSection() {
                     <div className="flex items-center space-x-4">
                       <Users size={16} className="text-blue-300" />
                       <div>
-                        <p className="text-white text-sm font-semibold">10,000+ Members</p>
+                        <p className="text-white text-sm font-semibold">Members</p>
                         <p className="text-white/70 text-xs">in our investing community</p>
                       </div>
                     </div>

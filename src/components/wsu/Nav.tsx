@@ -4,10 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { Menu, Zap, X } from "lucide-react"
 import Link from "next/link"
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import LoginForm from "@/components/wsu/LoginForm"
-import { useLogin } from '@/hooks/use-login'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { SectionNav, SectionLinks } from '@/components/wsu/SectionNav'
 
 // Define the props for the Navigation component
@@ -23,7 +19,7 @@ const styles = {
   getStartedButton: "bg-white hover:bg-gray-100 text-black font-semibold shadow-[0_4px_15px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.1)] border border-gray-200",
   loginButton: "bg-black hover:bg-gray-800 text-white font-semibold shadow-[0_4px_15px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.2)]",
   menuToggle: "text-green-700 hover:text-green-600 hover:bg-green-50 md:hidden p-3 rounded-full border border-green-500/30 hover:scale-110 transition-all duration-300",
-  sidebarLink: "text-gray-300 hover:text-emerald-400 hover:bg-emerald-950/30 transition-all duration-300 w-full justify-start"
+  sidebarLink: "text-gray-500 hover:text-black relative transition-all duration-200 w-full justify-start p-2 group hover:translate-y-[-1px] border-l-2 border-transparent hover:border-l-2 hover:border-green-500"
 }
 
 // Throttle function to limit execution frequency
@@ -39,9 +35,7 @@ function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (.
 }
 
 export function MainNav({ currentPath = '/' }: MainNavProps) {
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const { loading } = useLogin()
   const sidebarRef = useRef<HTMLDivElement>(null)
   const [hasScrolled, setHasScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero-section');
@@ -98,10 +92,6 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
     return () => window.removeEventListener('keydown', handleEscKey)
   }, [isSidebarOpen])
 
-  const handleLoginSuccess = () => {
-    setIsLoginOpen(false)
-  }
-
   // Handle section navigation for sidebar
   const handleSectionClick = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -113,24 +103,13 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
   };
 
   // Extracted components for better readability
-  const renderLoginDialog = () => (
-    <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-      <DialogTrigger asChild>
-        <Button 
-          className={`${styles.mainButton} ${styles.loginButton}`}
-          disabled={loading}
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-white border-gray-200 rounded-2xl">
-        <DialogTitle className="sr-only">Login Form</DialogTitle>
-        <DialogDescription className="sr-only">
-          Enter your credentials to log in to your account
-        </DialogDescription>
-        <LoginForm onSuccess={handleLoginSuccess} />
-      </DialogContent>
-    </Dialog>
+  const renderLoginButton = () => (
+    <Button 
+      className={`${styles.mainButton} ${styles.loginButton}`}
+      asChild
+    >
+      <Link href="/auth/login">Login</Link>
+    </Button>
   );
 
   const renderGetStartedButton = () => (
@@ -142,44 +121,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
     </Button>
   );
 
-  const renderNavigationLinks = () => (
-    <>
-      <Button 
-        variant="ghost" 
-        className={styles.sidebarLink}
-        asChild
-        onClick={() => setIsSidebarOpen(false)}
-      >
-        <Link href="/mobile-first-weSeedU">The Platform</Link>
-      </Button>
-      <Button 
-        variant="ghost" 
-        className={styles.sidebarLink}
-        asChild
-        onClick={() => setIsSidebarOpen(false)}
-      >
-        <Link href="/solutions">Solutions</Link>
-      </Button>
-      <Button 
-        variant="ghost" 
-        className={styles.sidebarLink} 
-        asChild
-        onClick={() => setIsSidebarOpen(false)}
-      >
-        <Link href="/about">About</Link>
-      </Button>
-      <Button 
-        variant="ghost" 
-        className={styles.sidebarLink}
-        asChild
-        onClick={() => setIsSidebarOpen(false)}
-      >
-        <Link href="/contact">Contact</Link>
-      </Button>
-    </>
-  );
-
-  // Navigation bar style with memoization to prevent recalculation on each render
+  // Navigation bar style
   const navbarStyle = {
     backgroundImage: 'linear-gradient(to right top, rgba(255,255,255,0.98), rgba(255,255,255,0.9))',
     boxShadow: '0 8px 30px rgba(73, 198, 40, 0.1)'
@@ -191,8 +133,8 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
       <nav 
         className={`w-full z-50 fixed top-0 transition-all duration-300 px-2 sm:px-4 md:px-6 ${
           hasScrolled 
-            ? 'backdrop-blur-md bg-white/95 border-b border-green-500/20 shadow-[0_8px_25px_rgba(0,0,0,0.1)] dark:bg-white/90 dark:border-green-500/10 rounded-b-2xl' 
-            : 'backdrop-blur-sm bg-white/90 dark:bg-white/85 rounded-b-3xl'
+            ? 'backdrop-blur-md bg-white/95 border-b border-green-500/20 shadow-[0_8px_25px_rgba(0,0,0,0.1)] rounded-b-2xl' 
+            : 'backdrop-blur-sm bg-white/90 rounded-b-3xl'
         }`}
         style={navbarStyle}
       >
@@ -206,7 +148,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
                 </div>
                 <div className="ml-2 text-xl font-bold flex">
                   <span className="text-green-600">We</span>
-                  <span className="text-green-800 dark:text-green-700">Seed</span>
+                  <span className="text-green-800">Seed</span>
                   <span className="text-green-600">U</span>
                 </div>
               </Link>
@@ -214,10 +156,9 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
 
             {/* Desktop buttons */}
             <div className="hidden md:flex items-center space-x-4">
-              <ThemeToggle />
               {renderGetStartedButton()}
               <div className="h-6 w-px bg-gray-300/50 mx-1"></div>
-              {renderLoginDialog()}
+              {renderLoginButton()}
             </div>
 
             {/* Menu toggle button */}
@@ -232,14 +173,13 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
           </div>
         </div>
         
-        {/* Divider with simple conditional visibility */}
+        {/* Divider with conditional visibility */}
         {currentPath === '/' && (
           <div 
             className={`hidden md:block relative transition-opacity duration-300 ${
               showSectionNav ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {/* Simplified divider effect - fewer elements */}
             <div 
               className="w-full h-[1px] bg-black/5"
               style={{
@@ -253,7 +193,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
           </div>
         )}
         
-        {/* SectionNav with simple CSS transitions */}
+        {/* SectionNav with CSS transitions */}
         {currentPath === '/' && (
           <div 
             className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out origin-top ${
@@ -270,7 +210,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
       {/* Sidebar overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 dark:bg-black/50 dark:backdrop-blur-sm"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
           aria-hidden="true"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -285,8 +225,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
       >
         <div className="p-4 pt-6 flex flex-col gap-4">
           {/* Close sidebar button */}
-          <div className="flex justify-between items-center mb-2">
-            <ThemeToggle className="ml-1" />
+          <div className="flex justify-end items-center mb-2">
             <Button 
               variant="ghost" 
               size="sm"
@@ -317,9 +256,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
             <div className="space-y-1">
               <Button 
                 variant="ghost" 
-                className="text-gray-500 hover:text-black relative transition-all duration-200 w-full justify-start p-2 
-                  group hover:translate-y-[-1px] border-l-2 border-transparent
-                  hover:border-l-2 hover:border-green-500"
+                className={styles.sidebarLink}
                 asChild
                 onClick={() => setIsSidebarOpen(false)}
               >
@@ -327,9 +264,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
               </Button>
               <Button 
                 variant="ghost" 
-                className="text-gray-500 hover:text-black relative transition-all duration-200 w-full justify-start p-2 
-                  group hover:translate-y-[-1px] border-l-2 border-transparent
-                  hover:border-l-2 hover:border-green-500"
+                className={styles.sidebarLink}
                 asChild
                 onClick={() => setIsSidebarOpen(false)}
               >
@@ -337,9 +272,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
               </Button>
               <Button 
                 variant="ghost" 
-                className="text-gray-500 hover:text-black relative transition-all duration-200 w-full justify-start p-2 
-                  group hover:translate-y-[-1px] border-l-2 border-transparent
-                  hover:border-l-2 hover:border-green-500"
+                className={styles.sidebarLink}
                 asChild
                 onClick={() => setIsSidebarOpen(false)}
               >
@@ -347,9 +280,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
               </Button>
               <Button 
                 variant="ghost" 
-                className="text-gray-500 hover:text-black relative transition-all duration-200 w-full justify-start p-2 
-                  group hover:translate-y-[-1px] border-l-2 border-transparent
-                  hover:border-l-2 hover:border-green-500" 
+                className={styles.sidebarLink}
                 asChild
                 onClick={() => setIsSidebarOpen(false)}
               >
@@ -362,7 +293,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
           <div className="mt-4 flex flex-col space-y-3">
             {renderGetStartedButton()}
             <div className="h-px w-full bg-gray-200 my-1"></div>
-            {renderLoginDialog()}
+            {renderLoginButton()}
           </div>
         </div>
       </div>

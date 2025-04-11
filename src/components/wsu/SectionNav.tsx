@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
+import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 
 // Define sections once to avoid duplication
 const SECTIONS = [
   { id: 'hero-section', label: 'Home' },
-  { id: 'impact-section', label: 'Impact' },
   { id: 'card-section', label: 'Features' },
   { id: 'partners-section', label: 'Partners' },
-  { id: 'solution-section', label: 'Solutions' },
-  { id: 'features-section', label: 'Key Features' }
+  { id: 'startup-section', label: 'Application' },
+  { id: 'impact-section', label: 'Impact' }
 ];
 
 interface Section {
@@ -24,6 +24,24 @@ interface SectionNavProps {
 
 export function SectionNav({ scrollToSection }: SectionNavProps = {}) {
   const [activeSection, setActiveSection] = useState('hero-section');
+  const navRef = useRef<HTMLDivElement>(null);
+  
+  // Track scroll progress for parallax effects
+  const { scrollYProgress } = useScroll({
+    offset: ["start start", "end end"]
+  });
+  
+  // Create smooth scrolling effect
+  const smoothScroll = useSpring(scrollYProgress, {
+    damping: 50,
+    stiffness: 300,
+    restDelta: 0.001
+  });
+  
+  // Parallax transforms for nav elements
+  const navTranslateY = useTransform(smoothScroll, [0, 0.1], [0, -10]);
+  const navScale = useTransform(smoothScroll, [0, 0.1], [1, 0.97]);
+  const navOpacity = useTransform(smoothScroll, [0, 0.2], [1, 0.9]);
   
   // Track the active section based on scroll position
   useEffect(() => {
@@ -65,26 +83,50 @@ export function SectionNav({ scrollToSection }: SectionNavProps = {}) {
     section: Section; 
     index: number; 
     offset?: number; 
-  }) => (
-    <Button 
-      key={section.id}
-      variant="ghost" 
-      className={`
-        relative text-gray-700 rounded-full text-sm px-4 py-1 transition-all duration-300
-        ${activeSection === section.id ? 'bg-white shadow-md scale-105 text-black' : 'bg-transparent'}
-      `}
-      onClick={() => handleSectionClick(section.id)}
-      style={{ transitionDelay: `${(index + offset) * 50}ms` }}
-    >
-      <span>{section.label}</span>
-      {activeSection === section.id && (
-        <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-black rounded-full"></span>
-      )}
-    </Button>
-  );
+  }) => {
+    // Per-button transforms with slight delay based on index
+    const buttonX = useTransform(
+      smoothScroll, 
+      [0, 0.3], 
+      [0, index % 2 === 0 ? -5 - (index * 3) : 5 + (index * 3)]
+    );
+    
+    return (
+      <motion.div
+        style={{ 
+          x: buttonX,
+          transition: `all ${300 + (index * 30)}ms cubic-bezier(0.4, 0, 0.2, 1)`
+        }}
+      >
+        <Button 
+          key={section.id}
+          variant="ghost" 
+          className={`
+            relative text-gray-700 rounded-full text-sm px-4 py-1 transition-all duration-300
+            ${activeSection === section.id ? 'bg-white shadow-md scale-105 text-black' : 'bg-transparent'}
+          `}
+          onClick={() => handleSectionClick(section.id)}
+          style={{ transitionDelay: `${(index + offset) * 50}ms` }}
+        >
+          <span>{section.label}</span>
+          {activeSection === section.id && (
+            <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-black rounded-full"></span>
+          )}
+        </Button>
+      </motion.div>
+    );
+  };
 
   return (
-    <div className="hidden md:flex items-center justify-center pb-2 pt-2 overflow-x-auto transition-all duration-300 w-full">
+    <motion.div 
+      ref={navRef}
+      className="hidden md:flex items-center justify-center pb-2 pt-2 overflow-x-auto transition-all duration-300 w-full"
+      style={{
+        y: navTranslateY,
+        scale: navScale,
+        opacity: navOpacity
+      }}
+    >
       <div className="flex justify-between w-full max-w-6xl px-4">
         <div className="flex space-x-3">
           {firstHalf.map((section, index) => (
@@ -98,7 +140,7 @@ export function SectionNav({ scrollToSection }: SectionNavProps = {}) {
           ))}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

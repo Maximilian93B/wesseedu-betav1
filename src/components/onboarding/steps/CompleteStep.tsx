@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, CheckCircle2, User, Briefcase, Leaf } from "lucide-react"
 import { motion } from "framer-motion"
 
 interface CompleteStepProps {
@@ -21,64 +21,129 @@ export default function CompleteStep({
   onBack,
   isLoading 
 }: CompleteStepProps) {
+  // Map tier names to more user-friendly display names
+  const tierDisplayNames = {
+    root: "Root - Basic Access",
+    thrive: "Thrive - Advanced Features",
+    impact: "Impact - Exclusive Access"
+  };
+  
   return (
-    <div className="space-y-6 py-4">
+    <div className="space-y-8 py-4">
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
         className="flex flex-col items-center justify-center"
       >
-        <div className="rounded-full bg-gradient-to-r from-teal-500/20 to-purple-500/20 p-4 mb-4 border border-teal-500/30">
-          <CheckCircle2 className="h-12 w-12 text-teal-400" />
+        <div className="relative mb-6">
+          <div className="absolute -inset-2 bg-gradient-to-r from-green-400/30 to-white/30 rounded-full blur-md"></div>
+          <div className="rounded-full bg-white p-4 border border-green-200 shadow-lg">
+            <CheckCircle2 className="h-12 w-12 text-green-600" />
+          </div>
         </div>
-        <h2 className="text-2xl font-bold text-center text-white">
+        <h2 className="text-2xl font-semibold text-center text-black mb-2">
           You're{" "}
-          <span className="bg-gradient-to-r from-teal-400 via-purple-400 to-teal-400 text-transparent bg-clip-text animate-flow">
+          <span className="bg-gradient-to-r from-green-400 via-[#70f570] to-green-400 text-transparent bg-clip-text animate-flow">
             all set
           </span>
           !
         </h2>
-        <p className="text-center text-white/70 mt-2 mb-6">
-          Let's review your profile before we finalize
+        <p className="text-center text-black/70 max-w-md">
+          Let's review your profile details before we finalize your sustainable investment journey
         </p>
       </motion.div>
 
-      <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 space-y-5 border border-white/10">
-        <div>
-          <h3 className="text-sm font-medium text-white/60 mb-1">Personal Information</h3>
-          <p className="font-medium text-white text-lg">{userData.firstName} {userData.lastName}</p>
-          <p className="text-white/80">{userData.email}</p>
-        </div>
-        
-        <div>
-          <h3 className="text-sm font-medium text-white/60 mb-1">Membership Tier</h3>
-          <p className="font-medium text-white text-lg capitalize">{userData.userTier}</p>
-        </div>
-        
-        <div>
-          <h3 className="text-sm font-medium text-white/60 mb-1">Investment Interests</h3>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {userData.interests.map(interest => (
-              <span 
-                key={interest} 
-                className="bg-gradient-to-r from-teal-500/20 to-purple-500/20 text-white text-sm px-3 py-1 rounded-full border border-teal-500/30"
-              >
-                {interest}
-              </span>
-            ))}
+      <div className="space-y-5">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white rounded-xl p-5 border border-black/5 shadow-md"
+        >
+          <div className="flex items-start">
+            <div className="p-2 bg-green-100 rounded-full mr-4">
+              <User className="h-5 w-5 text-green-600" />
+            </div>
+            <div className="flex-grow">
+              <h3 className="text-sm font-medium text-black/60 mb-1">Personal Information</h3>
+              <p className="font-medium text-black text-lg">{userData.firstName} {userData.lastName}</p>
+              <p className="text-black/70">{userData.email}</p>
+            </div>
           </div>
-        </div>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-xl p-5 border border-black/5 shadow-md"
+        >
+          <div className="flex items-start">
+            <div className="p-2 bg-green-100 rounded-full mr-4">
+              <Briefcase className="h-5 w-5 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-black/60 mb-1">Membership Tier</h3>
+              <p className="font-medium text-black text-lg">{tierDisplayNames[userData.userTier]}</p>
+            </div>
+          </div>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white rounded-xl p-5 border border-black/5 shadow-md"
+        >
+          <div className="flex items-start">
+            <div className="p-2 bg-green-100 rounded-full mr-4">
+              <Leaf className="h-5 w-5 text-green-600" />
+            </div>
+            <div className="flex-grow">
+              <h3 className="text-sm font-medium text-black/60 mb-2">Investment Interests</h3>
+              <div className="flex flex-wrap gap-2">
+                {userData.interests.map(interest => (
+                  <span 
+                    key={interest} 
+                    className="bg-green-50 text-green-700 text-sm px-3 py-1.5 rounded-full border border-green-200"
+                  >
+                    {interest}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="bg-green-50 border border-green-100 rounded-xl p-4 text-green-800 text-sm"
+      >
+        <p className="flex items-start">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 flex-shrink-0 mt-0.5">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+          <span>
+            By completing this setup, you'll gain access to personalized sustainable investment opportunities aligned with your interests.
+          </span>
+        </p>
+      </motion.div>
       
       <div className="flex justify-between pt-4">
         <Button 
           type="button" 
           onClick={onBack}
-          className="group relative text-white border-white/20 hover:border-white/40 
+          className="group relative text-black border-black/10 hover:border-black/20 
             backdrop-blur-sm px-6 py-2 h-auto
-            bg-white/5 hover:bg-white/10
-            transition-all duration-300 ease-in-out"
+            bg-white hover:bg-slate-50
+            shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)]
+            transition-all duration-300 ease-out
+            hover:translate-y-[-2px] rounded-lg"
           variant="outline"
           disabled={isLoading}
         >
@@ -87,13 +152,15 @@ export default function CompleteStep({
         <Button 
           onClick={onComplete}
           disabled={isLoading}
-          className="group relative text-white border-white/20 hover:border-white/40 
+          className="group relative text-black border-black/10 hover:border-black/20 
             backdrop-blur-sm px-8 py-2 h-auto
-            bg-gradient-to-r from-teal-500/50 to-purple-500/50
-            hover:from-teal-500/60 hover:to-purple-500/60
-            shadow-lg shadow-teal-500/10
-            hover:shadow-teal-500/20
-            transition-all duration-300 ease-in-out
+            bg-gradient-to-r from-green-500 to-[#70f570]
+            hover:from-green-600 hover:to-[#5bde5b]
+            text-white
+            shadow-lg shadow-green-500/10
+            hover:shadow-green-500/20
+            transition-all duration-300 ease-out
+            hover:translate-y-[-2px] rounded-lg
             disabled:opacity-70"
         >
           {isLoading ? (

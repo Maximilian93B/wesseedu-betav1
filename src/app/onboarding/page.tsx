@@ -5,6 +5,7 @@ import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react"
 import { useRouter } from "next/navigation"
 import OnboardingWizard from "@/components/onboarding/OnboardingWizard"
 import { useToast } from "@/hooks/use-toast"
+import { motion } from "framer-motion"
 
 export default function OnboardingPage() {
   const supabase = useSupabaseClient()
@@ -18,6 +19,14 @@ export default function OnboardingPage() {
   const redirectingRef = useState<boolean>(false)
 
   useEffect(() => {
+    // DEV ONLY: Provide mock data in development for easier access
+    if (process.env.NODE_ENV === 'development') {
+      console.log('DEV MODE: Using mock data for onboarding page');
+      setHasCheckedProfile(true);
+      setLoading(false);
+      return;
+    }
+
     // If we don't have a user yet, wait for auth to initialize
     if (user === undefined) {
       return
@@ -68,26 +77,37 @@ export default function OnboardingPage() {
     }
   }, [user, hasCheckedProfile, supabase, router, toast, redirectingRef])
 
-  // Show loading state while checking authorization
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0A1A3B]">
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-400 mx-auto mb-4"></div>
-          <p>Loading...</p>
+  const LoadingSpinner = () => (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-[#70f570] to-[#49c628]">
+      <div className="bg-white/90 p-6 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.15)] text-center">
+        <div className="relative w-16 h-16 mx-auto mb-4">
+          <motion.div 
+            className="absolute inset-0"
+            animate={{ 
+              rotate: 360,
+              opacity: [0.5, 1, 0.5]
+            }} 
+            transition={{ 
+              duration: 1.5, 
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <div className="h-16 w-16 rounded-full border-4 border-green-300 border-t-green-600"></div>
+          </motion.div>
         </div>
-      </div>
-    )
-  }
-
-  // Only render the onboarding wizard if we've confirmed the user needs it
-  return hasCheckedProfile ? (
-    <OnboardingWizard />
-  ) : (
-    <div className="flex items-center justify-center min-h-screen bg-[#0A1A3B]">
-      <div className="text-white text-center">
-        <p>Checking authorization...</p>
+        <p className="text-black font-medium">
+          {loading ? "Preparing your experience..." : "Checking authorization..."}
+        </p>
       </div>
     </div>
   )
+
+  // Only render the onboarding wizard if we've confirmed the user needs it
+  if (hasCheckedProfile) {
+    return <OnboardingWizard />
+  }
+  
+  // Show loading state
+  return <LoadingSpinner />
 } 

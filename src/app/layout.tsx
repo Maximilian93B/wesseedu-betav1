@@ -1,9 +1,19 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import SupabaseProviders from "./providers"
 import "./globals.css"
 import React from "react"
 import { headers } from 'next/headers'
 import { cn } from "@/lib/utils"
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  userScalable: true,
+  themeColor: "#49c628",
+}
 
 export const metadata: Metadata = {
   title: "WeSeedU - Sustainable Investment Platform",
@@ -11,8 +21,6 @@ export const metadata: Metadata = {
     "Connect with exclusive opportunities to support top-tier sustainable companies that drive impactful innovation.",
   keywords: ["sustainable investing", "impact investing", "ESG", "startup funding"],
   authors: [{ name: "WeSeedU Team" }],
-  viewport: "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, viewport-fit=cover, user-scalable=yes",
-  themeColor: "#49c628",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

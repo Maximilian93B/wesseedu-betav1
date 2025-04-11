@@ -28,15 +28,22 @@ const ADMIN_ROUTES = ["/admin"]
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
-  
-  // Use getUser() instead of getSession() for better security
-  const { data: { user }, error } = await supabase.auth.getUser()
   
   const { pathname } = req.nextUrl
 
   // Store the current URL in a cookie for layouts to access
   res.cookies.set('next-url', pathname)
+  
+  // DEV ONLY: Allow direct access to onboarding in development
+  if (process.env.NODE_ENV === 'development' && pathname.startsWith('/onboarding')) {
+    console.log('DEV MODE: Bypassing auth check for onboarding route');
+    return res;
+  }
+  
+  const supabase = createMiddlewareClient({ req, res })
+  
+  // Use getUser() instead of getSession() for better security
+  const { data: { user }, error } = await supabase.auth.getUser()
   
   // Handle public routes - always allow access
   if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {

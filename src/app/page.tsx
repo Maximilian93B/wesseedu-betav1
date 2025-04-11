@@ -214,6 +214,7 @@ export default function LandingPage() {
 
           <motion.div 
             className="parallax-section px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
+            id="partners-section"
             style={{ 
               y: partnersTransform,
               opacity: partnersOpacity,
@@ -253,6 +254,7 @@ export default function LandingPage() {
               {/* Solution sections with Suspense boundaries */}
               <motion.div 
                 className="parallax-section px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mt-16"
+                id="startup-section"
                 style={{
                   y: sectionOneTransform
                 }}
@@ -263,6 +265,7 @@ export default function LandingPage() {
               </motion.div>
               <motion.div 
                 className="parallax-section px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mb-16"
+                id="impact-section"
                 style={{
                   y: sectionTwoTransform
                 }}

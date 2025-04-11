@@ -8,6 +8,11 @@ interface LoginCredentials {
   onSuccess?: () => void
 }
 
+/**
+ * A lightweight hook for handling login in components other than the main login page.
+ * The main login page should implement its own logic to avoid duplication.
+ * This hook is kept for backward compatibility with other components that might use it.
+ */
 export function useLogin() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -32,18 +37,12 @@ export function useLogin() {
         throw new Error(typeof data.error === 'string' ? data.error : 'Login failed')
       }
 
+      // Call onSuccess callback if provided
       onSuccess?.()
-
-      if (!data.hasProfile) {
-        router.push('/auth/profile-create')
-      } else {
-        const returnUrl = searchParams.get('returnUrl') || '/auth/home'
-        router.push(returnUrl)
-      }
-
+      
+      // Use the redirectUrl from API response or fallback to returnUrl from URL params
       const redirectUrl = data.redirectUrl || searchParams.get('returnUrl') || '/auth/home'
       
-      console.log("Redirecting to:", redirectUrl)
       router.push(redirectUrl)
       router.refresh()
       
