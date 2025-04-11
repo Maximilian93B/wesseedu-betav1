@@ -1,3 +1,7 @@
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 let userConfig = undefined
 try {
   userConfig = require('./v0-user-next.config')
@@ -98,4 +102,4 @@ function mergeConfig(nextConfig, userConfig) {
 
 mergeConfig(nextConfig, userConfig)
 
-module.exports = nextConfig 
+module.exports = withBundleAnalyzer(nextConfig) 
