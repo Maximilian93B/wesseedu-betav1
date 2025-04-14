@@ -61,8 +61,8 @@ export default function PitchDeckDownload({ companyId, companyName, variant = 'd
       onClick={handleDownload}
       variant={variant === 'outline' ? 'outline' : 'default'}
       className={variant === 'outline' 
-        ? "border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-800 transition-all duration-200" 
-        : "bg-slate-900 hover:bg-slate-800 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 px-8 py-6 text-lg h-auto rounded-lg"}
+        ? "border-white/30 text-white hover:bg-white/10 transition-all duration-300 font-helvetica" 
+        : "bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 shadow-lg hover:shadow transition-all duration-300 hover:translate-y-[-2px] rounded-xl px-8 py-3 font-semibold font-helvetica"}
       disabled={isDownloading}
     >
       <Download className={variant === 'outline' ? "h-4 w-4 mr-2" : "h-5 w-5 mr-2"} />

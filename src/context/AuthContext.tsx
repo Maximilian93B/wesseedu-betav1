@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setProfile(null);
       setSession(null);
-      router.push('/auth/signin');
+      router.push('/');
       router.refresh();
     } catch (error) {
       console.error("Error signing out:", error);

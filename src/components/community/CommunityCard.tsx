@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users, MessageSquare, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 export interface CommunityCardProps {
   id: string;
@@ -44,80 +45,72 @@ export function CommunityCard({
   }
   
   return (
-    <div className="h-full">
+    <motion.div 
+      className="h-full"
+      whileHover={{ y: -5 }}
+      transition={{ duration: 0.3 }}
+    >
       <Card className={cn(
-        "relative h-full overflow-hidden rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.06)] transition-all duration-500",
-        isFeatured && "ring-1 ring-slate-400/50 shadow-[0_10px_30px_rgb(0,0,0,0.06)]"
+        "relative h-full overflow-hidden rounded-xl sm:rounded-2xl border-4 border-white shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.15)] transition-all duration-500 bg-white",
+        isFeatured && "ring-2 ring-green-400 shadow-[0_10px_30px_rgb(0,0,0,0.15)]"
       )}
-      style={{ 
-        backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-      }}
       >
-        {/* Subtle texture pattern for depth */}
-        <div className="absolute inset-0 opacity-[0.02]" 
-          style={{ 
-            backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-            backgroundSize: "40px 40px"
-          }} 
-        />
+        {/* Green accent bar */}
+        <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-[#70f570] to-[#49c628]"></div>
+        
+        {/* Green background accent */}
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-bl from-green-50 via-transparent to-transparent opacity-70"></div>
         
         {/* Featured badge */}
         {isFeatured && (
           <div className="absolute top-0 right-0 z-20">
-            <div className="font-medium text-xs tracking-wider text-white bg-slate-800 py-1 px-4 rounded-bl-lg shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
+            <div className="font-medium text-xs tracking-wider text-white bg-gradient-to-r from-[#70f570] to-[#49c628] py-1 px-4 rounded-bl-lg shadow-[0_4px_10px_rgba(0,0,0,0.1)] font-helvetica">
               FEATURED
             </div>
           </div>
         )}
         
-        {/* Top edge shadow line for definition */}
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
-        
-        {/* Inner shadow effects for depth */}
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
-        
         <div className="relative z-10 p-6">
           {/* Header section */}
           <div className="flex flex-col space-y-3">
             {/* Community name */}
-            <h3 className="text-xl font-medium leading-tight tracking-tight text-slate-800">
+            <h3 className="text-xl font-medium leading-tight tracking-tight text-green-800 font-display">
               {name}
             </h3>
             
             {/* Description */}
-            <p className="text-sm text-slate-600 line-clamp-2 mb-2">
+            <p className="text-sm text-green-700 line-clamp-2 mb-2 font-body">
               {description || 'No description available'}
             </p>
           </div>
           
-          {/* Stats row with updated design */}
-          <div className="flex items-center gap-5 mt-4 mb-5 bg-white/70 rounded-lg p-2 border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-            <div className="flex items-center text-slate-600">
-              <div className="bg-white p-1.5 rounded-md mr-2 shadow-sm border border-slate-200">
-                <Users className="h-3.5 w-3.5 text-slate-600" />
+          {/* Stats row with Green-White design */}
+          <div className="flex items-center gap-5 mt-4 mb-5 bg-green-50 rounded-lg p-2 border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+            <div className="flex items-center text-green-700">
+              <div className="bg-white p-1.5 rounded-md mr-2 shadow-sm border border-green-100">
+                <Users className="h-3.5 w-3.5 text-green-600" />
               </div>
-              <span className="text-xs font-medium">{formatNumber(memberCount)}</span>
+              <span className="text-xs font-medium font-helvetica">{formatNumber(memberCount)}</span>
             </div>
-            <div className="flex items-center text-slate-600">
-              <div className="bg-white p-1.5 rounded-md mr-2 shadow-sm border border-slate-200">
-                <MessageSquare className="h-3.5 w-3.5 text-slate-600" />
+            <div className="flex items-center text-green-700">
+              <div className="bg-white p-1.5 rounded-md mr-2 shadow-sm border border-green-100">
+                <MessageSquare className="h-3.5 w-3.5 text-green-600" />
               </div>
-              <span className="text-xs font-medium">{formatNumber(postCount)}</span>
+              <span className="text-xs font-medium font-helvetica">{formatNumber(postCount)}</span>
             </div>
             <div className="ml-auto">
-              <ExternalLink className="h-4 w-4 text-slate-400" />
+              <ExternalLink className="h-4 w-4 text-green-500" />
             </div>
           </div>
           
-          {/* Tags with improved design */}
+          {/* Tags with Green-White design */}
           {tags && tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-5">
               {tags.slice(0, 3).map(tag => (
                 <Badge 
                   key={tag} 
                   variant="outline" 
-                  className="px-2.5 py-1 text-[0.65rem] bg-white border-slate-200 text-slate-600 rounded-md font-medium shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
+                  className="px-2.5 py-1 text-[0.65rem] bg-white border-green-100 text-green-700 rounded-md font-medium shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica"
                 >
                   {tag}
                 </Badge>
@@ -125,7 +118,7 @@ export function CommunityCard({
               {tags.length > 3 && (
                 <Badge 
                   variant="outline" 
-                  className="px-2.5 py-1 text-[0.65rem] bg-white border-slate-200 text-slate-600 rounded-md font-medium shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
+                  className="px-2.5 py-1 text-[0.65rem] bg-white border-green-100 text-green-700 rounded-md font-medium shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica"
                 >
                   +{tags.length - 3}
                 </Badge>
@@ -133,25 +126,25 @@ export function CommunityCard({
             </div>
           )}
           
-          {/* Ambassadors section with improved design */}
+          {/* Ambassadors section with Green-White design */}
           {ambassadors && ambassadors.length > 0 && (
-            <div className="mt-6 bg-white/80 rounded-lg p-3 border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+            <div className="mt-6 bg-green-50 rounded-lg p-3 border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
               <div className="flex justify-between items-center mb-3">
-                <span className="text-xs font-medium text-slate-700">Network Advisors</span>
+                <span className="text-xs font-medium text-green-800 font-helvetica">Network Advisors</span>
                 {ambassadorCount > ambassadors.length && (
-                  <span className="text-xs text-slate-400">+{ambassadorCount - ambassadors.length} more</span>
+                  <span className="text-xs text-green-600 font-helvetica">+{ambassadorCount - ambassadors.length} more</span>
                 )}
               </div>
               <div className="flex -space-x-2">
                 {ambassadors.slice(0, 5).map((ambassador) => (
                   <Avatar 
                     key={ambassador.id}
-                    className="h-8 w-8 border-2 border-white ring-1 ring-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+                    className="h-8 w-8 border-2 border-white ring-1 ring-green-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)]"
                   >
                     {ambassador.image ? (
                       <AvatarImage src={ambassador.image} alt={ambassador.name} />
                     ) : (
-                      <AvatarFallback className="bg-gradient-to-br from-slate-100 to-white text-slate-600 text-xs font-medium">
+                      <AvatarFallback className="bg-gradient-to-br from-[#70f570] to-[#49c628] text-white text-xs font-medium">
                         {ambassador.name?.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     )}
@@ -162,6 +155,6 @@ export function CommunityCard({
           )}
         </div>
       </Card>
-    </div>
+    </motion.div>
   );
 } 

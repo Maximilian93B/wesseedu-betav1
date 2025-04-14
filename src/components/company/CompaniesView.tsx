@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Zap, RefreshCw, Globe, TrendingUp, Rocket, ArrowRight, DollarSign, LineChart, Users, Shield } from "lucide-react"
+import { Zap, RefreshCw, Globe, TrendingUp, Rocket, ArrowRight, DollarSign, LineChart, Users, Shield, Search, Filter, ChevronDown } from "lucide-react"
 import { CompanyCard } from "@/components/wsu/marketplace/CompanyCard"
 import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
 import { motion, AnimatePresence } from "framer-motion"
@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button"
 import { useAuthGuard } from "@/hooks/use-auth-guard"
 import { CompaniesViewHero } from "@/components/company/CompaniesViewHero"
 import { MarketplaceIntroduction } from "@/components/company/MarketplaceIntroduction"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 
 interface Company {
   id: string
@@ -40,10 +42,41 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
   useAuthGuard()
   
   const [companies, setCompanies] = useState<Company[]>([])
+  const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null)
   const [fetchAttempted, setFetchAttempted] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [activeCategory, setActiveCategory] = useState("All")
   const { toast } = useToast()
+
+  const categories = ["All", "Energy", "Agriculture", "Construction", "Technology", "Water"]
+
+  // Handle filtering and searching
+  useEffect(() => {
+    if (companies.length > 0) {
+      let results = [...companies]
+      
+      // Apply category filter
+      if (activeCategory !== "All") {
+        results = results.filter(company => 
+          company.description.toLowerCase().includes(activeCategory.toLowerCase()) ||
+          (company.sustainability_data?.construction?.toString().toLowerCase() === activeCategory.toLowerCase())
+        )
+      }
+      
+      // Apply search filter
+      if (searchQuery.trim() !== "") {
+        const query = searchQuery.toLowerCase()
+        results = results.filter(company => 
+          company.name.toLowerCase().includes(query) ||
+          company.description.toLowerCase().includes(query)
+        )
+      }
+      
+      setFilteredCompanies(results)
+    }
+  }, [companies, searchQuery, activeCategory])
 
   const fetchCompanies = async () => {
     if (fetchAttempted) return;
@@ -60,7 +93,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
         
         // Handle 401 error by redirecting to login
         if (response.status === 401) {
-          window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname)
+          window.location.href = '/auth/login?redirect=' + encodeURIComponent(window.location.pathname)
           return
         }
         
@@ -100,6 +133,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
       }))
       
       setCompanies(formattedCompanies)
+      setFilteredCompanies(formattedCompanies)
     } catch (error) {
       console.error("Error fetching companies:", error)
       toast({
@@ -135,7 +169,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: "100%" }}
       transition={{ type: "spring", stiffness: 80, damping: 17 }}
-      className="absolute inset-0 bg-white overflow-y-auto"
+      className="absolute inset-0 bg-gradient-to-r from-[#70f570] to-[#49c628] overflow-y-auto"
     >
       <AnimatePresence mode="wait">
         {selectedCompanyId ? (
@@ -150,7 +184,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-white overflow-y-auto"
+            className="absolute inset-0 bg-gradient-to-r from-[#70f570] to-[#49c628] overflow-y-auto"
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 relative z-10">
               {/* Hero section */}
@@ -159,26 +193,76 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
               {/* Marketplace introduction section */}
               <MarketplaceIntroduction onScrollToCompanies={handleScrollToCompanies} />
               
-              {/* Title for companies section */}
-              {!loading && companies.length > 0 && (
-                <motion.div 
-                  id="companies-section"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                  className="mb-16 flex items-center"
-                >
-                  <div className="h-12 w-1.5 bg-slate-600 rounded-full mr-5"></div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-slate-800">
+              {/* Enhanced filter and search section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                id="companies-section"
+                className="mb-12 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+              >
+                <div className="flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
+                  <div className="flex-grow">
+                    <h2 className="text-3xl font-bold text-white font-display mb-2 flex items-center">
+                      <div className="h-6 w-1.5 bg-white rounded-full mr-3"></div>
                       Featured Companies
                     </h2>
-                    <p className="text-slate-600 mt-2">
-                      Explore our curated selection of sustainable innovation companies
+                    <p className="text-white/90 font-body">
+                      Discover and invest in sustainable innovation companies making real-world impact
                     </p>
                   </div>
-                </motion.div>
-              )}
+                  
+                  {/* Search box */}
+                  <div className="relative w-full md:w-64 lg:w-80">
+                    <Input
+                      placeholder="Search companies..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 pr-4 py-2 bg-white/20 backdrop-blur-sm border-white/20 placeholder:text-white/60 text-white focus:border-white focus:ring-white/30"
+                    />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/80" />
+                  </div>
+                </div>
+                
+                {/* Category filters */}
+                <div className="mt-6 flex flex-wrap gap-2 items-center">
+                  <span className="text-white/90 font-medium mr-2 font-helvetica text-sm flex items-center">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filter:
+                  </span>
+                  {categories.map((category) => (
+                    <Badge
+                      key={category}
+                      onClick={() => setActiveCategory(category)}
+                      className={`cursor-pointer px-4 py-1.5 font-helvetica text-sm transition-all duration-300 ${
+                        activeCategory === category
+                          ? "bg-white text-green-700 shadow-[0_0_10px_rgba(255,255,255,0.4)]"
+                          : "bg-white/10 hover:bg-white/20 text-white border-white/20"
+                      }`}
+                    >
+                      {category}
+                    </Badge>
+                  ))}
+                </div>
+                
+                {/* Results stats */}
+                <div className="mt-4 flex justify-between items-center">
+                  <span className="text-white/80 text-sm font-body">
+                    {filteredCompanies.length} {filteredCompanies.length === 1 ? 'company' : 'companies'} found
+                  </span>
+                  {searchQuery || activeCategory !== "All" ? (
+                    <Button
+                      onClick={() => {
+                        setSearchQuery("");
+                        setActiveCategory("All");
+                      }}
+                      className="text-xs py-1 h-auto bg-white/10 hover:bg-white/20 text-white"
+                    >
+                      Clear filters
+                    </Button>
+                  ) : null}
+                </div>
+              </motion.div>
 
               {loading ? (
                 <motion.div 
@@ -187,35 +271,53 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                   className="flex flex-col items-center justify-center py-32"
                 >
                   <div className="relative mb-10">
-                    <div className="w-20 h-20 border-4 border-slate-200 rounded-full animate-spin"></div>
-                    <div className="w-20 h-20 border-4 border-slate-600 rounded-full 
+                    <div className="w-20 h-20 border-4 border-white/20 rounded-full animate-spin"></div>
+                    <div className="w-20 h-20 border-4 border-white rounded-full 
                       animate-spin absolute top-0 left-0 border-t-transparent"></div>
                   </div>
-                  <p className="text-slate-800 text-xl font-medium mb-2">Loading Companies</p>
-                  <p className="text-slate-500">Please wait while we retrieve sustainable opportunities</p>
+                  <p className="text-white text-xl font-medium mb-2 font-display">Loading Companies</p>
+                  <p className="text-white/80 font-body">Please wait while we retrieve sustainable opportunities</p>
                 </motion.div>
-              ) : companies.length === 0 ? (
+              ) : filteredCompanies.length === 0 ? (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center py-32 max-w-md mx-auto text-center"
+                  className="flex flex-col items-center justify-center py-20 max-w-md mx-auto text-center"
                 >
-                  <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center 
-                    mb-8 border-2 border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-                    <Zap className="h-12 w-12 text-slate-600" />
+                  <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center 
+                    mb-8 border-2 border-white/20 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                    <Search className="h-12 w-12 text-white" />
                   </div>
-                  <h3 className="text-slate-800 text-2xl font-medium mb-3">No Companies Found</h3>
-                  <p className="text-slate-600 mb-10 text-lg">
-                    We couldn't find any sustainable companies at the moment. Please try again later or refresh.
+                  <h3 className="text-white text-2xl font-medium mb-3 font-display">No Matches Found</h3>
+                  <p className="text-white/80 mb-10 text-lg font-body">
+                    {searchQuery || activeCategory !== "All" 
+                      ? "We couldn't find any companies matching your search criteria. Please try different filters." 
+                      : "We couldn't find any sustainable companies at the moment. Please try again later."}
                   </p>
                   <Button 
-                    onClick={handleRetryFetch}
-                    className="bg-slate-900 hover:bg-slate-800 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)]
-                    hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out
-                    hover:translate-y-[-2px] rounded-lg flex items-center gap-2 px-6 py-3"
+                    onClick={() => {
+                      if (searchQuery || activeCategory !== "All") {
+                        setSearchQuery("");
+                        setActiveCategory("All");
+                      } else {
+                        handleRetryFetch();
+                      }
+                    }}
+                    className="bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 shadow-lg
+                    hover:shadow transition-all duration-300 
+                    hover:translate-y-[-2px] rounded-xl px-8 py-3 font-semibold font-helvetica"
                   >
-                    <RefreshCw className="h-5 w-5" />
-                    <span className="text-base">Refresh Companies</span>
+                    {searchQuery || activeCategory !== "All" ? (
+                      <>
+                        <Filter className="h-5 w-5 mr-2" />
+                        <span>Clear Filters</span>
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-5 w-5 mr-2" />
+                        <span>Refresh Companies</span>
+                      </>
+                    )}
                   </Button>
                 </motion.div>
               ) : (
@@ -225,13 +327,20 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                   transition={{ duration: 0.5, delay: 0.3 }}
                   className="pb-16"
                 >
+                  {/* Grid with animation sequence */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                    {companies.map((company, idx) => (
+                    {filteredCompanies.map((company, idx) => (
                       <motion.div 
                         key={company.id}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.1 * (idx % 6) }}
+                        transition={{ 
+                          duration: 0.4, 
+                          delay: 0.1 * (idx % 6), 
+                          type: "spring",
+                          stiffness: 120 
+                        }}
+                        whileHover={{ y: -5, transition: { duration: 0.2 } }}
                         className="cursor-pointer"
                       >
                         <CompanyCard 
@@ -241,6 +350,37 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                       </motion.div>
                     ))}
                   </div>
+                  
+                  {/* Bottom CTA */}
+                  {filteredCompanies.length > 6 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      className="mt-16 text-center"
+                    >
+                      <div className="inline-block p-8 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+                        <h3 className="text-2xl text-white font-bold mb-4 font-display">
+                          Ready to make an impact?
+                        </h3>
+                        <p className="text-white/80 max-w-lg mx-auto mb-6 font-body">
+                          Join our community of investors funding the sustainable innovations that will shape our future.
+                        </p>
+                        <Button
+                          onClick={() => {
+                            // Scroll back to top
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 
+                          shadow-lg hover:shadow-xl transition-all duration-300 
+                          hover:translate-y-[-2px] rounded-xl px-8 py-4 text-lg font-semibold font-helvetica"
+                        >
+                          <Rocket className="h-5 w-5 mr-2" />
+                          <span>Get Started</span>
+                        </Button>
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
             </div>

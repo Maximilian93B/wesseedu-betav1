@@ -5,12 +5,16 @@
 // Cache keys
 export const CACHE_KEYS = {
   PROFILE_DATA: 'dashboard_profile_data',
+  COMMUNITY_FEED: 'dashboard_community_feed',
+  GOALS_DATA: 'dashboard_goals_data',
   // Add other cache keys as needed
 };
 
 // Cache expiry times (in milliseconds)
 export const CACHE_EXPIRY = {
   PROFILE_DATA: 5 * 60 * 1000, // 5 minutes
+  COMMUNITY_FEED: 5 * 60 * 1000, // 5 minutes
+  GOALS_DATA: 5 * 60 * 1000, // 5 minutes
   // Add other expiry times as needed
 };
 
@@ -50,6 +54,7 @@ export const getCachedData = <T>(key: string, expiryTime: number): T | null => {
       return data as T;
     } else {
       console.log(`CacheUtils: Cached data expired for key: ${key}`);
+      invalidateCache(key);
       return null;
     }
   } catch (error) {

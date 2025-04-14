@@ -10,7 +10,6 @@ import dynamic from "next/dynamic"
 
 // Import home page specific components
 import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
-import { SectionTransition } from "@/components/ui/effects/SectionTrans"
 
 // Import new modularized components from barrel file
 import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
@@ -69,20 +68,12 @@ const HowItWorksDynamic = dynamic(
   { ssr: true }
 )
 
-const PlatformImpactDynamic = dynamic(
-  () => import("@/components/wsu/home").then(mod => ({ default: mod.PlatformImpact })), 
-  { ssr: true }
-)
 
 const FeaturedContentDynamic = dynamic(
   () => import("@/components/wsu/home").then(mod => ({ default: mod.FeaturedContent })), 
   { ssr: true }
 )
 
-const CallToActionDynamic = dynamic(
-  () => import("@/components/wsu/home").then(mod => ({ default: mod.CallToAction })), 
-  { ssr: true }
-)
 
 const GrowthHeroDynamic = dynamic(
   () => import("@/components/wsu/home").then(mod => ({ default: mod.GrowthHero })), 

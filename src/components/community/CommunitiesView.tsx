@@ -7,6 +7,7 @@ import { useCommunityFilters } from '@/hooks/use-community-filters'
 import { Badge } from '@/components/ui/badge'
 import { CommunityWithTags, Ambassador } from '@/types'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 
 export interface ExtendedCommunity extends CommunityWithTags {
   featured?: boolean
@@ -16,6 +17,27 @@ export interface ExtendedCommunity extends CommunityWithTags {
 
 interface CommunitiesViewProps {
   onCommunitySelect: (id: string) => void
+}
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.08,
+      duration: 0.5
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: 10, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
 }
 
 export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
@@ -61,61 +83,66 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized"
     
     return (
-      <div 
-        className="py-16 text-center border border-slate-200 rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative"
-        style={{ 
-          backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-        }}
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="rounded-2xl overflow-hidden border-4 border-white shadow-[0_8px_30px_rgb(0,0,0,0.1)] relative bg-white"
       >
-        {/* Subtle texture pattern for depth */}
-        <div className="absolute inset-0 opacity-[0.02]" 
-          style={{ 
-            backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-            backgroundSize: "40px 40px"
-          }} 
-        />
+        {/* Green accent bar */}
+        <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-[#70f570] to-[#49c628]"></div>
         
-        {/* Top edge shadow line for definition */}
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+        {/* Green background accent */}
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-bl from-green-50 via-transparent to-transparent opacity-70"></div>
         
-        {/* Inner shadow effects for depth */}
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
-        
-        <div className="max-w-md mx-auto relative z-10">
-          <div className="w-16 h-16 bg-slate-50 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-            <Building2 className="h-8 w-8 text-slate-600" />
+        <div className="relative z-10 py-16">
+          <div className="max-w-md mx-auto">
+            <motion.div 
+              variants={itemVariants}
+              className="w-16 h-16 bg-gradient-to-r from-[#70f570] to-[#49c628] rounded-2xl mx-auto flex items-center justify-center mb-6 border-4 border-white shadow-[0_4px_20px_rgba(0,0,0,0.1)]"
+            >
+              <Building2 className="h-8 w-8 text-white" />
+            </motion.div>
+            <motion.h3 
+              variants={itemVariants}
+              className="text-xl font-medium text-green-800 mb-3 font-display"
+            >
+              {isUnauthorized ? "Authentication Required" : "Unable to Load Communities"}
+            </motion.h3>
+            <motion.p 
+              variants={itemVariants}
+              className="text-green-700 mb-8 max-w-sm mx-auto font-body"
+            >
+              {isUnauthorized 
+                ? "Please sign in to view communities and investment opportunities." 
+                : "We encountered an issue loading the communities. Please try again in a moment."}
+            </motion.p>
+            
+            {isUnauthorized ? (
+              <motion.div variants={itemVariants}>
+                <Link 
+                  href="/auth/signin"
+                  className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold inline-block shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
+                >
+                  Sign In
+                </Link>
+              </motion.div>
+            ) : (
+              <motion.button 
+                variants={itemVariants}
+                className="px-6 py-3 rounded-lg bg-white text-green-700 border border-green-200 hover:bg-green-50 shadow-[0_2px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
+                onClick={() => {
+                  fetchCommunities()
+                  fetchCompanies()
+                }}
+              >
+                <RotateCcw className="h-4 w-4 mr-2 inline-block" />
+                Retry
+              </motion.button>
+            )}
           </div>
-          <h3 className="text-xl font-medium text-slate-800 mb-3">
-            {isUnauthorized ? "Authentication Required" : "Unable to Load Communities"}
-          </h3>
-          <p className="text-slate-600 mb-8 max-w-sm mx-auto">
-            {isUnauthorized 
-              ? "Please sign in to view communities and investment opportunities." 
-              : "We encountered an issue loading the communities. Please try again in a moment."}
-          </p>
-          
-          {isUnauthorized ? (
-            <Link 
-              href="/auth/signin"
-              className="px-6 py-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium inline-block shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px]"
-            >
-              Sign In
-            </Link>
-          ) : (
-            <button 
-              className="px-6 py-3 rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out hover:translate-y-[-2px]"
-              onClick={() => {
-                fetchCommunities()
-                fetchCompanies()
-              }}
-            >
-              <RotateCcw className="h-4 w-4 mr-2 inline-block" />
-              Retry
-            </button>
-          )}
         </div>
-      </div>
+      </motion.div>
     )
   }
 
@@ -131,129 +158,109 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
   const featuredCommunities = filteredCommunities.filter(c => c.featured).length;
 
   return (
-    <div className="space-y-10">
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="space-y-10"
+    >
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Available Communities Card */}
-        <div 
-          className="rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative"
-          style={{ 
-            backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-          }}
+        <motion.div 
+          variants={itemVariants}
+          className="rounded-2xl border-4 border-white shadow-[0_8px_30px_rgb(0,0,0,0.1)] overflow-hidden relative bg-white"
         >
-          {/* Subtle texture pattern for depth */}
-          <div className="absolute inset-0 opacity-[0.02]" 
-            style={{ 
-              backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-              backgroundSize: "40px 40px"
-            }} 
-          />
-          
-          {/* Top edge shadow line for definition */}
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+          {/* Green accent bar */}
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-[#70f570] to-[#49c628]"></div>
           
           <div className="p-6 relative z-10">
             <div className="flex items-center">
-              <div className="bg-white h-14 w-14 rounded-xl flex items-center justify-center mr-5 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-                <Building2 className="h-6 w-6 text-slate-600" />
+              <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] h-14 w-14 rounded-xl flex items-center justify-center mr-5 border-4 border-white shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
+                <Building2 className="h-6 w-6 text-white" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-800 mb-1">
+                <div className="text-3xl font-bold text-green-800 mb-1 font-helvetica">
                   {totalCommunities}
                 </div>
-                <div className="text-xs uppercase tracking-wider text-slate-600 font-medium">Communities</div>
+                <div className="text-xs uppercase tracking-wider text-green-700 font-medium font-helvetica">Communities</div>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
         
         {/* With Ambassadors Card */}
-        <div 
-          className="rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative"
-          style={{ 
-            backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-          }}
+        <motion.div 
+          variants={itemVariants}
+          className="rounded-2xl border-4 border-white shadow-[0_8px_30px_rgb(0,0,0,0.1)] overflow-hidden relative bg-white"
         >
-          {/* Subtle texture pattern for depth */}
-          <div className="absolute inset-0 opacity-[0.02]" 
-            style={{ 
-              backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-              backgroundSize: "40px 40px"
-            }} 
-          />
-          
-          {/* Top edge shadow line for definition */}
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+          {/* Green accent bar */}
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-[#70f570] to-[#49c628]"></div>
           
           <div className="p-6 relative z-10">
             <div className="flex items-center">
-              <div className="bg-white h-14 w-14 rounded-xl flex items-center justify-center mr-5 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-                <Award className="h-6 w-6 text-slate-600" />
+              <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] h-14 w-14 rounded-xl flex items-center justify-center mr-5 border-4 border-white shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
+                <Award className="h-6 w-6 text-white" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-800 mb-1">
+                <div className="text-3xl font-bold text-green-800 mb-1 font-helvetica">
                   {ambassadorCommunities}
                 </div>
-                <div className="text-xs uppercase tracking-wider text-slate-600 font-medium">With Ambassadors</div>
+                <div className="text-xs uppercase tracking-wider text-green-700 font-medium font-helvetica">With Ambassadors</div>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
         
         {/* Premium Card */}
-        <div 
-          className="rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative"
-          style={{ 
-            backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-          }}
+        <motion.div 
+          variants={itemVariants}
+          className="rounded-2xl border-4 border-white shadow-[0_8px_30px_rgb(0,0,0,0.1)] overflow-hidden relative bg-white"
         >
-          {/* Subtle texture pattern for depth */}
-          <div className="absolute inset-0 opacity-[0.02]" 
-            style={{ 
-              backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-              backgroundSize: "40px 40px"
-            }} 
-          />
-          
-          {/* Top edge shadow line for definition */}
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
+          {/* Green accent bar */}
+          <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-[#70f570] to-[#49c628]"></div>
           
           <div className="p-6 relative z-10">
             <div className="flex items-center">
-              <div className="bg-white h-14 w-14 rounded-xl flex items-center justify-center mr-5 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-                <TrendingUp className="h-6 w-6 text-slate-600" />
+              <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] h-14 w-14 rounded-xl flex items-center justify-center mr-5 border-4 border-white shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
+                <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-800 mb-1">
+                <div className="text-3xl font-bold text-green-800 mb-1 font-helvetica">
                   {featuredCommunities}
                 </div>
-                <div className="text-xs uppercase tracking-wider text-slate-600 font-medium">Premium</div>
+                <div className="text-xs uppercase tracking-wider text-green-700 font-medium font-helvetica">Premium</div>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
       
       {/* Filter and results indicator */}
-      <div className="flex items-center justify-between bg-white rounded-lg p-4 border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+      <motion.div 
+        variants={itemVariants}
+        className="flex items-center justify-between bg-white rounded-lg p-4 border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)]"
+      >
         <div className="flex items-center">
-          <Shield className="h-5 w-5 text-slate-600 mr-3" />
-          <Badge className="bg-slate-50 text-slate-700 border border-slate-200 py-1.5 px-4 rounded-md shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-            <Users className="h-3.5 w-3.5 mr-2" />
+          <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] p-2 rounded-md mr-3 shadow-sm">
+            <Shield className="h-5 w-5 text-white" />
+          </div>
+          <Badge className="bg-green-50 text-green-700 border border-green-100 py-1.5 px-4 rounded-md shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+            <Users className="h-3.5 w-3.5 mr-2 text-green-600" />
             {filteredCommunities.length} {filteredCommunities.length === 1 ? 'community' : 'communities'}
           </Badge>
           {isLoading && (
-            <div className="ml-4 text-sm text-slate-600 flex items-center">
-              <div className="h-2 w-2 rounded-full bg-slate-600 animate-pulse mr-2"></div>
+            <div className="ml-4 text-sm text-green-700 flex items-center">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse mr-2"></div>
               Loading...
             </div>
           )}
         </div>
         
-        <div className="text-xs text-slate-500">
-          <span className="text-slate-700 font-medium">WeSeedU</span> Investment Communities
+        <div className="text-xs text-green-600 font-helvetica">
+          <span className="text-green-800 font-medium">WeSeedU</span> Investment Communities
         </div>
-      </div>
+      </motion.div>
       
       {/* Communities Grid */}
       <CommunitiesGrid 
@@ -262,6 +269,6 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
         handleCardSelect={handleCardSelect}
         clearFilters={clearFilters}
       />
-    </div>
+    </motion.div>
   )
 } 

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState, useMemo } from "react"
+import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { BarChart, Users, TrendingUp, Leaf, Globe, ChevronRight, ArrowRight } from "lucide-react"
@@ -14,6 +14,8 @@ import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
 import { CACHE_KEYS, CACHE_EXPIRY, getCachedData, setCachedData } from "@/lib/utils/cacheUtils"
+import CommunityIntegration from "./community/CommunityIntegration"
+import GoalTracker from "./goals/GoalTracker"
 
 export const dynamic = "force-dynamic"
 
@@ -447,7 +449,7 @@ export function DashboardView({ user }: DashboardViewProps) {
   }
 
   return (
-    <div className="w-full" style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
+    <div className="w-full bg-white">
       {/* Background pattern */}
       <div 
         className="absolute inset-0 opacity-[0.05]"
@@ -485,6 +487,18 @@ export function DashboardView({ user }: DashboardViewProps) {
                 className="data-[state=active]:bg-white data-[state=active]:text-green-900 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm text-white transition-all duration-300 font-body"
               >
                 Investments
+              </TabsTrigger>
+              <TabsTrigger 
+                value="community" 
+                className="data-[state=active]:bg-white data-[state=active]:text-green-900 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm text-white transition-all duration-300 font-body"
+              >
+                Community
+              </TabsTrigger>
+              <TabsTrigger 
+                value="goals" 
+                className="data-[state=active]:bg-white data-[state=active]:text-green-900 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm text-white transition-all duration-300 font-body"
+              >
+                Goals
               </TabsTrigger>
             </TabsList>
             
@@ -666,6 +680,50 @@ export function DashboardView({ user }: DashboardViewProps) {
                   {/* Card content */}
                   <div className="relative z-5 h-full p-4 sm:p-5 md:p-7">
                     <UserInvestments />
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </TabsContent>
+            
+            {/* New Community Tab */}
+            <TabsContent value="community">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key="community"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+                >
+                  {/* Simple white background */}
+                  <div className="absolute inset-0 bg-white"></div>
+                  
+                  {/* Card content */}
+                  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7">
+                    {user && <CommunityIntegration userId={user.id} />}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </TabsContent>
+            
+            {/* New Goals Tab */}
+            <TabsContent value="goals">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key="goals"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+                >
+                  {/* Simple white background */}
+                  <div className="absolute inset-0 bg-white"></div>
+                  
+                  {/* Card content */}
+                  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7">
+                    {user && <GoalTracker userId={user.id} />}
                   </div>
                 </motion.div>
               </AnimatePresence>
