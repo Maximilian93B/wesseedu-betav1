@@ -92,23 +92,24 @@ export function FundingCard({
         >
           {/* Static background */}
           <div className="absolute inset-0 z-0">
-            <div className={`absolute inset-0 bg-gradient-to-br ${backgroundColor} opacity-90`}></div>
+            {/* White solid background replacing gradient */}
+            <div className="absolute inset-0 bg-white"></div>
             
             {/* Subtle pattern overlay for texture */}
             <div 
               className="absolute inset-0 opacity-[0.03]"
               style={{
-                backgroundImage: `radial-gradient(circle at 30px 30px, currentColor 1px, transparent 1px)`,
+                backgroundImage: `radial-gradient(circle at 30px 30px, #000 1px, transparent 1px)`,
                 backgroundSize: "50px 50px"
               }}
             ></div>
           </div>
           
-          {/* Static glass effect */}
-          <div className="absolute inset-0 backdrop-blur-xl"></div>
+          {/* Static glass effect - reduced for white background */}
+          <div className="absolute inset-0 backdrop-blur-sm"></div>
           
           {/* Static borders and accents */}
-          <div className="absolute inset-0 rounded-2xl pointer-events-none border border-white/40"></div>
+          <div className="absolute inset-0 rounded-2xl pointer-events-none border border-gray-200"></div>
           <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${accentColor} opacity-70`}></div>
           <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-blue-400/30 via-blue-500/30 to-indigo-500/30"></div>
           
@@ -153,17 +154,17 @@ export function FundingCard({
       </motion.div>
           
       {/* Content container - fixed position, doesn't animate */}
-      <div className="relative z-10 h-full p-8 rounded-2xl">
-        {/* Card header with icon */}
-        <div className="flex items-start space-x-5 mb-6">
-          {/* Icon container */}
+      <div className="relative z-10 h-full p-6 sm:p-7 md:p-8 rounded-2xl flex flex-col">
+        {/* Card header with icon - fixed height */}
+        <div className="flex items-start gap-4 mb-5 sm:mb-6">
+          {/* Icon container - fixed size */}
           <div className="flex-shrink-0 relative">
-            <div className="relative p-3.5 rounded-xl overflow-hidden">
-              <div className={`absolute inset-0 bg-gradient-to-br ${accentColor} opacity-15 backdrop-blur-md`}></div>
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/50 via-white/30 to-transparent opacity-50"></div>
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden flex items-center justify-center">
+              {/* Solid background instead of semi-transparent gradient */}
+              <div className="absolute inset-0 bg-blue-500"></div>
               
-              {/* Icon */}
-              <div className="relative z-10 text-white text-2xl">
+              {/* Icon - changed to white for contrast with blue background */}
+              <div className="relative z-10 text-white text-xl sm:text-2xl flex items-center justify-center">
                 {icon}
               </div>
               
@@ -171,57 +172,51 @@ export function FundingCard({
               {hovered && (
                 <motion.div 
                   initial={{ opacity: 0 }}
-                  animate={{ 
-                    opacity: 0.8,
-                    transition: { duration: 0.4 } 
-                  }}
+                  animate={{ opacity: 0.8, transition: { duration: 0.4 } }}
                   className="absolute -inset-2 bg-blue-400/30 rounded-full blur-xl"
                 ></motion.div>
               )}
             </div>
           </div>
           
-          {/* Text content */}
+          {/* Text content with truncation */}
           <div className="flex-1">
-            <h3 className="text-2xl font-bold text-white mb-2.5">
+            <h3 className="text-xl sm:text-2xl font-bold text-black mb-2 line-clamp-2">
               {title}
             </h3>
-            <p className="text-white/80 text-sm leading-relaxed">
+            <p className="text-sm leading-relaxed text-gray-700 line-clamp-3">
               {description}
             </p>
           </div>
         </div>
         
-        {/* Quote panel */}
-        <div className="mt-3 mb-auto">
-          <div className="relative py-4 px-5 rounded-lg bg-gradient-to-br from-blue-50/20 to-white/10 backdrop-blur-sm">
-            <div className={`absolute left-0 top-4 bottom-4 w-1.5 bg-gradient-to-b ${accentColor} opacity-60`}></div>
+        {/* Quote panel with fixed height */}
+        <div className="mt-2 mb-auto flex-grow">
+          <div className="relative py-4 px-4 sm:px-5 rounded-lg bg-gray-50 shadow-sm min-h-[90px] flex flex-col justify-center">
+            <div className={`absolute left-0 top-4 bottom-4 w-1 sm:w-1.5 bg-gradient-to-b ${accentColor} opacity-60`}></div>
             
             {/* Quote icon */}
-            <div className="absolute -top-2 -left-1 text-white/30 text-4xl font-serif">❝</div>
+            <div className="absolute -top-2 -left-1 text-gray-300 text-3xl sm:text-4xl font-serif">❝</div>
             
-            <p className="text-sm font-medium text-white italic pl-3">{highlight}</p>
+            <p className="text-sm font-medium text-black italic pl-3 line-clamp-3">{highlight}</p>
             
             {/* Light reflection - only on hover */}
             {hovered && (
               <motion.div 
                 initial={{ opacity: 0 }}
-                animate={{ 
-                  opacity: 0.7,
-                  transition: { duration: 0.4 } 
-                }}
+                animate={{ opacity: 0.7, transition: { duration: 0.4 } }}
                 className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent rounded-lg"
               ></motion.div>
             )}
           </div>
         </div>
         
-        {/* Footer */}
-        <div className="mt-7 flex items-center justify-between">
+        {/* Footer with improved spacing and alignment */}
+        <div className="mt-5 sm:mt-6 flex items-center justify-between">
           {/* Amount badge */}
           <div className="relative overflow-hidden rounded-full">
-            <div className="px-5 py-2 rounded-full relative">
-              <div className={`absolute inset-0 bg-gradient-to-r ${accentColor} opacity-15 backdrop-blur-sm`}></div>
+            <div className="px-4 sm:px-5 py-1.5 sm:py-2 rounded-full relative">
+              <div className="absolute inset-0 bg-gray-100"></div>
               
               {/* Badge glow - only on hover */}
               {hovered && (
@@ -236,17 +231,14 @@ export function FundingCard({
                 ></motion.div>
               )}
               
-              <span className="relative z-10 text-base font-bold text-white">{amount}</span>
+              <span className="relative z-10 text-sm sm:text-base font-bold text-black">{amount}</span>
             </div>
             
             {/* Badge outer glow - only on hover */}
             {hovered && (
               <motion.div 
                 initial={{ opacity: 0 }}
-                animate={{ 
-                  opacity: 0.7,
-                  transition: { duration: 0.4 } 
-                }}
+                animate={{ opacity: 0.7, transition: { duration: 0.4 } }}
                 className="absolute -inset-1 bg-blue-400/20 rounded-full blur-lg"
               ></motion.div>
             )}
@@ -262,9 +254,9 @@ export function FundingCard({
                 transition={{ duration: 0.2 }}
                 className="flex items-center"
               >
-                <div className={`px-4 py-2 bg-gradient-to-r ${accentColor} text-white text-sm font-medium rounded-full flex items-center space-x-2 shadow-md`}>
+                <div className={`px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r ${accentColor} text-white text-xs sm:text-sm font-medium rounded-full flex items-center gap-1.5 sm:gap-2 shadow-md`}>
                   <span>Learn More</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </div>
               </motion.div>
             )}

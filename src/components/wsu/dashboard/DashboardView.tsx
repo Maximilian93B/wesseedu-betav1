@@ -48,25 +48,47 @@ interface DashboardViewProps {
   user: any  // You can make this more specific based on your user type
 }
 
-// Variants for animations
+// Updated animation variants to match style guide
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { 
     opacity: 1,
     transition: { 
       when: "beforeChildren",
-      staggerChildren: 0.1,
-      duration: 0.4
+      staggerChildren: 0.08,
+      duration: 0.5
     }
   }
 }
 
 const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
+  hidden: { y: 10, opacity: 0 },
   visible: { 
     y: 0, 
     opacity: 1,
     transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+}
+
+const floatingVariants = {
+  initial: { y: 0 },
+  animate: { 
+    y: [0, -10, 0],
+    rotate: [0, 0.5, 0, -0.5, 0],
+    transition: {
+      y: {
+        duration: 8,
+        repeat: Infinity,
+        repeatType: "reverse", 
+        ease: "easeInOut"
+      },
+      rotate: {
+        duration: 12,
+        repeat: Infinity,
+        repeatType: "reverse",
+        ease: "easeInOut"
+      }
+    }
   }
 }
 
@@ -97,28 +119,28 @@ export function DashboardView({ user }: DashboardViewProps) {
         value: `$${authProfile?.total_investments?.toLocaleString() || '0'}`,
         description: "Your total investment",
         icon: <BarChart className="h-6 w-6" />,
-        color: "from-green-400 to-blue-500",
+        color: "from-[#70f570] to-[#49c628]",
       },
       {
         title: "Sustainable Companies",
         value: "0",
         description: "Across various sectors",
         icon: <Leaf className="h-6 w-6" />,
-        color: "from-green-500 to-emerald-600",
+        color: "from-[#70f570] to-[#49c628]",
       },
       {
         title: "Impact Score",
         value: `${authProfile?.impact_score || 0}/10`,
         description: "Based on ESG criteria",
         icon: <Globe className="h-6 w-6" />,
-        color: "from-blue-400 to-indigo-600",
+        color: "from-[#70f570] to-[#49c628]",
       },
       {
         title: "Community Members",
         value: "0",
         description: "Active investors",
         icon: <Users className="h-6 w-6" />,
-        color: "from-purple-400 to-pink-500",
+        color: "from-[#70f570] to-[#49c628]",
       },
     ]);
   }, [authProfile]);
@@ -323,28 +345,28 @@ export function DashboardView({ user }: DashboardViewProps) {
         value: `$${data.profile?.total_investments?.toLocaleString() || '0'}`,
         description: "Your total investment",
         icon: <BarChart className="h-6 w-6" />,
-        color: "from-green-400 to-blue-500",
+        color: "from-[#70f570] to-[#49c628]",
       },
       {
         title: "Sustainable Companies",
         value: data.stats?.companiesCount?.toString() || "0",
         description: "Across various sectors",
         icon: <Leaf className="h-6 w-6" />,
-        color: "from-green-500 to-emerald-600",
+        color: "from-[#70f570] to-[#49c628]",
       },
       {
         title: "Impact Score",
         value: `${data.profile?.impact_score || 0}/10`,
         description: "Based on ESG criteria",
         icon: <Globe className="h-6 w-6" />,
-        color: "from-blue-400 to-indigo-600",
+        color: "from-[#70f570] to-[#49c628]",
       },
       {
         title: "Community Members",
         value: data.stats?.usersCount?.toString() || "0",
         description: "Active investors",
         icon: <Users className="h-6 w-6" />,
-        color: "from-purple-400 to-pink-500",
+        color: "from-[#70f570] to-[#49c628]",
       },
     ]);
   };
@@ -352,7 +374,8 @@ export function DashboardView({ user }: DashboardViewProps) {
   // Show a more informative loading state
   if (authLoading || loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[80vh] bg-white">
+      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[80vh]" 
+        style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
         <div className="relative h-12 w-12">
           <motion.div 
             className="absolute inset-0"
@@ -366,17 +389,17 @@ export function DashboardView({ user }: DashboardViewProps) {
               ease: "easeInOut"
             }}
           >
-            <Leaf className="h-12 w-12 text-slate-600" />
+            <Leaf className="h-12 w-12 text-white" />
           </motion.div>
         </div>
         <motion.p 
-          className="text-slate-700 font-medium"
+          className="text-white font-medium font-display"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
           Loading your sustainable investments...
         </motion.p>
-        <p className="text-slate-500 text-sm">Growing your impact dashboard</p>
+        <p className="text-white/90 text-sm font-body">Growing your impact dashboard</p>
       </div>
     );
   }
@@ -384,16 +407,20 @@ export function DashboardView({ user }: DashboardViewProps) {
   // Show error state if there was an error
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[60vh] bg-white">
+      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[60vh]"
+        style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
+          className="bg-white p-8 rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
         >
-          <p className="text-slate-700 mb-4">{error}</p>
+          <p className="text-black mb-4 font-body">{error}</p>
           <Button 
             onClick={() => window.location.reload()}
-            className="bg-slate-800 hover:bg-slate-700 text-white"
+            className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                      shadow-sm hover:shadow transition-all duration-300 
+                      rounded-lg py-3 text-sm font-helvetica"
           >
             Retry
           </Button>
@@ -406,9 +433,10 @@ export function DashboardView({ user }: DashboardViewProps) {
   if (!user) {
     router.push("/auth/signin");
     return (
-      <div className="flex items-center justify-center p-8 min-h-[60vh] bg-white">
+      <div className="flex items-center justify-center p-8 min-h-[60vh]"
+        style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
         <motion.p 
-          className="text-slate-500"
+          className="text-white font-medium font-body"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
@@ -419,8 +447,21 @@ export function DashboardView({ user }: DashboardViewProps) {
   }
 
   return (
-    <div className="w-full">
-      {/* Simplified outer container with minimal styling */}
+    <div className="w-full" style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
+      {/* Background pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.05]"
+        style={{
+          backgroundImage: `radial-gradient(circle at 20px 20px, white 1px, transparent 1px)`,
+          backgroundSize: "40px 40px"
+        }}
+      ></div>
+      
+      {/* Background glow effects */}
+      <div className="absolute top-1/4 right-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-pulse"></div>
+      <div className="absolute bottom-1/4 left-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-pulse" style={{ animationDelay: '-2s' }}></div>
+      
+      {/* Main content container */}
       <div className="relative">
         <div className="px-5 py-6 md:px-8 md:py-8">
           <DashboardHero 
@@ -432,16 +473,16 @@ export function DashboardView({ user }: DashboardViewProps) {
           <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} 
             className="mt-8"
           >
-            <TabsList className="mx-auto mb-6 border border-slate-200 bg-white/80 p-1 rounded-full w-auto inline-flex shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)]">
+            <TabsList className="mx-auto mb-6 border border-white/30 bg-white/10 backdrop-blur-md p-1 rounded-full w-auto inline-flex shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
               <TabsTrigger 
                 value="overview" 
-                className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-800 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm transition-all duration-200"
+                className="data-[state=active]:bg-white data-[state=active]:text-green-900 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm text-white transition-all duration-300 font-body"
               >
                 Overview
               </TabsTrigger>
               <TabsTrigger 
                 value="investments" 
-                className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-800 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm transition-all duration-200"
+                className="data-[state=active]:bg-white data-[state=active]:text-green-900 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm text-white transition-all duration-300 font-body"
               >
                 Investments
               </TabsTrigger>
@@ -454,77 +495,79 @@ export function DashboardView({ user }: DashboardViewProps) {
                 animate="visible"
                 className="space-y-6"
               >
-                {/* Investment Growth Chart - Modern styling */}
-                <div className="rounded-xl border border-slate-200 p-6 bg-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
-                  hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-shadow duration-500 relative overflow-hidden">
-                  {/* Subtle accent line */}
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-400 to-slate-200/20" />
+                {/* Investment Growth Chart */}
+                <motion.div 
+                  variants={itemVariants}
+                  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+                >
+                  {/* Simple white background */}
+                  <div className="absolute inset-0 bg-white"></div>
                   
-                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 relative z-10">
-                    <div>
-                      <h2 className="text-lg font-medium text-slate-800">Investment Growth</h2>
-                      <p className="text-slate-500 text-xs">Track your sustainable investment growth over time</p>
-                    </div>
-                    <div className="flex items-center space-x-2 mt-2 md:mt-0">
-                      <span className="text-xs text-slate-500">Last 7 periods</span>
-                      <div className="h-3 w-3 rounded-full bg-slate-100 flex items-center justify-center">
-                        <div className="h-1.5 w-1.5 rounded-full bg-slate-500"></div>
+                  {/* Card content */}
+                  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7 flex flex-col">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                      <div>
+                        <h2 className="text-xl sm:text-2xl font-extrabold text-black leading-tight tracking-tight font-display">Investment Growth</h2>
+                        <p className="text-sm sm:text-base text-black mt-2 leading-relaxed font-body">Track your sustainable investment growth over time</p>
+                      </div>
+                      <div className="flex items-center space-x-2 mt-2 md:mt-0">
+                        <span className="text-xs text-black/70 font-body">Last 7 periods</span>
+                        <div className="h-3 w-3 rounded-full bg-gradient-to-br from-[#70f570] to-[#49c628] flex items-center justify-center">
+                          <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
+                        </div>
                       </div>
                     </div>
+                    
+                    <div className="h-[250px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={investmentData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#70f570" stopOpacity={0.4} />
+                              <stop offset="100%" stopColor="#49c628" stopOpacity={0.1} />
+                            </linearGradient>
+                          </defs>
+                          <XAxis 
+                            dataKey="month" 
+                            stroke="#3a6d2e"
+                            tick={{ fill: '#3a6d2e' }}
+                            axisLine={{ stroke: '#e2e8f0' }}
+                            tickLine={{ stroke: '#e2e8f0' }}
+                          />
+                          <YAxis 
+                            stroke="#3a6d2e"
+                            tick={{ fill: '#3a6d2e' }}
+                            axisLine={{ stroke: '#e2e8f0' }}
+                            tickLine={{ stroke: '#e2e8f0' }}
+                            tickFormatter={(value) => `$${value}`}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: 'white',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '6px',
+                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                            }}
+                            labelStyle={{ color: '#334155', fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}
+                            itemStyle={{ color: '#334155', fontSize: '12px', padding: '2px 0' }}
+                            formatter={(value: number) => [`$${value.toLocaleString()}`, 'Investment']}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="amount"
+                            stroke="#49c628"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill="url(#investmentGradient)"
+                            activeDot={{ r: 6, stroke: '#49c628', strokeWidth: 2, fill: '#fff' }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
-                  
-                  <div className="h-[250px] relative z-10">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={investmentData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#64748b" stopOpacity={0.5} />
-                            <stop offset="100%" stopColor="#64748b" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <XAxis 
-                          dataKey="month" 
-                          stroke="#64748b"
-                          tick={{ fill: '#64748b' }}
-                          axisLine={{ stroke: '#e2e8f0' }}
-                          tickLine={{ stroke: '#e2e8f0' }}
-                        />
-                        <YAxis 
-                          stroke="#64748b"
-                          tick={{ fill: '#64748b' }}
-                          axisLine={{ stroke: '#e2e8f0' }}
-                          tickLine={{ stroke: '#e2e8f0' }}
-                          tickFormatter={(value) => `$${value}`}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: 'white',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '6px',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                          }}
-                          labelStyle={{ color: '#334155', fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}
-                          itemStyle={{ color: '#334155', fontSize: '12px', padding: '2px 0' }}
-                          formatter={(value: number) => [`$${value.toLocaleString()}`, 'Investment']}
-                        />
-                        <Area
-                          type="monotone"
-                          dataKey="amount"
-                          stroke="#64748b"
-                          strokeWidth={2}
-                          fillOpacity={1}
-                          fill="url(#investmentGradient)"
-                          activeDot={{ r: 6, stroke: '#64748b', strokeWidth: 2, fill: '#fff' }}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                  
-                  {/* Background glow effect */}
-                  <div className="absolute bottom-0 right-[10%] w-[200px] h-[200px] bg-slate-100/30 rounded-full blur-[80px] pointer-events-none"></div>
-                </div>
+                </motion.div>
 
-                {/* Analytics Grid - Modern styling */}
+                {/* Analytics Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                   {/* Left: Stats Grid */}
                   <div className="grid grid-cols-2 gap-4">
@@ -532,72 +575,77 @@ export function DashboardView({ user }: DashboardViewProps) {
                       <motion.div
                         key={index}
                         variants={itemVariants}
-                        className="h-full"
                       >
-                        <div className="bg-white rounded-lg border border-slate-200 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] 
-                          hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-all duration-300 relative overflow-hidden group">
-                          {/* Subtle top accent */}
-                          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-400 to-slate-300/20" />
+                        <div className="relative overflow-hidden rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+                          {/* Simple white background */}
+                          <div className="absolute inset-0 bg-white"></div>
                           
-                          <div className="flex items-start justify-between mb-2 relative z-10">
-                            <span className="text-xs text-slate-500 uppercase tracking-wide font-medium">{stat.title}</span>
-                            <div className="p-1.5 rounded-lg bg-slate-50 shadow-sm 
-                              group-hover:scale-110 transition-transform duration-200">
-                              {React.cloneElement(stat.icon as React.ReactElement, { className: 'h-3.5 w-3.5 text-slate-600' })}
+                          {/* Card content */}
+                          <div className="relative z-5 h-full p-4 flex flex-col">
+                            <div className="flex items-start justify-between mb-2">
+                              <span className="text-xs text-black/70 uppercase tracking-wide font-medium font-body">{stat.title}</span>
+                              <div className="flex-shrink-0 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-gradient-to-br from-[#70f570] to-[#49c628] flex items-center justify-center">
+                                {React.cloneElement(stat.icon as React.ReactElement, { className: 'h-3 w-3 text-white' })}
+                              </div>
                             </div>
+                            <div className="font-extrabold text-black text-lg sm:text-xl mb-1 font-helvetica">{stat.value}</div>
+                            <p className="text-xs text-black/70 font-body">{stat.description}</p>
                           </div>
-                          <div className="text-lg font-bold text-slate-800">{stat.value}</div>
-                          <p className="text-xs text-slate-500 mt-0.5">{stat.description}</p>
                         </div>
                       </motion.div>
                     ))}
                   </div>
 
-                  {/* Right: Watchlist - Modern styling */}
-                  <div className="lg:col-span-2">
-                    <div className="bg-white rounded-xl border border-slate-200 h-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
-                      hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-shadow duration-500 relative overflow-hidden">
-                      {/* Decorative top accent */}
-                      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-500 via-slate-400 to-transparent" />
+                  {/* Right: Watchlist */}
+                  <motion.div 
+                    variants={itemVariants}
+                    className="lg:col-span-2"
+                  >
+                    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
+                      {/* Simple white background */}
+                      <div className="absolute inset-0 bg-white"></div>
                       
-                      <div className="p-3 border-b border-slate-200 relative z-10">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h2 className="text-base font-medium text-slate-800">Watchlist</h2>
-                            <p className="text-xs text-slate-500">Companies you're tracking</p>
+                      {/* Card content */}
+                      <div className="relative z-5 h-full flex flex-col">
+                        <div className="p-4 border-b border-slate-100">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h2 className="text-xl font-extrabold text-black leading-tight tracking-tight font-display">Watchlist</h2>
+                              <p className="text-sm text-black/70 font-body">Companies you're tracking</p>
+                            </div>
+                            <Button
+                              onClick={() => router.push("/account/watchlist")}
+                              className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                                      shadow-sm hover:shadow transition-all duration-300 
+                                      rounded-lg py-2 px-4 text-sm font-helvetica"
+                            >
+                              View All
+                              <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => router.push("/account/watchlist")}
-                            className="text-slate-600 hover:text-slate-800 hover:bg-slate-100 text-xs rounded-lg"
-                          >
-                            View All
-                            <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                          </Button>
+                        </div>
+                        <div className="p-4">
+                          <AnimatePresence mode="wait">
+                            <motion.div
+                              key="watchlist"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <WatchlistView 
+                                externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
+                                externalLoading={loading}
+                                isPreview={true}
+                                maxItems={3}
+                                onViewAll={() => router.push("/account/watchlist")}
+                              />
+                            </motion.div>
+                          </AnimatePresence>
                         </div>
                       </div>
-                      <div className="p-3 relative z-10">
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key="watchlist"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <WatchlistView 
-                              externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
-                              externalLoading={loading}
-                              isPreview={true}
-                              maxItems={3}
-                              onViewAll={() => router.push("/account/watchlist")}
-                            />
-                          </motion.div>
-                        </AnimatePresence>
-                      </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </motion.div>
             </TabsContent>
@@ -610,13 +658,13 @@ export function DashboardView({ user }: DashboardViewProps) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="bg-white rounded-xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
-                  hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] p-6 relative overflow-hidden"
+                  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
                 >
-                  {/* Decorative top accent */}
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-500 via-slate-400 to-transparent" />
+                  {/* Simple white background */}
+                  <div className="absolute inset-0 bg-white"></div>
                   
-                  <div className="relative z-10">
+                  {/* Card content */}
+                  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7">
                     <UserInvestments />
                   </div>
                 </motion.div>

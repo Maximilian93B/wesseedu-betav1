@@ -17,7 +17,7 @@ import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
 
 // Placeholder component for lazy loading
 const LazyLoadingPlaceholder = () => (
-  <div className="flex justify-center items-center min-h-[50vh] bg-white">
+  <div className="flex justify-center items-center min-h-[50vh]" style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
     <LoadingScreen />
   </div>
 )
@@ -185,23 +185,26 @@ function HomePageContent() {
     <>
       <div 
         className="flex flex-col min-h-screen relative overflow-hidden max-w-[100vw]"
-        style={{ 
-          backgroundImage: "linear-gradient(to right top, #ebebeb, #eeeef0, #f1f2f5, #f4f5fa, #f6f9ff)" 
-        }}
+        style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}
       >
+        {/* Background pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage: `radial-gradient(circle at 20px 20px, white 1px, transparent 1px)`,
+            backgroundSize: "40px 40px"
+          }}
+        ></div>
+        
+        {/* Background glow effects */}
+        <div className="absolute top-1/4 right-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-pulse"></div>
+        <div className="absolute bottom-1/4 left-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-pulse" style={{ animationDelay: '-2s' }}></div>
+        
         <HomePageNav
           currentView={currentView}
           onNavigate={handleNavigation}
           onSignOut={signOut}
         />
-        
-        {/* Simplified background effects - with light colors for better performance */}
-        <div 
-          className="absolute left-[5%] top-[-5%] w-[600px] h-[600px] 
-            bg-gradient-to-br from-blue-100 to-emerald-50 blur-[100px] rounded-full 
-            pointer-events-none opacity-50"
-          aria-hidden="true"
-        ></div>
         
         {/* Main Layout - with overflow handling for mobile */}
         <div className="flex-1 relative overflow-x-hidden">
@@ -209,8 +212,8 @@ function HomePageContent() {
           <main className="w-full">
             {currentView === 'home' && (
               <>
-                {/* Hero Section - now light */}
-                <div className="bg-transparent relative">
+                {/* Hero Section with green apple styling */}
+                <div className="relative">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-16">
                     <Suspense fallback={<div className="h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
                       <HomeHeroDynamic 
@@ -226,32 +229,27 @@ function HomePageContent() {
                   </div>
                 </div>
 
-
-
-                {/* WHITE SECTION 1: How It Works - adjust padding top */}
-                <div className="bg-white pt-20 pb-16 md:pt-24 md:pb-24 relative mt-[-5px]"> {/* Increased top padding and slight negative margin */}
+                {/* WHITE SECTION 1: How It Works */}
+                <div className="relative overflow-hidden rounded-t-[2rem] border-t border-white/20 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] bg-white pt-20 pb-16 md:pt-24 md:pb-24 mt-[-1rem]">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                    <Suspense fallback={<div className="h-[200px] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+                    <Suspense fallback={<div className="h-[200px] flex items-center justify-center"><LoadingScreen /></div>}>
                       <HowItWorksDynamic />
                     </Suspense>
                   </div>
                 </div>
 
-
-
-                {/* DataViz with integrated wave transition - adjust padding bottom */}
-                <Suspense fallback={<div className="h-[400px] bg-slate-50 flex items-center justify-center"><LoadingScreen /></div>}>
-                  <div className="pb-0"> {/* Remove any bottom padding */}
+                {/* DataViz with integrated wave transition */}
+                <Suspense fallback={<div className="h-[400px] bg-white flex items-center justify-center"><LoadingScreen /></div>}>
+                  <div className="pb-0 bg-white"> 
                     <DataVizTransitionDynamic />
                   </div>
                 </Suspense>
 
-
-                {/* FeaturedContent Section - now with light colors */}
-                <div className="relative">
-                  {/* Simple split background container */}
+                {/* FeaturedContent Section */}
+                <div className="relative bg-white">
+                  {/* Split background container */}
                   <div className="flex flex-col md:flex-row">
-                    <div className="w-full md:w-1/2 bg-blue-50"></div>
+                    <div className="w-full md:w-1/2 bg-green-50"></div>
                     <div className="w-full md:w-1/2 bg-white"></div>
                   </div>
                   
@@ -266,9 +264,9 @@ function HomePageContent() {
                   <div className="h-[600px] sm:h-[660px] md:h-[720px] lg:h-[800px]"></div>
                 </div>
                 
-                {/* GrowthHero Section - now light */}
-                <div className="relative bg-gradient-to-b from-slate-50 to-white">
-                  <Suspense fallback={<div className="h-[30vh] flex items-center justify-center bg-white"><LoadingScreen /></div>}>
+                {/* GrowthHero Section */}
+                <div className="relative bg-gradient-to-b from-green-50 to-white">
+                  <Suspense fallback={<div className="h-[30vh] flex items-center justify-center"><LoadingScreen /></div>}>
                     <GrowthHeroDynamic 
                       onAction={() => handleNavigation('companies')} 
                       actionButtonText="Start Investing Today"
@@ -280,7 +278,7 @@ function HomePageContent() {
 
             {/* Dashboard overlay */}
             {currentView === 'dashboard' && (
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8 bg-transparent">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8">
                 <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <DashboardViewDynamic user={user} />
                 </Suspense>
@@ -289,7 +287,7 @@ function HomePageContent() {
 
             {/* Companies overlay */}
             {currentView === 'companies' && (
-              <div className="py-4 md:py-6 bg-transparent">
+              <div className="py-4 md:py-6">
                 <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <CompaniesViewDynamic 
                     onCompanySelect={handleCompanySelect}
@@ -300,7 +298,7 @@ function HomePageContent() {
 
             {/* Company details overlay */}
             {currentView === 'company-details' && selectedCompanyId && (
-              <div className="py-4 md:py-6 bg-transparent">
+              <div className="py-4 md:py-6">
                 <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <CompanyDetailsViewDynamic 
                     companyId={selectedCompanyId}
@@ -315,7 +313,7 @@ function HomePageContent() {
 
             {/* Communities overlay */}
             {currentView === 'communities' && (
-              <div className="py-4 md:py-6 bg-transparent">
+              <div className="py-4 md:py-6">
                 <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <CommunitiesViewDynamic 
                     onCommunitySelect={handleCommunitySelect}
@@ -326,7 +324,7 @@ function HomePageContent() {
 
             {/* Community details overlay */}
             {currentView === 'community-details' && selectedCommunityId && (
-              <div className="py-4 md:py-6 bg-transparent">
+              <div className="py-4 md:py-6">
                 <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <CommunityDetailsViewDynamic
                     community={{
@@ -354,7 +352,7 @@ function HomePageContent() {
 
             {/* Watchlist overlay */}
             {currentView === 'saved' && (
-              <div className="py-4 md:py-6 bg-transparent">
+              <div className="py-4 md:py-6">
                 <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
                   <WatchlistViewDynamic 
                     externalData={watchlistCompanies}

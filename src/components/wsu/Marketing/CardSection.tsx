@@ -163,7 +163,7 @@ export function CardSection() {
           {/* Main Heading */}
           <motion.h2 
             variants={itemVariants} 
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white tracking-tight leading-[1.15] mb-4 sm:mb-6 drop-shadow-sm"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white tracking-tight leading-[1.15] mb-4 sm:mb-6 drop-shadow-sm font-display"
           >
             Your Gateway to Impact Investing
           </motion.h2>
@@ -171,7 +171,7 @@ export function CardSection() {
           {/* Subheading */}
           <motion.p 
             variants={itemVariants}
-            className="text-sm sm:text-base md:text-lg text-white/95 max-w-2xl mx-auto mb-8 sm:mb-12 font-medium"
+            className="text-sm sm:text-base md:text-lg text-white/95 max-w-2xl mx-auto mb-8 sm:mb-12 font-medium font-body"
           >
             Join our community of impact investors gaining early access to high-potential sustainable startups.
           </motion.p>
@@ -181,19 +181,19 @@ export function CardSection() {
             variants={itemVariants}
             className="flex flex-wrap justify-center gap-x-6 sm:gap-x-10 md:gap-x-16 gap-y-3 sm:gap-y-5 w-full"
           >
-            <span className="flex items-center text-xs sm:text-sm md:text-base text-white">
+            <span className="flex items-center text-xs sm:text-sm md:text-base text-white font-body">
               <div className="flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-white/20 text-white mr-2 sm:mr-3 border border-white/40 shadow-md">
                 <Check size={12} />
               </div>
               <span className="font-medium">Vetted Opportunities</span>
             </span>
-            <span className="flex items-center text-xs sm:text-sm md:text-base text-white">
+            <span className="flex items-center text-xs sm:text-sm md:text-base text-white font-body">
               <div className="flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-white/20 text-white mr-2 sm:mr-3 border border-white/40 shadow-md">
                 <Check size={12} />
               </div>
               <span className="font-medium">Community-driven approach</span>
             </span>
-            <span className="flex items-center text-xs sm:text-sm md:text-base text-white">
+            <span className="flex items-center text-xs sm:text-sm md:text-base text-white font-body">
               <div className="flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-white/20 text-white mr-2 sm:mr-3 border border-white/40 shadow-md">
                 <Check size={12} />
               </div>
@@ -203,9 +203,9 @@ export function CardSection() {
         </motion.div>
 
         {/* Card carousel container with improved spacing and alignment */}
-        <div className="w-full max-w-[90%] sm:max-w-[600px] mx-auto relative mb-8 sm:mb-12">
+        <div className="w-full max-w-[90%] sm:max-w-[650px] mx-auto relative mb-10 sm:mb-16">
           {/* Carousel navigation buttons - PUSHED OUTWARD */}
-          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-between items-center z-30 px-1 sm:-mx-6 md:-mx-16 lg:-mx-24">
+          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-between items-center z-30 px-1 sm:-mx-8 md:-mx-20 lg:-mx-28">
             <button 
               onClick={prevSlide}
               className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center border border-white/30 shadow-lg hover:bg-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
@@ -224,7 +224,7 @@ export function CardSection() {
 
           <div 
             ref={carouselRef}
-            className="relative h-[450px] sm:h-[520px] md:h-[580px] mx-auto"
+            className="relative h-[480px] sm:h-[550px] md:h-[620px] mx-auto"
             onMouseDown={handleDragStart}
             onMouseMove={handleDragMove}
             onMouseUp={handleDragEnd}
@@ -243,12 +243,12 @@ export function CardSection() {
                 
                 const zIndex = 20 - Math.abs(normalizedPosition) * 5;
                 // Adjust scale for mobile
-                const scale = normalizedPosition === 0 ? 1 : (isMobileView ? 0.9 : 0.85) - Math.abs(normalizedPosition) * (isMobileView ? 0.05 : 0.1);
+                const scale = normalizedPosition === 0 ? 1 : (isMobileView ? 0.92 : 0.88) - Math.abs(normalizedPosition) * (isMobileView ? 0.05 : 0.08);
                 const opacity = normalizedPosition === 0 ? 1 : 0.7 - Math.abs(normalizedPosition) * 0.3;
                 
                 // Adjust positions for mobile
-                const xPosition = normalizedPosition === 0 ? 0 : `${normalizedPosition * (isMobileView ? 45 : 65)}%`;
-                const yPosition = normalizedPosition === 0 ? 0 : (isMobileView ? 10 : 20) * Math.abs(normalizedPosition);
+                const xPosition = normalizedPosition === 0 ? 0 : `${normalizedPosition * (isMobileView ? 50 : 70)}%`;
+                const yPosition = normalizedPosition === 0 ? 0 : (isMobileView ? 12 : 25) * Math.abs(normalizedPosition);
                 
                 return (
                   <motion.div
@@ -265,7 +265,7 @@ export function CardSection() {
                       scale,
                       opacity,
                       zIndex,
-                      filter: normalizedPosition !== 0 ? 'brightness(0.92) blur(1px)' : 'brightness(1)'
+                      filter: normalizedPosition !== 0 ? 'brightness(0.94) blur(1px)' : 'brightness(1)'
                     }}
                     exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
                     transition={{
@@ -289,7 +289,7 @@ export function CardSection() {
           </div>
           
           {/* Enhanced pagination dots */}
-          <div className="flex justify-center items-center mt-4 sm:mt-8 space-x-2 sm:space-x-3">
+          <div className="flex justify-center items-center mt-6 sm:mt-10 space-x-2 sm:space-x-3">
             {CARDS.map((_, idx) => (
               <button 
                 key={idx}
@@ -309,9 +309,9 @@ export function CardSection() {
         <div className="w-full text-center mt-4 sm:mt-6 mb-2 sm:mb-4">
           <div className="inline-flex flex-wrap justify-center items-center px-3 sm:px-5 py-2 sm:py-2.5 bg-white/10 backdrop-blur-md text-white border border-white/30 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
             <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-white/80 mr-2 sm:mr-2.5 animate-pulse"></span>
-            <span className="text-xs sm:text-sm font-medium">Limited spots</span>
+            <span className="text-xs sm:text-sm font-medium font-helvetica">Limited spots</span>
             <span className="mx-2 sm:mx-3 text-white/50">•</span>
-            <span className="text-xs sm:text-sm">Only 50 new investor accounts available this quarter</span>
+            <span className="text-xs sm:text-sm font-body">Only 50 new investor accounts available this quarter</span>
           </div>
         </div>
       </div>

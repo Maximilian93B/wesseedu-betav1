@@ -20,7 +20,10 @@ const config: Config = {
 	  },
 	  extend: {
 		fontFamily: {
-			helvetica: ["Helvetica", "sans-serif"],
+			helvetica: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+			secondary: ["Georgia", "Times New Roman", "serif"],
+			display: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+			body: ["Helvetica", "Arial", "sans-serif"],
 		},
 		colors: {
 		  border: "hsl(var(--border))",

@@ -288,10 +288,10 @@ export function WatchlistView({
                 ease: "easeInOut"
               }}
             >
-              <Bookmark className="h-10 w-10 text-slate-600" />
+              <Bookmark className="h-10 w-10 text-white" />
             </motion.div>
           </div>
-          <p className="text-slate-700 text-sm font-medium">Loading watchlist...</p>
+          <p className="text-white text-sm font-medium font-body">Loading watchlist...</p>
         </div>
       </div>
     )
@@ -308,48 +308,59 @@ export function WatchlistView({
   if (displayCompanies.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-60 py-8">
-        <div className="bg-white p-8 rounded-xl border border-slate-200 text-center max-w-md mx-auto shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-          <Bookmark className="h-10 w-10 text-slate-300 mx-auto mb-4" />
-          <p className="text-slate-700 text-center text-lg mb-4">Your watchlist is empty</p>
-          <p className="text-slate-500 text-sm mb-6">Start tracking sustainable companies to monitor your impact</p>
-          <Button 
-            variant="outline" 
-            onClick={() => window.location.href = '/companies'}
-            className="bg-white border-slate-300 text-slate-700 
-              hover:bg-slate-50 hover:border-slate-400"
-          >
-            Browse Companies
-          </Button>
+        <div className="relative overflow-hidden rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-6 text-center max-w-md mx-auto">
+          {/* Simple white background */}
+          <div className="absolute inset-0 bg-white"></div>
+          
+          {/* Content */}
+          <div className="relative z-5">
+            <Bookmark className="h-10 w-10 text-green-500 mx-auto mb-4" />
+            <p className="text-black font-extrabold text-lg mb-3 font-display">Your watchlist is empty</p>
+            <p className="text-black/70 text-sm mb-6 font-body">Start tracking sustainable companies to monitor your impact</p>
+            <Button 
+              className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                        shadow-sm hover:shadow transition-all duration-300 
+                        rounded-lg py-2 px-4 text-sm font-helvetica"
+              onClick={() => window.location.href = '/companies'}
+            >
+              <span className="flex items-center justify-center">
+                Browse Companies
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </span>
+            </Button>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <Card className="bg-white border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)] 
-      hover:shadow-[0_10px_30px_rgba(0,0,0,0.06)] overflow-hidden rounded-lg 
-      hover:border-slate-300 transition-all duration-200">
-      <CardHeader className="px-5 pt-5 pb-0">
-        <CardTitle className="text-lg font-medium text-slate-800 flex items-center">
-          <Bookmark className="h-5 w-5 mr-2 text-slate-600" />
-          Watchlist
-        </CardTitle>
-      </CardHeader>
+    <div className="relative overflow-hidden rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+      {/* Simple white background */}
+      <div className="absolute inset-0 bg-white"></div>
       
-      <CardContent className="px-5 py-5">
+      {/* Card content */}
+      <div className="relative z-5 p-5">
+        <div className="flex items-center mb-4">
+          <h3 className="text-xl font-extrabold text-black leading-tight tracking-tight font-display flex items-center">
+            <Bookmark className="h-5 w-5 mr-2 text-green-600" />
+            Watchlist
+          </h3>
+        </div>
+        
         {loading ? (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="space-y-4"
           >
-            <div className="flex items-center justify-center py-6 text-slate-500">
+            <div className="flex items-center justify-center py-6 text-black/70">
               <Bookmark className="h-5 w-5 mr-2 animate-spin" />
-              <span>Loading your watchlist...</span>
+              <span className="font-body">Loading your watchlist...</span>
             </div>
-            <Skeleton className="h-16 w-full bg-slate-100" />
-            <Skeleton className="h-16 w-full bg-slate-100" />
-            <Skeleton className="h-16 w-full bg-slate-100" />
+            <Skeleton className="h-16 w-full bg-green-50" />
+            <Skeleton className="h-16 w-full bg-green-50" />
+            <Skeleton className="h-16 w-full bg-green-50" />
           </motion.div>
         ) : watchlistCompanies.length === 0 ? (
           <motion.div 
@@ -358,22 +369,25 @@ export function WatchlistView({
             transition={{ duration: 0.3 }}
             className="flex flex-col items-center justify-center py-12 space-y-4 text-center"
           >
-            <Bookmark className="h-12 w-12 text-slate-300" />
+            <Bookmark className="h-12 w-12 text-green-200" />
             <div>
-              <p className="text-slate-600 mb-2">Your watchlist is empty</p>
-              <p className="text-slate-500 text-sm max-w-[250px] mx-auto">
+              <p className="text-black font-display mb-2">Your watchlist is empty</p>
+              <p className="text-black/70 text-sm max-w-[250px] mx-auto font-body">
                 Add companies you're interested in following to your watchlist
               </p>
             </div>
             
             <Button 
-              variant="outline" 
+              className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                        shadow-sm hover:shadow transition-all duration-300 
+                        rounded-lg py-2 px-4 text-sm font-helvetica"
               asChild
-              className="mt-4 border-slate-300 hover:bg-slate-50 text-slate-700"
             >
               <Link href="/companies">
-                Browse Companies
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <span className="flex items-center justify-center">
+                  Browse Companies
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </span>
               </Link>
             </Button>
           </motion.div>
@@ -391,12 +405,11 @@ export function WatchlistView({
                   variants={itemVariants}
                   exit={{ opacity: 0, y: -10 }}
                   whileHover={{ scale: 1.01 }}
-                  className="flex items-center p-3 rounded-lg border border-slate-200 bg-white 
-                    shadow-[0_2px_10px_rgba(0,0,0,0.01)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)] 
-                    transition-all duration-200 hover:border-slate-300 hover:bg-slate-50/50"
+                  className="flex items-center p-3 rounded-lg border border-green-100 bg-gradient-to-br from-green-50 to-green-100/50
+                    shadow-sm hover:shadow transition-all duration-200"
                 >
                   {company.companies?.logo_url ? (
-                    <div className="h-10 w-10 bg-slate-100 rounded-full mr-3 overflow-hidden border border-slate-200 flex items-center justify-center">
+                    <div className="h-10 w-10 bg-white rounded-full mr-3 overflow-hidden border border-green-100 flex items-center justify-center">
                       <Image 
                         src={company.companies.logo_url} 
                         alt={company.companies?.name || "Company logo"}
@@ -406,8 +419,8 @@ export function WatchlistView({
                       />
                     </div>
                   ) : (
-                    <div className="h-10 w-10 bg-slate-100 rounded-full mr-3 border border-slate-200 flex items-center justify-center">
-                      <span className="text-slate-500 text-sm font-medium">
+                    <div className="h-10 w-10 bg-gradient-to-br from-[#70f570] to-[#49c628] rounded-full mr-3 border border-white/20 flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">
                         {company.companies?.name?.substring(0, 2).toUpperCase() || "CO"}
                       </span>
                     </div>
@@ -415,28 +428,28 @@ export function WatchlistView({
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-medium text-slate-800 truncate">{company.companies?.name || "Unknown Company"}</h3>
+                      <h3 className="text-sm font-medium text-black font-body truncate">{company.companies?.name || "Unknown Company"}</h3>
                       <Link 
                         href={`/companies/${company.companies?.id || ""}`}
-                        className="ml-2 text-slate-400 hover:text-slate-700 transition-colors"
+                        className="ml-2 text-green-600 hover:text-green-700 transition-colors"
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Link>
                     </div>
-                    <div className="text-xs text-slate-500">{company.companies?.description || company.companies?.mission_statement || "No description available."}</div>
+                    <div className="text-xs text-black/70 font-body">{company.companies?.description || company.companies?.mission_statement || "No description available."}</div>
                   </div>
                   
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="ml-2 px-2 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+                        <div className="ml-2 px-2 py-1 rounded-md text-xs font-medium bg-gradient-to-br from-[#70f570]/20 to-[#49c628]/20 text-green-700 font-helvetica">
                           {company.companies?.score || 0}/10
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent className="bg-white border border-slate-200 text-slate-800 shadow-lg">
+                      <TooltipContent className="bg-white border border-green-100 text-black shadow-lg">
                         <div className="text-xs">
-                          <div className="font-medium mb-1">ESG Impact Score</div>
-                          <div className="text-slate-600">Higher score indicates better environmental and social governance</div>
+                          <div className="font-medium mb-1 font-display">ESG Impact Score</div>
+                          <div className="text-black/70 font-body">Higher score indicates better environmental and social governance</div>
                         </div>
                       </TooltipContent>
                     </Tooltip>
@@ -446,24 +459,26 @@ export function WatchlistView({
             </AnimatePresence>
             
             {displayCompanies.length > 0 && (
-              <div className="flex justify-end mt-2">
+              <div className="flex justify-end mt-4">
                 <Button 
-                  variant="ghost" 
-                  size="sm" 
+                  className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                            shadow-sm hover:shadow transition-all duration-300 
+                            rounded-lg py-2 px-4 text-sm font-helvetica"
                   asChild
-                  className="text-slate-600 hover:text-slate-800 hover:bg-slate-100"
                 >
                   <Link href="/account/watchlist">
-                    Manage Watchlist
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <span className="flex items-center justify-center">
+                      Manage Watchlist
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </span>
                   </Link>
                 </Button>
               </div>
             )}
           </motion.div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
@@ -479,7 +494,7 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
+  hidden: { y: 10, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,

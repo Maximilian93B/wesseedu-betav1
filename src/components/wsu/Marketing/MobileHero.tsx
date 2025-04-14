@@ -147,7 +147,7 @@ export function MobileHero() {
             className="overflow-hidden relative mb-5"
           >
             <motion.h1 
-              className="text-4xl sm:text-5xl font-black tracking-tight leading-[1.1] text-white"
+              className="text-4xl sm:text-5xl font-black tracking-tight leading-[1.1] text-white font-display"
               style={{
                 textShadow: '0 2px 10px rgba(255,255,255,0.2)',
                 letterSpacing: '-0.02em'
@@ -168,7 +168,7 @@ export function MobileHero() {
           
           <motion.p 
             variants={itemVariants}
-            className="text-white/90 text-base leading-relaxed mb-8 font-light max-w-[95%]"
+            className="text-white/90 text-base leading-relaxed mb-8 font-light max-w-[95%] font-body"
           >
             Join the movement to build a greener tomorrow through sustainable investments that benefit both your finances and our planet.
           </motion.p>
@@ -183,7 +183,7 @@ export function MobileHero() {
               asChild
               className="group bg-[#00b4db] text-white shadow-[0_4px_12px_rgba(0,150,200,0.3)]
                 hover:shadow-[0_6px_20px_rgba(0,150,200,0.4)] transition-all duration-300 ease-out 
-                rounded-xl px-7 py-3 font-medium relative overflow-hidden w-auto"
+                rounded-xl px-7 py-3 font-medium relative overflow-hidden w-auto font-helvetica"
               style={{ 
                 background: 'linear-gradient(135deg, #00b4db 0%, #0083b0 100%)',
               }}
@@ -302,8 +302,8 @@ export function MobileHero() {
                 </motion.div>
                 <div className="w-8 h-0.5 bg-white/60 rounded-full"></div>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
-              <p className="text-white/80 text-sm leading-relaxed pr-2">{feature.description}</p>
+              <h3 className="text-xl font-semibold text-white mb-2 font-display">{feature.title}</h3>
+              <p className="text-white/80 text-sm leading-relaxed pr-2 font-body">{feature.description}</p>
               {index < features.length - 1 && (
                 <div className="w-full h-[1px] bg-white/20 mt-6"></div>
               )}
