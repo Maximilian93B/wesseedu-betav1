@@ -3,8 +3,8 @@
 import { Suspense } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/use-auth"
-import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
+import { useAuthGuard } from "@/hooks/use-auth-guard"
+import { LoadingScreen } from "@/components/wsu/home"
 import { motion } from 'framer-motion'
 import { Users, TrendingUp, ChevronDown, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -97,7 +97,7 @@ function getAllAmbassadors(communities: Community[]): Ambassador[] {
 }
 
 export default function CommunitiesPage() {
-  const { user, loading } = useAuth()
+  const { isAuthenticated, isLoading } = useAuthGuard()
   const router = useRouter()
   const { communities, loading: communitiesLoading } = useCommunities()
   
@@ -105,15 +105,10 @@ export default function CommunitiesPage() {
   const ambassadors = communitiesLoading ? sampleAmbassadors : getAllAmbassadors(communities || []);
   
   // Show loading during auth check
-  if (loading) {
+  if (isLoading) {
     return <LoadingScreen />
   }
   
-  // If no user after loading completes, show login message
-  if (!user) {
-    return <LoginRequired />
-  }
-
   return (
     <div className="space-y-8 max-w-[2000px] mx-auto">
       {/* Hero Section */}

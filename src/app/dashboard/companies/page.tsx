@@ -3,8 +3,8 @@
 import { Suspense } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/use-auth"
-import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
+import { useAuthGuard } from "@/hooks/use-auth-guard"
+import { LoadingScreen } from "@/components/wsu/home"
 
 // Placeholder component for lazy loading
 const LazyLoadingPlaceholder = () => (
@@ -20,19 +20,14 @@ const CompaniesViewDynamic = dynamic(
 )
 
 export default function CompaniesPage() {
-  const { user, loading } = useAuth()
+  const { isAuthenticated, isLoading } = useAuthGuard()
   const router = useRouter()
   
   // Show loading during auth check
-  if (loading) {
+  if (isLoading) {
     return <LoadingScreen />
   }
   
-  // If no user after loading completes, show login message
-  if (!user) {
-    return <LoginRequired />
-  }
-
   return (
     <div className="w-full">
       <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>

@@ -5,11 +5,12 @@ import { Leaf } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useAuth } from "@/context/AuthContext"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 export function DashboardNav() {
   const { signOut } = useAuth()
   const pathname = usePathname()
+  const router = useRouter()
 
   // Define the navigation items
   const navItems = [
@@ -19,6 +20,12 @@ export function DashboardNav() {
     { href: "/dashboard/communities", label: "Communities" },
     { href: "/dashboard/saved", label: "Saved" },
   ]
+  
+  // Handle sign out with redirect
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/') // Redirect to root page after sign out
+  }
 
   // Check if current path is active
   const isActive = (path: string) => {
@@ -89,7 +96,7 @@ export function DashboardNav() {
         <div className="flex-shrink-0">
           <Button
             variant="ghost"
-            onClick={signOut}
+            onClick={handleSignOut}
             className="text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-all duration-300"
           >
             Sign Out
