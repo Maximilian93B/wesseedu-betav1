@@ -43,6 +43,7 @@ interface WatchlistViewProps {
 export function useWatchlist() {
   const [watchlistCompanies, setWatchlistCompanies] = useState<WatchlistCompany[]>([])
   const [loading, setLoading] = useState(true)
+  const [fetchAttempted, setFetchAttempted] = useState(false)
   const { user, loading: authLoading } = useAuth()
   const { toast } = useToast()
 
@@ -56,12 +57,14 @@ export function useWatchlist() {
     if (!user?.id) {
       console.log("useWatchlist: No user ID, skipping fetch")
       setLoading(false)
+      setFetchAttempted(true)
       return
     }
     
     try {
       console.log("useWatchlist: Starting fetch, setting loading to true")
       setLoading(true)
+      setFetchAttempted(true)
       
       // Use the correct API endpoint that matches your route
       const response = await fetchWithAuth('/api/user/watchlist', {
@@ -115,6 +118,32 @@ export function useWatchlist() {
     }
   }, [user?.id, authLoading, toast]); // Only depend on these values
 
+  // Handle initial data loading when user is available
+  useEffect(() => {
+    if (!authLoading && user && !fetchAttempted) {
+      console.log(`useWatchlist: User authenticated (${user.email}), fetching watchlist data`)
+      fetchWatchlistCompanies()
+      
+      // Set a timeout to exit loading state after 10 seconds
+      const timeoutId = setTimeout(() => {
+        if (loading) {
+          console.log("useWatchlist: Loading timeout reached, forcing exit from loading state")
+          setLoading(false)
+          toast({
+            title: "Loading Timeout",
+            description: "Could not load watchlist data in a reasonable time. Please try again later.",
+            variant: "destructive"
+          })
+        }
+      }, 10000)
+      
+      return () => clearTimeout(timeoutId)
+    } else if (!authLoading && !user) {
+      setLoading(false)
+      setFetchAttempted(true)
+    }
+  }, [authLoading, user, fetchAttempted, loading]);
+
   const handleRemoveFromWatchlist = async (companyId: string) => {
     if (!user?.id) return
     
@@ -152,31 +181,6 @@ export function useWatchlist() {
     }
   }
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      console.log(`useWatchlist: User authenticated (${user.email}), fetching watchlist data`)
-      fetchWatchlistCompanies()
-      
-      // Set a timeout to exit loading state after 10 seconds
-      const timeoutId = setTimeout(() => {
-        if (loading) {
-          console.log("useWatchlist: Loading timeout reached, forcing exit from loading state")
-          setLoading(false)
-          setWatchlistCompanies([])
-          toast({
-            title: "Loading Timeout",
-            description: "Could not load watchlist data in a reasonable time. Please try again later.",
-            variant: "destructive"
-          })
-        }
-      }, 10000)
-      
-      return () => clearTimeout(timeoutId)
-    } else {
-      setLoading(false)
-    }
-  }, [authLoading, user]); // Remove fetchWatchlistCompanies from dependencies
-
   return {
     watchlistCompanies,
     loading,
@@ -193,6 +197,7 @@ export function WatchlistView({
   onViewAll
 }: WatchlistViewProps) {
   const { toast } = useToast()
+  const [dataFetchRequested, setDataFetchRequested] = useState(false)
   
   // Use the hook if external data is not provided
   const {
@@ -213,13 +218,14 @@ export function WatchlistView({
 
   // Fix the useEffect to prevent infinite loops
   useEffect(() => {
-    if (!externalData && !loading) {
+    if (!externalData && !dataFetchRequested) {
       console.log("WatchlistView: No external data provided, fetching data from hook");
       fetchWatchlistCompanies();
+      setDataFetchRequested(true);
     } else {
-      console.log(`WatchlistView: Using external data or already loading`);
+      console.log(`WatchlistView: Using external data:`, !!externalData, "loading:", loading);
     }
-  }, [externalData, loading]); // Remove fetchWatchlistCompanies from dependencies
+  }, [externalData, dataFetchRequested, fetchWatchlistCompanies]);
 
   // Test function to check if API routes are working
   const testApiConnection = async () => {

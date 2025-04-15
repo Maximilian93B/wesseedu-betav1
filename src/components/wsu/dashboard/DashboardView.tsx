@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { BarChart, Users, TrendingUp, Leaf, Globe, ChevronRight, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { WatchlistView, useWatchlist } from "./WatchlistView"
 import UserInvestments from "./UserInvestments"
 import { DashboardHero } from "./DashboardHero"
@@ -16,6 +15,7 @@ import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
 import { CACHE_KEYS, CACHE_EXPIRY, getCachedData, setCachedData } from "@/lib/utils/cacheUtils"
 import CommunityIntegration from "./community/CommunityIntegration"
 import GoalTracker from "./goals/GoalTracker"
+import InvestmentOverviewChart from "./InvestmentOverviewChart"
 
 export const dynamic = "force-dynamic"
 
@@ -106,7 +106,6 @@ export function DashboardView({ user }: DashboardViewProps) {
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [watchlistCompanies, setWatchlistCompanies] = useState<any[]>([])
   const [watchlistLoading, setWatchlistLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<string>("overview")
   
   // Use the shared watchlist hook to avoid duplicate data fetching
   const { 
@@ -449,7 +448,7 @@ export function DashboardView({ user }: DashboardViewProps) {
   }
 
   return (
-    <div className="w-full bg-white">
+    <div className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden">
       {/* Background pattern */}
       <div 
         className="absolute inset-0 opacity-[0.05]"
@@ -463,272 +462,172 @@ export function DashboardView({ user }: DashboardViewProps) {
       <div className="absolute top-1/4 right-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-1/4 left-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-pulse" style={{ animationDelay: '-2s' }}></div>
       
-      {/* Main content container */}
-      <div className="relative">
-        <div className="px-5 py-6 md:px-8 md:py-8">
+      {/* Main content container - full width */}
+      <div className="relative w-full">
+        <div className="px-3 py-4 pt-6 sm:pt-8 md:pt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
+          {/* Hero Section */}
           <DashboardHero 
             user={user} 
             profile={authProfile}
             loading={loading}
           />
           
-          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} 
-            className="mt-8"
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12 mt-6 sm:mt-8 md:mt-10"
           >
-            <TabsList className="mx-auto mb-6 border border-white/30 bg-white/10 backdrop-blur-md p-1 rounded-full w-auto inline-flex shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
-              <TabsTrigger 
-                value="overview" 
-                className="data-[state=active]:bg-white data-[state=active]:text-green-900 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm text-white transition-all duration-300 font-body"
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger 
-                value="investments" 
-                className="data-[state=active]:bg-white data-[state=active]:text-green-900 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm text-white transition-all duration-300 font-body"
-              >
-                Investments
-              </TabsTrigger>
-              <TabsTrigger 
-                value="community" 
-                className="data-[state=active]:bg-white data-[state=active]:text-green-900 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm text-white transition-all duration-300 font-body"
-              >
-                Community
-              </TabsTrigger>
-              <TabsTrigger 
-                value="goals" 
-                className="data-[state=active]:bg-white data-[state=active]:text-green-900 data-[state=active]:shadow-sm rounded-full px-5 py-1.5 text-sm text-white transition-all duration-300 font-body"
-              >
-                Goals
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="overview">
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="space-y-6"
-              >
-                {/* Investment Growth Chart */}
-                <motion.div 
-                  variants={itemVariants}
-                  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
-                >
-                  {/* Simple white background */}
-                  <div className="absolute inset-0 bg-white"></div>
-                  
-                  {/* Card content */}
-                  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7 flex flex-col">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                      <div>
-                        <h2 className="text-xl sm:text-2xl font-extrabold text-black leading-tight tracking-tight font-display">Investment Growth</h2>
-                        <p className="text-sm sm:text-base text-black mt-2 leading-relaxed font-body">Track your sustainable investment growth over time</p>
-                      </div>
-                      <div className="flex items-center space-x-2 mt-2 md:mt-0">
-                        <span className="text-xs text-black/70 font-body">Last 7 periods</span>
-                        <div className="h-3 w-3 rounded-full bg-gradient-to-br from-[#70f570] to-[#49c628] flex items-center justify-center">
-                          <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={investmentData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                          <defs>
-                            <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#70f570" stopOpacity={0.4} />
-                              <stop offset="100%" stopColor="#49c628" stopOpacity={0.1} />
-                            </linearGradient>
-                          </defs>
-                          <XAxis 
-                            dataKey="month" 
-                            stroke="#3a6d2e"
-                            tick={{ fill: '#3a6d2e' }}
-                            axisLine={{ stroke: '#e2e8f0' }}
-                            tickLine={{ stroke: '#e2e8f0' }}
-                          />
-                          <YAxis 
-                            stroke="#3a6d2e"
-                            tick={{ fill: '#3a6d2e' }}
-                            axisLine={{ stroke: '#e2e8f0' }}
-                            tickLine={{ stroke: '#e2e8f0' }}
-                            tickFormatter={(value) => `$${value}`}
-                          />
-                          <Tooltip
-                            contentStyle={{
-                              backgroundColor: 'white',
-                              border: '1px solid #e2e8f0',
-                              borderRadius: '6px',
-                              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                            }}
-                            labelStyle={{ color: '#334155', fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}
-                            itemStyle={{ color: '#334155', fontSize: '12px', padding: '2px 0' }}
-                            formatter={(value: number) => [`$${value.toLocaleString()}`, 'Investment']}
-                          />
-                          <Area
-                            type="monotone"
-                            dataKey="amount"
-                            stroke="#49c628"
-                            strokeWidth={2}
-                            fillOpacity={1}
-                            fill="url(#investmentGradient)"
-                            activeDot={{ r: 6, stroke: '#49c628', strokeWidth: 2, fill: '#fff' }}
-                          />
-                        </AreaChart>
-                      </ResponsiveContainer>
+            {/* Investment Growth Chart */}
+            <motion.div 
+              variants={itemVariants}
+              className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+              whileHover={{ y: -5, boxShadow: "0 12px 30px rgba(0,0,0,0.12)" }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              {/* Simple white background */}
+              <div className="absolute inset-0 bg-white"></div>
+              
+              {/* Card content */}
+              <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6 flex flex-col">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-3 md:mb-4">
+                  <div>
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold text-black leading-tight tracking-tight font-display">Investment Growth</h2>
+                    <p className="text-xs sm:text-sm md:text-base text-black mt-1 md:mt-2 leading-relaxed font-body">Track your sustainable investment growth over time</p>
+                  </div>
+                  <div className="flex items-center space-x-2 mt-2 md:mt-0">
+                    <span className="text-xs text-black/70 font-body">Last 7 periods</span>
+                    <div className="h-3 w-3 rounded-full bg-gradient-to-br from-[#70f570] to-[#49c628] flex items-center justify-center">
+                      <div className="h-1.5 w-1.5 rounded-full bg-white"></div>
                     </div>
                   </div>
-                </motion.div>
-
-                {/* Analytics Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                  {/* Left: Stats Grid */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {stats.map((stat, index) => (
-                      <motion.div
-                        key={index}
-                        variants={itemVariants}
-                      >
-                        <div className="relative overflow-hidden rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
-                          {/* Simple white background */}
-                          <div className="absolute inset-0 bg-white"></div>
-                          
-                          {/* Card content */}
-                          <div className="relative z-5 h-full p-4 flex flex-col">
-                            <div className="flex items-start justify-between mb-2">
-                              <span className="text-xs text-black/70 uppercase tracking-wide font-medium font-body">{stat.title}</span>
-                              <div className="flex-shrink-0 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-gradient-to-br from-[#70f570] to-[#49c628] flex items-center justify-center">
-                                {React.cloneElement(stat.icon as React.ReactElement, { className: 'h-3 w-3 text-white' })}
-                              </div>
-                            </div>
-                            <div className="font-extrabold text-black text-lg sm:text-xl mb-1 font-helvetica">{stat.value}</div>
-                            <p className="text-xs text-black/70 font-body">{stat.description}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Right: Watchlist */}
-                  <motion.div 
-                    variants={itemVariants}
-                    className="lg:col-span-2"
-                  >
-                    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
-                      {/* Simple white background */}
-                      <div className="absolute inset-0 bg-white"></div>
-                      
-                      {/* Card content */}
-                      <div className="relative z-5 h-full flex flex-col">
-                        <div className="p-4 border-b border-slate-100">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h2 className="text-xl font-extrabold text-black leading-tight tracking-tight font-display">Watchlist</h2>
-                              <p className="text-sm text-black/70 font-body">Companies you're tracking</p>
-                            </div>
-                            <Button
-                              onClick={() => router.push("/account/watchlist")}
-                              className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
-                                      shadow-sm hover:shadow transition-all duration-300 
-                                      rounded-lg py-2 px-4 text-sm font-helvetica"
-                            >
-                              View All
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="p-4">
-                          <AnimatePresence mode="wait">
-                            <motion.div
-                              key="watchlist"
-                              initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
-                              exit={{ opacity: 0 }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              <WatchlistView 
-                                externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
-                                externalLoading={loading}
-                                isPreview={true}
-                                maxItems={3}
-                                onViewAll={() => router.push("/account/watchlist")}
-                              />
-                            </motion.div>
-                          </AnimatePresence>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
                 </div>
-              </motion.div>
-            </TabsContent>
+                
+                <div className="h-[250px] sm:h-[280px] md:h-[320px] lg:h-[380px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={investmentData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="investmentGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#70f570" stopOpacity={0.4} />
+                          <stop offset="100%" stopColor="#49c628" stopOpacity={0.1} />
+                        </linearGradient>
+                      </defs>
+                      <XAxis 
+                        dataKey="month" 
+                        stroke="#3a6d2e"
+                        tick={{ fill: '#3a6d2e', fontSize: '10px', dy: 5 }}
+                        axisLine={{ stroke: '#e2e8f0' }}
+                        tickLine={{ stroke: '#e2e8f0' }}
+                      />
+                      <YAxis 
+                        stroke="#3a6d2e"
+                        tick={{ fill: '#3a6d2e', fontSize: '10px' }}
+                        axisLine={{ stroke: '#e2e8f0' }}
+                        tickLine={{ stroke: '#e2e8f0' }}
+                        tickFormatter={(value) => `$${value}`}
+                        width={45}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                        }}
+                        labelStyle={{ color: '#334155', fontWeight: 'bold', marginBottom: '5px', fontSize: '13px' }}
+                        itemStyle={{ color: '#334155', fontSize: '12px', padding: '2px 0' }}
+                        formatter={(value: number) => [`$${value.toLocaleString()}`, 'Investment']}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="amount"
+                        stroke="#49c628"
+                        strokeWidth={2}
+                        fillOpacity={1}
+                        fill="url(#investmentGradient)"
+                        activeDot={{ r: 6, stroke: '#49c628', strokeWidth: 2, fill: '#fff' }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </motion.div>
             
-            <TabsContent value="investments">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key="investments"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
-                >
-                  {/* Simple white background */}
+            {/* Investments Section - 2 columns */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
+              {/* Left Column: User Investments */}
+              <motion.div variants={itemVariants} className="h-full">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] h-full">
                   <div className="absolute inset-0 bg-white"></div>
-                  
-                  {/* Card content */}
-                  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7">
+                  <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
                     <UserInvestments />
                   </div>
-                </motion.div>
-              </AnimatePresence>
-            </TabsContent>
-            
-            {/* New Community Tab */}
-            <TabsContent value="community">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key="community"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
-                >
-                  {/* Simple white background */}
+                </div>
+              </motion.div>
+              
+              {/* Right Column: Investment Chart */}
+              <motion.div variants={itemVariants} className="h-full">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] h-full">
                   <div className="absolute inset-0 bg-white"></div>
-                  
-                  {/* Card content */}
-                  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7">
-                    {user && <CommunityIntegration userId={user.id} />}
+                  <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
+                    <InvestmentOverviewChart />
                   </div>
-                </motion.div>
-              </AnimatePresence>
-            </TabsContent>
+                </div>
+              </motion.div>
+            </div>
             
-            {/* New Goals Tab */}
-            <TabsContent value="goals">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key="goals"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
-                >
-                  {/* Simple white background */}
+            {/* Goals Section */}
+            <motion.div variants={itemVariants}>
+              <div className="relative overflow-hidden rounded-lg sm:rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
+                <div className="absolute inset-0 bg-white"></div>
+                <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
+                  <GoalTracker userId={user?.id} />
+                </div>
+              </div>
+            </motion.div>
+            
+            {/* Bottom Row - Community and Watchlist */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
+              {/* Left: Community Integration */}
+              <motion.div variants={itemVariants} className="h-full">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] h-full">
                   <div className="absolute inset-0 bg-white"></div>
-                  
-                  {/* Card content */}
-                  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7">
-                    {user && <GoalTracker userId={user.id} />}
+                  <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
+                    <h2 className="text-lg sm:text-xl font-extrabold text-black leading-tight tracking-tight font-display mb-3 md:mb-4">Community</h2>
+                    <CommunityIntegration userId={user?.id} />
                   </div>
-                </motion.div>
-              </AnimatePresence>
-            </TabsContent>
-          </Tabs>
+                </div>
+              </motion.div>
+              
+              {/* Right: Watchlist */}
+              <motion.div variants={itemVariants} className="h-full">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] h-full">
+                  <div className="absolute inset-0 bg-white"></div>
+                  <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
+                    <div className="flex items-center justify-between mb-3 md:mb-4">
+                      <h2 className="text-lg sm:text-xl font-extrabold text-black leading-tight tracking-tight font-display">Watchlist</h2>
+                      <Button
+                        onClick={() => router.push("/account/watchlist")}
+                        className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                                  shadow-sm hover:shadow transition-all duration-300 
+                                  rounded-lg py-1.5 px-3 text-xs sm:text-sm font-helvetica"
+                      >
+                        View All
+                        <ArrowRight className="ml-1.5 h-3 w-3 sm:h-4 sm:w-4" />
+                      </Button>
+                    </div>
+                    <WatchlistView 
+                      externalData={savedCompanies.length > 0 ? savedCompanies : watchlistCompanies}
+                      externalLoading={loading}
+                      isPreview={true}
+                      maxItems={3}
+                      onViewAll={() => router.push("/account/watchlist")}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>

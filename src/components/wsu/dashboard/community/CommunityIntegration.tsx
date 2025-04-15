@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/use-auth"
 import { CACHE_KEYS, CACHE_EXPIRY, getCachedData, setCachedData, invalidateCache } from "@/lib/utils/cacheUtils"
 
 interface CommunityActivity {
@@ -34,11 +35,12 @@ interface CommunityFeedData {
 }
 
 interface CommunityIntegrationProps {
-  userId: string
+  userId?: string  // Make userId optional
 }
 
 const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) => {
   const router = useRouter()
+  const { user } = useAuth()
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -46,78 +48,90 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
   const [communityStats, setCommunityStats] = useState<CommunityStats | null>(null)
   const [authError, setAuthError] = useState(false)
   
+  // Get the actual userId to use, either from props or from auth context
+  const actualUserId = userId || user?.id
+  
   useEffect(() => {
+    console.log("CommunityIntegration: Component mounted with userId:", actualUserId)
+    
     const fetchCommunityData = async () => {
       try {
+        console.log("CommunityIntegration: Starting data fetch")
         setLoading(true)
         setError(null)
         setAuthError(false)
         
-        // Check for cached data first with the correct type
+        // Check for cached data first
         const cachedData = getCachedData<CommunityFeedData>(CACHE_KEYS.COMMUNITY_FEED, CACHE_EXPIRY.COMMUNITY_FEED)
         
         if (cachedData) {
+          console.log("CommunityIntegration: Using cached data")
           setCommunityActivity(cachedData.recentActivity || [])
           setCommunityStats(cachedData.stats || { communities_joined: 0, posts_created: 0, comments_made: 0 })
           setLoading(false)
           return
         }
         
-        // Fetch fresh data if no cache exists
-        const { data, error, status } = await fetchWithAuth('/api/dashboard/community-feed')
+        // Simple fetch with error handling
+        console.log("CommunityIntegration: No cache, fetching from API")
+        const response = await fetchWithAuth('/api/dashboard/community-feed')
         
-        // Handle unauthorized error
-        if (status === 401) {
-          console.log("Authentication error - redirecting to login")
-          setAuthError(true)
-          setLoading(false)
+        if (response.error) {
+          console.error("CommunityIntegration: API error:", response.error)
           
-          // Clear any cached data for this feature
-          invalidateCache(CACHE_KEYS.COMMUNITY_FEED)
-          
-          // Redirect to login after a short delay
-          setTimeout(() => {
+          if (response.status === 401) {
+            console.log("CommunityIntegration: Auth error, redirecting to login")
+            setAuthError(true)
+            setLoading(false)
             router.push("/auth/signin")
-          }, 1000)
-          return
-        }
-        
-        if (error) {
-          console.error("Error fetching community data:", error)
-          setError("Failed to load community data")
-          toast({
-            title: "Error",
-            description: "Failed to load community data",
-            variant: "destructive"
-          })
+            return
+          }
+          
+          setError(`API error: ${response.error}`)
           setLoading(false)
           return
         }
         
-        if (!data) {
-          setError("No community data available")
-          setLoading(false)
-          return
-        }
+        console.log("CommunityIntegration: Data fetched successfully")
         
         // Cache the data
-        setCachedData(CACHE_KEYS.COMMUNITY_FEED, data)
+        setCachedData(CACHE_KEYS.COMMUNITY_FEED, response.data)
         
         // Update state with the fetched data
-        setCommunityActivity(data.recentActivity || [])
-        setCommunityStats(data.stats || { communities_joined: 0, posts_created: 0, comments_made: 0 })
+        setCommunityActivity(response.data.recentActivity || [])
+        setCommunityStats(response.data.stats || { communities_joined: 0, posts_created: 0, comments_made: 0 })
         setLoading(false)
       } catch (err) {
-        console.error("Error in community data fetch:", err)
+        console.error("CommunityIntegration: Error in fetch:", err)
         setError("An unexpected error occurred")
         setLoading(false)
       }
     }
     
-    if (userId) {
+    // Only fetch if we have a userId and are not redirecting
+    if (actualUserId && !authError) {
       fetchCommunityData()
+    } else {
+      console.log("CommunityIntegration: Skipping fetch, no userId or auth error")
+      setLoading(false)
     }
-  }, [userId, toast, router])
+    
+    // Set a safety timeout to prevent infinite loading
+    const safetyTimeout = setTimeout(() => {
+      if (loading) {
+        console.log("CommunityIntegration: Safety timeout triggered, ending loading state")
+        setLoading(false)
+        setError("Loading timeout - please try refreshing the page")
+      }
+    }, 5000)
+    
+    return () => {
+      clearTimeout(safetyTimeout)
+      console.log("CommunityIntegration: Component unmounted")
+    }
+  }, [actualUserId, router, authError, loading])
+  
+  console.log("CommunityIntegration: Rendering with loading:", loading, "error:", error, "authError:", authError)
   
   // Format date for display
   const formatDate = (dateString: string): string => {

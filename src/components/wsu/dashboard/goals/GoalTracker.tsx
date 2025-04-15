@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Edit2, Trash2, Check, Target, Award, Clock, Filter, ChevronDown, TrendingUp } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { CACHE_KEYS, CACHE_EXPIRY, getCachedData, setCachedData, invalidateCache } from "@/lib/utils/cacheUtils"
+import { useAuth } from "@/hooks/use-auth"
 
 interface Goal {
   id: string
@@ -60,12 +61,13 @@ interface GoalsData {
 }
 
 interface GoalTrackerProps {
-  userId: string
+  userId?: string  // Make userId optional
 }
 
 const GoalTracker: React.FC<GoalTrackerProps> = ({ userId }) => {
   const router = useRouter()
   const { toast } = useToast()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [goals, setGoals] = useState<Goal[]>([])
@@ -83,80 +85,186 @@ const GoalTracker: React.FC<GoalTrackerProps> = ({ userId }) => {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [authError, setAuthError] = useState(false)
+  const [initialized, setInitialized] = useState(false)
   
-  // Fetch goals and milestones
+  // Get the actual userId to use, either from props or from auth context
+  const actualUserId = userId || user?.id
+  
+  // Add debugging log to track component mounting and props
   useEffect(() => {
-    const fetchGoalData = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        setAuthError(false)
-        
-        // Check for cached data first with proper typing
-        const cachedData = getCachedData<GoalsData>(CACHE_KEYS.GOALS_DATA, CACHE_EXPIRY.GOALS_DATA)
-        
-        if (cachedData) {
-          setGoals(cachedData.goals || [])
-          setMilestones(cachedData.milestones || [])
-          setLoading(false)
-          return
-        }
-        
-        // Fetch fresh data if no cache exists
-        const { data, error, status } = await fetchWithAuth('/api/dashboard/goals')
-        
-        // Handle unauthorized error
-        if (status === 401) {
-          console.log("Authentication error - redirecting to login")
-          setAuthError(true)
-          setLoading(false)
-          
-          // Clear any cached data for this feature
-          invalidateCache(CACHE_KEYS.GOALS_DATA)
-          
-          // Redirect to login after a short delay
-          setTimeout(() => {
-            router.push("/auth/signin")
-          }, 1000)
-          return
-        }
-        
-        if (error) {
-          console.error("Error fetching goals data:", error)
-          setError("Failed to load goals data")
-          toast({
-            title: "Error",
-            description: "Failed to load goals data",
-            variant: "destructive"
-          })
-          setLoading(false)
-          return
-        }
-        
-        if (!data) {
-          setError("No goals data available")
-          setLoading(false)
-          return
-        }
-        
-        // Cache the data
-        setCachedData(CACHE_KEYS.GOALS_DATA, data)
-        
-        // Update state with the fetched data
-        setGoals(data.goals || [])
-        setMilestones(data.milestones || [])
-        setLoading(false)
-      } catch (err) {
-        console.error("Error in goals data fetch:", err)
-        setError("An unexpected error occurred")
-        setLoading(false)
-      }
+    console.log("GoalTracker: Component mounted", { 
+      providedUserId: userId, 
+      contextUserId: user?.id,
+      actualUserId 
+    });
+    
+    return () => {
+      console.log("GoalTracker: Component unmounted");
+    };
+  }, [userId, user?.id, actualUserId]);
+  
+  // Create a memoized fetch function that can be reused
+  const fetchGoalData = useCallback(async () => {
+    console.log("GoalTracker: Attempting to fetch goals data with userId:", actualUserId);
+    
+    if (!actualUserId) {
+      console.log("GoalTracker: No userId available, skipping data fetch")
+      setLoading(false)
+      return
     }
     
-    if (userId) {
+    try {
+      console.log("GoalTracker: Starting fetch process");
+      setLoading(true)
+      setError(null)
+      setAuthError(false)
+      
+      // Check for cached data first with proper typing
+      const cachedData = getCachedData<GoalsData>(CACHE_KEYS.GOALS_DATA, CACHE_EXPIRY.GOALS_DATA)
+      
+      if (cachedData) {
+        console.log("GoalTracker: Using cached data", cachedData);
+        setGoals(cachedData.goals || [])
+        setMilestones(cachedData.milestones || [])
+        setLoading(false)
+        return
+      }
+      
+      // Fetch fresh data if no cache exists
+      console.log("GoalTracker: No cache found, fetching fresh data from API");
+      const { data, error, status } = await fetchWithAuth('/api/dashboard/goals')
+      
+      console.log("GoalTracker: API response received", { 
+        hasData: !!data, 
+        hasError: !!error, 
+        status 
+      });
+      
+      // Immediately end loading state since we have a response
+      setLoading(false)
+      
+      // Handle unauthorized error
+      if (status === 401) {
+        console.log("Authentication error - redirecting to login")
+        setAuthError(true)
+        
+        // Clear any cached data for this feature
+        invalidateCache(CACHE_KEYS.GOALS_DATA)
+        
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          router.push("/auth/signin")
+        }, 1000)
+        return
+      }
+      
+      if (error) {
+        console.error("Error fetching goals data:", error)
+        setError("Failed to load goals data")
+        toast({
+          title: "Error",
+          description: "Failed to load goals data",
+          variant: "destructive"
+        })
+        return
+      }
+      
+      // Handle the case when data is null or undefined
+      if (!data) {
+        console.log("GoalTracker: No data returned from API");
+        // Instead of treating this as an error, just set empty arrays
+        setGoals([])
+        setMilestones([])
+        return
+      }
+      
+      // Handle the case where the data structure is valid but might not contain goals or milestones
+      const goalsData = data.goals || []
+      const milestonesData = data.milestones || []
+      
+      console.log("GoalTracker: Processing data", { 
+        goalsCount: goalsData.length, 
+        milestonesCount: milestonesData.length,
+        isEmptyResponse: goalsData.length === 0 && milestonesData.length === 0
+      });
+      
+      // Cache the data if it's valid (we have arrays, even if empty)
+      if (Array.isArray(goalsData) && Array.isArray(milestonesData)) {
+        console.log("GoalTracker: Caching data");
+        setCachedData(CACHE_KEYS.GOALS_DATA, {
+          goals: goalsData,
+          milestones: milestonesData
+        })
+      }
+      
+      // Update state with the fetched data
+      console.log("GoalTracker: Updating state with fetched data");
+      setGoals(goalsData)
+      setMilestones(milestonesData)
+    } catch (err) {
+      console.error("Error in goals data fetch:", err)
+      setError("An unexpected error occurred")
+      setLoading(false)
+    }
+  }, [router, toast, actualUserId])
+  
+  // Only run once on component initialization
+  useEffect(() => {
+    console.log("GoalTracker: Initialization effect running", { 
+      initialized, 
+      hasUserId: !!actualUserId 
+    });
+    
+    if (!initialized && actualUserId) {
+      console.log("GoalTracker: Conditions met, triggering data fetch");
+      fetchGoalData();
+      setInitialized(true);
+    } else if (!initialized) {
+      console.log("GoalTracker: No user ID available, ending loading state");
+      setLoading(false);
+    }
+  }, [initialized, actualUserId, fetchGoalData]);
+  
+  // Modify the safety timeout to clear automatically when loading state changes
+  useEffect(() => {
+    let safetyTimeout: NodeJS.Timeout | null = null;
+    
+    if (loading) {
+      // Set safety timeout only when loading
+      safetyTimeout = setTimeout(() => {
+        console.log("GoalTracker: Safety timeout triggered - forcing loading state to end");
+        setLoading(false);
+        setError("Loading timeout - please try refreshing the page");
+      }, 10000); // 10 seconds timeout
+    }
+    
+    return () => {
+      // Clear timeout when component unmounts or loading state changes
+      if (safetyTimeout) {
+        clearTimeout(safetyTimeout);
+      }
+    };
+  }, [loading]);
+  
+  // Add an effect to listen for investment events
+  useEffect(() => {
+    // Function to handle investment events
+    const handleInvestmentEvent = () => {
+      console.log("GoalTracker: Investment event detected, refreshing goals")
+      // Invalidate the goals cache to force a fresh fetch
+      invalidateCache(CACHE_KEYS.GOALS_DATA)
+      // Fetch fresh data
       fetchGoalData()
     }
-  }, [userId, toast, router])
+    
+    // Subscribe to the custom event
+    window.addEventListener('investment_made', handleInvestmentEvent)
+    
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('investment_made', handleInvestmentEvent)
+    }
+  }, [fetchGoalData])
   
   // Calculate progress percentage
   const calculateProgress = (goal: Goal): number => {

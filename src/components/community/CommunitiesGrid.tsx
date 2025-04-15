@@ -20,7 +20,7 @@ export function CommunitiesGrid({
   // Loading state with elegant skeletons
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 lg:gap-10">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={`skeleton-${index}`} className="relative overflow-hidden rounded-2xl">
             <Skeleton className="h-[350px] w-full bg-gradient-to-b from-slate-100 via-slate-50 to-white/80 rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]" />
@@ -64,12 +64,12 @@ export function CommunitiesGrid({
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
         
-        <div className="max-w-md mx-auto relative z-10">
+        <div className="w-full max-w-lg mx-auto relative z-10">
           <div className="w-16 h-16 bg-slate-50 rounded-full mx-auto flex items-center justify-center mb-6 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
             <AlertCircle className="h-8 w-8 text-slate-600" />
           </div>
           <h3 className="text-xl font-medium text-slate-800 mb-4">No communities available</h3>
-          <p className="text-slate-600 mb-8 max-w-sm mx-auto">
+          <p className="text-slate-600 mb-8 w-full max-w-md mx-auto">
             Contact your administrator to request access to private equity communities or adjust your search filters.
           </p>
           <Button 
@@ -88,7 +88,7 @@ export function CommunitiesGrid({
   
   // Community cards with refined layout and shadowing
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 lg:gap-10">
       {filteredCommunities.map((community) => {
         // Ensure we have valid data for each community
         if (!community || !community.id) {

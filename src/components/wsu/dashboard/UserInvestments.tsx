@@ -272,6 +272,17 @@ const UserInvestments = () => {
       form.reset();
       setOpen(false);
       fetchInvestments();
+      
+      // Emit investment_made event to trigger goal updates
+      // This custom event will be caught by GoalTracker component
+      const event = new CustomEvent('investment_made', {
+        detail: {
+          amount: parseFloat(values.amount),
+          company_id: values.company_id
+        }
+      });
+      window.dispatchEvent(event);
+      
     } catch (error) {
       console.error('Error adding investment:', error);
       toast({

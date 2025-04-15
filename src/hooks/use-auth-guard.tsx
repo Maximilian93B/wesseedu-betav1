@@ -11,6 +11,7 @@ const PUBLIC_ROUTES = [
   '/marketing',
   '/unauthorized',
   '/auth/login',
+  '/auth/signin',
   '/auth/signup',
   '/auth/callback',
   '/auth/confirmation',
@@ -29,12 +30,15 @@ interface UseAuthGuardOptions {
  * Navigates to login page if user is not authenticated and page requires auth
  */
 export function useAuthGuard({
-  redirectTo = '/auth/login',
+  redirectTo = '/auth/signin',
   requireAuth = true,
 }: UseAuthGuardOptions = {}) {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  
+  // Derive isAuthenticated from user
+  const isAuthenticated = !!user;
 
   useEffect(() => {
     // Skip if still loading

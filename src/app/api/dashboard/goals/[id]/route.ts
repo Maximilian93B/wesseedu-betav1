@@ -87,20 +87,29 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     // Check if the goal is being marked as completed
     if (updates.status === 'completed' && body.status !== 'completed') {
       // Create a milestone for the completed goal
-      const { data: goal } = await supabase!
+      const { data: goal, error: goalFetchError } = await supabase!
         .from('user_goals')
         .select('title, category, target_amount')
         .eq('id', goalId)
         .single()
       
-      if (goal) {
-        await supabase!.from('user_milestones').insert([{
+      if (goalFetchError) {
+        console.error(`Error fetching goal data for milestone creation:`, goalFetchError)
+        // Continue with the update even if we can't create the milestone
+      } else if (goal) {
+        // Only create milestone if we have goal data
+        const { error: milestoneError } = await supabase!.from('user_milestones').insert([{
           user_id: userId,
           title: `Goal Achieved: ${goal.title}`,
           description: `Congratulations on reaching your ${goal.category} investment goal of $${goal.target_amount}!`,
           is_achieved: true,
           achievement_date: new Date().toISOString()
         }])
+        
+        if (milestoneError) {
+          console.error(`Error creating milestone:`, milestoneError)
+          // Continue with the update even if milestone creation fails
+        }
       }
     }
     

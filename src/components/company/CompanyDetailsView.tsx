@@ -220,143 +220,138 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: "100%" }}
       transition={{ type: "spring", stiffness: 80, damping: 17 }}
-      className="absolute inset-0 bg-white overflow-y-auto"
+      className="absolute inset-0 bg-gradient-to-r from-[#70f570] to-[#49c628] overflow-y-auto"
     >
-      <div className="min-h-screen bg-white">
-        {/* Hero section with green gradient background */}
-        <div className="relative bg-gradient-to-r from-[#70f570] to-[#49c628]">
-          <div className="absolute inset-0 opacity-[0.03]" 
-            style={{ 
-              backgroundImage: `radial-gradient(circle at 20px 20px, white 1px, transparent 0)`,
-              backgroundSize: "40px 40px"
-            }} 
-          />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
-            <div className="flex items-center justify-between mb-8">
-              <Button
-                onClick={() => onClose()}
-                variant="ghost"
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/20 
-                  transition-colors duration-200 rounded-xl shadow-sm"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Companies
-              </Button>
-              <div className="flex gap-4">
-                {company && company.id && (
-                  <PitchDeckDownload 
-                    companyId={company.id} 
-                    companyName={company.name || 'company'} 
-                    variant="outline"
-                  />
-                )}
-                {company && company.id && (
-                  <SaveCompanyButton companyId={company.id} size="default" variant="outline" />
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row items-start gap-12 mt-12">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="relative w-40 h-40 md:w-56 md:h-56 rounded-xl overflow-hidden 
-                  border border-white/20 bg-white flex-shrink-0 shadow-[0_0_20px_rgba(255,255,255,0.3)]
-                  group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-white opacity-0 
-                  group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
-                {company?.image_url ? (
-                  <Image
-                    src={company?.image_url || ''}
-                    alt={`${company?.name || 'Company'} logo`}
-                    fill
-                    className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 768px) 160px, 224px"
-                    priority
-                  />
-                ) : (
-                  <div className="w-full h-full bg-white 
-                    flex items-center justify-center">
-                    <Building2 className="h-20 w-20 text-green-600" />
-                  </div>
-                )}
-                <div className="absolute inset-0 ring-1 ring-white/20 rounded-xl"></div>
-              </motion.div>
-              
-              <div className="flex-grow min-w-0">
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="flex flex-wrap gap-4 mb-6"
-                >
-                  <Badge variant="outline" 
-                    className="px-4 py-1.5 border-white/30 bg-white/10 
-                      text-white hover:bg-white/20 transition-colors duration-200">
-                    <Users className="h-4 w-4 mr-2" />
-                    {company?.community_members?.toLocaleString() || '0'}
-                  </Badge>
-                  <Badge variant="outline" 
-                    className="px-4 py-1.5 border-white/30 bg-white/10 
-                      text-white hover:bg-white/20 transition-colors duration-200">
-                    Score: {company?.score || 0}/100
-                  </Badge>
-                  {company?.sustainability_data?.construction && (
-                    <Badge variant="outline" 
-                      className="px-4 py-1.5 border-white/30 bg-white/10 
-                        text-white hover:bg-white/20 transition-colors duration-200">
-                      {company.sustainability_data.construction}
-                    </Badge>
-                  )}
-                  
-                  {/* Add Join Community Button */}
-                  {communityInfo && (
-                    <Button
-                      onClick={handleJoinOrLeave}
-                      className={communityInfo.isMember 
-                        ? "bg-white/20 hover:bg-white/30 text-white border border-white/30" 
-                        : "bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 shadow-lg"}
-                      disabled={joiningOrLeaving || !communityInfo.id}
-                    >
-                      {joiningOrLeaving ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      ) : communityInfo.isMember ? (
-                        <BellOff className="h-4 w-4 mr-2" />
-                      ) : (
-                        <Bell className="h-4 w-4 mr-2" />
-                      )}
-                      {communityInfo.isMember ? 'Leave Community' : 'Join Community'}
-                    </Button>
-                  )}
-                </motion.div>
-                
-                <motion.h1 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.2] 
-                    text-white font-display mb-6"
-                >
-                  {company?.name || 'Company'}
-                </motion.h1>
-                
-                <motion.p 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="text-white text-sm sm:text-base md:text-xl leading-relaxed font-light font-body"
-                >
-                  {company?.description || 'No description available'}
-                </motion.p>
-              </div>
-            </div>
+      {/* Top section with green gradient background */}
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+        <div className="flex items-center justify-between mb-8">
+          <Button
+            onClick={() => onClose()}
+            variant="ghost"
+            className="bg-white/10 hover:bg-white/20 text-white border border-white/20 
+              transition-colors duration-200 rounded-xl shadow-sm"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Companies
+          </Button>
+          <div className="flex gap-4">
+            {company && company.id && (
+              <PitchDeckDownload 
+                companyId={company.id} 
+                companyName={company.name || 'company'} 
+                variant="outline"
+              />
+            )}
+            {company && company.id && (
+              <SaveCompanyButton companyId={company.id} size="default" variant="outline" />
+            )}
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="space-y-24">
+        <div className="flex flex-col md:flex-row items-start gap-12 mt-12">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="relative w-40 h-40 md:w-56 md:h-56 rounded-xl overflow-hidden 
+              border border-white/20 bg-white flex-shrink-0 shadow-[0_0_20px_rgba(255,255,255,0.3)]
+              group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-white opacity-0 
+              group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
+            {company?.image_url ? (
+              <Image
+                src={company?.image_url || ''}
+                alt={`${company?.name || 'Company'} logo`}
+                fill
+                className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 768px) 160px, 224px"
+                priority
+              />
+            ) : (
+              <div className="w-full h-full bg-white 
+                flex items-center justify-center">
+                <Building2 className="h-20 w-20 text-green-600" />
+              </div>
+            )}
+            <div className="absolute inset-0 ring-1 ring-white/20 rounded-xl"></div>
+          </motion.div>
+          
+          <div className="flex-grow min-w-0">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-wrap gap-4 mb-6"
+            >
+              <Badge variant="outline" 
+                className="px-4 py-1.5 border-white/30 bg-white/10 
+                  text-white hover:bg-white/20 transition-colors duration-200">
+                <Users className="h-4 w-4 mr-2" />
+                {company?.community_members?.toLocaleString() || '0'}
+              </Badge>
+              <Badge variant="outline" 
+                className="px-4 py-1.5 border-white/30 bg-white/10 
+                  text-white hover:bg-white/20 transition-colors duration-200">
+                Score: {company?.score || 0}/100
+              </Badge>
+              {company?.sustainability_data?.construction && (
+                <Badge variant="outline" 
+                  className="px-4 py-1.5 border-white/30 bg-white/10 
+                    text-white hover:bg-white/20 transition-colors duration-200">
+                  {company.sustainability_data.construction}
+                </Badge>
+              )}
+              
+              {/* Add Join Community Button */}
+              {communityInfo && (
+                <Button
+                  onClick={handleJoinOrLeave}
+                  className={communityInfo.isMember 
+                    ? "bg-white/20 hover:bg-white/30 text-white border border-white/30" 
+                    : "bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 shadow-lg"}
+                  disabled={joiningOrLeaving || !communityInfo.id}
+                >
+                  {joiningOrLeaving ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : communityInfo.isMember ? (
+                    <BellOff className="h-4 w-4 mr-2" />
+                  ) : (
+                    <Bell className="h-4 w-4 mr-2" />
+                  )}
+                  {communityInfo.isMember ? 'Leave Community' : 'Join Community'}
+                </Button>
+              )}
+            </motion.div>
+            
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.2] 
+                text-white font-display mb-6"
+            >
+              {company?.name || 'Company'}
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-white text-sm sm:text-base md:text-xl leading-relaxed font-light font-body"
+            >
+              {company?.description || 'No description available'}
+            </motion.p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main content in white rounded container */}
+      <div 
+        className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden mt-6"
+      >
+        <div className="relative w-full">
+          <div className="px-4 py-4 pt-6 sm:pt-8 md:pt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 space-y-12 md:space-y-16">
             {/* Mission Statement Card with green styling */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -365,36 +360,19 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
               transition={{ duration: 0.6 }}
             >
               <Card 
-                className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
-                style={{ 
-                  backgroundImage: "linear-gradient(to right top, #ffffff, #f6fff8, #e9fff0, #d8ffe6, #c4ffdb)" 
-                }}
+                className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
               >
-                {/* Subtle texture pattern */}
-                <div className="absolute inset-0 opacity-[0.02]" 
-                  style={{ 
-                    backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-                    backgroundSize: "40px 40px"
-                  }} 
-                />
-                
-                {/* Top edge shadow line */}
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-[#70f570]/30 via-[#49c628]/20 to-[#70f570]/30"></div>
-                
                 {/* Left accent */}
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#70f570] to-[#49c628]"></div>
                 
                 <CardContent className="p-10 relative z-10">
-                  <div className="max-w-3xl mx-auto text-center">
-                    <h3 className="text-2xl font-medium text-black mb-6 font-display">Our Mission</h3>
-                    <p className="text-sm sm:text-base text-black leading-relaxed font-body italic text-2xl">
+                  <div className="w-full text-center">
+                    <h3 className="text-2xl font-medium text-gray-800 mb-6 font-display">Our Mission</h3>
+                    <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-body italic text-2xl">
                       "{company?.mission_statement || 'No mission statement available'}"
                     </p>
                   </div>
                 </CardContent>
-                
-                {/* Bottom shadow */}
-                <div className="absolute bottom-0 left-0 w-full h-10 bg-gradient-to-t from-green-50/50 to-transparent"></div>
               </Card>
             </motion.div>
 
@@ -408,7 +386,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
               >
                 Key Performance Indicators
               </motion.h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-10 mb-12">
                 {Object.entries(company?.financials || {}).map(([key, value], index) => (
                   <motion.div
                     key={key}
@@ -500,7 +478,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
               </div>
               
               {/* Additional sustainability information with enhanced styling */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
                 {company?.sustainability_data?.features && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -577,7 +555,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
               {/* Additional sustainability highlights */}
               {(company?.sustainability_data?.energy_surplus !== undefined || 
                 company?.sustainability_data?.carbon_footprint) && (
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
                   {company?.sustainability_data?.energy_surplus !== undefined && (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -820,7 +798,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                 <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-white/30 via-white/20 to-white/30"></div>
                 
                 <div className="relative z-10 px-8 py-16 md:py-20">
-                  <div className="max-w-3xl mx-auto text-center">
+                  <div className="w-full text-center">
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 font-display">
                       Ready to Support {company?.name || 'this company'}?
                     </h2>

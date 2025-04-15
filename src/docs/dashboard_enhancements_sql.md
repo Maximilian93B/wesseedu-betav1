@@ -27,28 +27,28 @@ JOIN profiles p ON cp.author_id = p.id;
 
 ### User Communities Function
 ```sql
-CREATE OR REPLACE FUNCTION get_user_communities(user_id UUID)
+CREATE OR REPLACE FUNCTION get_user_communities(input_user_id UUID)
 RETURNS TABLE (community_id UUID) AS $$
 BEGIN
     RETURN QUERY 
     SELECT cm.community_id
     FROM community_members cm
-    WHERE cm.user_id = user_id;
+    WHERE cm.user_id = input_user_id;
 END;
 $$ LANGUAGE plpgsql;
 ```
 
 ### Community Stats Function
 ```sql
-CREATE OR REPLACE FUNCTION get_user_community_stats(user_id UUID)
+CREATE OR REPLACE FUNCTION get_user_community_stats(input_user_id UUID)
 RETURNS JSON AS $$
 DECLARE
     result JSON;
 BEGIN
     SELECT json_build_object(
-        'communities_joined', (SELECT COUNT(*) FROM community_members WHERE user_id = $1),
-        'posts_created', (SELECT COUNT(*) FROM community_posts WHERE author_id = $1),
-        'comments_made', (SELECT COUNT(*) FROM community_post_comments WHERE user_id = $1)
+        'communities_joined', (SELECT COUNT(*) FROM community_members cm WHERE cm.user_id = input_user_id),
+        'posts_created', (SELECT COUNT(*) FROM community_posts cp WHERE cp.author_id = input_user_id),
+        'comments_made', (SELECT COUNT(*) FROM community_post_comments cpc WHERE cpc.user_id = input_user_id)
     ) INTO result;
     
     RETURN result;

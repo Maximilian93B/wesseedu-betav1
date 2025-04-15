@@ -8,8 +8,8 @@ import { useWatchlist } from "@/components/wsu/dashboard/WatchlistView"
 import Head from "next/head"
 import dynamic from "next/dynamic"
 
-// Import home page specific components
-import { HomePageNav } from "@/components/wsu/dashboard/HomePageNav"
+// Import DashboardNav for standardized navigation
+import { DashboardNav } from "@/components/wsu/dashboard/DashboardNav"
 
 // Import new modularized components from barrel file
 import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
@@ -137,30 +137,28 @@ function HomePageContent() {
     };
   }, [loading]); // Only depend on auth loading state, not localLoading
 
+  // Use router for navigation instead of state
   const handleNavigation = useCallback((view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => {
     if (view === 'home') {
       setCurrentView('home')
     } else if (view === 'dashboard') {
-      setCurrentView('dashboard')
+      router.push('/dashboard/overview')
     } else if (view === 'companies') {
-      setCurrentView('companies')
+      router.push('/dashboard/companies')
     } else if (view === 'saved') {
-      setCurrentView('saved')
+      router.push('/dashboard/saved')
     } else if (view === 'communities') {
-      // Use router to navigate to the communities page instead of changing view
-      router.push('/communities')
+      router.push('/dashboard/communities')
     }
   }, [router]);
 
   const handleCompanySelect = useCallback((id: string) => {
-    setSelectedCompanyId(id);
-    setCurrentView('company-details');
-  }, []);
+    router.push(`/dashboard/companies/${id}`)
+  }, [router]);
 
   const handleCommunitySelect = useCallback((id: string) => {
-    setSelectedCommunityId(id);
-    setCurrentView('community-details');
-  }, []);
+    router.push(`/dashboard/communities/${id}`)
+  }, [router]);
 
   // Show loading state
   if (localLoading) {
@@ -191,11 +189,7 @@ function HomePageContent() {
         <div className="absolute top-1/4 right-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-pulse"></div>
         <div className="absolute bottom-1/4 left-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-pulse" style={{ animationDelay: '-2s' }}></div>
         
-        <HomePageNav
-          currentView={currentView}
-          onNavigate={handleNavigation}
-          onSignOut={signOut}
-        />
+        <DashboardNav />
         
         {/* Main Layout - with overflow handling for mobile */}
         <div className="flex-1 relative overflow-x-hidden">
@@ -267,89 +261,13 @@ function HomePageContent() {
               </>
             )}
 
-            {/* Dashboard overlay */}
-            {currentView === 'dashboard' && (
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 md:py-8">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
-                  <DashboardViewDynamic user={user} />
-                </Suspense>
-              </div>
-            )}
-
-            {/* Companies overlay */}
-            {currentView === 'companies' && (
-              <div className="py-4 md:py-6">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
-                  <CompaniesViewDynamic 
-                    onCompanySelect={handleCompanySelect}
-                  />
-                </Suspense>
-              </div>
-            )}
-
-            {/* Company details overlay */}
-            {currentView === 'company-details' && selectedCompanyId && (
-              <div className="py-4 md:py-6">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
-                  <CompanyDetailsViewDynamic 
-                    companyId={selectedCompanyId}
-                    onClose={() => {
-                      setSelectedCompanyId(null)
-                      setCurrentView('companies')
-                    }}
-                  />
-                </Suspense>
-              </div>
-            )}
-
-            {/* Communities overlay */}
-            {currentView === 'communities' && (
-              <div className="py-4 md:py-6">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
-                  <CommunitiesViewDynamic 
-                    onCommunitySelect={handleCommunitySelect}
-                  />
-                </Suspense>
-              </div>
-            )}
-
-            {/* Community details overlay */}
-            {currentView === 'community-details' && selectedCommunityId && (
-              <div className="py-4 md:py-6">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
-                  <CommunityDetailsViewDynamic
-                    community={{
-                      id: selectedCommunityId,
-                      isMember: false,
-                      description: null,
-                      created_at: new Date().toISOString(),
-                      companies: {
-                        id: selectedCommunityId,
-                        name: 'Loading...',
-                        description: null,
-                        mission_statement: null,
-                        score: 0,
-                        image_url: null
-                      }
-                    }}
-                    onBack={() => {
-                      setSelectedCommunityId(null)
-                      setCurrentView('communities')
-                    }}
-                  />
-                </Suspense>
-              </div>
-            )}
-
-            {/* Watchlist overlay */}
-            {currentView === 'saved' && (
-              <div className="py-4 md:py-6">
-                <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
-                  <WatchlistViewDynamic 
-                    externalData={watchlistCompanies}
-                    externalLoading={watchlistLoading}
-                  />
-                </Suspense>
+            {/* We no longer need these sections as they're now handled by separate routes */}
+            {/* Instead, show a redirect message if someone tries to use the old URL patterns */}
+            {currentView !== 'home' && (
+              <div className="container mx-auto py-6 px-4 bg-white rounded-xl shadow-lg">
+                <p className="text-green-800 text-lg">
+                  Redirecting to the proper page...
+                </p>
               </div>
             )}
           </main>
