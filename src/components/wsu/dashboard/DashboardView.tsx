@@ -48,6 +48,7 @@ interface ProfileData {
 
 interface DashboardViewProps {
   user: any  // You can make this more specific based on your user type
+  quickActionsComponent?: React.ReactNode
 }
 
 // Updated animation variants to match style guide
@@ -94,7 +95,7 @@ const floatingVariants = {
   }
 }
 
-export function DashboardView({ user }: DashboardViewProps) {
+export function DashboardView({ user, quickActionsComponent }: DashboardViewProps) {
   const router = useRouter()
   const { profile: authProfile, loading: authLoading } = useAuth()
   const { toast } = useToast()
@@ -471,6 +472,15 @@ export function DashboardView({ user }: DashboardViewProps) {
             profile={authProfile}
             loading={loading}
           />
+          
+          {/* Insert QuickActions component here, between hero and charts */}
+          {quickActionsComponent && (
+            <div className="relative py-8 -mx-3 sm:-mx-6 md:-mx-8 lg:-mx-10 xl:-mx-12 2xl:-mx-16">
+              {/* Break out of the white background */}
+              <div className="absolute inset-0 bg-transparent"></div>
+              {quickActionsComponent}
+            </div>
+          )}
           
           <motion.div
             variants={containerVariants}

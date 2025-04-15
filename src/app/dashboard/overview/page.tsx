@@ -23,6 +23,12 @@ const DashboardViewDynamic = dynamic(
   { ssr: false, loading: () => <LazyLoadingPlaceholder /> }
 )
 
+// Dynamically import QuickActions
+const QuickActionsDynamic = dynamic(
+  () => import("@/components/wsu/home").then(mod => ({ default: mod.QuickActions })), 
+  { ssr: true }
+)
+
 function DashboardOverviewContent() {
   const { user, loading } = useAuth()
   const router = useRouter()
@@ -67,6 +73,21 @@ function DashboardOverviewContent() {
     };
   }, [loading, localLoading, toast]);
   
+  // Handle navigation with updated routing paths
+  const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => {
+    if (view === 'home') {
+      router.push('/dashboard/home')
+    } else if (view === 'dashboard') {
+      router.push('/dashboard/overview')
+    } else if (view === 'companies') {
+      router.push('/dashboard/companies')
+    } else if (view === 'saved') {
+      router.push('/dashboard/saved')
+    } else if (view === 'communities') {
+      router.push('/dashboard/communities')
+    }
+  }
+  
   // Show loading state
   if (localLoading) {
     return <LoadingScreen />
@@ -77,10 +98,21 @@ function DashboardOverviewContent() {
     return <LoginRequired />
   }
 
+  // Create a standalone QuickActions component that uses the green apple styling
+  const StandaloneQuickActions = () => (
+    <div className="mx-3 sm:mx-6 md:mx-8 lg:mx-10 xl:mx-12 2xl:mx-16">
+      <QuickActionsDynamic onNavigate={handleNavigation} />
+    </div>
+  );
+
   return (
     <div className="space-y-8 max-w-[2000px] mx-auto">
+      {/* Dashboard View with QuickActions */}
       <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
-        <DashboardViewDynamic user={user} />
+        <DashboardViewDynamic 
+          user={user} 
+          quickActionsComponent={<StandaloneQuickActions />} 
+        />
       </Suspense>
     </div>
   )

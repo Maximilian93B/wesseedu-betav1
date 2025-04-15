@@ -16,11 +16,6 @@ const HomeHeroDynamic = dynamic(
   { ssr: true }
 )
 
-const QuickActionsDynamic = dynamic(
-  () => import("@/components/wsu/home").then(mod => ({ default: mod.QuickActions })), 
-  { ssr: true }
-)
-
 const HowItWorksDynamic = dynamic(
   () => import("@/components/wsu/home").then(mod => ({ default: mod.HowItWorks })), 
   { ssr: true }
@@ -122,11 +117,6 @@ function DashboardHomeContent() {
                 profile={profile} 
                 onNavigate={handleNavigation} 
               />
-              
-              {/* QuickActions */}
-              <div className="mt-8 md:mt-16 relative">
-                <QuickActionsDynamic onNavigate={handleNavigation} />
-              </div>
             </Suspense>
           </div>
         </div>
