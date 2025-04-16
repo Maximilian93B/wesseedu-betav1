@@ -6,11 +6,14 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { useAuth } from "@/context/AuthContext"
 import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 export function DashboardNav() {
   const { signOut } = useAuth()
   const pathname = usePathname()
   const router = useRouter()
+  const [isSigningOut, setIsSigningOut] = useState(false)
 
   // Define the navigation items
   const navItems = [
@@ -23,8 +26,52 @@ export function DashboardNav() {
   
   // Handle sign out with redirect
   const handleSignOut = async () => {
-    await signOut()
-    router.push('/') // Redirect to root page after sign out
+    // Set a timeout to prevent indefinite loading state
+    const timeoutId = setTimeout(() => {
+      console.log("Sign out timeout - resetting state")
+      setIsSigningOut(false)
+    }, 5000) // 5 second maximum timeout
+    
+    try {
+      setIsSigningOut(true)
+      console.log("Sign out button clicked, attempting to sign out...")
+      
+      if (typeof signOut !== 'function') {
+        console.error("signOut is not a function", signOut)
+        throw new Error("Unable to sign out: signOut is not available")
+      }
+      
+      try {
+        await signOut()
+        console.log("Sign out completed successfully")
+      } catch (contextError) {
+        console.error("Error with context signOut, trying direct Supabase auth:", contextError)
+        
+        // Fallback to direct Supabase auth
+        const supabase = createClientComponentClient()
+        const { error } = await supabase.auth.signOut()
+        
+        if (error) {
+          console.error("Supabase signOut error:", error)
+          throw error
+        } else {
+          console.log("Supabase signOut successful (API response)")
+          // Force navigation and refresh after signout
+          window.location.href = '/'
+        }
+      }
+    } catch (error) {
+      console.error("Error during sign out:", error)
+      
+      // Force reset UI state on error
+      setIsSigningOut(false)
+      
+      // Force navigation as last resort
+      window.location.href = '/'
+    } finally {
+      clearTimeout(timeoutId)
+      setIsSigningOut(false)
+    }
   }
 
   // Check if current path is active
@@ -97,9 +144,10 @@ export function DashboardNav() {
           <Button
             variant="ghost"
             onClick={handleSignOut}
+            disabled={isSigningOut}
             className="text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-all duration-300"
           >
-            Sign Out
+            {isSigningOut ? "Signing Out..." : "Sign Out"}
           </Button>
         </div>
       </div>

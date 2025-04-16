@@ -58,7 +58,7 @@ export function HowItWorks() {
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
       variants={fadeInUpVariant}
-      className="mb-24 relative overflow-hidden rounded-2xl border border-slate-200/70 shadow-[0_8px_25px_rgb(0,0,0,0.03)]"
+      className="mb-16 sm:mb-20 md:mb-24 relative overflow-hidden rounded-xl sm:rounded-2xl border border-slate-200/70 shadow-[0_8px_25px_rgb(0,0,0,0.03)]"
       style={{ 
         backgroundImage: "linear-gradient(to right, #ffffff, #f8f8ff, #f0f1ff, #e6eaff, #dde4ff)" 
       }}
@@ -72,24 +72,24 @@ export function HowItWorks() {
       />
       
       {/* Top header section */}
-      <div className="relative z-10 p-8 sm:p-12 pb-0 sm:pb-0">
+      <div className="relative z-10 p-6 sm:p-8 md:p-12 pb-0 sm:pb-0">
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="max-w-xl mx-auto text-center mb-12"
+          className="max-w-xl mx-auto text-center mb-8 sm:mb-12"
         >
-          <h2 className="text-3xl font-bold text-slate-800 mb-5 relative inline-block">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-4 sm:mb-5 relative inline-block">
             How WeSeedU Works
-            <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-[2px] bg-gradient-to-r from-slate-400/30 via-slate-500 to-slate-400/30"></span>
+            <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-20 sm:w-24 h-[2px] bg-gradient-to-r from-slate-400/30 via-slate-500 to-slate-400/30"></span>
           </h2>
-          <p className="text-slate-600 text-lg">Follow these steps to maximize your sustainable investment journey.</p>
+          <p className="text-slate-600 text-base sm:text-lg">Follow these steps to maximize your sustainable investment journey.</p>
         </motion.div>
       </div>
 
       {/* Steps grid section */}
-      <div className="relative z-10 px-6 sm:px-12 pb-12">
+      <div className="relative z-10 px-4 sm:px-6 md:px-12 pb-10 sm:pb-12">
         <motion.div 
           variants={{
             hidden: { opacity: 0 },
@@ -100,7 +100,7 @@ export function HowItWorks() {
               }
             }
           }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto"
         >
           {howItWorksSteps.map((step, index) => (
             <motion.div
@@ -108,7 +108,7 @@ export function HowItWorks() {
               variants={itemVariants}
               whileHover={{ y: -4, scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200/80 
+              className="bg-white/90 backdrop-blur-sm rounded-lg sm:rounded-xl border border-slate-200/80 
                 shadow-[0_8px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(0,0,0,0.08)] 
                 overflow-hidden relative group"
             >
@@ -116,22 +116,22 @@ export function HowItWorks() {
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-400/30 via-slate-500/50 to-slate-400/30 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
               
               {/* Step number indicator */}
-              <div className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-full 
-                bg-slate-800/90 text-white text-sm font-medium shadow-lg transform rotate-0 group-hover:rotate-3 transition-all duration-300">
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full 
+                bg-slate-800/90 text-white text-xs sm:text-sm font-medium shadow-lg transform rotate-0 group-hover:rotate-3 transition-all duration-300">
                 {step.number}
               </div>
               
-              <div className="p-7 pt-8">
-                <h3 className="text-xl font-semibold text-slate-800 mb-3 flex items-center">
+              <div className="p-5 sm:p-7 pt-6 sm:pt-8">
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-800 mb-2 sm:mb-3 flex items-center">
                   {step.title}
                 </h3>
                 
-                <p className="text-slate-600 text-sm leading-relaxed mb-4">{step.description}</p>
+                <p className="text-slate-600 text-sm leading-relaxed mb-3 sm:mb-4">{step.description}</p>
                 
                 {/* Progress indicator */}
-                <div className="flex items-center gap-2 text-slate-500 text-xs">
-                  <div className="p-1 rounded-full bg-slate-100 group-hover:bg-emerald-50 transition-colors duration-300">
-                    <CheckCircle className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-500 transition-colors duration-300" />
+                <div className="flex items-center gap-1.5 sm:gap-2 text-slate-500 text-xs">
+                  <div className="p-0.5 sm:p-1 rounded-full bg-slate-100 group-hover:bg-emerald-50 transition-colors duration-300">
+                    <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 group-hover:text-emerald-500 transition-colors duration-300" />
                   </div>
                   <span className="font-medium opacity-70 group-hover:opacity-100 transition-opacity duration-300">
                     Progress tracking
@@ -158,16 +158,16 @@ export function HowItWorks() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.4 }}
           viewport={{ once: true }}
-          className="mt-12 text-center"
+          className="mt-8 sm:mt-12 text-center"
         >
           <a 
             href="#get-started" 
-            className="inline-flex items-center gap-2 text-slate-700 hover:text-slate-900 font-medium text-sm 
-              px-5 py-2.5 rounded-full bg-white shadow-sm hover:shadow-md border border-slate-200/80 
+            className="inline-flex items-center gap-1.5 sm:gap-2 text-slate-700 hover:text-slate-900 font-medium text-xs sm:text-sm 
+              px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white shadow-sm hover:shadow-md border border-slate-200/80 
               transition-all duration-300 group"
           >
             Get started today
-            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
+            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
           </a>
         </motion.div>
       </div>

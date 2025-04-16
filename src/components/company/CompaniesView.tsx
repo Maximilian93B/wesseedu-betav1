@@ -194,6 +194,26 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                 
                 {/* Marketplace introduction section */}
                 <MarketplaceIntroduction onScrollToCompanies={handleScrollToCompanies} />
+                
+                {/* Visual connector between introduction and companies section */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="relative flex flex-col items-center -mt-8 mb-4 z-20"
+                >
+                  <div className="bg-white/20 backdrop-blur-sm py-10 px-12 rounded-3xl border border-white/30 shadow-lg max-w-4xl w-full text-center mt-20">
+                    <h3 className="text-white text-2xl font-bold mb-4 font-display">Ready to explore sustainable opportunities?</h3>
+                    <p className="text-white/90 mb-6 font-body text-lg max-w-2xl mx-auto">Browse our curated selection of innovative companies making a positive impact on our planet and future.</p>
+                  </div>
+                  
+                  <div className="mt-8 flex flex-col items-center">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center 
+                      shadow-[0_0_20px_rgba(255,255,255,0.6)] mt-3">
+                      <ChevronDown className="h-7 w-7 text-green-600" />
+                    </div>
+                  </div>
+                </motion.div>
               </div>
               
               {/* Main white container with rounded corners */}
@@ -208,11 +228,11 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
-                      className="mb-12 rounded-xl sm:rounded-2xl border border-gray-100 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+                      className="mb-16 rounded-xl sm:rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
                     >
                       <div className="flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
                         <div className="flex-grow">
-                          <h2 className="text-3xl font-bold text-gray-800 font-display mb-2 flex items-center">
+                          <h2 className="text-3xl font-bold text-gray-800 font-display mb-3 flex items-center">
                             <div className="h-6 w-1.5 bg-green-500 rounded-full mr-3"></div>
                             Featured Companies
                           </h2>
@@ -234,8 +254,8 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                       </div>
                       
                       {/* Category filters */}
-                      <div className="mt-6 flex flex-wrap gap-2 items-center">
-                        <span className="text-gray-700 font-medium mr-2 font-helvetica text-sm flex items-center">
+                      <div className="mt-6 flex flex-wrap gap-2.5 items-center">
+                        <span className="text-gray-700 font-medium mr-3 font-helvetica text-sm flex items-center">
                           <Filter className="h-4 w-4 mr-2" />
                           Filter:
                         </span>
@@ -255,7 +275,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                       </div>
                       
                       {/* Results stats */}
-                      <div className="mt-4 flex justify-between items-center">
+                      <div className="mt-5 flex justify-between items-center">
                         <span className="text-gray-600 text-sm font-body">
                           {filteredCompanies.length} {filteredCompanies.length === 1 ? 'company' : 'companies'} found
                         </span>
@@ -337,7 +357,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                         className="pb-16"
                       >
                         {/* Grid with animation sequence */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 auto-rows-fr">
                           {filteredCompanies.map((company, idx) => (
                             <motion.div 
                               key={company.id}
@@ -345,12 +365,12 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ 
                                 duration: 0.4, 
-                                delay: 0.1 * (idx % 6), 
+                                delay: 0.05 * (idx % 8), 
                                 type: "spring",
                                 stiffness: 120 
                               }}
                               whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                              className="cursor-pointer"
+                              className="h-full"
                             >
                               <CompanyCard 
                                 company={company} 

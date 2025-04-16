@@ -1,10 +1,11 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useAuthGuard } from "@/hooks/use-auth-guard"
-import { LoadingScreen } from "@/components/wsu/home"
+import { useAuth } from "@/context/AuthContext"
+import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
+import { useToast } from "@/hooks/use-toast"
 
 // Placeholder component for lazy loading
 const LazyLoadingPlaceholder = () => (
@@ -20,12 +21,57 @@ const CompaniesViewDynamic = dynamic(
 )
 
 export default function CompaniesPage() {
-  const { isAuthenticated, isLoading } = useAuthGuard()
+  const { user, loading } = useAuth()
   const router = useRouter()
+  const { toast } = useToast()
+  const [localLoading, setLocalLoading] = useState(true)
   
-  // Show loading during auth check
-  if (isLoading) {
+  // Track whether we've shown the loading timeout toast
+  const hasShownTimeoutToastRef = useRef(false)
+  
+  // Add a timeout to ensure we don't get stuck in loading state
+  useEffect(() => {
+    // Flag to track component mount state for preventing memory leaks
+    let isMounted = true;
+    
+    // If auth loading is already complete, update local loading state immediately
+    if (!loading && isMounted) {
+      setLocalLoading(false);
+    }
+    
+    // Set a timeout to force loading to false after 5 seconds
+    const timeoutId = setTimeout(() => {
+      if (isMounted && localLoading) {
+        setLocalLoading(false);
+        
+        // Only show toast if we actually had to force the loading state change
+        // and we haven't shown it yet
+        if (loading && !hasShownTimeoutToastRef.current) {
+          hasShownTimeoutToastRef.current = true;
+          toast({
+            title: "Loading timeout",
+            description: "Some data might not be available. Please refresh if needed.",
+            variant: "default"
+          });
+        }
+      }
+    }, 5000);
+
+    // Cleanup function to prevent memory leaks and cancel timeout
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [loading, localLoading, toast]);
+  
+  // Show loading state
+  if (localLoading) {
     return <LoadingScreen />
+  }
+
+  // If no user after loading completes, show login message
+  if (!user) {
+    return <LoginRequired />
   }
   
   return (

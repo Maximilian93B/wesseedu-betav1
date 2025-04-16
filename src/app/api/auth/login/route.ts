@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       .single()
 
     // Determine if user needs onboarding
-    let redirectUrl = '/auth/home'
+    let redirectUrl = '/dashboard/home'
 
     // If profile doesn't exist (PGRST116 is the "not found" error code)
     if (profileError && profileError.code === 'PGRST116') {

@@ -32,7 +32,7 @@ interface HomeHeroProps {
 
 export function HomeHero({ profile, onNavigate }: HomeHeroProps) {
   return (
-    <div className="relative overflow-hidden pb-20 rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mx-4"
+    <div className="relative overflow-hidden pb-12 sm:pb-16 md:pb-20 rounded-lg sm:rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] mx-0 sm:mx-4"
       style={{ 
         backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
       }}
@@ -53,7 +53,7 @@ export function HomeHero({ profile, onNavigate }: HomeHeroProps) {
       <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
       
       <motion.div 
-        className="container max-w-5xl mx-auto px-4 pt-16 md:pt-24 text-center md:text-left relative z-10 
+        className="container max-w-5xl mx-auto px-4 pt-10 sm:pt-12 md:pt-16 lg:pt-24 text-center md:text-left relative z-10 
                   flex flex-col md:flex-row items-center justify-between"
         initial="hidden"
         animate="visible"
@@ -61,8 +61,8 @@ export function HomeHero({ profile, onNavigate }: HomeHeroProps) {
       >
         <div className="md:max-w-[60%]">
           {/* Highlight badge */}
-          <motion.div variants={itemVariants} className="mb-6">
-            <span className="inline-flex items-center bg-slate-800 px-3 py-1 rounded-full text-xs font-medium
+          <motion.div variants={itemVariants} className="mb-4 sm:mb-6">
+            <span className="inline-flex items-center bg-slate-800 px-2 sm:px-3 py-1 rounded-full text-xs font-medium
               text-white tracking-wider">
               <span className="w-1.5 h-1.5 rounded-full bg-white mr-1.5"></span>
               SUSTAINABLE INVESTING
@@ -71,7 +71,7 @@ export function HomeHero({ profile, onNavigate }: HomeHeroProps) {
           
           <motion.h1 
             variants={itemVariants}
-            className="text-4xl md:text-6xl font-black tracking-tight text-slate-800 leading-tight mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-slate-800 leading-tight mb-4 sm:mb-6"
           >
             Invest in a <span className="relative">
               brighter future
@@ -81,19 +81,19 @@ export function HomeHero({ profile, onNavigate }: HomeHeroProps) {
           
           <motion.p 
             variants={itemVariants}
-            className="text-lg md:text-xl text-slate-600 mx-auto md:mx-0 mb-10 leading-relaxed"
+            className="text-base sm:text-lg md:text-xl text-slate-600 mx-auto md:mx-0 mb-8 sm:mb-10 leading-relaxed"
           >
             Join a community of investors dedicated to making positive change through sustainable and impactful investment opportunities.
           </motion.p>
           
           <motion.div 
             variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start"
           >
             <Button 
-              className="bg-slate-900 text-white font-medium px-8 py-6 rounded-lg text-lg
+              className="bg-slate-900 text-white font-medium px-6 sm:px-8 py-5 sm:py-6 rounded-lg text-base sm:text-lg
                 shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)]
-                hover:bg-slate-800 transition-all duration-300 ease-out hover:translate-y-[-2px]"
+                hover:bg-slate-800 transition-all duration-300 ease-out hover:translate-y-[-2px)] w-full sm:w-auto"
               asChild
             >
               <Link href="/auth/signup">Get Started</Link>
@@ -102,9 +102,9 @@ export function HomeHero({ profile, onNavigate }: HomeHeroProps) {
             <Button 
               variant="outline" 
               className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-800 
-                font-medium px-8 py-6 rounded-lg text-lg
+                font-medium px-6 sm:px-8 py-5 sm:py-6 rounded-lg text-base sm:text-lg mt-3 sm:mt-0
                 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)]
-                transition-all duration-300 ease-out hover:translate-y-[-2px] hover:border-slate-300"
+                transition-all duration-300 ease-out hover:translate-y-[-2px] hover:border-slate-300 w-full sm:w-auto"
               asChild
             >
               <Link href="/about">Learn More</Link>
@@ -112,17 +112,17 @@ export function HomeHero({ profile, onNavigate }: HomeHeroProps) {
           </motion.div>
         </div>
         
-        {/* Dollar Coins Image */}
+        {/* Dollar Coins Image - mobile optimized */}
         <motion.div 
           variants={itemVariants}
-          className="mt-12 md:mt-0 md:ml-8 flex-shrink-0"
+          className="mt-10 sm:mt-12 md:mt-0 md:ml-8 flex-shrink-0 w-[220px] sm:w-[280px]"
         >
           <Image
             src="/rocket.png"
             alt="Stack of dollar coins"
             width={280}
             height={280}
-            className="drop-shadow-2xl"
+            className="drop-shadow-2xl w-full h-auto"
           />
         </motion.div>
       </motion.div>

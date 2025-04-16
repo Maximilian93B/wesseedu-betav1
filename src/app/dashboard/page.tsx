@@ -2,11 +2,11 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { AuthProvider, useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/context/AuthContext"
 import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
 import Head from "next/head"
 
-function DashboardContent() {
+export default function DashboardPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   
@@ -29,15 +29,4 @@ function DashboardContent() {
 
   // This will briefly show while redirecting
   return <LoadingScreen />
-}
-
-export default function DashboardPage() {
-  return (
-    <AuthProvider>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      </Head>
-      <DashboardContent />
-    </AuthProvider>
-  )
 } 

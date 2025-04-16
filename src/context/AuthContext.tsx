@@ -1,3 +1,5 @@
+"use client"
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User, Session } from '@supabase/supabase-js';
@@ -63,8 +65,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshSession = async () => {
     try {
       console.log('AuthContext: Refreshing session');
-      const { data: { session } } = await supabase.auth.getSession();
-      return !!session;
+      const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+      
+      // If session exists, update the session state and verify the user
+      if (refreshedSession) {
+        setSession(refreshedSession);
+        await verifyAndSetUser();
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error('AuthContext: Error refreshing session:', error);
       return false;
@@ -73,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    console.log("AuthContext: Initializing auth context");
 
     async function verifyAndSetUser() {
       try {
@@ -164,19 +174,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        if (newSession) {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (mounted) {
+            setLoading(true); // Set loading while we verify
+          }
+          
           const isUserVerified = await verifyAndSetUser();
           if (mounted) {
-            if (isUserVerified) {
+            if (isUserVerified && newSession) {
               setSession(newSession);
-            } else {
+            } else if (newSession === null) {
               setSession(null);
-              await supabase.auth.signOut();
+              setUser(null);
+              setProfile(null);
             }
             setLoading(false);
           }
-        } else if (mounted) {
-          setLoading(false);
         }
       }
     );

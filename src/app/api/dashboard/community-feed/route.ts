@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     
     // Get user community stats using the function
     const statsResult = await supabase!
-      .rpc('get_user_community_stats', { user_id: userId })
+      .rpc('get_user_community_stats', { input_user_id: userId })
     
     if (statsResult.error) {
       console.error('API: Error fetching user community stats:', statsResult.error)
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
     
     // Get communities the user is a member of using the function
     const userCommunitiesResult = await supabase!
-      .rpc('get_user_communities', { user_id: userId })
+      .rpc('get_user_communities', { input_user_id: userId })
     
     // Declare userCommunities as a generic array to handle both formats
     let userCommunities: any[] = []

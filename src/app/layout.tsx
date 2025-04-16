@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from "next"
-import SupabaseProviders from "./providers"
-import "./globals.css"
+import Providers from "./providers"
+import "@/app/globals.css"
 import React from "react"
 import { headers } from 'next/headers'
 import { cn } from "@/lib/utils"
+import { Inter } from "next/font/google"
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -76,7 +79,7 @@ export default function RootLayout({
         <meta name="HandheldFriendly" content="true" />
       </head>
       <body className={cn("min-h-screen bg-background font-sans antialiased text-base touch-manipulation")}>
-        <SupabaseProviders>
+        <Providers>
           <div className="relative flex min-h-screen flex-col">
             {/* Only show Navigation if NOT on any auth page */}
             {!isAuthPage && (
@@ -86,7 +89,7 @@ export default function RootLayout({
             )}
             <main className="flex-1 relative z-0">{children}</main>
           </div>
-        </SupabaseProviders>
+        </Providers>
       </body>
     </html>
   )

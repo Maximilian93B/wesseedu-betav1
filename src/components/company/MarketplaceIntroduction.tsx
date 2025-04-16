@@ -32,9 +32,9 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
   return (
     <div className="mb-16">
       <div className="relative">
-        {/* Main showcase container - Full width with slimmer height */}
+        {/* Main showcase container with full width */}
         <div className="w-screen relative left-1/2 right-1/2 mx-[-50vw] rounded-none overflow-hidden border-x-0 border-y border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]
-          hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-shadow duration-500"
+          hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-shadow duration-500 min-h-[550px]"
           style={{ 
             backgroundImage: "linear-gradient(115deg, #70f570, #49c628)" 
           }}
@@ -53,11 +53,12 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
           {/* Inner shadow effects for depth */}
           <div className="absolute top-0 left-0 w-full h-12 bg-gradient-to-b from-white/10 to-transparent opacity-40"></div>
           <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white/10 to-transparent"></div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 relative z-10">
-            {/* Featured section column - Left side - Now spans 3 columns */}
+
+          {/* Main content grid - ensure full width with no gaps */}
+          <div className="grid grid-cols-12 h-full relative z-10">
+            {/* Left column - featured section */}
             <motion.div 
-              className="lg:col-span-3 relative overflow-hidden bg-white/10"
+              className="col-span-12 lg:col-span-4 relative overflow-hidden bg-white/10 p-6 md:p-8"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -66,7 +67,7 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
               
               <motion.div 
                 variants={containerVariants}
-                className="relative z-10 p-6 sm:p-8 h-full flex flex-col justify-between"
+                className="relative z-10 h-full flex flex-col justify-between"
               >
                 <div>
                   <motion.div 
@@ -79,39 +80,33 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                   
                   <motion.h3 
                     variants={itemVariants}
-                    className="text-xl sm:text-2xl font-extrabold text-white mb-3 leading-tight tracking-tight font-display"
+                    className="text-2xl sm:text-3xl font-extrabold text-white mb-4 leading-tight tracking-tight font-display"
                   >
-                    Discover and Invest in
-                    <span className="ml-1">Innovative Sustainable</span>
-                    <span className="ml-1">Solutions</span>
+                    Discover and Invest
+                    <br />in Innovative
+                    <br />Sustainable Solutions
                   </motion.h3>
                   
                   <motion.div 
                     variants={itemVariants}
                     className="mb-6"
                   >
-                    <p className="text-white text-sm leading-relaxed font-light font-body">
+                    <p className="text-white text-sm sm:text-base leading-relaxed font-light font-body drop-shadow-sm">
                       Our marketplace connects you with cutting-edge companies creating positive environmental and social impact.
                     </p>
                   </motion.div>
                 </div>
-                
-                <motion.div 
-                  variants={itemVariants}
-                >
-               
-                </motion.div>
               </motion.div>
             </motion.div>
             
-            {/* Stats section - Middle - Now spans 4 columns */}
+            {/* Middle section - Stats (4 column) */}
             <motion.div 
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="lg:col-span-4 bg-white/20 backdrop-blur-sm p-6 sm:p-8"
+              className="col-span-12 lg:col-span-4 bg-white/20 backdrop-blur-sm p-6 md:p-8 border-l border-white/10"
             >
-              <div className="grid grid-cols-2 gap-3 h-full">
+              <div className="grid grid-cols-2 gap-4 h-full">
                 {[
                   { 
                     label: "Growth", 
@@ -143,7 +138,7 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                     key={index}
                     className="relative overflow-hidden rounded-lg border border-white/20 bg-white/10 
                       shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]
-                      hover:border-white/30 transition-all duration-300 p-3"
+                      hover:border-white/30 transition-all duration-300 p-4"
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center
@@ -152,29 +147,30 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                       </div>
                       <span className="text-xs font-medium text-white font-helvetica">{stat.label}</span>
                     </div>
-                    <p className="text-lg font-extrabold text-white font-helvetica">{stat.value}</p>
-                    <p className="text-white/80 text-xs font-body">{stat.desc}</p>
+                    <p className="text-lg sm:text-xl font-extrabold text-white font-helvetica drop-shadow-sm">{stat.value}</p>
+                    <p className="text-white/90 text-xs font-body drop-shadow-sm">{stat.desc}</p>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
             
-            {/* Key benefits section - Right side - Now spans 5 columns */}
+            {/* Right section - Key benefits */}
             <motion.div 
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="lg:col-span-5 bg-white/10 backdrop-blur-sm p-6 sm:p-8"
+              className="col-span-12 lg:col-span-4 bg-white/10 backdrop-blur-sm p-6 md:p-8 border-l border-white/10"
             >
               <motion.div 
                 variants={itemVariants}
+                className="h-full flex flex-col"
               >
-                <h4 className="font-medium text-white flex items-center text-sm mb-3 font-display">
+                <h4 className="font-medium text-white flex items-center text-base mb-4 font-display drop-shadow-sm">
                   <Shield className="h-4 w-4 mr-2 text-white" />
                   <span>Key Benefits</span>
                 </h4>
                 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-col gap-3 flex-grow">
                   {[
                     {
                       title: "Financial Performance",
@@ -195,8 +191,8 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                     <motion.div 
                       variants={itemVariants}
                       key={index}
-                      className="flex-1 min-w-[180px] p-3 bg-white/10 rounded-lg border border-white/20 hover:border-white/30 
-                        transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                      className="bg-white/10 rounded-lg border border-white/20 hover:border-white/30 
+                        transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] p-4"
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center border border-white/30">
@@ -204,7 +200,7 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                         </div>
                         <h5 className="text-xs font-medium text-white font-helvetica">{item.title}</h5>
                       </div>
-                      <p className="text-white/80 text-xs font-body">{item.description}</p>
+                      <p className="text-white/90 text-xs sm:text-sm font-body drop-shadow-sm">{item.description}</p>
                     </motion.div>
                   ))}
                 </div>

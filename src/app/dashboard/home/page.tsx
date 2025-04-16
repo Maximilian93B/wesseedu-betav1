@@ -2,10 +2,9 @@
 
 import { Suspense, useRef, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { AuthProvider, useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
 import dynamic from "next/dynamic"
-import Head from "next/head"
 
 // Import modularized components
 import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
@@ -26,17 +25,12 @@ const FeaturedContentDynamic = dynamic(
   { ssr: true }
 )
 
-const GrowthHeroDynamic = dynamic(
-  () => import("@/components/wsu/home").then(mod => ({ default: mod.GrowthHero })), 
-  { ssr: true }
-)
-
 const DataVizTransitionDynamic = dynamic(
   () => import("@/components/wsu/dashboard/DataVizTransition").then(mod => ({ default: mod.DataVizTransition })), 
   { ssr: false }
 )
 
-function DashboardHomeContent() {
+export default function DashboardHomePage() {
   const { user, profile, loading } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
@@ -106,13 +100,13 @@ function DashboardHomeContent() {
   }
 
   return (
-    <div className="space-y-8 max-w-[2000px] mx-auto">
+    <div className="w-full max-w-[2000px] mx-auto overflow-x-hidden">
       {/* Main Content */}
       <main className="w-full">
         {/* Hero Section with green apple styling */}
         <div className="relative">
-          <div className="w-full px-4 sm:px-6 py-8 md:py-16">
-            <Suspense fallback={<div className="h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-16">
+            <Suspense fallback={<div className="h-[250px] sm:h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
               <HomeHeroDynamic 
                 profile={profile} 
                 onNavigate={handleNavigation} 
@@ -121,62 +115,43 @@ function DashboardHomeContent() {
           </div>
         </div>
 
-        {/* WHITE SECTION 1: How It Works */}
-        <div className="relative overflow-hidden rounded-t-[2rem] border-t border-white/20 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] bg-white pt-20 pb-16 md:pt-24 md:pb-24 mt-[-1rem]">
-          <div className="w-full px-4 sm:px-6">
-            <Suspense fallback={<div className="h-[200px] flex items-center justify-center"><LoadingScreen /></div>}>
+        {/* How It Works Section */}
+        <div className="relative overflow-hidden rounded-t-[1.5rem] sm:rounded-t-[2rem] border-t border-white/20 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] bg-white pt-12 pb-10 sm:pt-16 md:pt-24 md:pb-16 mt-[-1rem]">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+            <Suspense fallback={<div className="h-[180px] sm:h-[200px] flex items-center justify-center"><LoadingScreen /></div>}>
               <HowItWorksDynamic />
             </Suspense>
           </div>
         </div>
 
-        {/* DataViz with integrated wave transition */}
-        <Suspense fallback={<div className="h-[400px] bg-white flex items-center justify-center"><LoadingScreen /></div>}>
-          <div className="pb-0 bg-white"> 
-            <DataVizTransitionDynamic />
+        {/* Data Visualization Section */}
+        <div className="bg-white pb-6 sm:pb-8">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+            <Suspense fallback={<div className="h-[250px] sm:h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
+              <DataVizTransitionDynamic />
+            </Suspense>
           </div>
-        </Suspense>
+        </div>
 
-        {/* FeaturedContent Section */}
+        {/* Featured Content Section */}
         <div className="relative bg-white">
-          {/* Split background container */}
-          <div className="flex flex-col md:flex-row">
-            <div className="w-full md:w-1/2 bg-green-50"></div>
-            <div className="w-full md:w-1/2 bg-white"></div>
+          {/* Split background container - improved for mobile */}
+          <div className="absolute inset-0">
+            <div className="h-1/2 md:h-full md:w-1/2 bg-green-50 absolute top-0 left-0 md:bottom-0"></div>
+            <div className="h-1/2 md:h-full md:w-1/2 bg-white absolute bottom-0 right-0 md:top-0"></div>
           </div>
           
           {/* Content container */}
-          <div className="absolute inset-0">
-            <Suspense fallback={<div className="h-full flex items-center justify-center py-12"><LoadingScreen /></div>}>
+          <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <Suspense fallback={<div className="h-[400px] sm:h-[500px] md:h-[600px] flex items-center justify-center"><LoadingScreen /></div>}>
               <FeaturedContentDynamic />
             </Suspense>
           </div>
           
-          {/* Fixed height container - adjusted for mobile */}
-          <div className="h-[600px] sm:h-[660px] md:h-[720px] lg:h-[800px]"></div>
-        </div>
-        
-        {/* GrowthHero Section */}
-        <div className="relative bg-gradient-to-b from-green-50 to-white">
-          <Suspense fallback={<div className="h-[30vh] flex items-center justify-center"><LoadingScreen /></div>}>
-            <GrowthHeroDynamic 
-              onAction={() => handleNavigation('companies')} 
-              actionButtonText="Start Investing Today"
-            />
-          </Suspense>
+          {/* Responsive height container */}
+          <div className="h-[500px] sm:h-[580px] md:h-[720px] lg:h-[800px]"></div>
         </div>
       </main>
     </div>
-  )
-}
-
-export default function DashboardHomePage() {
-  return (
-    <AuthProvider>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      </Head>
-      <DashboardHomeContent />
-    </AuthProvider>
   )
 } 
