@@ -8,12 +8,37 @@ import dynamic from "next/dynamic"
 import Head from "next/head"
 
 // Import modularized components
-import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
+import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
+import { Skeleton } from "@/components/ui/skeleton"
 
 // Placeholder component for lazy loading
 const LazyLoadingPlaceholder = () => (
-  <div className="flex justify-center items-center min-h-[50vh]">
-    <LoadingScreen />
+  <div className="w-full p-6 mx-auto">
+    <div className="space-y-6">
+      {/* Dashboard header skeleton */}
+      <div className="mb-8">
+        <Skeleton className="h-12 w-3/4 mb-2 rounded-lg" />
+        <Skeleton className="h-5 w-1/2 rounded-lg" />
+      </div>
+      
+      {/* Stats row skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="bg-white rounded-xl p-4 border shadow-sm">
+            <Skeleton className="h-8 w-8 mb-3 rounded-lg" />
+            <Skeleton className="h-7 w-1/2 mb-1 rounded-lg" />
+            <Skeleton className="h-4 w-3/4 rounded-lg" />
+          </div>
+        ))}
+      </div>
+      
+      {/* Main chart skeleton */}
+      <div className="bg-white rounded-xl p-5 border shadow-sm">
+        <Skeleton className="h-7 w-1/4 mb-2 rounded-lg" />
+        <Skeleton className="h-4 w-1/2 mb-6 rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-lg" />
+      </div>
+    </div>
   </div>
 )
 
@@ -34,6 +59,12 @@ function DashboardOverviewContent() {
   const router = useRouter()
   const { toast } = useToast()
   const [localLoading, setLocalLoading] = useState(true)
+  
+  // Define modules to preload for better performance
+  const preloadModules = [
+    () => import("@/components/wsu/dashboard/DashboardView"),
+    () => import("@/components/wsu/home").then(mod => mod.QuickActions)
+  ]
   
   // Track whether we've shown the loading timeout toast
   const hasShownTimeoutToastRef = useRef(false)
@@ -90,7 +121,7 @@ function DashboardOverviewContent() {
   
   // Show loading state
   if (localLoading) {
-    return <LoadingScreen />
+    return <LoadingPreloader preloadModules={preloadModules} />
   }
 
   // If no user after loading completes, show login message
@@ -108,7 +139,7 @@ function DashboardOverviewContent() {
   return (
     <div className="space-y-8 max-w-[2000px] mx-auto">
       {/* Dashboard View with QuickActions */}
-      <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+      <Suspense fallback={<LazyLoadingPlaceholder />}>
         <DashboardViewDynamic 
           user={user} 
           quickActionsComponent={<StandaloneQuickActions />} 

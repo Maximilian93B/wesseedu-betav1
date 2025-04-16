@@ -16,6 +16,7 @@ import { CACHE_KEYS, CACHE_EXPIRY, getCachedData, setCachedData } from "@/lib/ut
 import CommunityIntegration from "./community/CommunityIntegration"
 import GoalTracker from "./goals/GoalTracker"
 import InvestmentOverviewChart from "./InvestmentOverviewChart"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export const dynamic = "force-dynamic"
 
@@ -153,7 +154,8 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
       return;
     }
     
-    if (user) {
+    // Only fetch data when user exists and we haven't loaded it yet
+    if (user && !profileData) {
       console.log("DashboardView: User detected, loading data");
       const loadData = async () => {
         try {
@@ -188,10 +190,9 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
       
       loadData();
     } else {
-      console.log("DashboardView: No user, skipping data load");
-      setLoading(false);
+      console.log("DashboardView: No user or data already loaded, skipping data load");
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, profileData]);
 
   const fetchProfileData = async () => {
     console.log("DashboardView: Checking for cached profile data");
@@ -376,34 +377,54 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
   // Show a more informative loading state
   if (authLoading || loading) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[80vh]" 
-        style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
-        <div className="relative h-12 w-12">
-          <motion.div 
-            className="absolute inset-0"
-            animate={{ 
-              rotate: 360,
-              scale: [1, 1.1, 1]
-            }} 
-            transition={{ 
-              duration: 1.5, 
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <Leaf className="h-12 w-12 text-white" />
-          </motion.div>
+      <div className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden">
+        <div className="px-3 py-4 pt-6 sm:pt-8 md:pt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
+          {/* Skeleton for DashboardHero */}
+          <div className="mb-6 sm:mb-8">
+            <Skeleton className="h-16 sm:h-20 w-3/4 mb-3 rounded-lg" />
+            <Skeleton className="h-6 w-1/2 rounded-lg" />
+          </div>
+          
+          {/* Skeleton for charts */}
+          <div className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12 mt-6 sm:mt-8 md:mt-10">
+            {/* Investment Growth Chart skeleton */}
+            <div className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-3 sm:p-4 md:p-5 lg:p-6">
+              <Skeleton className="h-6 w-1/3 mb-2 rounded-lg" />
+              <Skeleton className="h-4 w-1/2 mb-4 rounded-lg" />
+              <Skeleton className="h-[250px] sm:h-[280px] md:h-[320px] lg:h-[380px] w-full rounded-lg" />
+            </div>
+            
+            {/* 2 column section skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
+              {/* Left Column */}
+              <div className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-3 sm:p-4 md:p-5 lg:p-6">
+                <Skeleton className="h-6 w-1/2 mb-3 rounded-lg" />
+                <div className="space-y-2">
+                  <Skeleton className="h-12 w-full rounded-lg" />
+                  <Skeleton className="h-12 w-full rounded-lg" />
+                  <Skeleton className="h-12 w-full rounded-lg" />
+                </div>
+              </div>
+              
+              {/* Right Column */}
+              <div className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-3 sm:p-4 md:p-5 lg:p-6">
+                <Skeleton className="h-6 w-1/2 mb-3 rounded-lg" />
+                <Skeleton className="h-[180px] w-full rounded-lg" />
+              </div>
+            </div>
+            
+            {/* Goals Section skeleton */}
+            <div className="rounded-lg sm:rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-3 sm:p-4 md:p-5 lg:p-6">
+              <Skeleton className="h-6 w-1/4 mb-3 rounded-lg" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-full rounded-lg" />
+                <Skeleton className="h-8 w-full rounded-lg" />
+              </div>
+            </div>
+          </div>
         </div>
-        <motion.p 
-          className="text-white font-medium font-display"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          Loading your sustainable investments...
-        </motion.p>
-        <p className="text-white/90 text-sm font-body">Growing your impact dashboard</p>
       </div>
-    );
+    )
   }
 
   // Show error state if there was an error

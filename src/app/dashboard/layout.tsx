@@ -6,6 +6,15 @@ import Head from "next/head"
 import { useAuth } from "@/context/AuthContext"
 import { LoadingScreen } from "@/components/wsu/home"
 import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
+import dynamic from "next/dynamic"
+import { NavigationProvider } from "@/context/NavigationContext"
+
+// Prefetch component modules without requiring hooks
+const prefetchModules = () => {
+  import("@/components/wsu/home")
+  import("@/components/wsu/dashboard/DashboardNav")
+}
 
 export default function DashboardLayout({
   children,
@@ -15,9 +24,21 @@ export default function DashboardLayout({
   const { user, loading } = useAuth()
   const { toast } = useToast()
   const [localLoading, setLocalLoading] = useState(true)
+  const router = useRouter()
   
   // Track whether we've shown the loading timeout toast
   const hasShownTimeoutToastRef = useRef(false)
+  
+  // Preload critical components when the dashboard layout mounts
+  useEffect(() => {
+    // Prefetch modules
+    prefetchModules()
+    
+    // Prefetch routes using the router from the component
+    router.prefetch('/dashboard/home')
+    router.prefetch('/dashboard/overview')
+    router.prefetch('/dashboard/companies')
+  }, [router])
   
   // Add a timeout to ensure we don't get stuck in loading state
   useEffect(() => {
@@ -54,13 +75,13 @@ export default function DashboardLayout({
     };
   }, [loading, localLoading, toast]);
   
-  // Show loading during auth check
+  // Show loading during auth check with enhanced LoadingScreen
   if (localLoading) {
     return <LoadingScreen />
   }
   
   return (
-    <>
+    <NavigationProvider>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
@@ -76,6 +97,6 @@ export default function DashboardLayout({
           {children}
         </div>
       </div>
-    </>
+    </NavigationProvider>
   )
 } 

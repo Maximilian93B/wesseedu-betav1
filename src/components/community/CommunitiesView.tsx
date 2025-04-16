@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { CommunityWithTags, Ambassador } from '@/types'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { useNavigation } from '@/context/NavigationContext'
 
 export interface ExtendedCommunity extends CommunityWithTags {
   featured?: boolean
@@ -56,6 +57,8 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     fetchCompanies
   } = useCompanies()
 
+  const { setIsTransitioning } = useNavigation()
+
   // Use the community filters hook with empty search query
   const {
     filteredCommunities,
@@ -69,14 +72,29 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
 
   // Fetch data on component mount
   useEffect(() => {
-    fetchCommunities()
-    fetchCompanies()
-  }, [])
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (isMounted) {
+        fetchCommunities();
+        fetchCompanies();
+      }
+    };
+    
+    loadData();
+    
+    // Clean up transitioning state when component unmounts
+    return () => {
+      isMounted = false;
+      setIsTransitioning(false);
+    };
+  }, []);
 
-  // Handle card selection with useCallback
+  // Handle card selection with useCallback and transition state
   const handleCardSelect = useCallback((id: string) => {
+    setIsTransitioning(true)
     onCommunitySelect(id)
-  }, [onCommunitySelect])
+  }, [onCommunitySelect, setIsTransitioning])
 
   // Show error state if there's an issue with the API
   if ((communitiesError || companiesError) && !communitiesLoading && !companiesLoading) {
@@ -88,6 +106,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
         animate="visible"
         variants={containerVariants}
         className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden"
+        onAnimationComplete={() => setIsTransitioning(false)}
       >
         <div className="relative w-full">
           <div className="px-3 py-4 pt-6 sm:pt-8 md:pt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 space-y-10">
@@ -99,41 +118,41 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
             </motion.div>
             <motion.h3 
               variants={itemVariants}
-              className="text-xl font-medium text-green-800 mb-3 font-display"
+              className="text-xl font-medium text-green-800 mb-3 font-display text-center"
             >
               {isUnauthorized ? "Authentication Required" : "Unable to Load Communities"}
             </motion.h3>
             <motion.p 
               variants={itemVariants}
-              className="text-green-700 mb-8 max-w-sm mx-auto font-body"
+              className="text-green-700 mb-8 max-w-sm mx-auto font-body text-center"
             >
               {isUnauthorized 
                 ? "Please sign in to view communities and investment opportunities." 
                 : "We encountered an issue loading the communities. Please try again in a moment."}
             </motion.p>
             
-            {isUnauthorized ? (
-              <motion.div variants={itemVariants}>
+            <motion.div variants={itemVariants} className="flex justify-center">
+              {isUnauthorized ? (
                 <Link 
                   href="/auth/signin"
                   className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold inline-block shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
                 >
                   Sign In
                 </Link>
-              </motion.div>
-            ) : (
-              <motion.button 
-                variants={itemVariants}
-                className="px-6 py-3 rounded-lg bg-white text-green-700 border border-green-200 hover:bg-green-50 shadow-[0_2px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
-                onClick={() => {
-                  fetchCommunities()
-                  fetchCompanies()
-                }}
-              >
-                <RotateCcw className="h-4 w-4 mr-2 inline-block" />
-                Retry
-              </motion.button>
-            )}
+              ) : (
+                <motion.button 
+                  variants={itemVariants}
+                  className="px-6 py-3 rounded-lg bg-white text-green-700 border border-green-200 hover:bg-green-50 shadow-[0_2px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
+                  onClick={() => {
+                    fetchCommunities()
+                    fetchCompanies()
+                  }}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2 inline-block" />
+                  Retry
+                </motion.button>
+              )}
+            </motion.div>
           </div>
         </div>
       </motion.div>
@@ -151,12 +170,20 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
   ).length;
   const featuredCommunities = filteredCommunities.filter(c => c.featured).length;
 
+  // When data loads, clear transitioning state
+  useEffect(() => {
+    if (!isLoading && filteredCommunities.length > 0) {
+      setIsTransitioning(false);
+    }
+  }, [isLoading, filteredCommunities.length, setIsTransitioning]);
+
   return (
     <motion.div 
       initial="hidden"
       animate="visible"
       variants={containerVariants}
       className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden"
+      onAnimationComplete={() => setIsTransitioning(false)}
     >
       <div className="relative w-full">
         <div className="px-3 py-4 pt-6 sm:pt-8 md:pt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 space-y-10">

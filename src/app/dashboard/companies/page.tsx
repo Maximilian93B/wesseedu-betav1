@@ -4,13 +4,34 @@ import { Suspense, useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
-import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
+import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { useToast } from "@/hooks/use-toast"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useNavigation } from "@/context/NavigationContext" 
 
 // Placeholder component for lazy loading
 const LazyLoadingPlaceholder = () => (
-  <div className="flex justify-center items-center min-h-[50vh]">
-    <LoadingScreen />
+  <div className="w-full py-8">
+    <div className="mx-auto max-w-5xl">
+      <Skeleton className="h-16 w-3/4 mb-4 rounded-lg" />
+      <Skeleton className="h-6 w-1/2 mb-8 rounded-lg" />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+            <Skeleton className="w-full h-48 rounded-t-xl" />
+            <div className="p-4">
+              <Skeleton className="h-6 w-3/4 mb-2 rounded-lg" />
+              <Skeleton className="h-4 w-full mb-4 rounded-lg" />
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-8 w-24 rounded-lg" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   </div>
 )
 
@@ -25,24 +46,45 @@ export default function CompaniesPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [localLoading, setLocalLoading] = useState(true)
+  const { isFirstVisit, markRouteVisited, isTransitioning, setIsTransitioning } = useNavigation()
+  const currentRoute = '/dashboard/companies'
   
   // Track whether we've shown the loading timeout toast
   const hasShownTimeoutToastRef = useRef(false)
   
+  // Define modules to preload for better performance
+  const preloadModules = [
+    () => import("@/components/company/CompaniesView")
+  ]
+  
+  // Reset transitioning state when component mounts/unmounts
+  useEffect(() => {
+    setIsTransitioning(false)
+    return () => setIsTransitioning(false)
+  }, [setIsTransitioning])
+  
   // Add a timeout to ensure we don't get stuck in loading state
   useEffect(() => {
+    // If this is not a first visit, skip loading process
+    if (!isFirstVisit(currentRoute) && !isTransitioning) {
+      setLocalLoading(false)
+      return
+    }
+    
     // Flag to track component mount state for preventing memory leaks
     let isMounted = true;
     
     // If auth loading is already complete, update local loading state immediately
     if (!loading && isMounted) {
       setLocalLoading(false);
+      markRouteVisited(currentRoute)
     }
     
     // Set a timeout to force loading to false after 5 seconds
     const timeoutId = setTimeout(() => {
       if (isMounted && localLoading) {
         setLocalLoading(false);
+        markRouteVisited(currentRoute)
         
         // Only show toast if we actually had to force the loading state change
         // and we haven't shown it yet
@@ -62,11 +104,11 @@ export default function CompaniesPage() {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [loading, localLoading, toast]);
+  }, [loading, localLoading, toast, isFirstVisit, currentRoute, markRouteVisited, isTransitioning]);
   
-  // Show loading state
-  if (localLoading) {
-    return <LoadingScreen />
+  // Only show loading for first visit or transition
+  if (localLoading && (isFirstVisit(currentRoute) || isTransitioning)) {
+    return <LoadingPreloader preloadModules={preloadModules} />
   }
 
   // If no user after loading completes, show login message
@@ -76,9 +118,10 @@ export default function CompaniesPage() {
   
   return (
     <div className="w-full">
-      <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+      <Suspense fallback={<LazyLoadingPlaceholder />}>
         <CompaniesViewDynamic 
           onCompanySelect={(id) => {
+            setIsTransitioning(true)
             router.push(`/dashboard/companies/${id}`)
           }}
         />

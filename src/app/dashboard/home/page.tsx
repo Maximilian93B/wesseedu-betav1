@@ -7,7 +7,9 @@ import { useToast } from "@/hooks/use-toast"
 import dynamic from "next/dynamic"
 
 // Import modularized components
-import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
+import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useNavigation } from "@/context/NavigationContext"
 
 // Dynamically import home page components
 const HomeHeroDynamic = dynamic(
@@ -30,29 +32,65 @@ const DataVizTransitionDynamic = dynamic(
   { ssr: false }
 )
 
+// Component loading placeholder
+const ComponentLoadingPlaceholder = ({ height }: { height: string }) => (
+  <div className={`${height} flex items-center justify-center`}>
+    <div className="w-full max-w-md">
+      <Skeleton className="h-8 w-3/4 mb-4 rounded-lg" />
+      <Skeleton className="h-4 w-full mb-2 rounded-lg" />
+      <Skeleton className="h-4 w-5/6 mb-2 rounded-lg" />
+      <Skeleton className="h-32 w-full rounded-lg mt-6" />
+    </div>
+  </div>
+)
+
 export default function DashboardHomePage() {
   const { user, profile, loading } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
   const [localLoading, setLocalLoading] = useState(true)
+  const { isFirstVisit, markRouteVisited, isTransitioning, setIsTransitioning } = useNavigation()
+  const currentRoute = '/dashboard/home'
+  
+  // Define modules to preload for better dashboard performance
+  const dashboardModules = [
+    () => import("@/components/wsu/home").then(mod => mod.HomeHero),
+    () => import("@/components/wsu/home").then(mod => mod.HowItWorks),
+    () => import("@/components/wsu/home").then(mod => mod.FeaturedContent),
+    () => import("@/components/wsu/dashboard/DataVizTransition")
+  ]
   
   // Track whether we've shown the loading timeout toast
   const hasShownTimeoutToastRef = useRef(false)
   
+  // Reset transitioning state when component mounts/unmounts
+  useEffect(() => {
+    setIsTransitioning(false)
+    return () => setIsTransitioning(false)
+  }, [setIsTransitioning])
+  
   // Add a timeout to ensure we don't get stuck in loading state
   useEffect(() => {
+    // If this is not a first visit, skip loading process
+    if (!isFirstVisit(currentRoute) && !isTransitioning) {
+      setLocalLoading(false)
+      return
+    }
+    
     // Flag to track component mount state for preventing memory leaks
     let isMounted = true;
     
     // If auth loading is already complete, update local loading state immediately
     if (!loading && isMounted) {
       setLocalLoading(false);
+      markRouteVisited(currentRoute)
     }
     
     // Set a timeout to force loading to false after 5 seconds
     const timeoutId = setTimeout(() => {
       if (isMounted && localLoading) {
         setLocalLoading(false);
+        markRouteVisited(currentRoute)
         
         // Only show toast if we actually had to force the loading state change
         // and we haven't shown it yet
@@ -72,10 +110,11 @@ export default function DashboardHomePage() {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [loading, localLoading, toast]);
+  }, [loading, localLoading, toast, isFirstVisit, currentRoute, markRouteVisited, isTransitioning]);
   
   // Handle navigation with updated routing paths
   const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => {
+    setIsTransitioning(true)
     if (view === 'home') {
       router.push('/dashboard/home')
     } else if (view === 'dashboard') {
@@ -89,9 +128,13 @@ export default function DashboardHomePage() {
     }
   }
   
-  // Show loading state
-  if (localLoading) {
-    return <LoadingScreen />
+  // Only show loading for first visit or transition
+  if (localLoading && (isFirstVisit(currentRoute) || isTransitioning)) {
+    return (
+      <LoadingPreloader
+        preloadModules={dashboardModules}
+      />
+    )
   }
 
   // If no user after loading completes, show login message
@@ -106,7 +149,7 @@ export default function DashboardHomePage() {
         {/* Hero Section with green apple styling */}
         <div className="relative">
           <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-16">
-            <Suspense fallback={<div className="h-[250px] sm:h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
+            <Suspense fallback={<ComponentLoadingPlaceholder height="h-[250px] sm:h-[300px]" />}>
               <HomeHeroDynamic 
                 profile={profile} 
                 onNavigate={handleNavigation} 
@@ -118,7 +161,7 @@ export default function DashboardHomePage() {
         {/* How It Works Section */}
         <div className="relative overflow-hidden rounded-t-[1.5rem] sm:rounded-t-[2rem] border-t border-white/20 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] bg-white pt-12 pb-10 sm:pt-16 md:pt-24 md:pb-16 mt-[-1rem]">
           <div className="w-full px-4 sm:px-6 lg:px-8">
-            <Suspense fallback={<div className="h-[180px] sm:h-[200px] flex items-center justify-center"><LoadingScreen /></div>}>
+            <Suspense fallback={<ComponentLoadingPlaceholder height="h-[180px] sm:h-[200px]" />}>
               <HowItWorksDynamic />
             </Suspense>
           </div>
@@ -127,7 +170,7 @@ export default function DashboardHomePage() {
         {/* Data Visualization Section */}
         <div className="bg-white pb-6 sm:pb-8">
           <div className="w-full px-4 sm:px-6 lg:px-8">
-            <Suspense fallback={<div className="h-[250px] sm:h-[300px] flex items-center justify-center"><LoadingScreen /></div>}>
+            <Suspense fallback={<ComponentLoadingPlaceholder height="h-[250px] sm:h-[300px]" />}>
               <DataVizTransitionDynamic />
             </Suspense>
           </div>
@@ -143,7 +186,7 @@ export default function DashboardHomePage() {
           
           {/* Content container */}
           <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-            <Suspense fallback={<div className="h-[400px] sm:h-[500px] md:h-[600px] flex items-center justify-center"><LoadingScreen /></div>}>
+            <Suspense fallback={<ComponentLoadingPlaceholder height="h-[400px] sm:h-[500px] md:h-[600px]" />}>
               <FeaturedContentDynamic />
             </Suspense>
           </div>

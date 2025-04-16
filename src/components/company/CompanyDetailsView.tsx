@@ -22,6 +22,9 @@ import SaveCompanyButton from "@/components/company/SaveCompanyButton";
 import PitchDeckDownload from "@/components/company/PitchDeckDownload";
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigation } from "@/context/NavigationContext";
+import { Skeleton } from "@/components/ui/skeleton";
+
 
 interface Company {
   id: string;
@@ -66,11 +69,16 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
   const [communityInfo, setCommunityInfo] = useState<CommunityInfo | null>(null);
   const [joiningOrLeaving, setJoiningOrLeaving] = useState(false);
   const { toast } = useToast();
+  const { markRouteVisited, setIsTransitioning } = useNavigation();
+  const detailsRoute = `/dashboard/companies/${companyId}`;
 
   useEffect(() => {
     async function fetchCompanyData() {
       try {
         setLoading(true);
+        // Mark this company details route as visited to prevent loading screen on return
+        markRouteVisited(detailsRoute);
+        
         const response = await fetchWithAuth(`/api/companies/${companyId}`);
         
         if (response.error) {
@@ -96,20 +104,30 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
         
         // After getting company data, fetch the community info
         if (companyData) {
-          fetchCompanyCommunity(companyData.id);
+          try {
+            await fetchCompanyCommunity(companyData.id);
+          } catch (communityErr) {
+            console.error('Error fetching community data:', communityErr);
+            // Don't block rendering if community data fails
+          }
         }
       } catch (err) {
         console.error('Error fetching company data:', err);
         setError('Failed to load company data. Please try again later.');
       } finally {
         setLoading(false);
+        // Loading is complete, clear transitioning state
+        setIsTransitioning(false);
       }
     }
 
     if (companyId) {
       fetchCompanyData();
     }
-  }, [companyId]);
+    
+    // Clean up transitioning state when component unmounts
+    return () => setIsTransitioning(false);
+  }, [companyId, markRouteVisited, setIsTransitioning, detailsRoute]);
 
   const fetchCompanyCommunity = async (companyId: string) => {
     try {
@@ -131,6 +149,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
       setCommunityInfo(communityData);
     } catch (error) {
       console.error('Error fetching company community:', error);
+      // Don't throw the error, just log it
     }
   };
   
@@ -175,42 +194,83 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
     }
   };
 
-  // Show loading state
+  // Handle back button with transition state
+  const handleBack = () => {
+    setIsTransitioning(true);
+    onClose();
+  };
+
+  // Show a more elegant skeleton loading UI instead of full screen loading
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-r from-[#70f570] to-[#49c628]">
-        <div className="relative mb-8">
-          <div className="w-16 h-16 border-4 border-white/20 rounded-full animate-spin"></div>
-          <div className="w-16 h-16 border-4 border-white rounded-full 
-            animate-spin absolute top-0 left-0 border-t-transparent"></div>
+      <motion.div
+        initial={{ opacity: 0, x: "100%" }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: "100%" }}
+        transition={{ type: "spring", stiffness: 80, damping: 17 }}
+        className="absolute inset-0 bg-gradient-to-r from-[#70f570] to-[#49c628] overflow-y-auto"
+      >
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+          <div className="flex items-center justify-between mb-8">
+            <Button
+              onClick={handleBack}
+              variant="ghost"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 
+                transition-colors duration-200 rounded-xl shadow-sm"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Companies
+            </Button>
+          </div>
+
+          <div className="flex flex-col md:flex-row items-start gap-12 mt-12">
+            <Skeleton className="w-40 h-40 md:w-56 md:h-56 rounded-xl bg-white/20" />
+            <div className="flex-grow min-w-0">
+              <div className="flex flex-wrap gap-4 mb-6">
+                <Skeleton className="h-8 w-24 rounded-full bg-white/20" />
+                <Skeleton className="h-8 w-24 rounded-full bg-white/20" />
+                <Skeleton className="h-8 w-32 rounded-full bg-white/20" />
+              </div>
+              <Skeleton className="h-12 w-3/4 mb-6 rounded-lg bg-white/20" />
+              <Skeleton className="h-6 w-full mb-2 rounded-lg bg-white/20" />
+              <Skeleton className="h-6 w-5/6 mb-2 rounded-lg bg-white/20" />
+              <Skeleton className="h-6 w-4/6 mb-2 rounded-lg bg-white/20" />
+            </div>
+          </div>
         </div>
-        <p className="text-white font-medium mb-2 font-display">Loading</p>
-        <p className="text-white/80 text-sm font-body">Retrieving company details...</p>
-      </div>
+      </motion.div>
     );
   }
 
   // Show error state
   if (error || !company) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-r from-[#70f570] to-[#49c628]">
-        <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center 
-          mb-8 border border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
-          <Building2 className="h-10 w-10 text-white" />
+      <motion.div
+        initial={{ opacity: 0, x: "100%" }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: "100%" }}
+        transition={{ type: "spring", stiffness: 80, damping: 17 }}
+        className="absolute inset-0 bg-gradient-to-r from-[#70f570] to-[#49c628] overflow-y-auto"
+      >
+        <div className="flex flex-col items-center justify-center h-screen px-4">
+          <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center 
+            mb-8 border border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+            <Building2 className="h-10 w-10 text-white" />
+          </div>
+          <h3 className="text-white text-xl font-medium mb-2 font-display">
+            {error || 'Company not found'}
+          </h3>
+          <p className="text-white/80 mb-8 max-w-md text-center font-body">
+            We couldn't find the company you're looking for. It may have been removed or there might be a temporary issue.
+          </p>
+          <Button onClick={handleBack}
+            className="bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 
+            shadow-lg rounded-xl px-8 py-3 font-semibold transition-all duration-300 font-helvetica">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Companies
+          </Button>
         </div>
-        <h3 className="text-white text-xl font-medium mb-2 font-display">
-          {error || 'Company not found'}
-        </h3>
-        <p className="text-white/80 mb-8 max-w-md text-center font-body">
-          We couldn't find the company you're looking for. It may have been removed or there might be a temporary issue.
-        </p>
-        <Button onClick={onClose} 
-          className="bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 
-          shadow-lg rounded-xl px-8 py-3 font-semibold transition-all duration-300 font-helvetica">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Companies
-        </Button>
-      </div>
+      </motion.div>
     );
   }
 
@@ -221,12 +281,13 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
       exit={{ opacity: 0, x: "100%" }}
       transition={{ type: "spring", stiffness: 80, damping: 17 }}
       className="absolute inset-0 bg-gradient-to-r from-[#70f570] to-[#49c628] overflow-y-auto"
+      onAnimationComplete={() => setIsTransitioning(false)}
     >
       {/* Top section with green gradient background */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-6 relative z-10">
         <div className="flex items-center justify-between mb-8">
           <Button
-            onClick={() => onClose()}
+            onClick={handleBack}
             variant="ghost"
             className="bg-white/10 hover:bg-white/20 text-white border border-white/20 
               transition-colors duration-200 rounded-xl shadow-sm"
@@ -878,7 +939,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                 
                 <div className="flex gap-4">
                   <Button
-                    onClick={() => onClose()}
+                    onClick={handleBack}
                     className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white 
                     font-semibold shadow-sm hover:shadow transition-all duration-300 
                     rounded-lg py-3 text-sm font-helvetica"

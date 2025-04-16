@@ -4,18 +4,37 @@ import { Suspense, useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
-import { LoadingScreen, LoginRequired } from "@/components/wsu/home"
+import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { motion } from 'framer-motion'
 import { Users, TrendingUp, ChevronDown, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCommunities } from '@/hooks/use-communities'
 import { Ambassador, Community } from '@/types/community'
 import { useToast } from "@/hooks/use-toast"
+import { Skeleton } from "@/components/ui/skeleton"
 
 // Placeholder component for lazy loading
 const LazyLoadingPlaceholder = () => (
-  <div className="flex justify-center items-center min-h-[50vh]">
-    <LoadingScreen />
+  <div className="space-y-6 p-4">
+    <Skeleton className="h-14 w-1/2 mb-3 rounded-lg" />
+    <Skeleton className="h-6 w-3/4 mb-6 rounded-lg" />
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="bg-white rounded-xl overflow-hidden border shadow-sm">
+          <Skeleton className="w-full h-40 rounded-t-xl" />
+          <div className="p-4">
+            <Skeleton className="h-7 w-1/2 mb-2 rounded-lg" />
+            <Skeleton className="h-4 w-full mb-1 rounded-lg" />
+            <Skeleton className="h-4 w-3/4 mb-4 rounded-lg" />
+            <div className="flex justify-between items-center mt-4">
+              <Skeleton className="h-8 w-20 rounded-lg" />
+              <Skeleton className="h-6 w-16 rounded-lg" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   </div>
 )
 
@@ -104,6 +123,12 @@ export default function CommunitiesPage() {
   const { toast } = useToast()
   const [localLoading, setLocalLoading] = useState(true)
   
+  // Define modules to preload
+  const preloadModules = [
+    () => import("@/components/community/CommunitiesView"),
+    () => import("@/components/community/AmbassadorShowcase")
+  ]
+  
   // Track whether we've shown the loading timeout toast
   const hasShownTimeoutToastRef = useRef(false)
   
@@ -147,7 +172,7 @@ export default function CommunitiesPage() {
   
   // Show loading state
   if (localLoading) {
-    return <LoadingScreen />
+    return <LoadingPreloader preloadModules={preloadModules} />
   }
 
   // If no user after loading completes, show login message
@@ -266,7 +291,18 @@ export default function CommunitiesPage() {
       {/* Ambassador Showcase */}
       <div className="bg-white rounded-xl p-8 shadow-lg border-4 border-white">
         <h2 className="text-2xl font-bold text-green-800 mb-6 font-display">Our Community Ambassadors</h2>
-        <Suspense fallback={<div className="h-[200px] flex items-center justify-center"><LoadingScreen /></div>}>
+        <Suspense fallback={<div className="space-y-6">
+          <div className="flex justify-around flex-wrap gap-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl overflow-hidden border shadow-sm p-4 w-60">
+                <Skeleton className="h-24 w-24 rounded-full mx-auto mb-4" />
+                <Skeleton className="h-6 w-3/4 mx-auto mb-1 rounded-lg" />
+                <Skeleton className="h-4 w-5/6 mx-auto mb-1 rounded-lg" />
+                <Skeleton className="h-4 w-1/2 mx-auto mb-4 rounded-lg" />
+              </div>
+            ))}
+          </div>
+        </div>}>
           <AmbassadorShowcaseDynamic ambassadors={ambassadors} />
         </Suspense>
       </div>
@@ -303,7 +339,7 @@ export default function CommunitiesPage() {
         </div>
         
         {/* Community grid */}
-        <Suspense fallback={<div className="h-[400px] flex items-center justify-center"><LoadingScreen /></div>}>
+        <Suspense fallback={<LazyLoadingPlaceholder />}>
           <CommunitiesViewDynamic 
             onCommunitySelect={(id) => {
               router.push(`/dashboard/communities/${id}`)

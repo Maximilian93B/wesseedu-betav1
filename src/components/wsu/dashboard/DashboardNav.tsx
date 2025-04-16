@@ -8,12 +8,14 @@ import { useAuth } from "@/context/AuthContext"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useNavigation } from "@/context/NavigationContext"
 
 export function DashboardNav() {
   const { signOut } = useAuth()
   const pathname = usePathname()
   const router = useRouter()
   const [isSigningOut, setIsSigningOut] = useState(false)
+  const { setIsTransitioning } = useNavigation()
 
   // Define the navigation items
   const navItems = [
@@ -23,6 +25,14 @@ export function DashboardNav() {
     { href: "/dashboard/communities", label: "Communities" },
     { href: "/dashboard/saved", label: "Saved" },
   ]
+  
+  // Handle navigation with transition state
+  const handleNavigation = (href: string) => {
+    if (href !== pathname) {
+      setIsTransitioning(true)
+      router.push(href)
+    }
+  }
   
   // Handle sign out with redirect
   const handleSignOut = async () => {
@@ -117,9 +127,9 @@ export function DashboardNav() {
 
         <nav className="flex-grow flex justify-center gap-4 sm:gap-6">
           {navItems.map((item) => (
-            <Link
+            <button
               key={item.href}
-              href={item.href}
+              onClick={() => handleNavigation(item.href)}
               className={`relative text-sm font-medium transition-all duration-300 px-3 py-2 ${
                 isActive(item.href)
                   ? 'text-slate-800' 
@@ -136,7 +146,7 @@ export function DashboardNav() {
                 />
               )}
               <span>{item.label}</span>
-            </Link>
+            </button>
           ))}
         </nav>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { Zap, RefreshCw, Globe, TrendingUp, Rocket, ArrowRight, DollarSign, LineChart, Users, Shield, Search, Filter, ChevronDown } from "lucide-react"
 import { CompanyCard } from "@/components/wsu/marketplace/CompanyCard"
 import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
@@ -13,6 +13,8 @@ import { CompaniesViewHero } from "@/components/company/CompaniesViewHero"
 import { MarketplaceIntroduction } from "@/components/company/MarketplaceIntroduction"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useNavigation } from "@/context/NavigationContext"
 
 interface Company {
   id: string
@@ -48,8 +50,15 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
   const [fetchAttempted, setFetchAttempted] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeCategory, setActiveCategory] = useState("All")
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const { toast } = useToast()
-
+  const { isTransitioning, setIsTransitioning } = useNavigation()
+  
+  // Track whether component is mounted and fetch is in progress
+  const isMountedRef = useRef(true)
+  const fetchInProgressRef = useRef(false)
+  const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
   const categories = ["All", "Energy", "Agriculture", "Construction", "Technology", "Water"]
 
   // Handle filtering and searching
@@ -78,22 +87,50 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
     }
   }, [companies, searchQuery, activeCategory])
 
-  const fetchCompanies = async () => {
-    if (fetchAttempted) return;
+  const fetchCompanies = useCallback(async () => {
+    // Guard against concurrent fetches, unmounted components, or already attempted fetches
+    if (fetchInProgressRef.current || !isMountedRef.current || fetchAttempted) {
+      return;
+    }
     
+    // Set fetch in progress flag
+    fetchInProgressRef.current = true;
     setLoading(true);
     setFetchAttempted(true);
+    setFetchError(null);
+    
+    // Create a timeout to cancel fetch if it takes too long
+    fetchTimeoutRef.current = setTimeout(() => {
+      if (isMountedRef.current && fetchInProgressRef.current) {
+        fetchInProgressRef.current = false;
+        setLoading(false);
+        setFetchError("Request timed out. Please try again.");
+        toast({
+          title: "Timeout",
+          description: "Request took too long to complete. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }, 15000); // 15 second timeout
     
     try {
       console.log("CompaniesView: Fetching companies data")
       const response = await fetchWithAuth('/api/companies')
+      
+      // Clear timeout since request completed
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+        fetchTimeoutRef.current = null;
+      }
+      
+      if (!isMountedRef.current) return; // Exit if component unmounted during fetch
       
       if (response.error) {
         console.error("Error in companies response:", response.error)
         
         // Handle 401 error by redirecting to login
         if (response.status === 401) {
-          window.location.href = '/auth/signin?redirect=' + encodeURIComponent(window.location.pathname)
+          window.location.href = '/auth/login?redirect=' + encodeURIComponent(window.location.pathname)
           return
         }
         
@@ -136,6 +173,10 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
       setFilteredCompanies(formattedCompanies)
     } catch (error) {
       console.error("Error fetching companies:", error)
+      
+      if (!isMountedRef.current) return; // Exit if component unmounted during fetch
+      
+      setFetchError((error as Error).message || "Failed to load companies");
       toast({
         title: "Error",
         description: "Failed to load companies. Please try again.",
@@ -143,25 +184,91 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
       })
       setCompanies([])
     } finally {
-      setLoading(false)
+      // Clear timeout if it hasn't been cleared yet
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+        fetchTimeoutRef.current = null;
+      }
+      
+      if (isMountedRef.current) {
+        fetchInProgressRef.current = false;
+        setLoading(false);
+        
+        if (setIsTransitioning) {
+          setIsTransitioning(false);
+        }
+      }
     }
-  }
+  }, [fetchAttempted, toast, setIsTransitioning]);
 
+  // Setup effect for component mounting/unmounting and initial fetch
   useEffect(() => {
-    fetchCompanies()
-  }, [])
+    isMountedRef.current = true;
+    let isInitialFetch = true;
+    
+    // Call fetchCompanies on mount (runs only once)
+    if (isInitialFetch) {
+      fetchCompanies();
+      isInitialFetch = false;
+    }
+    
+    // Cleanup function for unmounting
+    return () => {
+      isMountedRef.current = false;
+      
+      // Clear any pending timeouts
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+        fetchTimeoutRef.current = null;
+      }
+      
+      if (setIsTransitioning) {
+        setIsTransitioning(false);
+      }
+    };
+  }, []);
 
-  const handleRetryFetch = () => {
-    setFetchAttempted(false)
-    fetchCompanies()
-  }
+  const handleRetryFetch = useCallback(() => {
+    setFetchAttempted(false);
+    fetchCompanies();
+  }, [fetchCompanies]);
 
-  const handleScrollToCompanies = () => {
+  const handleScrollToCompanies = useCallback(() => {
     const companiesSection = document.getElementById('companies-section')
     if (companiesSection) {
       companiesSection.scrollIntoView({ behavior: 'smooth' })
     }
-  }
+  }, []);
+
+  // Handle selecting a company with transition state
+  const handleCompanySelect = useCallback((id: string) => {
+    if (setIsTransitioning) {
+      setIsTransitioning(true)
+    }
+    setSelectedCompanyId(id)
+    onCompanySelect(id)
+  }, [onCompanySelect, setIsTransitioning]);
+
+  // Handle closing company details with transition state
+  const handleCloseDetails = useCallback(() => {
+    if (setIsTransitioning) {
+      setIsTransitioning(true)
+    }
+    setSelectedCompanyId(null)
+    // Small delay to allow animation to complete
+    setTimeout(() => {
+      if (isMountedRef.current && setIsTransitioning) {
+        setIsTransitioning(false)
+      }
+    }, 300);
+  }, [setIsTransitioning]);
+
+  // Safe animation completion handler to avoid state updates if component unmounted
+  const handleAnimationComplete = useCallback(() => {
+    if (isMountedRef.current && setIsTransitioning) {
+      setIsTransitioning(false)
+    }
+  }, [setIsTransitioning]);
 
   return (
     <motion.div
@@ -170,13 +277,14 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
       exit={{ opacity: 0, x: "100%" }}
       transition={{ type: "spring", stiffness: 80, damping: 17 }}
       className="absolute inset-0 bg-gradient-to-r from-[#70f570] to-[#49c628] overflow-y-auto"
+      onAnimationComplete={handleAnimationComplete}
     >
       <AnimatePresence mode="wait">
         {selectedCompanyId ? (
           <CompanyDetailsView 
             key="company-details"
             companyId={selectedCompanyId} 
-            onClose={() => setSelectedCompanyId(null)} 
+            onClose={handleCloseDetails} 
           />
         ) : (
           <motion.div
@@ -294,19 +402,30 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                     </motion.div>
 
                     {loading ? (
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex flex-col items-center justify-center py-32"
-                      >
-                        <div className="relative mb-10">
-                          <div className="w-20 h-20 border-4 border-gray-100 rounded-full animate-spin"></div>
-                          <div className="w-20 h-20 border-4 border-green-500 rounded-full 
-                            animate-spin absolute top-0 left-0 border-t-transparent"></div>
+                      <div className="space-y-8 py-8">
+                        {/* Company list loading skeleton */}
+                        <div className="text-center mb-6">
+                          <Skeleton className="h-7 w-48 mx-auto mb-2 rounded-lg" />
+                          <Skeleton className="h-4 w-64 mx-auto rounded-lg" />
                         </div>
-                        <p className="text-gray-800 text-xl font-medium mb-2 font-display">Loading Companies</p>
-                        <p className="text-gray-600 font-body">Please wait while we retrieve sustainable opportunities</p>
-                      </motion.div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 auto-rows-fr">
+                          {/* Generate 8 company card skeletons */}
+                          {[...Array(8)].map((_, idx) => (
+                            <div key={idx} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden h-full">
+                              <Skeleton className="w-full h-40 rounded-t-xl" />
+                              <div className="p-4">
+                                <Skeleton className="h-6 w-3/4 mb-2 rounded-lg" />
+                                <Skeleton className="h-4 w-full mb-4 rounded-lg" />
+                                <div className="flex items-center justify-between">
+                                  <Skeleton className="h-8 w-24 rounded-lg" />
+                                  <Skeleton className="h-8 w-8 rounded-full" />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     ) : filteredCompanies.length === 0 ? (
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -374,7 +493,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                             >
                               <CompanyCard 
                                 company={company} 
-                                onCompanySelect={onCompanySelect}
+                                onCompanySelect={handleCompanySelect}
                               />
                             </motion.div>
                           ))}
