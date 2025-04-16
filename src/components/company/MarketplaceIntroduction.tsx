@@ -33,7 +33,7 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
     <div className="mb-16">
       <div className="relative">
         {/* Main showcase container with full width */}
-        <div className="w-screen relative left-1/2 right-1/2 mx-[-50vw] rounded-none overflow-hidden border-x-0 border-y border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]
+        <div className="w-screen relative left-1/2 right-1/2 mx-[-50vw] rounded-none overflow-hidden border-x-0 border-y border-white/30 shadow-[0_8px_30px_rgba(0,0,0,0.15)]
           hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-shadow duration-500 min-h-[550px]"
           style={{ 
             backgroundImage: "linear-gradient(115deg, #70f570, #49c628)" 
@@ -80,7 +80,7 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                   
                   <motion.h3 
                     variants={itemVariants}
-                    className="text-2xl sm:text-3xl font-extrabold text-white mb-4 leading-tight tracking-tight font-display"
+                    className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4 leading-tight tracking-tight font-display"
                   >
                     Discover and Invest
                     <br />in Innovative
@@ -91,7 +91,7 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                     variants={itemVariants}
                     className="mb-6"
                   >
-                    <p className="text-white text-sm sm:text-base leading-relaxed font-light font-body drop-shadow-sm">
+                    <p className="text-white text-sm sm:text-base md:text-lg leading-relaxed font-light font-body drop-shadow-sm">
                       Our marketplace connects you with cutting-edge companies creating positive environmental and social impact.
                     </p>
                   </motion.div>
@@ -136,9 +136,9 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                   <motion.div
                     variants={itemVariants}
                     key={index}
-                    className="relative overflow-hidden rounded-lg border border-white/20 bg-white/10 
+                    className="relative overflow-hidden rounded-lg border border-white/30 bg-white/10 
                       shadow-[0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]
-                      hover:border-white/30 transition-all duration-300 p-4"
+                      hover:border-white/40 transition-all duration-300 p-4"
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center
@@ -191,7 +191,7 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                     <motion.div 
                       variants={itemVariants}
                       key={index}
-                      className="bg-white/10 rounded-lg border border-white/20 hover:border-white/30 
+                      className="bg-white/10 rounded-lg border border-white/30 hover:border-white/40 
                         transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] p-4"
                     >
                       <div className="flex items-center gap-2 mb-2">
@@ -200,7 +200,7 @@ export function MarketplaceIntroduction({ onScrollToCompanies }: MarketplaceIntr
                         </div>
                         <h5 className="text-xs font-medium text-white font-helvetica">{item.title}</h5>
                       </div>
-                      <p className="text-white/90 text-xs sm:text-sm font-body drop-shadow-sm">{item.description}</p>
+                      <p className="text-white/90 text-xs sm:text-sm leading-relaxed font-body drop-shadow-sm">{item.description}</p>
                     </motion.div>
                   ))}
                 </div>

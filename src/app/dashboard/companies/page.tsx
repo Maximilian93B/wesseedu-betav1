@@ -8,6 +8,7 @@ import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useNavigation } from "@/context/NavigationContext" 
+import { CurvedTransition } from "@/components/ui/CurvedTransition"
 
 // Placeholder component for lazy loading
 const LazyLoadingPlaceholder = () => (
@@ -118,6 +119,7 @@ export default function CompaniesPage() {
   
   return (
     <div className="w-full">
+      <CurvedTransition fillColor="#ffffff" curveType="arc" size="sm" />
       <Suspense fallback={<LazyLoadingPlaceholder />}>
         <CompaniesViewDynamic 
           onCompanySelect={(id) => {

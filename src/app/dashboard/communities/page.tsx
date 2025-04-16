@@ -13,6 +13,7 @@ import { Ambassador, Community } from '@/types/community'
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 
+
 // Placeholder component for lazy loading
 const LazyLoadingPlaceholder = () => (
   <div className="space-y-6 p-4">
@@ -21,7 +22,7 @@ const LazyLoadingPlaceholder = () => (
     
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {[...Array(6)].map((_, i) => (
-        <div key={i} className="bg-white rounded-xl overflow-hidden border shadow-sm">
+        <div key={i} className="bg-white rounded-xl overflow-hidden border border-green-100 shadow-sm">
           <Skeleton className="w-full h-40 rounded-t-xl" />
           <div className="p-4">
             <Skeleton className="h-7 w-1/2 mb-2 rounded-lg" />
@@ -181,13 +182,13 @@ export default function CommunitiesPage() {
   }
   
   return (
-    <div className="space-y-8 max-w-[2000px] mx-auto">
+    <div className="space-y-4 max-w-[2000px] mx-auto">
       {/* Hero Section */}
       <motion.div
         initial="hidden"
         animate="visible"
         variants={containerVariants}
-        className="bg-white rounded-xl sm:rounded-2xl overflow-hidden border-4 border-white relative shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+        className="bg-white rounded-xl sm:rounded-2xl overflow-hidden border-4 border-white relative shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
       >
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-bl from-green-50 via-transparent to-transparent opacity-70"></div>
         
@@ -204,7 +205,7 @@ export default function CommunitiesPage() {
             </motion.div>
             
             <motion.h1 
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-green-800 mb-6 tracking-tight leading-tight font-display" 
+              className="text-3xl md:text-4xl lg:text-5xl font-black text-green-800 mb-6 tracking-tight leading-tight font-display" 
               variants={itemVariants}
             >
               <span className="text-green-700">Seed</span> Capital,
@@ -243,19 +244,19 @@ export default function CommunitiesPage() {
             >
               <div className="grid grid-cols-3 gap-8">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-green-700 font-semibold text-2xl font-helvetica">3,000+</p>
+                  <p className="text-green-700 font-extrabold text-2xl font-helvetica">3,000+</p>
                   <div className="h-px w-12 bg-green-200 mb-1"></div>
                   <p className="text-green-600 text-sm font-body">Impact Investors</p>
                 </div>
                 
                 <div className="flex flex-col space-y-1">
-                  <p className="text-green-700 font-semibold text-2xl font-helvetica">40+</p>
+                  <p className="text-green-700 font-extrabold text-2xl font-helvetica">40+</p>
                   <div className="h-px w-12 bg-green-200 mb-1"></div>
                   <p className="text-green-600 text-sm font-body">Sustainable Deals</p>
                 </div>
                 
                 <div className="flex flex-col space-y-1">
-                  <p className="text-green-700 font-semibold text-2xl font-helvetica">12</p>
+                  <p className="text-green-700 font-extrabold text-2xl font-helvetica">12</p>
                   <div className="h-px w-12 bg-green-200 mb-1"></div>
                   <p className="text-green-600 text-sm font-body">Niche Networks</p>
                 </div>
@@ -264,37 +265,38 @@ export default function CommunitiesPage() {
           </div>
         </div>
       </motion.div>
-      
+
       {/* Feature rows with two-column layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-        <div className="p-6 rounded-xl bg-white border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+        <div className="p-6 rounded-xl bg-white border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
           <div className="flex items-center mb-4">
-            <div className="bg-green-50 p-3 rounded-md mr-4">
-              <Users className="h-5 w-5 text-green-600" />
+            <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] p-3 rounded-md mr-4 shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
+              <Users className="h-5 w-5 text-white" />
             </div>
             <p className="text-green-800 font-medium text-lg font-display">Regenerative Networks</p>
           </div>
-          <p className="text-green-700 font-body">Collaborate with like-minded investors committed to positive environmental and social impact. Join forums, events, and discussions that align with your values.</p>
+          <p className="text-green-700 font-body leading-relaxed">Collaborate with like-minded investors committed to positive environmental and social impact. Join forums, events, and discussions that align with your values.</p>
         </div>
         
-        <div className="p-6 rounded-xl bg-white border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+        <div className="p-6 rounded-xl bg-white border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
           <div className="flex items-center mb-4">
-            <div className="bg-green-50 p-3 rounded-md mr-4">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+            <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] p-3 rounded-md mr-4 shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
+              <TrendingUp className="h-5 w-5 text-white" />
             </div>
             <p className="text-green-800 font-medium text-lg font-display">Sustainable Alpha</p>
           </div>
-          <p className="text-green-700 font-body">Gain access to curated investment opportunities that generate returns while accelerating positive change. Our network helps you identify high-potential sustainable opportunities.</p>
+          <p className="text-green-700 font-body leading-relaxed">Gain access to curated investment opportunities that generate returns while accelerating positive change. Our network helps you identify high-potential sustainable opportunities.</p>
         </div>
       </div>
       
+    
       {/* Ambassador Showcase */}
-      <div className="bg-white rounded-xl p-8 shadow-lg border-4 border-white">
-        <h2 className="text-2xl font-bold text-green-800 mb-6 font-display">Our Community Ambassadors</h2>
+      <div className="bg-white rounded-xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.1)] border border-green-100">
+        <h2 className="text-2xl font-black text-green-800 mb-6 font-display tracking-tight">Our Community Ambassadors</h2>
         <Suspense fallback={<div className="space-y-6">
           <div className="flex justify-around flex-wrap gap-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden border shadow-sm p-4 w-60">
+              <div key={i} className="bg-white rounded-xl overflow-hidden border border-green-100 shadow-sm p-4 w-60">
                 <Skeleton className="h-24 w-24 rounded-full mx-auto mb-4" />
                 <Skeleton className="h-6 w-3/4 mx-auto mb-1 rounded-lg" />
                 <Skeleton className="h-4 w-5/6 mx-auto mb-1 rounded-lg" />
@@ -307,15 +309,17 @@ export default function CommunitiesPage() {
         </Suspense>
       </div>
       
+   
+      
       {/* Communities List Section */}
-      <div id="communities-list" className="bg-white rounded-xl shadow-lg p-8">
+      <div id="communities-list" className="bg-white rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-8 border border-green-100">
         <div className="mb-8 relative">
           <div className="flex items-center gap-8 mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-green-800 font-display">
+              <h2 className="text-2xl font-black text-green-800 font-display tracking-tight">
                 Select Your <span className="text-green-700">Community</span>
               </h2>
-              <p className="text-green-700 mt-2 font-body">
+              <p className="text-green-700 mt-2 font-body leading-relaxed">
                 Find your niche where your capital can seed meaningful change
               </p>
             </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { Zap, RefreshCw, Globe, TrendingUp, Rocket, ArrowRight, DollarSign, LineChart, Users, Shield, Search, Filter, ChevronDown } from "lucide-react"
+import { RefreshCw, Rocket, Search, Filter, ChevronDown } from "lucide-react"
 import { CompanyCard } from "@/components/wsu/marketplace/CompanyCard"
 import { CompanyDetailsView } from "@/components/company/CompanyDetailsView"
 import { motion, AnimatePresence } from "framer-motion"

@@ -118,13 +118,13 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
             </motion.div>
             <motion.h3 
               variants={itemVariants}
-              className="text-xl font-medium text-green-800 mb-3 font-display text-center"
+              className="text-xl sm:text-2xl font-bold text-green-800 mb-3 font-display text-center tracking-tight"
             >
               {isUnauthorized ? "Authentication Required" : "Unable to Load Communities"}
             </motion.h3>
             <motion.p 
               variants={itemVariants}
-              className="text-green-700 mb-8 max-w-sm mx-auto font-body text-center"
+              className="text-green-700 mb-8 max-w-sm mx-auto font-body text-center leading-relaxed"
             >
               {isUnauthorized 
                 ? "Please sign in to view communities and investment opportunities." 
@@ -192,7 +192,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
             {/* Available Communities Card */}
             <motion.div 
               variants={itemVariants}
-              className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] overflow-hidden relative bg-white"
+              className="rounded-xl sm:rounded-2xl border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)] overflow-hidden relative bg-white"
             >
               <div className="p-6 relative z-10">
                 <div className="flex items-center">
@@ -200,7 +200,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
                     <Building2 className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <div className="text-3xl font-bold text-green-800 mb-1 font-helvetica">
+                    <div className="text-3xl font-extrabold text-green-800 mb-1 font-helvetica">
                       {totalCommunities}
                     </div>
                     <div className="text-xs uppercase tracking-wider text-green-700 font-medium font-helvetica">Communities</div>
@@ -212,7 +212,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
             {/* With Ambassadors Card */}
             <motion.div 
               variants={itemVariants}
-              className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] overflow-hidden relative bg-white"
+              className="rounded-xl sm:rounded-2xl border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)] overflow-hidden relative bg-white"
             >
               <div className="p-6 relative z-10">
                 <div className="flex items-center">
@@ -220,7 +220,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
                     <Award className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <div className="text-3xl font-bold text-green-800 mb-1 font-helvetica">
+                    <div className="text-3xl font-extrabold text-green-800 mb-1 font-helvetica">
                       {ambassadorCommunities}
                     </div>
                     <div className="text-xs uppercase tracking-wider text-green-700 font-medium font-helvetica">With Ambassadors</div>
@@ -232,7 +232,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
             {/* Premium Card */}
             <motion.div 
               variants={itemVariants}
-              className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] overflow-hidden relative bg-white"
+              className="rounded-xl sm:rounded-2xl border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)] overflow-hidden relative bg-white"
             >
               <div className="p-6 relative z-10">
                 <div className="flex items-center">
@@ -240,7 +240,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
                     <TrendingUp className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <div className="text-3xl font-bold text-green-800 mb-1 font-helvetica">
+                    <div className="text-3xl font-extrabold text-green-800 mb-1 font-helvetica">
                       {featuredCommunities}
                     </div>
                     <div className="text-xs uppercase tracking-wider text-green-700 font-medium font-helvetica">Premium</div>
@@ -253,7 +253,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
           {/* Filter and results indicator */}
           <motion.div 
             variants={itemVariants}
-            className="flex items-center justify-between bg-white rounded-xl p-5 border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+            className="flex items-center justify-between bg-white rounded-xl p-5 border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
           >
             <div className="flex items-center">
               <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] p-2 rounded-md mr-3 shadow-sm">

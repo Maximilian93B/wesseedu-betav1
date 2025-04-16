@@ -7,6 +7,9 @@ import { Ambassador } from '@/types/community';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
+
+
+
 interface AmbassadorShowcaseProps {
   ambassadors: Ambassador[];
   className?: string;
@@ -242,6 +245,7 @@ export function AmbassadorShowcase({ ambassadors, className }: AmbassadorShowcas
           </div>
         </div>
       </div>
+
     </div>
   );
 } 

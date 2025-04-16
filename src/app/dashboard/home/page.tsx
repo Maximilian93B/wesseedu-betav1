@@ -216,7 +216,7 @@ export default function DashboardHomePage() {
   }
 
   return (
-    <div className="w-full max-w-[2000px] mx-auto overflow-hidden rounded-lg">
+    <div className="w-full max-w-full mx-auto overflow-hidden rounded-lg">
       {/* Main Content */}
       <main className="w-full">
         {/* Hero Section with dashboard introduction */}
