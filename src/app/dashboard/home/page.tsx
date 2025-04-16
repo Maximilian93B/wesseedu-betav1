@@ -11,38 +11,112 @@ import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useNavigation } from "@/context/NavigationContext"
 
-// Dynamically import home page components
-const HomeHeroDynamic = dynamic(
-  () => import("@/components/wsu/home").then(mod => ({ default: mod.HomeHero })), 
+// Dynamically import dashboard home page components
+const DashboardIntroHeroDynamic = dynamic(
+  () => import("@/components/wsu/dashboard/DashboardIntroHero").then(mod => ({ default: mod.DashboardIntroHero })), 
   { ssr: true }
 )
 
-const HowItWorksDynamic = dynamic(
-  () => import("@/components/wsu/home").then(mod => ({ default: mod.HowItWorks })), 
+const DashboardExplainerDynamic = dynamic(
+  () => import("@/components/wsu/dashboard/DashboardExplainer").then(mod => ({ default: mod.DashboardExplainer })), 
   { ssr: true }
 )
 
-const FeaturedContentDynamic = dynamic(
-  () => import("@/components/wsu/home").then(mod => ({ default: mod.FeaturedContent })), 
+const AIInsightsDynamic = dynamic(
+  () => import("@/components/wsu/dashboard/AIInsights").then(mod => ({ default: mod.AIInsights })), 
   { ssr: true }
 )
 
-const DataVizTransitionDynamic = dynamic(
-  () => import("@/components/wsu/dashboard/DataVizTransition").then(mod => ({ default: mod.DataVizTransition })), 
-  { ssr: false }
-)
-
-// Component loading placeholder
-const ComponentLoadingPlaceholder = ({ height }: { height: string }) => (
-  <div className={`${height} flex items-center justify-center`}>
-    <div className="w-full max-w-md">
-      <Skeleton className="h-8 w-3/4 mb-4 rounded-lg" />
-      <Skeleton className="h-4 w-full mb-2 rounded-lg" />
-      <Skeleton className="h-4 w-5/6 mb-2 rounded-lg" />
-      <Skeleton className="h-32 w-full rounded-lg mt-6" />
-    </div>
-  </div>
-)
+// Component loading placeholder with responsive design
+const ComponentLoadingPlaceholder = ({ type = "default" }: { type?: "hero" | "explainer" | "ai" | "default" }) => {
+  switch(type) {
+    case "hero":
+      return (
+        <div className="bg-gradient-to-r from-[#70f570]/40 to-[#49c628]/40 py-10 sm:py-16 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <Skeleton className="h-6 w-40 mb-4 rounded-full" />
+                <Skeleton className="h-8 sm:h-10 w-4/5 mb-3 rounded-lg" />
+                <Skeleton className="h-8 sm:h-10 w-3/5 mb-6 rounded-lg" />
+                <Skeleton className="h-4 w-full mb-2 rounded-lg" />
+                <Skeleton className="h-4 w-5/6 mb-6 rounded-lg" />
+                <div className="flex gap-3 flex-wrap">
+                  <Skeleton className="h-10 w-36 rounded-lg" />
+                  <Skeleton className="h-10 w-36 rounded-lg" />
+                </div>
+              </div>
+              <div className="hidden sm:block">
+                <Skeleton className="h-64 w-full rounded-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    case "explainer":
+      return (
+        <div className="py-8 sm:py-12 px-4 sm:px-6 bg-white">
+          <Skeleton className="h-8 w-60 mx-auto mb-4 rounded-lg" />
+          <Skeleton className="h-4 w-full max-w-md mx-auto mb-8 rounded-lg" />
+          <div className="space-y-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="grid md:grid-cols-2 gap-6 items-center">
+                <div>
+                  <Skeleton className="h-6 w-40 mb-3 rounded-lg" />
+                  <Skeleton className="h-4 w-full mb-2 rounded-lg" />
+                  <Skeleton className="h-4 w-5/6 mb-4 rounded-lg" />
+                  <div className="space-y-2">
+                    {[1, 2, 3].map(j => (
+                      <div key={j} className="flex items-center">
+                        <Skeleton className="h-4 w-4 mr-2 rounded-full" />
+                        <Skeleton className="h-3 w-3/4 rounded-lg" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Skeleton className="h-48 w-full rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    case "ai":
+      return (
+        <div className="bg-gradient-to-r from-[#70f570]/40 to-[#49c628]/40 py-10 sm:py-16 px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <Skeleton className="h-8 sm:h-10 w-4/5 mb-4 rounded-lg" />
+                <Skeleton className="h-4 w-full mb-4 rounded-lg" />
+                <div className="space-y-3">
+                  {[1, 2, 3, 4].map(i => (
+                    <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                  ))}
+                </div>
+                <Skeleton className="h-10 w-40 mt-6 rounded-lg" />
+              </div>
+              <div className="hidden sm:block">
+                <Skeleton className="h-72 w-full max-w-md mx-auto rounded-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    default:
+      return (
+        <div className="py-8 px-4 sm:px-6">
+          <div className="w-full max-w-md mx-auto">
+            <Skeleton className="h-8 w-3/4 mb-4 rounded-lg" />
+            <Skeleton className="h-4 w-full mb-2 rounded-lg" />
+            <Skeleton className="h-4 w-5/6 mb-2 rounded-lg" />
+            <Skeleton className="h-32 w-full rounded-lg mt-6" />
+          </div>
+        </div>
+      );
+  }
+}
 
 export default function DashboardHomePage() {
   const { user, profile, loading } = useAuth()
@@ -54,10 +128,9 @@ export default function DashboardHomePage() {
   
   // Define modules to preload for better dashboard performance
   const dashboardModules = [
-    () => import("@/components/wsu/home").then(mod => mod.HomeHero),
-    () => import("@/components/wsu/home").then(mod => mod.HowItWorks),
-    () => import("@/components/wsu/home").then(mod => mod.FeaturedContent),
-    () => import("@/components/wsu/dashboard/DataVizTransition")
+    () => import("@/components/wsu/dashboard/DashboardIntroHero"),
+    () => import("@/components/wsu/dashboard/DashboardExplainer"),
+    () => import("@/components/wsu/dashboard/AIInsights")
   ]
   
   // Track whether we've shown the loading timeout toast
@@ -143,56 +216,31 @@ export default function DashboardHomePage() {
   }
 
   return (
-    <div className="w-full max-w-[2000px] mx-auto overflow-x-hidden">
+    <div className="w-full max-w-[2000px] mx-auto overflow-hidden rounded-lg">
       {/* Main Content */}
       <main className="w-full">
-        {/* Hero Section with green apple styling */}
-        <div className="relative">
-          <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-16">
-            <Suspense fallback={<ComponentLoadingPlaceholder height="h-[250px] sm:h-[300px]" />}>
-              <HomeHeroDynamic 
-                profile={profile} 
-                onNavigate={handleNavigation} 
-              />
-            </Suspense>
-          </div>
+        {/* Hero Section with dashboard introduction */}
+        <div className="relative ">
+          <Suspense fallback={<ComponentLoadingPlaceholder type="hero" />}>
+            <DashboardIntroHeroDynamic 
+              profile={profile} 
+              onNavigate={handleNavigation} 
+            />
+          </Suspense>
         </div>
 
-        {/* How It Works Section */}
-        <div className="relative overflow-hidden rounded-t-[1.5rem] sm:rounded-t-[2rem] border-t border-white/20 shadow-[0_-8px_30px_rgba(0,0,0,0.1)] bg-white pt-12 pb-10 sm:pt-16 md:pt-24 md:pb-16 mt-[-1rem]">
-          <div className="w-full px-4 sm:px-6 lg:px-8">
-            <Suspense fallback={<ComponentLoadingPlaceholder height="h-[180px] sm:h-[200px]" />}>
-              <HowItWorksDynamic />
-            </Suspense>
-          </div>
+        {/* Dashboard Features Section - Explains the dashboard */}
+        <div className="w-full bg-white">
+          <Suspense fallback={<ComponentLoadingPlaceholder type="explainer" />}>
+            <DashboardExplainerDynamic />
+          </Suspense>
         </div>
 
-        {/* Data Visualization Section */}
-        <div className="bg-white pb-6 sm:pb-8">
-          <div className="w-full px-4 sm:px-6 lg:px-8">
-            <Suspense fallback={<ComponentLoadingPlaceholder height="h-[250px] sm:h-[300px]" />}>
-              <DataVizTransitionDynamic />
-            </Suspense>
-          </div>
-        </div>
-
-        {/* Featured Content Section */}
-        <div className="relative bg-white">
-          {/* Split background container - improved for mobile */}
-          <div className="absolute inset-0">
-            <div className="h-1/2 md:h-full md:w-1/2 bg-green-50 absolute top-0 left-0 md:bottom-0"></div>
-            <div className="h-1/2 md:h-full md:w-1/2 bg-white absolute bottom-0 right-0 md:top-0"></div>
-          </div>
-          
-          {/* Content container */}
-          <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-            <Suspense fallback={<ComponentLoadingPlaceholder height="h-[400px] sm:h-[500px] md:h-[600px]" />}>
-              <FeaturedContentDynamic />
-            </Suspense>
-          </div>
-          
-          {/* Responsive height container */}
-          <div className="h-[500px] sm:h-[580px] md:h-[720px] lg:h-[800px]"></div>
+        {/* AI Insights Section - Explains how AI is used under the hood */}
+        <div className="w-full">
+          <Suspense fallback={<ComponentLoadingPlaceholder type="ai" />}>
+            <AIInsightsDynamic />
+          </Suspense>
         </div>
       </main>
     </div>
