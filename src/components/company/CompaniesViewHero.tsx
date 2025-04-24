@@ -1,166 +1,152 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Zap, Globe, BarChart3, Users, CheckCircle } from "lucide-react"
+import { Zap, Globe, BarChart3, Users, CheckCircle, ArrowRight } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 
+// Animation variants for staggered animations
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.08,
+      duration: 0.5
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: 10, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+}
+
 export function CompaniesViewHero() {
-  // Floating animation for the image
-  const [animationOffset, setAnimationOffset] = useState(0);
-  
-  // Create a gentle floating effect
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAnimationOffset(prev => Math.sin(Date.now() / 1000) * 10);
-    }, 50);
-    
-    return () => clearInterval(interval);
-  }, []);
-  
   return (
-    <div className="relative w-full overflow-hidden mb-16 rounded-xl sm:rounded-2xl border border-white/30 shadow-[0_8px_30px_rgba(0,0,0,0.15)]
-      hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-shadow duration-500 mt-8"
-      style={{ 
-        backgroundImage: "linear-gradient(115deg, #70f570, #49c628)" 
-      }}
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="relative w-full overflow-hidden mb-16 rounded-xl sm:rounded-2xl border-4 border-white bg-white shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-shadow duration-500 mt-8"
     >
-      {/* Subtle texture pattern for depth */}
-      <div className="absolute inset-0 opacity-[0.03]" 
-        style={{ 
-          backgroundImage: `radial-gradient(circle at 20px 20px, white 1px, transparent 0)`,
-          backgroundSize: "40px 40px"
-        }} 
-      />
+      {/* Background subtle pattern */}
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-bl from-green-50 via-transparent to-transparent opacity-70"></div>
       
-      {/* Top edge shadow line for definition */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-white/30 via-white/40 to-white/30"></div>
-      
-      {/* Inner shadow effects for depth */}
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white/10 to-transparent opacity-40"></div>
+      {/* Green accent bar */}
+      <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-[#70f570] to-[#49c628]"></div>
       
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-10 py-4 sm:py-8 lg:py-16 pt-24 pb-32">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-8 py-16 sm:px-10 sm:py-20">
+        <div className="flex flex-col lg:flex-row items-start justify-between gap-12">
           {/* Text content - Left side */}
-          <div className="lg:max-w-[55%] text-center lg:text-left">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+          <div className="lg:max-w-[50%] text-left">
+            <motion.div variants={itemVariants} className="mb-5">
+              <span className="text-green-700 text-sm tracking-wide font-medium px-4 py-1.5 rounded-full border border-green-200 shadow-[0_2px_10px_rgba(0,0,0,0.1)] bg-green-50 font-helvetica inline-flex items-center">
+                <Zap className="h-4 w-4 text-green-700 mr-2" />
+                Sustainable Investing
+              </span>
+            </motion.div>
+            
+            <motion.h1
+              variants={itemVariants}
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-800 to-green-600 leading-tight"
             >
-              <div className="inline-flex items-center justify-center gap-2 px-5 py-2 mb-8 rounded-full bg-white/10 border border-white/30 shadow-[0_4px_12px_rgba(0,0,0,0.05)]">
-                <Zap className="h-4 w-4 text-white" />
-                <span className="text-sm font-medium text-white font-helvetica">
-                  Discover Sustainable Investments
-                </span>
-              </div>
-              
-              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.2] text-white font-display">
-                <span>
-                  Sustainable
-                </span>
-                <br />
-                <span>
-                  Investment
-                </span>
-                <br />
-                <span>
-                  Marketplace
-                </span>
-              </h1>
-              
-              <div className="max-w-2xl mx-auto lg:mx-0 mt-8">
-                <p className="text-white text-sm sm:text-base md:text-xl leading-relaxed font-light font-body">
-                  Connect with innovative sustainable companies making real-world impact while generating competitive financial returns.
-                </p>
-              </div>
+              Money Grows Greener Here
+            </motion.h1>
+            
+            <motion.h2 
+              variants={itemVariants} 
+              className="mt-5 text-green-700 text-lg sm:text-xl md:text-2xl leading-relaxed font-medium"
+            >
+              Connect with innovative sustainable companies making real-world impact
+              while generating competitive financial returns.
+            </motion.h2>
+            
+            <motion.div variants={itemVariants} className="mt-8">
+              <button 
+                className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold px-6 py-3 text-sm font-helvetica shadow-md hover:shadow-lg transition-all duration-300 rounded-lg flex items-center"
+              >
+                <span className="mr-2">Explore Companies</span>
+                <ArrowRight className="h-4 w-4 inline" />
+              </button>
             </motion.div>
           </div>
           
           {/* Image - Right side */}
           <motion.div 
-            className="relative flex-shrink-0 mt-4 lg:mt-0"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            style={{
-              y: animationOffset,
+            variants={itemVariants}
+            className="hidden md:block md:w-[50%] mt-4 md:mt-0"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1,
+              y: [0, -8, 0]
+            }}
+            transition={{ 
+              duration: 0.6,
+              y: {
+                duration: 6,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut"
+              }
             }}
           >
-            {/* Blob shadow */}
-            <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-[220px] h-[40px] bg-white/10 rounded-full blur-xl"></div>
-            
-            {/* Image */}
-            <div className="relative">
-              <Image
-                src="/sustainability.png" 
-                alt="Sustainable World"
-                width={320}
-                height={320}
-                className="drop-shadow-2xl"
-              />
+            <div className="relative max-w-md mx-auto">
+              {/* Shadow effect */}
+              <div className="absolute -bottom-12 w-[85%] h-16 mx-auto left-0 right-0 
+                             bg-slate-900/20 blur-xl rounded-full"></div>
               
-              {/* Glow effect */}
-              <div className="absolute inset-0 rounded-full bg-white/10 filter blur-2xl"></div>
+              {/* The image */}
+              <Image
+                src="/financial-target.png" 
+                alt="Sustainable World"
+                width={420}
+                height={420}
+                className="drop-shadow-2xl transform hover:rotate-3 transition-all duration-700"
+                priority
+              />
             </div>
           </motion.div>
         </div>
         
         {/* Stats bar */}
         <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 pt-8 border-t border-white/20"
+          variants={itemVariants}
+          className="mt-16 p-6 bg-white rounded-xl shadow-md border border-green-100"
         >
-          {[
-            { 
-              label: "Verified Companies", 
-              value: "200+", 
-              icon: <CheckCircle className="h-5 w-5 text-white" />,
-              iconBg: "bg-white/10"
-            },
-            { 
-              label: "Average Return", 
-              value: "24%", 
-              icon: <BarChart3 className="h-5 w-5 text-white" />,
-              iconBg: "bg-white/10"
-            },
-            { 
-              label: "Active Investors", 
-              value: "30K+", 
-              icon: <Users className="h-5 w-5 text-white" />,
-              iconBg: "bg-white/10"
-            },
-            { 
-              label: "Sustainable Impact", 
-              value: "High", 
-              icon: <Globe className="h-5 w-5 text-white" />,
-              iconBg: "bg-white/10"
-            }
-          ].map((stat, index) => (
-            <motion.div 
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + (index * 0.1) }}
-              className="flex items-center gap-4"
-            >
-              <div className={`w-12 h-12 rounded-full ${stat.iconBg} flex items-center justify-center border border-white/30 shadow-[0_4px_12px_rgba(0,0,0,0.05)]`}>
-                {stat.icon}
+          <div className="grid grid-cols-4 gap-6 md:gap-10">
+            {[
+              { 
+                label: "Verified Companies", 
+                value: "200+", 
+              },
+              { 
+                label: "Average Return", 
+                value: "24%", 
+              },
+              { 
+                label: "Active Investors", 
+                value: "30K+", 
+              },
+              { 
+                label: "Sustainable Impact", 
+                value: "High", 
+              }
+            ].map((stat, index) => (
+              <div key={index} className="flex flex-col items-center text-center">
+                <p className="text-green-700 font-extrabold text-2xl font-helvetica">{stat.value}</p>
+                <p className="text-green-600 text-sm font-body mt-1">{stat.label}</p>
               </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-extrabold text-white font-helvetica">{stat.value}</span>
-                <span className="text-white/80 text-sm font-body">{stat.label}</span>
-              </div>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </motion.div>
       </div>
-      
-      {/* Bottom shadow effect */}
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white/10 to-transparent"></div>
-    </div>
+    </motion.div>
   );
 } 

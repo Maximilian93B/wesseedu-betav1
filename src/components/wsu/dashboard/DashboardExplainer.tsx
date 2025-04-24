@@ -40,10 +40,10 @@ export function DashboardExplainer() {
   // Define dashboard sections
   const dashboardSections: DashboardSection[] = [
     {
-      title: "Overview Dashboard",
+      title: "Dashboard Overview",
       description: "Your dashboard home gives you a complete view of your sustainable investment portfolio at a glance.",
       path: "/dashboard/overview",
-      imageSrc: "/images/dashboard/overview.png",
+      imageSrc: "/dashboard_explainer.png",
       features: [
         "Portfolio sustainability score",
         "Impact metrics visualization",
@@ -54,10 +54,10 @@ export function DashboardExplainer() {
       cta: "View Your Overview"
     },
     {
-      title: "Company Explorer",
+      title: "WeSeedU Marketplace",
       description: "Discover and analyze sustainable companies that align with your investment criteria and values.",
-      path: "/dashboard/companies", 
-      imageSrc: "/images/dashboard/companies.png",
+      path: "/dashboard_explainer.png", 
+      imageSrc: "/community_preview.png",
       features: [
         "Advanced filtering by impact metrics",
         "Detailed sustainability ratings",
@@ -82,10 +82,10 @@ export function DashboardExplainer() {
       cta: "Check Your Saved Items"
     },
     {
-      title: "Communities",
+      title: " WSU Communities",
       description: "Connect with like-minded investors and learn from ambassador-led sustainable investing communities.",
       path: "/dashboard/communities",
-      imageSrc: "/images/dashboard/communities.png",
+      imageSrc:"/community_preview.png",
       features: [
         "Join thematic investment groups",
         "Expert-led discussions",

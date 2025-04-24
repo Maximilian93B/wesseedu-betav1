@@ -3,7 +3,6 @@ import { Braces, Server, Cpu, Database, Brain, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CurvedTransition } from "@/components/ui/CurvedTransition";
 
 // Animation variants
 const containerVariants = {
@@ -278,9 +277,6 @@ export function AIInsights() {
           </motion.div>
         </div>
       </div>
-      
-      {/* Transition to white section */}
-      <CurvedTransition fillColor="white" size="lg" curveType="arc" />
     </section>
   );
 } 

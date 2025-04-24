@@ -220,7 +220,7 @@ export default function DashboardHomePage() {
       {/* Main Content */}
       <main className="w-full">
         {/* Hero Section with dashboard introduction */}
-        <div className="relative ">
+        <div className="relative">
           <Suspense fallback={<ComponentLoadingPlaceholder type="hero" />}>
             <DashboardIntroHeroDynamic 
               profile={profile} 

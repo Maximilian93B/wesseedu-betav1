@@ -302,26 +302,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
                 
                 {/* Marketplace introduction section */}
                 <MarketplaceIntroduction onScrollToCompanies={handleScrollToCompanies} />
-                
-                {/* Visual connector between introduction and companies section */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="relative flex flex-col items-center -mt-8 mb-4 z-20"
-                >
-                  <div className="bg-white/20 backdrop-blur-sm py-10 px-12 rounded-3xl border border-white/30 shadow-lg max-w-4xl w-full text-center mt-20">
-                    <h3 className="text-white text-2xl font-bold mb-4 font-display">Ready to explore sustainable opportunities?</h3>
-                    <p className="text-white/90 mb-6 font-body text-lg max-w-2xl mx-auto">Browse our curated selection of innovative companies making a positive impact on our planet and future.</p>
-                  </div>
-                  
-                  <div className="mt-8 flex flex-col items-center">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center 
-                      shadow-[0_0_20px_rgba(255,255,255,0.6)] mt-3">
-                      <ChevronDown className="h-7 w-7 text-green-600" />
-                    </div>
-                  </div>
-                </motion.div>
+            
               </div>
               
               {/* Main white container with rounded corners */}
