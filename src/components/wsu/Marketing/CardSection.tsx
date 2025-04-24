@@ -208,14 +208,14 @@ export function CardSection() {
           <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-between items-center z-30 px-1 sm:-mx-8 md:-mx-20 lg:-mx-28">
             <button 
               onClick={prevSlide}
-              className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center border border-white/30 shadow-lg hover:bg-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+              className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 rounded-full bg-white/50 backdrop-blur-md text-black flex items-center justify-center border border-white/50 shadow-lg hover:bg-white/70 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
               aria-label="Previous slide"
             >
               <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 rotate-180" />
             </button>
             <button 
               onClick={nextSlide}
-              className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center border border-white/30 shadow-lg hover:bg-white/30 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+              className="w-8 h-8 sm:w-10 md:w-12 sm:h-10 md:h-12 rounded-full bg-white/50 backdrop-blur-md text-black flex items-center justify-center border border-white/50 shadow-lg hover:bg-white/70 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
               aria-label="Next slide"
             >
               <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />

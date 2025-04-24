@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
 import dynamic from "next/dynamic"
 
+
 // Import modularized components
 import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -27,8 +28,16 @@ const AIInsightsDynamic = dynamic(
   { ssr: true }
 )
 
+const FooterDynamic = dynamic(
+  () => import("@/components/wsu/Footer").then(mod => ({ default: mod.Footer })), 
+  { ssr: true }
+) 
+
+
+
+
 // Component loading placeholder with responsive design
-const ComponentLoadingPlaceholder = ({ type = "default" }: { type?: "hero" | "explainer" | "ai" | "default" }) => {
+const ComponentLoadingPlaceholder = ({ type = "default" }: { type?: "hero" | "explainer" | "ai" | "default" | "footer" }) => {
   switch(type) {
     case "hero":
       return (
@@ -242,7 +251,13 @@ export default function DashboardHomePage() {
             <AIInsightsDynamic />
           </Suspense>
         </div>
+        <div className="w-full">
+          <Suspense fallback={<ComponentLoadingPlaceholder type="footer" />}>
+            <FooterDynamic />
+          </Suspense>
+        </div>
       </main>
+   
     </div>
   )
 } 

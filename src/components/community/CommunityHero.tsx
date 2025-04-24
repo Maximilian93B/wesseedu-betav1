@@ -66,12 +66,7 @@ export function CommunityHero({
       <div className="relative z-20 px-8 py-12 sm:px-10 sm:py-16 md:p-16 flex flex-col md:flex-row items-center">
         {/* Text content */}
         <div className="max-w-3xl md:max-w-[55%]">
-          <motion.div className="mb-3" variants={itemVariants}>
-            <span className="text-green-700 text-sm tracking-wide font-medium px-3 py-1 rounded-full border border-green-200 shadow-[0_2px_10px_rgba(0,0,0,0.1)] bg-green-50 font-helvetica">
-              WeSeedU Communities
-            </span>
-          </motion.div>
-          
+        
           <motion.h1 
             className="text-3xl md:text-4xl lg:text-5xl font-black text-green-800 mb-6 tracking-tight leading-tight font-display" 
             variants={itemVariants}

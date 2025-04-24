@@ -112,19 +112,19 @@ export function StartupApplicationSection() {
             variants={headingAnimation}
             className="w-full text-center"
           >
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-none mb-4">
+            <h2 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none mb-5 text-shadow-sm">
               <span className="inline-block text-white">
                 Fund Your 
               </span>
               {" "}
               <span className="relative">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white/80 to-white/20">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 drop-shadow-lg">
                   Sustainable Vision
                 </span>
               </span>
             </h2>
             
-            <p className="text-white/90 text-lg max-w-2xl mx-auto leading-relaxed mt-4">
+            <p className="text-white/90 text-lg max-w-2xl mx-auto leading-relaxed mt-5">
               WeSeedU connects innovative sustainable startups with impact investors and UN funding opportunities.
             </p>
           </motion.div>

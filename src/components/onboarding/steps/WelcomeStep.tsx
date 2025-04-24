@@ -95,26 +95,28 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
         <div className="relative">
           <div className="absolute -inset-0.5 bg-gradient-to-br from-green-400/50 to-white/50 opacity-70 rounded-xl blur-md"></div>
           
-          <Button 
-            onClick={onNext} 
+          <button 
+            onClick={() => {
+              console.log("WelcomeStep button clicked");
+              if (typeof onNext === 'function') {
+                onNext();
+              } else {
+                console.error("onNext is not a function", onNext);
+              }
+            }} 
             className="relative w-full bg-white hover:bg-slate-50 
               text-black font-medium border border-black/10
               shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)]
               transition-all duration-300 ease-out 
-              hover:translate-y-[-2px] rounded-xl py-6 h-auto text-base group z-10"
-            size="lg"
+              hover:translate-y-[-2px] rounded-xl py-6 px-4 h-auto text-base group z-10
+              flex justify-center items-center"
+            type="button"
           >
-            <motion.div
-              variants={pulseVariants}
-              initial="initial"
-              animate="animate"
-              className="absolute inset-0 bg-gradient-to-r from-green-100/30 to-white/30 rounded-xl blur-[1px] z-0"
-            />
             <span className="relative z-10 flex items-center">
               Let's get started 
               <ArrowRight className="ml-2 h-4 w-4 transform group-hover:translate-x-1 transition-transform duration-300" />
             </span>
-          </Button>
+          </button>
         </div>
         
         {/* Feature points with improved styling */}

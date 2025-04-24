@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
-import { Leaf, Sprout, ArrowRight } from "lucide-react"
+import { Leaf, Sprout, ArrowRight, ArrowLeft } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 
@@ -95,6 +95,7 @@ export default function OnboardingWizard() {
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
   
   // Refs for scroll effects
   const containerRef = useRef<HTMLDivElement>(null)
@@ -166,14 +167,28 @@ export default function OnboardingWizard() {
   }
 
   const handleNext = async () => {
+    console.log("handleNext called, current step:", currentStep);
+    
     if (currentStep < totalSteps) {
-      // Save progress to user metadata
-      if (userId) {
-        await supabase.auth.updateUser({
-          data: { onboarding_step: currentStep + 1 }
-        })
+      try {
+        // Directly update state first to ensure UI responds
+        const nextStep = currentStep + 1;
+        console.log("Setting current step to:", nextStep);
+        setCurrentStep(nextStep);
+        
+        // Then update user metadata (if needed)
+        if (userId) {
+          await supabase.auth.updateUser({
+            data: { onboarding_step: nextStep }
+          }).catch(err => {
+            console.error("Supabase update error:", err);
+          });
+        }
+      } catch (error) {
+        console.error("Error in handleNext:", error);
+        // Force update even if error occurs
+        setCurrentStep(currentStep + 1);
       }
-      setCurrentStep(prev => prev + 1)
     }
   }
 
@@ -276,6 +291,10 @@ export default function OnboardingWizard() {
     }
   }
 
+  const handleReturnHome = () => {
+    router.push("/")
+  }
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -329,6 +348,53 @@ export default function OnboardingWizard() {
         background: "radial-gradient(circle at center, #6fdd6f, #49c628)"
       }}
     >      
+      {/* Return to home button */}
+      <div className="fixed top-4 left-4 z-20">
+        <Button
+          onClick={() => setShowExitConfirm(true)}
+          variant="outline"
+          size="sm"
+          className="bg-white text-black hover:bg-white/90 hover:text-green-900 
+            border border-white/20 shadow-sm rounded-xl 
+            font-semibold transition-all duration-300 font-helvetica"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" /> Return to Home
+        </Button>
+      </div>
+
+      {/* Exit confirmation dialog */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-xl p-6 max-w-md mx-4 shadow-[0_8px_30px_rgba(0,0,0,0.2)]"
+          >
+            <h3 className="text-xl font-medium text-black mb-3 font-display">Exit Onboarding?</h3>
+            <p className="text-black/70 mb-6 font-body">
+              Your progress will be saved, but you'll need to complete the onboarding process later to access all features.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowExitConfirm(false)}
+                className="bg-white text-black hover:bg-white/90 border-white/20 font-helvetica"
+              >
+                Continue Setup
+              </Button>
+              <Button
+                onClick={handleReturnHome}
+                className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 
+                  text-white font-semibold shadow-sm transition-all duration-300 
+                  rounded-lg font-helvetica"
+              >
+                Return to Home
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      
       <motion.div
         initial="hidden"
         animate="visible"

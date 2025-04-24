@@ -2,6 +2,7 @@
 
 import React, { Suspense, useState, useEffect, useRef, useMemo } from 'react'
 import { MainNav } from "@/components/wsu/Nav"
+import { Footer } from "@/components/wsu/Footer"
 import { motion, useScroll, useTransform, useSpring, LazyMotion, domAnimation } from "framer-motion"
 import { useRouter, usePathname } from "next/navigation"
 import dynamic from 'next/dynamic'
@@ -297,6 +298,9 @@ export default function LandingPage() {
             </section>
           </motion.div>
         </main>
+        
+        {/* Footer */}
+        {isMounted && <Footer />}
       </div>
     </LazyMotion>
   )
