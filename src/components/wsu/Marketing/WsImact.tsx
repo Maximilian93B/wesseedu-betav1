@@ -134,7 +134,7 @@ export function SustainableImpactSection() {
               <div className="p-5 sm:p-6">
                 <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-2.5 line-clamp-1">Your Money Changes Tomorrow</h3>
                 <p className="text-sm sm:text-base text-slate-600 mb-4 line-clamp-2">
-                  In today's rapidly changing world, where climate challenges and social inequities persist, WeSeedU offers a revolutionary approach to financial investment...
+                  In today&apos;s rapidly changing world, where climate challenges and social inequities persist, WeSeedU offers a revolutionary approach to financial investment...
                 </p>
                 <div className="flex justify-between items-center pt-1">
                   <div className="flex items-center text-sm text-slate-500">
@@ -264,7 +264,7 @@ export function SustainableImpactSection() {
                   {/* Testimonial */}
                   <div className="bg-white/10 rounded-lg p-3.5 border border-white/10">
                     <p className="text-white/90 text-sm italic mb-2 leading-relaxed">
-                      "WeSeedU has transformed how I approach sustainable investing. The insights and community have been invaluable to my portfolio growth."
+                      &quot;WeSeedU has transformed how I approach sustainable investing. The insights and community have been invaluable to my portfolio growth.&quot;
                     </p>
                     <div className="flex items-center justify-between">
                       <p className="text-white text-sm font-semibold">Maxwell.B</p>

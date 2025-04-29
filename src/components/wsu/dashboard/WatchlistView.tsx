@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { ExternalLink, Bookmark, TrendingUp, BarChart } from "lucide-react"
+import { ExternalLink, Bookmark } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useAuth } from "@/hooks/use-auth"
@@ -28,6 +27,7 @@ interface WatchlistCompany {
     pitch_deck_url: string
     sustainability_data: any
     logo_url?: string
+    image_url?: string // Added for compatibility with both fields
   } | null
 }
 
@@ -46,9 +46,16 @@ export function useWatchlist() {
   const [fetchAttempted, setFetchAttempted] = useState(false)
   const { user, loading: authLoading } = useAuth()
   const { toast } = useToast()
+  const fetchInProgress = useRef(false);
 
   // Use useCallback to memoize the function
   const fetchWatchlistCompanies = useCallback(async () => {
+    // Prevent concurrent fetch operations
+    if (fetchInProgress.current) {
+      console.log("useWatchlist: Fetch already in progress, skipping duplicate call");
+      return;
+    }
+    
     if (authLoading) {
       console.log("useWatchlist: Auth is still loading, waiting...")
       return
@@ -63,11 +70,12 @@ export function useWatchlist() {
     
     try {
       console.log("useWatchlist: Starting fetch, setting loading to true")
+      fetchInProgress.current = true;
       setLoading(true)
       setFetchAttempted(true)
       
-      // Use the correct API endpoint that matches your route
-      const response = await fetchWithAuth('/api/user/watchlist', {
+      // Use the new unified API endpoint
+      const response = await fetchWithAuth('/api/watchlist', {
         cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
@@ -83,23 +91,46 @@ export function useWatchlist() {
         throw new Error(response.error.toString())
       }
       
-      if (!response.data) {
-        console.error("useWatchlist: No data returned from watchlist API")
+      // Handle different response formats
+      let watchlistData;
+      if (response.data?.data) {
+        // New format: data is in data property
+        watchlistData = response.data.data;
+      } else if (Array.isArray(response.data)) {
+        // Old format: data is directly in response
+        watchlistData = response.data;
+      } else {
+        console.error("useWatchlist: Unexpected watchlist response format", response)
         throw new Error("Failed to fetch watchlist data")
       }
       
-      console.log("useWatchlist: Watchlist data fetched successfully:", response.data)
+      console.log("useWatchlist: Watchlist data fetched successfully:", watchlistData)
+      
+      // Process the data to normalize image_url/logo_url
+      const processedData = watchlistData.map((item: WatchlistCompany) => {
+        if (item.companies) {
+          return {
+            ...item,
+            companies: {
+              ...item.companies,
+              // Use image_url as logo_url if logo_url doesn't exist
+              logo_url: item.companies.logo_url || item.companies.image_url || null
+            }
+          };
+        }
+        return item;
+      });
       
       // Set the watchlist companies
       console.log("useWatchlist: Setting watchlist companies")
-      setWatchlistCompanies(response.data)
+      setWatchlistCompanies(processedData)
       
       // Log how many companies have valid company data
-      const validCompanies = response.data.filter((item: WatchlistCompany) => item.companies !== null)
-      console.log(`useWatchlist: ${validCompanies.length} of ${response.data.length} items have valid company data`)
+      const validCompanies = processedData.filter((item: WatchlistCompany) => item.companies !== null)
+      console.log(`useWatchlist: ${validCompanies.length} of ${processedData.length} items have valid company data`)
       
       // Log the company IDs for debugging
-      const companyIds = response.data.map((item: WatchlistCompany) => item.company_id)
+      const companyIds = processedData.map((item: WatchlistCompany) => item.company_id)
       console.log(`useWatchlist: Company IDs in watchlist: ${JSON.stringify(companyIds)}`)
     } catch (error) {
       console.error("useWatchlist: Error fetching watchlist companies:", error)
@@ -115,14 +146,17 @@ export function useWatchlist() {
     } finally {
       console.log("useWatchlist: Setting loading to false")
       setLoading(false)
+      fetchInProgress.current = false;
     }
   }, [user?.id, authLoading, toast]); // Only depend on these values
 
   // Handle initial data loading when user is available
   useEffect(() => {
-    if (!authLoading && user && !fetchAttempted) {
+    // Only load once when the component mounts and user is available
+    if (!authLoading && user && !fetchAttempted && !fetchInProgress.current) {
       console.log(`useWatchlist: User authenticated (${user.email}), fetching watchlist data`)
-      fetchWatchlistCompanies()
+      setFetchAttempted(true); // Set this first to prevent multiple fetches
+      fetchWatchlistCompanies();
       
       // Set a timeout to exit loading state after 10 seconds
       const timeoutId = setTimeout(() => {
@@ -142,7 +176,7 @@ export function useWatchlist() {
       setLoading(false)
       setFetchAttempted(true)
     }
-  }, [authLoading, user, fetchAttempted, loading]);
+  }, [user, authLoading, fetchAttempted]);
 
   const handleRemoveFromWatchlist = async (companyId: string) => {
     if (!user?.id) return
@@ -150,12 +184,16 @@ export function useWatchlist() {
     try {
       console.log("Removing company from watchlist:", companyId)
       
-      // Call the correct API endpoint
-      const response = await fetchWithAuth(`/api/user/watchlist/${companyId}`, {
-        method: 'DELETE',
+      // Use the new unified API endpoint with action parameter
+      const response = await fetchWithAuth('/api/watchlist', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({
+          company_id: companyId,
+          action: 'remove'
+        })
       })
       
       console.log("Remove response:", response)
@@ -198,6 +236,7 @@ export function WatchlistView({
 }: WatchlistViewProps) {
   const { toast } = useToast()
   const [dataFetchRequested, setDataFetchRequested] = useState(false)
+  const isInitialRender = useRef(true);
   
   // Use the hook if external data is not provided
   const {
@@ -218,14 +257,19 @@ export function WatchlistView({
 
   // Fix the useEffect to prevent infinite loops
   useEffect(() => {
-    if (!externalData && !dataFetchRequested) {
-      console.log("WatchlistView: No external data provided, fetching data from hook");
-      fetchWatchlistCompanies();
+    // Only run once on initial render
+    if (!externalData && isInitialRender.current) {
+      isInitialRender.current = false;
+      console.log("WatchlistView: Initial render, setting dataFetchRequested to true");
       setDataFetchRequested(true);
-    } else {
-      console.log(`WatchlistView: Using external data:`, !!externalData, "loading:", loading);
+      
+      // Only fetch if not already loading
+      if (!loading) {
+        console.log("WatchlistView: Initial fetch of watchlist data");
+        fetchWatchlistCompanies();
+      }
     }
-  }, [externalData, dataFetchRequested, fetchWatchlistCompanies]);
+  }, [externalData, loading, fetchWatchlistCompanies]);
 
   // Test function to check if API routes are working
   const testApiConnection = async () => {
@@ -379,7 +423,7 @@ export function WatchlistView({
             <div>
               <p className="text-black font-display mb-2">Your watchlist is empty</p>
               <p className="text-black/70 text-sm max-w-[250px] mx-auto font-body">
-                Add companies you're interested in following to your watchlist
+                Add companies you&apos;re interested in following to your watchlist
               </p>
             </div>
             

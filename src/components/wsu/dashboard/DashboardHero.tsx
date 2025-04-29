@@ -61,7 +61,7 @@ export function DashboardHero({
               </h1>
               
               <p className="text-xs sm:text-sm text-slate-600 mb-4 max-w-lg leading-relaxed font-body">
-                Track your sustainable investments and measure the positive impact you're making on our planet.
+                Track your sustainable investments and measure the positive impact you&apos;re making on our planet.
               </p>
               
               {/* Stats row with Green Apple styling */}

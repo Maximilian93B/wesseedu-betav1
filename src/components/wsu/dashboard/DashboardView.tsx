@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { BarChart, Users, Leaf, Globe, ArrowRight } from "lucide-react"
@@ -108,11 +108,36 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [watchlistCompanies, setWatchlistCompanies] = useState<any[]>([])
   const [watchlistLoading, setWatchlistLoading] = useState(false)
+  const isInitialMount = useRef(true);
+  const fetchInProgress = useRef(false);
   
   // Use the shared watchlist hook to avoid duplicate data fetching
   const { 
     fetchWatchlistCompanies
   } = useWatchlist()
+
+  // Add a global timeout to forcibly exit loading state after 10 seconds
+  useEffect(() => {
+    // Only set the timeout once when loading becomes true
+    const loadingStartTime = Date.now();
+    const loadingTimeoutId = setTimeout(() => {
+      // Only force exit if still loading after timeout
+      if (loading && Date.now() - loadingStartTime >= 10000) {
+        console.log("DashboardView: Global loading timeout reached, forcing exit from loading state");
+        setLoading(false);
+        toast({
+          title: "Loading Timeout",
+          description: "Dashboard took too long to load. Some elements may be missing.",
+          variant: "destructive"
+        });
+      }
+    }, 10000);
+    
+    return () => clearTimeout(loadingTimeoutId);
+    
+    // Run this effect only once on component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Set default stats even before loading
   useEffect(() => {
@@ -148,149 +173,7 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
     ]);
   }, [authProfile]);
 
-  useEffect(() => {
-    if (authLoading) {
-      console.log("DashboardView: Auth is still loading, waiting...");
-      return;
-    }
-    
-    // Only fetch data when user exists and we haven't loaded it yet
-    if (user && !profileData) {
-      console.log("DashboardView: User detected, loading data");
-      const loadData = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-          
-          // Set a timeout to force loading to end after 5 seconds
-          const timeoutId = setTimeout(() => {
-            if (loading) {
-              console.log("DashboardView: Loading timeout reached");
-              setLoading(false);
-              setError("Loading took too long. Some data may be incomplete.");
-              toast({
-                title: "Warning",
-                description: "Loading took too long. Some data may be incomplete.",
-                variant: "destructive"
-              });
-            }
-          }, 5000);
-          
-          await fetchProfileData();
-          
-          // Clear timeout if data loaded successfully
-          clearTimeout(timeoutId);
-          setLoading(false);
-        } catch (error) {
-          console.error("Error loading dashboard data:", error);
-          setError("Failed to load dashboard data");
-          setLoading(false);
-        }
-      };
-      
-      loadData();
-    } else {
-      console.log("DashboardView: No user or data already loaded, skipping data load");
-    }
-  }, [user, authLoading, profileData]);
-
-  const fetchProfileData = async () => {
-    console.log("DashboardView: Checking for cached profile data");
-    
-    // Check if we have cached data using the utility function with proper typing
-    const cachedData = getCachedData<ProfileData>(CACHE_KEYS.PROFILE_DATA, CACHE_EXPIRY.PROFILE_DATA);
-    
-    if (cachedData) {
-      console.log("DashboardView: Using cached profile data");
-      setProfileData(cachedData);
-      
-      // Process saved companies data from cache
-      if (cachedData.savedCompanies && cachedData.savedCompanies.length > 0) {
-        console.log(`DashboardView: Using ${cachedData.savedCompanies.length} saved companies from cache`);
-        
-        // Transform the data to match the WatchlistCompany interface
-        const transformedCompanies = cachedData.savedCompanies.map((item: any) => ({
-          id: item.id,
-          company_id: item.company_id,
-          companies: item.companies
-        }));
-        
-        setSavedCompanies(transformedCompanies);
-        
-        // Also refresh the watchlist data to ensure consistency
-        fetchWatchlistCompanies();
-      } else {
-        console.log("DashboardView: No saved companies in cache");
-        setSavedCompanies([]);
-      }
-      
-      // Process cached investment data
-      processInvestmentsData(cachedData.investments);
-      
-      // Update stats
-      updateStatistics(cachedData);
-      
-      return;
-    }
-    
-    // If no valid cache exists, fetch fresh data
-    console.log("DashboardView: Fetching profile data from API");
-    try {
-      const { data, error } = await fetchWithAuth('/api/auth/profile', {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      if (error) {
-        console.error("Error fetching profile data:", error);
-        throw error;
-      }
-      
-      if (!data) {
-        throw new Error("No data returned from API");
-      }
-      
-      console.log("DashboardView: Profile data fetched successfully", data);
-      
-      // Cache the fresh data using the utility function
-      setCachedData(CACHE_KEYS.PROFILE_DATA, data);
-      
-      setProfileData(data);
-      
-      // Process saved companies data
-      if (data.savedCompanies && data.savedCompanies.length > 0) {
-        console.log(`DashboardView: Found ${data.savedCompanies.length} saved companies`);
-        
-        // Transform the data to match the WatchlistCompany interface
-        const transformedCompanies = data.savedCompanies.map((item: any) => ({
-          id: item.id,
-          company_id: item.company_id,
-          companies: item.companies
-        }));
-        
-        setSavedCompanies(transformedCompanies);
-        
-        // Also refresh the watchlist data to ensure consistency
-        fetchWatchlistCompanies();
-      } else {
-        console.log("DashboardView: No saved companies found");
-        setSavedCompanies([]);
-      }
-      
-      // Process investments to create chart data
-      processInvestmentsData(data.investments);
-      
-      // Update stats
-      updateStatistics(data);
-      
-    } catch (error) {
-      console.error("Error in fetchProfileData:", error);
-      throw error;
-    }
-  };
-  
-  const processInvestmentsData = (investments: any[] = []) => {
+  const processInvestmentsData = useCallback((investments: any[] = []) => {
     if (investments && investments.length > 0) {
       // Group investments by month
       const investmentsByMonth = investments.reduce((acc: Record<string, number>, inv: any) => {
@@ -339,9 +222,9 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
         { month: "Jul", amount: 3600 },
       ]);
     }
-  };
+  }, []);
   
-  const updateStatistics = (data: any) => {
+  const updateStatistics = useCallback((data: any) => {
     setStats([
       {
         title: "Total Investments",
@@ -372,7 +255,187 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
         color: "from-[#70f570] to-[#49c628]",
       },
     ]);
-  };
+  }, []);
+
+  const fetchProfileData = useCallback(async () => {
+    // Prevent concurrent fetch operations
+    if (fetchInProgress.current) {
+      console.log("DashboardView: Profile data fetch already in progress, skipping duplicate call");
+      return;
+    }
+
+    console.log("DashboardView: Checking for cached profile data");
+    fetchInProgress.current = true;
+    
+    try {
+      // Check if we have cached data using the utility function with proper typing
+      const cachedData = getCachedData<ProfileData>(CACHE_KEYS.PROFILE_DATA, CACHE_EXPIRY.PROFILE_DATA);
+      
+      if (cachedData) {
+        console.log("DashboardView: Using cached profile data");
+        setProfileData(cachedData);
+        
+        // Process saved companies data from cache
+        if (cachedData.savedCompanies && cachedData.savedCompanies.length > 0) {
+          console.log(`DashboardView: Using ${cachedData.savedCompanies.length} saved companies from cache`);
+          
+          // Transform the data to match the WatchlistCompany interface
+          const transformedCompanies = cachedData.savedCompanies.map((item: any) => ({
+            id: item.id,
+            company_id: item.company_id,
+            companies: item.companies
+          }));
+          
+          setSavedCompanies(transformedCompanies);
+        } else {
+          console.log("DashboardView: No saved companies in cache");
+          setSavedCompanies([]);
+        }
+        
+        // Process cached investment data
+        processInvestmentsData(cachedData.investments);
+        
+        // Update stats
+        updateStatistics(cachedData);
+        
+        // Make sure to exit loading state even when using cached data
+        setLoading(false);
+        return;
+      }
+      
+      // If no valid cache exists, fetch fresh data
+      console.log("DashboardView: Fetching profile data from API");
+      const { data, error } = await fetchWithAuth('/api/auth/profile', {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (error) {
+        console.error("Error fetching profile data:", error);
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error("No data returned from API");
+      }
+      
+      console.log("DashboardView: Profile data fetched successfully", data);
+      
+      // Cache the fresh data using the utility function
+      setCachedData(CACHE_KEYS.PROFILE_DATA, data);
+      
+      setProfileData(data);
+      
+      // Process saved companies data
+      if (data.savedCompanies && data.savedCompanies.length > 0) {
+        console.log(`DashboardView: Found ${data.savedCompanies.length} saved companies`);
+        
+        // Transform the data to match the WatchlistCompany interface
+        const transformedCompanies = data.savedCompanies.map((item: any) => ({
+          id: item.id,
+          company_id: item.company_id,
+          companies: item.companies
+        }));
+        
+        setSavedCompanies(transformedCompanies);
+      } else {
+        console.log("DashboardView: No saved companies found");
+        setSavedCompanies([]);
+      }
+      
+      // Process investments to create chart data
+      processInvestmentsData(data.investments);
+      
+      // Update stats
+      updateStatistics(data);
+      
+      // Set loading to false after successful fetch
+      setLoading(false);
+    } catch (error) {
+      console.error("Error in fetchProfileData:", error);
+      // Set loading to false even when there's an error
+      setLoading(false);
+      throw error;
+    } finally {
+      fetchInProgress.current = false;
+    }
+  }, [processInvestmentsData, updateStatistics]);
+
+  useEffect(() => {
+    if (authLoading) {
+      console.log("DashboardView: Auth is still loading, waiting...");
+      return;
+    }
+    
+    // Skip fetching on component re-renders
+    if (!isInitialMount.current) {
+      console.log("DashboardView: Skipping additional data load after initial mount");
+      // Ensure loading state is set to false
+      if (loading) {
+        console.log("DashboardView: Resetting stuck loading state");
+        setLoading(false);
+      }
+      return;
+    }
+    
+    // Only fetch data when user exists and we haven't loaded it yet
+    if (user && !profileData) {
+      console.log("DashboardView: User detected, loading data");
+      isInitialMount.current = false;
+      
+      let mounted = true; // Use a mounted flag for cleanup
+      
+      const loadData = async () => {
+        if (!mounted) return;
+        
+        try {
+          setLoading(true);
+          setError(null);
+          
+          // Set a timeout to force loading to end after 5 seconds
+          const timeoutId = setTimeout(() => {
+            if (!mounted) return;
+            
+            console.log("DashboardView: Loading timeout reached");
+            setLoading(false);
+            setError("Loading took too long. Some data may be incomplete.");
+            toast({
+              title: "Warning",
+              description: "Loading took too long. Some data may be incomplete.",
+              variant: "destructive"
+            });
+          }, 5000);
+          
+          await fetchProfileData();
+          
+          // Clear timeout if data loaded successfully
+          clearTimeout(timeoutId);
+          
+          if (mounted) {
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error("Error loading dashboard data:", error);
+          if (mounted) {
+            setError("Failed to load dashboard data");
+            setLoading(false);
+          }
+        }
+      };
+      
+      loadData();
+      
+      // Cleanup function to handle unmounting
+      return () => {
+        mounted = false;
+      };
+    } else {
+      console.log("DashboardView: No user or data already loaded, skipping data load");
+      // Ensure we're not in a loading state if we're skipping data load
+      setLoading(false);
+    }
+  }, [user, authLoading]);
 
   // Show a more informative loading state
   if (authLoading || loading) {

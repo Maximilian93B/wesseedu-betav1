@@ -84,23 +84,29 @@ export default function SaveCompanyButton({
       // Invalidate the profile cache before making any changes
       invalidateProfileCache();
       
-      if (isSaved) {
-        console.log(`SaveCompanyButton: Removing company ${companyId} from watchlist`);
-        const response = await fetchWithAuth('/api/protected/watchlist/remove', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-          },
-          body: JSON.stringify({ companyId }),
-        });
-        
-        console.log(`SaveCompanyButton: Remove response:`, response);
-        
-        if (response.error) {
-          throw new Error(response.error.toString());
-        }
-        
+      // Use the unified API with action parameter
+      const action = isSaved ? 'remove' : 'add';
+      console.log(`SaveCompanyButton: ${action === 'remove' ? 'Removing' : 'Adding'} company ${companyId} ${action === 'remove' ? 'from' : 'to'} watchlist`);
+      
+      const response = await fetchWithAuth('/api/watchlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
+        body: JSON.stringify({ 
+          company_id: companyId,
+          action
+        }),
+      });
+      
+      console.log(`SaveCompanyButton: ${action} response:`, response);
+      
+      if (response.error) {
+        throw new Error(response.error.toString());
+      }
+      
+      if (action === 'remove') {
         removeSavedCompany(companyId);
         setIsSaved(false);
         
@@ -113,29 +119,7 @@ export default function SaveCompanyButton({
           title: "Success",
           description: "Company removed from watchlist",
         });
-        
       } else {
-        console.log(`SaveCompanyButton: Adding company ${companyId} to watchlist`);
-        
-        // Log the exact payload being sent
-        const payload = { companyId };
-        console.log('SaveCompanyButton: Add payload:', payload);
-        
-        const response = await fetchWithAuth('/api/protected/watchlist/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-          },
-          body: JSON.stringify(payload),
-        });
-        
-        console.log(`SaveCompanyButton: Add response:`, response);
-        
-        if (response.error) {
-          throw new Error(response.error.toString());
-        }
-        
         console.log(`SaveCompanyButton: Successfully added company ${companyId} to watchlist`);
         addSavedCompany(companyId);
         setIsSaved(true);

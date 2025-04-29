@@ -372,7 +372,7 @@ export default function OnboardingWizard() {
           >
             <h3 className="text-xl font-medium text-black mb-3 font-display">Exit Onboarding?</h3>
             <p className="text-black/70 mb-6 font-body">
-              Your progress will be saved, but you'll need to complete the onboarding process later to access all features.
+              Your progress will be saved, but you&apos;ll need to complete the onboarding process later to access all features.
             </p>
             <div className="flex justify-end space-x-3">
               <Button

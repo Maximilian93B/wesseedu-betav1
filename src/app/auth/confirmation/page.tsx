@@ -177,7 +177,7 @@ export default function ConfirmationPage() {
         </CardContent>
         <CardFooter>
           <p className="text-sm text-center text-muted-foreground w-full text-black">
-            If you don't see the email, please check your spam folder.
+            If you don&apos;t see the email, please check your spam folder.
           </p>
         </CardFooter>
       </Card>

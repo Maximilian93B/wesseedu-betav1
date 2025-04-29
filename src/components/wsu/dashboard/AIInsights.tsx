@@ -86,7 +86,7 @@ export function AIInsights() {
                 AI-Powered Sustainable Investing
               </h2>
               <p className="text-white/90 text-sm sm:text-base md:text-lg leading-relaxed font-body">
-                Behind WeSeedU's intuitive dashboard is a powerful AI engine designed to help you make informed sustainable investment decisions.
+                Behind WeSeedU&apos;s intuitive dashboard is a powerful AI engine designed to help you make informed sustainable investment decisions.
               </p>
             </motion.div>
             

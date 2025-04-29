@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkAuth } from '@/lib/utils/authCheck'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
 
 // Add this line to prevent static optimization
 export const dynamic = 'force-dynamic'
@@ -22,135 +24,243 @@ interface CommunityActivity {
   avatar_url: string | null;
 }
 
+interface CommunityPost {
+  id: string;
+  content: string;
+  created_at: string;
+  community_id: string;
+  communities: {
+    id: string;
+    name: string;
+  };
+  user_id: string;
+  user_profiles: {
+    id: string;
+    username: string;
+    avatar_url: string | null;
+  };
+}
+
+interface CommunityMember {
+  id: string;
+  created_at: string;
+  community_id: string;
+  communities: {
+    id: string;
+    name: string;
+  };
+  user_id: string;
+  user_profiles: {
+    id: string;
+    username: string;
+    avatar_url: string | null;
+  };
+}
+
 export async function GET(req: NextRequest) {
-  console.log("API: Community feed request received")
-  
-  // Check authentication using the shared utility
-  const { error, authenticated, supabase, session } = await checkAuth()
-  
-  if (!authenticated) {
-    console.log("API: User not authenticated for community feed")
-    return NextResponse.json({ error: 'Unauthorized' }, { 
-      status: 401,
-      headers: {
-        'Cache-Control': 'no-store, must-revalidate',
-      }
-    })
-  }
-  
-  console.log("API: User authenticated, ID:", session?.user.id)
-  
   try {
-    const userId = session!.user.id
+    // Check authentication
+    const auth = await checkAuth();
     
-    // Get user community stats using the function
-    const statsResult = await supabase!
-      .rpc('get_user_community_stats', { input_user_id: userId })
+    // If not authenticated, return 401 with proper error message
+    if (auth.error) {
+      return NextResponse.json({ 
+        data: null,
+        error: 'Unauthorized', 
+        status: 401 
+      }, { status: 401 });
+    }
+
+    // Use the Supabase client from auth check
+    const supabase = auth.supabase;
     
-    if (statsResult.error) {
-      console.error('API: Error fetching user community stats:', statsResult.error)
+    // Get user from the auth session
+    const user = auth.session.user;
+    
+    if (!user) {
+      return NextResponse.json({ 
+        data: null,
+        error: 'User not found', 
+        status: 401 
+      }, { status: 401 });
+    }
+
+    // Fetch community posts with user and community information (last 2 weeks)
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    
+    const { data: postsData, error: postsError } = await supabase
+      .from('community_posts')
+      .select(`
+        id,
+        content,
+        created_at,
+        community_id,
+        communities!community_posts_community_id_fkey(id, name),
+        user_id,
+        user_profiles!community_posts_user_id_fkey(id, username, avatar_url)
+      `)
+      .gt('created_at', twoWeeksAgo.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(20);
       
-      // Fallback to direct queries if function fails
-      const communityCountQuery = await supabase!
-        .from('community_members')
-        .select('count', { count: 'exact' })
-        .eq('user_id', userId)
-      
-      const postsCountQuery = await supabase!
-        .from('community_posts')
-        .select('count', { count: 'exact' })
-        .eq('author_id', userId)
-      
-      const commentsCountQuery = await supabase!
-        .from('community_post_comments')
-        .select('count', { count: 'exact' })
-        .eq('user_id', userId)
-      
-      const communityStats = {
-        communities_joined: communityCountQuery.count || 0,
-        posts_created: postsCountQuery.count || 0,
-        comments_made: commentsCountQuery.count || 0
-      }
-      
-      console.log("API: Community stats (fallback):", communityStats)
+    if (postsError) {
+      console.error('Error fetching community posts:', postsError);
+      return NextResponse.json({ 
+        data: null,
+        error: 'Error fetching community posts', 
+        status: 500 
+      }, { status: 500 });
     }
     
-    // Get communities the user is a member of using the function
-    const userCommunitiesResult = await supabase!
-      .rpc('get_user_communities', { input_user_id: userId })
-    
-    // Declare userCommunities as a generic array to handle both formats
-    let userCommunities: any[] = []
-    
-    if (userCommunitiesResult.error) {
-      console.error('API: Error fetching user communities function:', userCommunitiesResult.error)
+    // Fetch new community members (last 2 weeks)
+    const { data: membersData, error: membersError } = await supabase
+      .from('community_members')
+      .select(`
+        id,
+        created_at,
+        community_id,
+        communities!community_members_community_id_fkey(id, name),
+        user_id,
+        user_profiles!community_members_user_id_fkey(id, username, avatar_url)
+      `)
+      .gt('created_at', twoWeeksAgo.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(20);
       
-      // Fallback to direct query if function fails
-      const fallbackCommunitiesResult = await supabase!
-        .from('community_members')
-        .select('community_id')
-        .eq('user_id', userId)
-      
-      if (fallbackCommunitiesResult.error) {
-        console.error('API: Error in fallback communities query:', fallbackCommunitiesResult.error)
-        return NextResponse.json({ error: 'Failed to fetch communities' }, { status: 500 })
-      }
-      
-      userCommunities = fallbackCommunitiesResult.data || []
-    } else {
-      userCommunities = userCommunitiesResult.data || []
+    if (membersError) {
+      console.error('Error fetching community members:', membersError);
+      return NextResponse.json({ 
+        data: null,
+        error: 'Error fetching community members', 
+        status: 500 
+      }, { status: 500 });
     }
     
-    console.log(`API: Found ${userCommunities.length} communities for user`)
+    // Format posts data
+    const formattedPosts = postsData.map((post: any) => ({
+      id: post.id,
+      user: {
+        id: post.user_profiles.id,
+        name: post.user_profiles.username,
+        avatar: post.user_profiles.avatar_url
+      },
+      type: 'post',
+      content: post.content,
+      timestamp: post.created_at,
+      community: {
+        id: post.community_id,
+        name: post.communities.name
+      },
+      likes: 0,
+      comments: 0
+    }));
     
-    // Set up the stats object, either from the function or fallback
-    let communityStats
-    if (statsResult.error) {
-      // Already handled in the fallback above
-    } else {
-      communityStats = statsResult.data
-      console.log("API: Community stats (from function):", communityStats)
-    }
+    // Format members data
+    const formattedMembers = membersData.map((member: any) => ({
+      id: member.id,
+      user: {
+        id: member.user_profiles.id,
+        name: member.user_profiles.username,
+        avatar: member.user_profiles.avatar_url
+      },
+      type: 'join',
+      content: `Joined ${member.communities.name} community`,
+      timestamp: member.created_at,
+      community: {
+        id: member.community_id,
+        name: member.communities.name
+      },
+      likes: 0,
+      comments: 0
+    }));
     
-    // Get recent activity from communities the user is a part of
-    let recentActivity = []
+    // Combine and sort all activity by timestamp
+    const combinedActivity = [...formattedPosts, ...formattedMembers]
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 30); // Limit to 30 most recent activities
     
-    if (userCommunities.length > 0) {
-      // Convert array of community IDs to a format suitable for the IN clause
-      const communityIds = userCommunities.map(community => {
-        // Handle both possible formats from direct query or function
-        return community.community_id !== undefined ? community.community_id : community
-      })
+    // In development mode, you can return mock + real data for testing
+    if (process.env.NODE_ENV === 'development' && req.nextUrl.searchParams.get('mock') === 'true') {
+      console.log('Development mode: Returning mock + real community feed data');
       
-      // Use the user_community_activity view to get activity data with proper joins
-      const activityResult = await supabase!
-        .from('user_community_activity')
-        .select('*')
-        .in('community_id', communityIds)
-        .order('created_at', { ascending: false })
-        .limit(10)
+      // Mock data
+      const mockData = [
+        {
+          id: 'feed-1',
+          user: {
+            id: 'user-1',
+            name: 'Emma Johnson',
+            avatar: 'https://placehold.co/100'
+          },
+          type: 'investment',
+          content: 'Invested in EcoTech Solutions',
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          company: {
+            id: 'company-1',
+            name: 'EcoTech Solutions',
+            image: 'https://placehold.co/100'
+          },
+          likes: 12,
+          comments: 3
+        },
+        {
+          id: 'feed-2',
+          user: {
+            id: 'user-2',
+            name: 'Michael Chen',
+            avatar: 'https://placehold.co/100'
+          },
+          type: 'comment',
+          content: 'Great progress on their water purification project!',
+          timestamp: new Date(Date.now() - 7200000).toISOString(),
+          company: {
+            id: 'company-3',
+            name: 'AquaPure Technologies',
+            image: 'https://placehold.co/100'
+          },
+          likes: 8,
+          comments: 1
+        },
+        {
+          id: 'feed-3',
+          user: {
+            id: 'user-3',
+            name: 'Sophia Rodriguez',
+            avatar: 'https://placehold.co/100'
+          },
+          type: 'investment',
+          content: 'Invested in GreenGrow Farms',
+          timestamp: new Date(Date.now() - 10800000).toISOString(),
+          company: {
+            id: 'company-2',
+            name: 'GreenGrow Farms',
+            image: 'https://placehold.co/100'
+          },
+          likes: 15,
+          comments: 5
+        }
+      ];
       
-      if (activityResult.error) {
-        console.error('API: Error fetching community activity:', activityResult.error)
-        return NextResponse.json({ error: 'Failed to fetch community activity' }, { status: 500 })
-      }
-      
-      recentActivity = activityResult.data || []
-      console.log(`API: Found ${recentActivity.length} activity items`)
+      return NextResponse.json({
+        data: [...mockData, ...combinedActivity],
+        error: null,
+        status: 200
+      });
     }
-    
-    // In case we can't find any real activity, return empty arrays rather than null
-    const response = {
-      communities: userCommunities || [],
-      stats: communityStats,
-      recentActivity: recentActivity || []
-    }
-    
-    console.log("API: Returning successful response")
-    return NextResponse.json(response)
+
+    return NextResponse.json({ 
+      data: combinedActivity,
+      error: null,
+      status: 200
+    }, { status: 200 });
     
   } catch (error) {
-    console.error('API: Error in community feed API:', error)
-    return NextResponse.json({ error: 'Failed to fetch community data' }, { status: 500 })
+    console.error('Error in community feed API:', error);
+    return NextResponse.json({ 
+      data: null,
+      error: 'Internal Server Error', 
+      status: 500 
+    }, { status: 500 });
   }
 } 

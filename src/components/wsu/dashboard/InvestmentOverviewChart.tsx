@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   PieChart, 
   Pie, 
@@ -67,6 +67,47 @@ const InvestmentOverviewChart = () => {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
   const { user, loading: authLoading } = useAuth();
   
+  const fetchChartData = useCallback(async () => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      const response = await fetchWithAuth('/api/protected/investments/categories');
+      
+      if (response.error) {
+        throw new Error(response.error.toString());
+      }
+      
+      // Handle different response formats (direct data or nested data.data)
+      const categories = response.data?.data || response.data || [];
+      
+      if (categories.length === 0) {
+        // If no data, use default with zero values but keep the categories
+        setData(DEFAULT_DATA);
+        return;
+      }
+      
+      // Map the data to include colors
+      const chartData = categories.map((item, index) => ({
+        name: item.category,
+        value: item.amount,
+        color: MONOCHROME_COLORS[index % MONOCHROME_COLORS.length]
+      }));
+      
+      setData(chartData);
+    } catch (error) {
+      console.error('Error fetching investment categories:', error);
+      // On error, use default with zero values
+      setData(DEFAULT_DATA);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user?.id]);
+  
   useEffect(() => {
     if (!authLoading && user) {
       fetchChartData();
@@ -82,45 +123,7 @@ const InvestmentOverviewChart = () => {
     } else if (!authLoading && !user) {
       setIsLoading(false);
     }
-  }, [authLoading, user]);
-  
-  const fetchChartData = async () => {
-    if (!user?.id) {
-      setIsLoading(false);
-      return;
-    }
-    
-    try {
-      setIsLoading(true);
-      
-      const response = await fetchWithAuth('/api/protected/investments/categories');
-      
-      if (response.error) {
-        throw new Error(response.error.toString());
-      }
-      
-      if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
-        // If no data, use default with zero values but keep the categories
-        setData(DEFAULT_DATA);
-        return;
-      }
-      
-      // Map the data to include colors
-      const chartData = response.data.map((item, index) => ({
-        name: item.category,
-        value: item.amount,
-        color: MONOCHROME_COLORS[index % MONOCHROME_COLORS.length]
-      }));
-      
-      setData(chartData);
-    } catch (error) {
-      console.error('Error fetching investment categories:', error);
-      // On error, use default with zero values
-      setData(DEFAULT_DATA);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [authLoading, user, fetchChartData]);
   
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);

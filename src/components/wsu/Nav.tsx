@@ -51,7 +51,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   // Optimized scroll handler with throttling
-  const handleScroll = useCallback(throttle(() => {
+  const handleScroll = useCallback(() => {
     const currentScrollY = window.scrollY;
     
     // Basic scroll detection
@@ -65,13 +65,19 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
     }
     
     setLastScrollY(currentScrollY);
-  }, 100), [lastScrollY]);
+  }, [lastScrollY]);
   
+  // Create throttled version of the scroll handler
+  const throttledScrollHandler = useCallback(
+    throttle(handleScroll, 100),
+    [handleScroll]
+  );
+
   // Set up optimized scroll listener
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+    window.addEventListener('scroll', throttledScrollHandler, { passive: true });
+    return () => window.removeEventListener('scroll', throttledScrollHandler);
+  }, [throttledScrollHandler]);
 
   // Unified handler for sidebar events (click outside and escape key)
   useEffect(() => {

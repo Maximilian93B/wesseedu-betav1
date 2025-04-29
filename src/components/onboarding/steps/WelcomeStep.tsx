@@ -65,7 +65,7 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
           Welcome to <span className="bg-gradient-to-r from-green-600 via-[#49c628] to-[#70f570] text-transparent bg-clip-text">WeSeedU</span>
         </h2>
         <p className="text-black/70 max-w-md mx-auto">
-          We're excited to help you set up your sustainable investment portfolio that aligns with your values.
+          We&apos;re excited to help you set up your sustainable investment portfolio that aligns with your values.
         </p>
       </motion.div>
 
@@ -74,7 +74,7 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
         className="bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-black/5 shadow-lg"
       >
         <p className="text-black mb-4">
-          We'll guide you through a quick setup process to personalize your investment experience. This will only take a few minutes to complete.
+          We&apos;ll guide you through a quick setup process to personalize your investment experience. This will only take a few minutes to complete.
         </p>
         <p className="text-black">
           Get ready to discover opportunities that match both your financial goals and environmental values.
@@ -113,7 +113,7 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
             type="button"
           >
             <span className="relative z-10 flex items-center">
-              Let's get started 
+              Let&apos;s get started 
               <ArrowRight className="ml-2 h-4 w-4 transform group-hover:translate-x-1 transition-transform duration-300" />
             </span>
           </button>
@@ -121,7 +121,7 @@ export default function WelcomeStep({ onNext }: WelcomeStepProps) {
         
         {/* Feature points with improved styling */}
         <div className="mt-6 space-y-4 bg-white/90 backdrop-blur-sm rounded-xl p-5 border border-black/5 shadow-sm">
-          <h3 className="text-black font-medium text-sm">During this setup, we'll:</h3>
+          <h3 className="text-black font-medium text-sm">During this setup, we&apos;ll:</h3>
           {[
             "Create your personalized investment profile",
             "Understand your sustainable interests",

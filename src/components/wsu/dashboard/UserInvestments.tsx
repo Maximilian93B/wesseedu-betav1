@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -118,6 +118,8 @@ const UserInvestments = () => {
   const { toast } = useToast();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const fetchInProgress = useRef(false);
+  const effectRan = useRef(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -128,30 +130,13 @@ const UserInvestments = () => {
     },
   });
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchInvestments();
-      fetchCompanies();
-      
-      // Set a timeout to exit loading state after 5 seconds
-      const timeoutId = setTimeout(() => {
-        if (isLoading) {
-          setIsLoading(false);
-          setHasError(true);
-        }
-      }, 5000);
-      
-      return () => clearTimeout(timeoutId);
-    } else if (!authLoading && !user) {
-      setIsLoading(false);
-      setInvestments([]);
-      setTotalInvested(0);
-      // Redirect to login if not authenticated
-      router.push('/auth/signin');
+  const fetchInvestments = useCallback(async () => {
+    // Prevent concurrent fetch operations
+    if (fetchInProgress.current) {
+      console.log("Fetch already in progress, skipping duplicate call");
+      return;
     }
-  }, [authLoading, user, router]);
 
-  const fetchInvestments = async () => {
     if (!user?.id) {
       setIsLoading(false);
       setInvestments([]);
@@ -160,6 +145,8 @@ const UserInvestments = () => {
     }
     
     try {
+      console.log("UserInvestments: Starting fetchInvestments call");
+      fetchInProgress.current = true;
       setIsLoading(true);
       setHasError(false);
       
@@ -169,8 +156,9 @@ const UserInvestments = () => {
         throw new Error(response.error.toString());
       }
       
-      // Transform data for the chart - group by month
-      const investmentData = response.data || [];
+      // Handle both response formats for backward compatibility
+      const investmentData = (response.data && Array.isArray(response.data)) ? response.data : [];
+      console.log(`UserInvestments: Got ${investmentData.length} investments`);
       setInvestments(investmentData);
       
       // Process data for chart
@@ -208,28 +196,35 @@ const UserInvestments = () => {
       }, 0) || 0;
       
       setTotalInvested(total);
+      console.log("UserInvestments: Finished fetchInvestments call");
     } catch (error) {
       console.error('Error fetching investments:', error);
       setHasError(true);
     } finally {
       setIsLoading(false);
+      fetchInProgress.current = false;
     }
-  };
+  }, [user?.id]);
 
-  const fetchCompanies = async () => {
+  const fetchCompanies = useCallback(async () => {
     try {
+      console.log("UserInvestments: Starting fetchCompanies call");
       const response = await fetchWithAuth('/api/companies');
       
       if (response.error) {
         throw new Error(response.error.toString());
       }
       
-      if (!response.data) {
+      // Handle both response formats for backward compatibility
+      const companiesData = response.data?.data || response.data || [];
+      
+      if (!companiesData || companiesData.length === 0) {
         setCompanies([]);
         return;
       }
       
-      setCompanies(response.data);
+      console.log(`UserInvestments: Got ${companiesData.length} companies`);
+      setCompanies(companiesData);
     } catch (error) {
       console.error('Error fetching companies:', error);
       toast({
@@ -238,7 +233,43 @@ const UserInvestments = () => {
         variant: "destructive"
       });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    // Add a guard to prevent useEffect from running more than once
+    if (effectRan.current) {
+      return; // Only run once
+    }
+    
+    if (!authLoading && user) {
+      console.log("UserInvestments: Auth loaded and user found, fetching data");
+      effectRan.current = true;
+      fetchInvestments();
+      fetchCompanies();
+      
+      // Set a timeout to exit loading state after 5 seconds
+      const timeoutId = setTimeout(() => {
+        if (isLoading) {
+          console.log("UserInvestments: Loading timeout reached");
+          setIsLoading(false);
+          setHasError(true);
+        }
+      }, 5000);
+      
+      return () => clearTimeout(timeoutId);
+    } else if (!authLoading && !user) {
+      effectRan.current = true;
+      setIsLoading(false);
+      setInvestments([]);
+      setTotalInvested(0);
+      // Redirect to login if not authenticated
+      router.push('/auth/signin');
+    }
+    
+    return () => {
+      // No need to set effectRan.current = true here as it's already set above
+    };
+  }, [authLoading, user, router, fetchInvestments, fetchCompanies]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user?.id) {
@@ -353,7 +384,7 @@ const UserInvestments = () => {
               >
                 <AlertTriangle className="h-12 w-12 text-green-200" />
                 <p className="text-black/70 max-w-[250px] font-body">
-                  We couldn't load your investment data. Please try again later.
+                  We couldn&apos;t load your investment data. Please try again later.
                 </p>
               </motion.div>
             ) : chartData.length === 0 ? (
@@ -363,7 +394,7 @@ const UserInvestments = () => {
               >
                 <Lightbulb className="h-12 w-12 text-green-200" />
                 <p className="text-black/70 max-w-[250px] font-body">
-                  You haven't made any investments yet. Ready to start your impact journey?
+                  You haven&apos;t made any investments yet. Ready to start your impact journey?
                 </p>
               </motion.div>
             ) : (

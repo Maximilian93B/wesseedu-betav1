@@ -204,12 +204,10 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
   // Setup effect for component mounting/unmounting and initial fetch
   useEffect(() => {
     isMountedRef.current = true;
-    let isInitialFetch = true;
     
     // Call fetchCompanies on mount (runs only once)
-    if (isInitialFetch) {
+    if (!fetchAttempted) {
       fetchCompanies();
-      isInitialFetch = false;
     }
     
     // Cleanup function for unmounting
@@ -226,7 +224,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
         setIsTransitioning(false);
       }
     };
-  }, []);
+  }, [setIsTransitioning, fetchAttempted, fetchCompanies]); // Add fetchAttempted to dependencies
 
   const handleRetryFetch = useCallback(() => {
     setFetchAttempted(false);

@@ -261,7 +261,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
             {error || 'Company not found'}
           </h3>
           <p className="text-white/80 mb-8 max-w-md text-center font-body">
-            We couldn't find the company you're looking for. It may have been removed or there might be a temporary issue.
+            We couldn&apos;t find the company you&apos;re looking for. It may have been removed or there might be a temporary issue.
           </p>
           <Button onClick={handleBack}
             className="bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 
@@ -430,7 +430,7 @@ export function CompanyDetailsView({ companyId, onClose }: CompanyDetailsViewPro
                   <div className="w-full text-center">
                     <h3 className="text-2xl font-medium text-gray-800 mb-6 font-display">Our Mission</h3>
                     <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-body italic text-2xl">
-                      "{company?.mission_statement || 'No mission statement available'}"
+                      &ldquo;{company?.mission_statement || 'No mission statement available'}&rdquo;
                     </p>
                   </div>
                 </CardContent>

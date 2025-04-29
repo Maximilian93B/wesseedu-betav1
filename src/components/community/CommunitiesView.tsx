@@ -70,6 +70,9 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     companiesLoading 
   })
 
+  // Simplified isLoading determination - moved up before any conditional returns
+  const isLoading = communitiesLoading || companiesLoading
+
   // Fetch data on component mount
   useEffect(() => {
     let isMounted = true;
@@ -88,7 +91,15 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
       isMounted = false;
       setIsTransitioning(false);
     };
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally omitting dependencies to prevent infinite loop
+
+  // When data loads, clear transitioning state - moved up before any conditional returns
+  useEffect(() => {
+    if (!isLoading && filteredCommunities.length > 0) {
+      setIsTransitioning(false);
+    }
+  }, [isLoading, filteredCommunities.length, setIsTransitioning]);
 
   // Handle card selection with useCallback and transition state
   const handleCardSelect = useCallback((id: string) => {
@@ -159,9 +170,6 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     )
   }
 
-  // Simplified isLoading determination
-  const isLoading = communitiesLoading || companiesLoading
-
   // Get stats for communities
   const totalCommunities = filteredCommunities.length;
   const ambassadorCommunities = filteredCommunities.filter(c => 
@@ -169,13 +177,6 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     (c.ambassadorCount !== undefined && c.ambassadorCount > 0)
   ).length;
   const featuredCommunities = filteredCommunities.filter(c => c.featured).length;
-
-  // When data loads, clear transitioning state
-  useEffect(() => {
-    if (!isLoading && filteredCommunities.length > 0) {
-      setIsTransitioning(false);
-    }
-  }, [isLoading, filteredCommunities.length, setIsTransitioning]);
 
   return (
     <motion.div 

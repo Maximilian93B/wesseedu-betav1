@@ -9,6 +9,7 @@ import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
 import { CACHE_KEYS, CACHE_EXPIRY, getCachedData, setCachedData, invalidateCache } from "@/lib/utils/cacheUtils"
+import Image from "next/image"
 
 interface CommunityActivity {
   id: string
@@ -281,10 +282,12 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0">
                     {activity.avatar_url ? (
-                      <img 
+                      <Image 
                         src={activity.avatar_url} 
                         alt={activity.author_name}
-                        className="h-8 w-8 rounded-full object-cover"
+                        width={32}
+                        height={32}
+                        className="rounded-full object-cover"
                       />
                     ) : (
                       <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">

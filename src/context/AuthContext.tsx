@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User, Session } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   // Function to fetch user profile data
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Error in fetchUserProfile:", error);
       return null;
     }
-  };
+  }, [supabase]);
 
   // Sign out function
   const signOut = async () => {
@@ -80,42 +80,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Function to verify and set user
+  const verifyAndSetUser = useCallback(async () => {
+    try {
+      // Always verify user with getUser() first
+      const { data: { user: verifiedUser }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !verifiedUser) {
+        console.log("Auth: User verification failed or no user found");
+        setUser(null);
+        setProfile(null);
+        setSession(null);
+        return false;
+      }
+
+      setUser(verifiedUser);
+      
+      // Fetch and set profile data
+      const profileData = await fetchUserProfile(verifiedUser.id);
+      if (profileData) {
+        setProfile(profileData);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Auth: Error verifying user:", error);
+      return false;
+    }
+  }, [supabase.auth, fetchUserProfile]);
+
   useEffect(() => {
     let mounted = true;
     console.log("AuthContext: Initializing auth context");
-
-    async function verifyAndSetUser() {
-      try {
-        // Always verify user with getUser() first
-        const { data: { user: verifiedUser }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError || !verifiedUser) {
-          console.log("Auth: User verification failed or no user found");
-          if (mounted) {
-            setUser(null);
-            setProfile(null);
-            setSession(null);
-          }
-          return false;
-        }
-
-        if (mounted) {
-          setUser(verifiedUser);
-          
-          // Fetch and set profile data
-          const profileData = await fetchUserProfile(verifiedUser.id);
-          if (profileData && mounted) {
-            setProfile(profileData);
-          }
-          
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error("Auth: Error verifying user:", error);
-        return false;
-      }
-    }
 
     async function initializeAuth() {
       try {
@@ -123,7 +119,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!authConfig.isAuthEnabled && authConfig.devBypassEmail) {
           console.log(`Auth: Using dev bypass with email ${authConfig.devBypassEmail}`);
           // Set mock user for development
-          setUser({ email: authConfig.devBypassEmail } as User);
+          setUser({ 
+            id: 'dev-user-id',
+            email: authConfig.devBypassEmail,
+            app_metadata: {},
+            user_metadata: { name: 'Development User' },
+            aud: 'authenticated',
+            created_at: new Date().toISOString()
+          } as unknown as User);
+          // Also set a mock session for API calls
+          setSession({
+            access_token: 'dev-token',
+            refresh_token: 'dev-refresh-token',
+            expires_in: 3600,
+            expires_at: new Date().getTime() + 3600000,
+            token_type: 'bearer',
+            user: {
+              id: 'dev-user-id',
+              email: authConfig.devBypassEmail
+            } as unknown as User
+          } as Session);
           setLoading(false);
           return;
         }
@@ -198,7 +213,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase.auth, router]);
+  }, [supabase.auth, router, verifyAndSetUser]);
 
   const value = {
     user,

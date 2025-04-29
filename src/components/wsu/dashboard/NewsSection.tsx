@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { formatDistanceToNow } from "date-fns"
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
 import { useToast } from "@/hooks/use-toast"
+import Image from "next/image"
 
 // Interface for news items
 interface NewsItem {
@@ -344,9 +345,11 @@ export function NewsSection() {
                 {/* Article image with improved hover animation */}
                 <div className="flex-shrink-0 w-24 h-16 overflow-hidden rounded-md relative shadow-sm">
                   <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
-                  <img 
+                  <Image 
                     src={item.image_url} 
                     alt={item.title} 
+                    width={96}
+                    height={64}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>

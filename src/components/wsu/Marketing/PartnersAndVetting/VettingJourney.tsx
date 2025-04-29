@@ -63,7 +63,7 @@ export function VettingJourney() {
         <div className="text-center mb-10">
           <h3 className="text-2xl font-bold text-green-800 mb-3">The Vetting Journey</h3>
           <p className="text-green-700/80 max-w-2xl mx-auto">
-            Follow a company's journey from application to approval through our rigorous vetting process, 
+            Follow a company&apos;s journey from application to approval through our rigorous vetting process, 
             ensuring only the most sustainable and promising opportunities reach our investors.
           </p>
         </div>

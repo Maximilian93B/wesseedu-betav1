@@ -36,9 +36,10 @@ export function useCompanies() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
+  // Remove auto-fetch on mount to prevent infinite loops
+  // useEffect(() => {
+  //   fetchCompanies();
+  // }, []);
 
   const fetchCompanies = async (search?: string, filters?: Record<string, any>) => {
     setLoading(true);

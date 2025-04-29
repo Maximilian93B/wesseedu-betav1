@@ -43,11 +43,7 @@ export default function CommunityPage({ params }: CommunityPageProps) {
   const [community, setCommunity] = useState<Community | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetchCommunityData()
-  }, [communityId])
-
-  const fetchCommunityData = async () => {
+  const fetchCommunityData = useCallback(async () => {
     setLoading(true)
     try {
       const response = await fetchWithAuth(`/api/communities/${communityId}`)
@@ -67,7 +63,11 @@ export default function CommunityPage({ params }: CommunityPageProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [communityId, toast])
+
+  useEffect(() => {
+    fetchCommunityData()
+  }, [fetchCommunityData])
 
   const handleBack = () => {
     router.back()
@@ -144,7 +144,7 @@ export default function CommunityPage({ params }: CommunityPageProps) {
             className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.1)]"
           >
             <motion.h1 variants={itemVariants} className="text-2xl font-bold text-white mb-4 font-display">Community Not Found</motion.h1>
-            <motion.p variants={itemVariants} className="text-white/90 mb-6 font-body">The community you're looking for doesn't exist or has been removed.</motion.p>
+            <motion.p variants={itemVariants} className="text-white/90 mb-6 font-body">The community you&apos;re looking for doesn&apos;t exist or has been removed.</motion.p>
             <motion.button 
               variants={itemVariants}
               onClick={handleBack}

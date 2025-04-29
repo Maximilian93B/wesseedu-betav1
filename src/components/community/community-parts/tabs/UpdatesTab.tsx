@@ -47,7 +47,7 @@ export const UpdatesTab = () => {
                   <div className="pl-11">
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
                       Our latest sustainability metrics show a 15% reduction in carbon emissions across our investments.
-                      We've also increased our renewable energy portfolio by 22% this quarter.
+                      We&apos;ve also increased our renewable energy portfolio by 22% this quarter.
                     </p>
                     <MemoizedButton 
                       variant="outline" 
@@ -85,7 +85,7 @@ export const UpdatesTab = () => {
                   </div>
                   <div className="pl-11">
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
-                      Join us for an exclusive webinar where we'll discuss new investment opportunities
+                      Join us for an exclusive webinar where we&apos;ll discuss new investment opportunities
                       and meet with our celebrity ambassadors. Reserve your spot today.
                     </p>
                     <MemoizedButton 

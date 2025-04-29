@@ -87,7 +87,7 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
                 </p>
                 
                 <p className="text-white/80 text-lg sm:text-xl max-w-md leading-relaxed">
-                  As you advance through each stage, you'll unlock new features and benefits that enhance your investment experience.
+                  As you advance through each stage, you&apos;ll unlock new features and benefits that enhance your investment experience.
                 </p>
               </div>
               
