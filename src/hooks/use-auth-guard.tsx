@@ -43,7 +43,7 @@ export function useAuthGuard({
     'Example: const { isAuthenticated, isLoading, user } = useAuth({ requireAuth: true });'
   );
   
-  const { isAuthenticated, isLoading, user, checkAuthStatus } = useAuth({
+  const { isAuthenticated, loading, user, checkAuthStatus } = useAuth({
     redirectTo,
     requireAuth,
     checkOnMount: false
@@ -52,11 +52,11 @@ export function useAuthGuard({
 
   useEffect(() => {
     checkAuthStatus();
-  }, [isAuthenticated, pathname, isLoading]);
+  }, [isAuthenticated, pathname, loading, checkAuthStatus]);
 
   return { 
     isAuthenticated, 
-    isLoading, 
+    loading, 
     user
   };
 } 

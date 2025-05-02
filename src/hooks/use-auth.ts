@@ -144,7 +144,7 @@ export function useAuth(options: UseAuthOptions = {}) {
     if (checkOnMount) {
       checkAuthStatus();
     }
-  }, [loading, isAuthenticated, pathname, requireAuth]);
+  }, [loading, isAuthenticated, pathname, requireAuth, checkAuthStatus, checkOnMount]);
 
   return {
     ...authContext,

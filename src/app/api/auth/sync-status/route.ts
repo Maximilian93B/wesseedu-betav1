@@ -70,7 +70,7 @@ export async function GET() {
       data: { 
         authenticated: !!session,
         serverAuthMode: 'standard',
-        needsRefresh: tokenInfo?.secondsRemaining < 300, // Less than 5 minutes left
+        needsRefresh: (tokenInfo?.secondsRemaining ?? Infinity) < 300, // Less than 5 minutes left
         session: session ? {
           user: {
             id: session.user.id,

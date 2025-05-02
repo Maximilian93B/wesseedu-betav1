@@ -46,7 +46,6 @@ const CommunitiesViewDynamic = dynamic(
     loading: () => <LazyLoadingPlaceholder />,
     // This makes Next.js show the loading component for at least 300ms even if the component loads quickly
     // to avoid content flashing
-    loadingTimeout: 300 
   }
 )
 
@@ -56,7 +55,6 @@ const AmbassadorShowcaseDynamic = dynamic(
   { 
     ssr: false, 
     loading: () => <LazyLoadingPlaceholder />,
-    loadingTimeout: 300
   }
 )
 

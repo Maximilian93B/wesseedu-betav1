@@ -41,7 +41,7 @@ interface CompaniesViewProps {
 
 export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
   // Replace deprecated useAuthGuard with the unified useAuth hook
-  const { isAuthenticated, isLoading: authLoading, user } = useAuth({ requireAuth: true })
+  const { isAuthenticated, user } = useAuth({ requireAuth: true })
   
   const [companies, setCompanies] = useState<Company[]>([])
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([])

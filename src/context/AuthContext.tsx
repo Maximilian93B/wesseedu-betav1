@@ -249,7 +249,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsAuthenticated(true);
           }
         } 
-        else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        // Cast event to string for the USER_DELETED check to bypass potential type mismatch issues
+        else if (event === 'SIGNED_OUT' || (event as string) === 'USER_DELETED') {
           console.log("Auth: User signed out or deleted");
           if (isMounted) {
             setUser(null);
@@ -290,7 +291,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Unsubscribe from auth state changes
       subscription.unsubscribe();
     };
-  }, [fetchUserProfile, supabase.auth, router]);
+  }, [fetchUserProfile, supabase.auth, router, user]);
 
   const value = {
     user,

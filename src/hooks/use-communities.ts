@@ -94,8 +94,8 @@ export function useCommunities() {
         console.log('useCommunities: API returned null data, setting empty communities array');
         setCommunities([]);
       }
-      // Handle empty array directly in data field  
-      else if (response.data && Object.prototype.hasOwnProperty.call(response.data, 'data') && response.data.data === []) {
+      // Handle empty array directly in data field by checking its length 
+      else if (response.data && Object.prototype.hasOwnProperty.call(response.data, 'data') && Array.isArray(response.data.data) && response.data.data.length === 0) {
         console.log('useCommunities: API returned empty array in data, setting empty communities array');
         setCommunities([]);
       }
