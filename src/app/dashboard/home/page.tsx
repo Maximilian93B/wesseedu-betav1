@@ -1,16 +1,14 @@
 "use client"
 
-import { Suspense, useRef, useState, useEffect } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/AuthContext"
-import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/use-auth"
 import dynamic from "next/dynamic"
-
+import { useNavigation } from "@/context/NavigationContext"
 
 // Import modularized components
 import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useNavigation } from "@/context/NavigationContext"
 
 // Dynamically import dashboard home page components
 const DashboardIntroHeroDynamic = dynamic(
@@ -32,9 +30,6 @@ const FooterDynamic = dynamic(
   () => import("@/components/wsu/Footer").then(mod => ({ default: mod.Footer })), 
   { ssr: true }
 ) 
-
-
-
 
 // Component loading placeholder with responsive design
 const ComponentLoadingPlaceholder = ({ type = "default" }: { type?: "hero" | "explainer" | "ai" | "default" | "footer" }) => {
@@ -128,11 +123,14 @@ const ComponentLoadingPlaceholder = ({ type = "default" }: { type?: "hero" | "ex
 }
 
 export default function DashboardHomePage() {
-  const { user, profile, loading } = useAuth()
+  // Use the unified auth hook with checkOnMount: false to prevent automatic redirects
+  const { user, profile, loading, isAuthenticated } = useAuth({
+    requireAuth: false,
+    checkOnMount: false
+  })
   const router = useRouter()
-  const { toast } = useToast()
-  const [localLoading, setLocalLoading] = useState(true)
   const { isFirstVisit, markRouteVisited, isTransitioning, setIsTransitioning } = useNavigation()
+  const [pageLoading, setPageLoading] = useState(true)
   const currentRoute = '/dashboard/home'
   
   // Define modules to preload for better dashboard performance
@@ -142,60 +140,47 @@ export default function DashboardHomePage() {
     () => import("@/components/wsu/dashboard/AIInsights")
   ]
   
-  // Track whether we've shown the loading timeout toast
-  const hasShownTimeoutToastRef = useRef(false)
-  
   // Reset transitioning state when component mounts/unmounts
   useEffect(() => {
+    console.log("DashboardHomePage: Component mounted, resetting transition state");
     setIsTransitioning(false)
     return () => setIsTransitioning(false)
   }, [setIsTransitioning])
   
-  // Add a timeout to ensure we don't get stuck in loading state
+  // Handle loading state and route visits
   useEffect(() => {
     // If this is not a first visit, skip loading process
     if (!isFirstVisit(currentRoute) && !isTransitioning) {
-      setLocalLoading(false)
+      console.log("DashboardHomePage: Not first visit and not transitioning, skipping loading");
+      setPageLoading(false)
       return
     }
     
-    // Flag to track component mount state for preventing memory leaks
-    let isMounted = true;
+    console.log("DashboardHomePage: First visit or transitioning, starting loading process");
     
-    // If auth loading is already complete, update local loading state immediately
-    if (!loading && isMounted) {
-      setLocalLoading(false);
+    // Only consider auth loading once
+    if (!loading) {
+      console.log("DashboardHomePage: Auth loading complete, marking route as visited");
+      setPageLoading(false);
       markRouteVisited(currentRoute)
     }
     
-    // Set a timeout to force loading to false after 5 seconds
+    // Safety timeout to prevent infinite loading (3 seconds)
     const timeoutId = setTimeout(() => {
-      if (isMounted && localLoading) {
-        setLocalLoading(false);
-        markRouteVisited(currentRoute)
-        
-        // Only show toast if we actually had to force the loading state change
-        // and we haven't shown it yet
-        if (loading && !hasShownTimeoutToastRef.current) {
-          hasShownTimeoutToastRef.current = true;
-          toast({
-            title: "Loading timeout",
-            description: "Some data might not be available. Please refresh if needed.",
-            variant: "default"
-          });
-        }
-      }
-    }, 5000);
+      console.log("DashboardHomePage: Safety timeout reached, forcing loading off");
+      setPageLoading(false);
+      markRouteVisited(currentRoute);
+    }, 3000);
 
-    // Cleanup function to prevent memory leaks and cancel timeout
     return () => {
-      isMounted = false;
+      console.log("DashboardHomePage: Cleaning up loading effect");
       clearTimeout(timeoutId);
     };
-  }, [loading, localLoading, toast, isFirstVisit, currentRoute, markRouteVisited, isTransitioning]);
+  }, [loading, isFirstVisit, currentRoute, markRouteVisited, isTransitioning]);
   
   // Handle navigation with updated routing paths
   const handleNavigation = (view: 'home' | 'dashboard' | 'companies' | 'saved' | 'communities') => {
+    console.log("DashboardHomePage: Navigation requested to", view);
     setIsTransitioning(true)
     if (view === 'home') {
       router.push('/dashboard/home')
@@ -211,7 +196,8 @@ export default function DashboardHomePage() {
   }
   
   // Only show loading for first visit or transition
-  if (localLoading && (isFirstVisit(currentRoute) || isTransitioning)) {
+  if (pageLoading && (isFirstVisit(currentRoute) || isTransitioning)) {
+    console.log("DashboardHomePage: Showing loading preloader");
     return (
       <LoadingPreloader
         preloadModules={dashboardModules}
@@ -219,11 +205,13 @@ export default function DashboardHomePage() {
     )
   }
 
-  // If no user after loading completes, show login message
-  if (!user) {
+  // If not authenticated, show login required
+  if (!isAuthenticated && !loading) {
+    console.log("DashboardHomePage: Not authorized, showing login required");
     return <LoginRequired />
   }
 
+  console.log("DashboardHomePage: Rendering main content");
   return (
     <div className="w-full max-w-full mx-auto overflow-hidden rounded-lg">
       {/* Main Content */}

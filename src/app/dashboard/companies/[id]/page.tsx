@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/hooks/use-auth"
 import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigation } from "@/context/NavigationContext"
@@ -45,7 +45,10 @@ const CompanyDetailsViewDynamic = dynamic(
 )
 
 export default function CompanyDetailsPage({ params }: { params: { id: string } }) {
-  const { user, loading } = useAuth()
+  const { user, loading, isAuthenticated } = useAuth({
+    requireAuth: false,
+    checkOnMount: false
+  })
   const router = useRouter()
   const companyId = params.id
   const { toast } = useToast()

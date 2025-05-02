@@ -110,6 +110,12 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
   const [watchlistLoading, setWatchlistLoading] = useState(false)
   const isInitialMount = useRef(true);
   const fetchInProgress = useRef(false);
+  const localUserRef = useRef(user);
+  
+  // Update local user ref when prop changes
+  useEffect(() => {
+    localUserRef.current = user;
+  }, [user]);
   
   // Use the shared watchlist hook to avoid duplicate data fetching
   const { 
@@ -363,28 +369,33 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
   }, [processInvestmentsData, updateStatistics]);
 
   useEffect(() => {
+    // Improved logging to track what's happening
+    console.log("DashboardView: Effect triggered with authLoading:", authLoading, 
+               "user:", user?.id || "not set", 
+               "isInitialMount:", isInitialMount.current, 
+               "profileData exists:", !!profileData);
+    
+    // Don't do anything if explicitly transitioning to not loading
+    if (!loading && !isInitialMount.current) {
+      console.log("DashboardView: Already not loading and not initial mount, skipping fetch");
+      return;
+    }
+    
+    // Still loading auth, wait for it to complete
     if (authLoading) {
-      console.log("DashboardView: Auth is still loading, waiting...");
+      console.log("DashboardView: Auth still loading, waiting...");
       return;
     }
     
-    // Skip fetching on component re-renders
-    if (!isInitialMount.current) {
-      console.log("DashboardView: Skipping additional data load after initial mount");
-      // Ensure loading state is set to false
-      if (loading) {
-        console.log("DashboardView: Resetting stuck loading state");
-        setLoading(false);
-      }
-      return;
-    }
+    // Valid user check using both the prop user and auth state
+    const effectiveUser = user || localUserRef.current;
     
-    // Only fetch data when user exists and we haven't loaded it yet
-    if (user && !profileData) {
-      console.log("DashboardView: User detected, loading data");
+    // If we have a user and this is the initial mount, proceed with data fetching
+    if (effectiveUser && isInitialMount.current) {
+      console.log("DashboardView: User is authenticated, proceeding with data fetch");
       isInitialMount.current = false;
       
-      let mounted = true; // Use a mounted flag for cleanup
+      let mounted = true;
       
       const loadData = async () => {
         if (!mounted) return;
@@ -393,26 +404,26 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
           setLoading(true);
           setError(null);
           
-          // Set a timeout to force loading to end after 5 seconds
+          console.log("DashboardView: Starting profile data fetch");
+          // Set a more reasonable timeout that's shorter than the global one
           const timeoutId = setTimeout(() => {
-            if (!mounted) return;
-            
-            console.log("DashboardView: Loading timeout reached");
-            setLoading(false);
-            setError("Loading took too long. Some data may be incomplete.");
-            toast({
-              title: "Warning",
-              description: "Loading took too long. Some data may be incomplete.",
-              variant: "destructive"
-            });
-          }, 5000);
+            if (mounted && loading) {
+              console.log("DashboardView: Local timeout reached, setting error state");
+              setLoading(false);
+              setError("Loading took too long. Some data may be incomplete.");
+              toast({
+                title: "Warning",
+                description: "Loading took too long. Some data may be incomplete.",
+                variant: "destructive"
+              });
+            }
+          }, 7000);
           
           await fetchProfileData();
           
-          // Clear timeout if data loaded successfully
-          clearTimeout(timeoutId);
-          
           if (mounted) {
+            console.log("DashboardView: Data fetch completed successfully");
+            clearTimeout(timeoutId);
             setLoading(false);
           }
         } catch (error) {
@@ -426,21 +437,33 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
       
       loadData();
       
-      // Cleanup function to handle unmounting
       return () => {
         mounted = false;
       };
     } else {
-      console.log("DashboardView: No user or data already loaded, skipping data load");
-      // Ensure we're not in a loading state if we're skipping data load
-      setLoading(false);
+      // No valid user or not initial mount
+      if (!effectiveUser) {
+        console.log("DashboardView: No valid user, not fetching data");
+      } else {
+        console.log("DashboardView: Not initial mount or data already fetched");
+      }
+      
+      // Ensure loading is turned off in all cases
+      if (loading) {
+        console.log("DashboardView: Turning off loading state as no data fetch is needed");
+        setLoading(false);
+      }
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, fetchProfileData, loading, profileData, toast]);
 
   // Show a more informative loading state
   if (authLoading || loading) {
+    console.log("DashboardView: Rendering loading state, authLoading:", authLoading, "loading:", loading);
     return (
       <div className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden">
+        {/* Decorative top accent following Green Apple style */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#70f570] via-[#49c628] to-transparent" />
+        
         <div className="px-3 py-4 pt-6 sm:pt-8 md:pt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
           {/* Skeleton for DashboardHero */}
           <div className="mb-6 sm:mb-8">
@@ -451,7 +474,7 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
           {/* Skeleton for charts */}
           <div className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12 mt-6 sm:mt-8 md:mt-10">
             {/* Investment Growth Chart skeleton */}
-            <div className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-3 sm:p-4 md:p-5 lg:p-6">
+            <div className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] p-3 sm:p-4 md:p-5 lg:p-6">
               <Skeleton className="h-6 w-1/3 mb-2 rounded-lg" />
               <Skeleton className="h-4 w-1/2 mb-4 rounded-lg" />
               <Skeleton className="h-[250px] sm:h-[280px] md:h-[320px] lg:h-[380px] w-full rounded-lg" />
@@ -460,7 +483,7 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
             {/* 2 column section skeleton */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
               {/* Left Column */}
-              <div className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-3 sm:p-4 md:p-5 lg:p-6">
+              <div className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] p-3 sm:p-4 md:p-5 lg:p-6">
                 <Skeleton className="h-6 w-1/2 mb-3 rounded-lg" />
                 <div className="space-y-2">
                   <Skeleton className="h-12 w-full rounded-lg" />
@@ -470,14 +493,14 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
               </div>
               
               {/* Right Column */}
-              <div className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-3 sm:p-4 md:p-5 lg:p-6">
+              <div className="rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] p-3 sm:p-4 md:p-5 lg:p-6">
                 <Skeleton className="h-6 w-1/2 mb-3 rounded-lg" />
                 <Skeleton className="h-[180px] w-full rounded-lg" />
               </div>
             </div>
             
             {/* Goals Section skeleton */}
-            <div className="rounded-lg sm:rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-3 sm:p-4 md:p-5 lg:p-6">
+            <div className="rounded-lg sm:rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] p-3 sm:p-4 md:p-5 lg:p-6">
               <Skeleton className="h-6 w-1/4 mb-3 rounded-lg" />
               <div className="space-y-2">
                 <Skeleton className="h-8 w-full rounded-lg" />
@@ -492,6 +515,7 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
 
   // Show error state if there was an error
   if (error) {
+    console.log("DashboardView: Rendering error state:", error);
     return (
       <div className="flex flex-col items-center justify-center p-8 space-y-4 min-h-[60vh]"
         style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
@@ -499,7 +523,7 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="bg-white p-8 rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+          className="bg-white p-8 rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
         >
           <p className="text-black mb-4 font-body">{error}</p>
           <Button 
@@ -515,8 +539,12 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
     );
   }
 
+  // Check for authenticated user - use BOTH the prop user and auth context user
+  const effectiveUser = user || localUserRef.current;
+  
   // Redirect if no user
-  if (!user) {
+  if (!effectiveUser) {
+    console.log("DashboardView: No user found, redirecting to signin");
     router.push("/auth/signin");
     return (
       <div className="flex items-center justify-center p-8 min-h-[60vh]"
@@ -532,6 +560,7 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
     );
   }
 
+  console.log("DashboardView: Rendering main dashboard for user:", effectiveUser.id);
   return (
     <div className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden">
       {/* Background pattern */}
@@ -575,12 +604,15 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
             {/* Investment Growth Chart */}
             <motion.div 
               variants={itemVariants}
-              className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+              className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
               whileHover={{ y: -5, boxShadow: "0 12px 30px rgba(0,0,0,0.12)" }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               {/* Simple white background */}
               <div className="absolute inset-0 bg-white"></div>
+              
+              {/* Decorative top accent following Green Apple style */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#70f570] via-[#49c628] to-transparent" />
               
               {/* Card content */}
               <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6 flex flex-col">
@@ -651,8 +683,10 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
               {/* Left Column: User Investments */}
               <motion.div variants={itemVariants} className="h-full">
-                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] h-full">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] h-full">
                   <div className="absolute inset-0 bg-white"></div>
+                  {/* Decorative top accent following Green Apple style */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#70f570] via-[#49c628] to-transparent" />
                   <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
                     <UserInvestments />
                   </div>
@@ -661,8 +695,10 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
               
               {/* Right Column: Investment Chart */}
               <motion.div variants={itemVariants} className="h-full">
-                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] h-full">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] h-full">
                   <div className="absolute inset-0 bg-white"></div>
+                  {/* Decorative top accent following Green Apple style */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#70f570] via-[#49c628] to-transparent" />
                   <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
                     <InvestmentOverviewChart />
                   </div>
@@ -672,8 +708,10 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
             
             {/* Goals Section */}
             <motion.div variants={itemVariants}>
-              <div className="relative overflow-hidden rounded-lg sm:rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
+              <div className="relative overflow-hidden rounded-lg sm:rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
                 <div className="absolute inset-0 bg-white"></div>
+                {/* Decorative top accent following Green Apple style */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#70f570] via-[#49c628] to-transparent" />
                 <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
                   <GoalTracker userId={user?.id} />
                 </div>
@@ -684,8 +722,10 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
               {/* Left: Community Integration */}
               <motion.div variants={itemVariants} className="h-full">
-                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] h-full">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] h-full">
                   <div className="absolute inset-0 bg-white"></div>
+                  {/* Decorative top accent following Green Apple style */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#70f570] via-[#49c628] to-transparent" />
                   <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
                     <h2 className="text-lg sm:text-xl font-extrabold text-black leading-tight tracking-tight font-display mb-3 md:mb-4">Community</h2>
                     <CommunityIntegration userId={user?.id} />
@@ -695,8 +735,10 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
               
               {/* Right: Watchlist */}
               <motion.div variants={itemVariants} className="h-full">
-                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)] h-full">
+                <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)] h-full">
                   <div className="absolute inset-0 bg-white"></div>
+                  {/* Decorative top accent following Green Apple style */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#70f570] via-[#49c628] to-transparent" />
                   <div className="relative z-5 h-full p-3 sm:p-4 md:p-5 lg:p-6">
                     <div className="flex items-center justify-between mb-3 md:mb-4">
                       <h2 className="text-lg sm:text-xl font-extrabold text-black leading-tight tracking-tight font-display">Watchlist</h2>

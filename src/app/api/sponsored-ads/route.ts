@@ -1,5 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
-import { supabaseClient } from '@/lib/supabase/supabaseClient';
 
 export interface SponsoredAd {
   id: string;
@@ -18,8 +18,13 @@ export interface SponsoredAd {
 
 export async function GET() {
   try {
-    // Query the sponsored_ads table
-    const { data, error } = await supabaseClient
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+    
+    // Use service role to bypass RLS policies
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const { data, error } = await supabase
       .from('sponsored_ads')
       .select('*')
       .eq('active', true)

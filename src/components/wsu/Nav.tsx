@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
-import { Menu, Zap, X } from "lucide-react"
+import { Menu,  X } from "lucide-react"
 import Link from "next/link"
 import { SectionNav, SectionLinks } from '@/components/wsu/SectionNav'
 
@@ -50,8 +50,8 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
   const [showSectionNav, setShowSectionNav] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Optimized scroll handler with throttling
-  const handleScroll = useCallback(() => {
+  // Fix the throttle implementation with useCallback
+  const throttledScrollHandler = useCallback(() => {
     const currentScrollY = window.scrollY;
     
     // Basic scroll detection
@@ -66,17 +66,12 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
     
     setLastScrollY(currentScrollY);
   }, [lastScrollY]);
-  
-  // Create throttled version of the scroll handler
-  const throttledScrollHandler = useCallback(
-    throttle(handleScroll, 100),
-    [handleScroll]
-  );
 
-  // Set up optimized scroll listener
+  // Use throttle with the useCallback-wrapped function
   useEffect(() => {
-    window.addEventListener('scroll', throttledScrollHandler, { passive: true });
-    return () => window.removeEventListener('scroll', throttledScrollHandler);
+    const throttledHandler = throttle(throttledScrollHandler, 100);
+    window.addEventListener('scroll', throttledHandler, { passive: true });
+    return () => window.removeEventListener('scroll', throttledHandler);
   }, [throttledScrollHandler]);
 
   // Unified handler for sidebar events (click outside and escape key)

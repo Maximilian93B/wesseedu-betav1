@@ -27,6 +27,7 @@ const InvestmentSummary = () => {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const fetchInProgress = useRef(false);
+  const effectRan = useRef(false);
 
   const fetchStats = useCallback(async () => {
     // Prevent concurrent fetch operations
@@ -82,9 +83,6 @@ const InvestmentSummary = () => {
   }, [user?.id, toast]);
 
   useEffect(() => {
-    // Add a guard to prevent useEffect from running more than once
-    const effectRan = useRef(false);
-    
     if (effectRan.current) {
       return; // Only run once
     }
@@ -96,19 +94,22 @@ const InvestmentSummary = () => {
       
       // Set a timeout to exit loading state after 5 seconds
       const timeoutId = setTimeout(() => {
-        if (isLoading) {
-          console.log("InvestmentSummary: Loading timeout reached");
-          setIsLoading(false);
-          setStats({
-            totalInvested: 0,
-            investmentCount: 0
-          });
-          toast({
-            title: "Loading Timeout",
-            description: "Could not load investment data in a reasonable time. Using default values.",
-            variant: "destructive"
-          });
-        }
+        setIsLoading(currentIsLoading => {
+          if (currentIsLoading) {
+            console.log("InvestmentSummary: Loading timeout reached");
+            setStats({
+              totalInvested: 0,
+              investmentCount: 0
+            });
+            toast({
+              title: "Loading Timeout",
+              description: "Could not load investment data in a reasonable time. Using default values.",
+              variant: "destructive"
+            });
+            return false;
+          }
+          return currentIsLoading;
+        });
       }, 5000);
       
       return () => clearTimeout(timeoutId);

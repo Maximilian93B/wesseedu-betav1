@@ -6,7 +6,8 @@ export async function GET(req: NextRequest) {
   const { error, authenticated, supabase, session } = await checkAuth()
   
   if (!authenticated) {
-    return error
+    // Ensure we always return a Response object, not null
+    return error || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   
   try {
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
   const { error, authenticated, supabase, session } = await checkAuth()
   
   if (!authenticated) {
-    return error
+    return error || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   
   try {
@@ -101,7 +102,7 @@ export async function PATCH(req: NextRequest) {
   const { error, authenticated, supabase, session } = await checkAuth()
   
   if (!authenticated) {
-    return error
+    return error || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   
   try {
@@ -119,7 +120,9 @@ export async function PATCH(req: NextRequest) {
       
       // Ensure we only update allowed fields
       const allowedUpdates = ['title', 'description', 'target_amount', 'current_amount', 'category', 'target_date', 'status']
-      const filteredUpdates = Object.keys(updates).reduce((obj, key) => {
+      
+      // Use a Record type to avoid TypeScript errors
+      const filteredUpdates: Record<string, any> = Object.keys(updates).reduce((obj: Record<string, any>, key) => {
         if (allowedUpdates.includes(key)) {
           obj[key] = updates[key]
         }
@@ -159,7 +162,7 @@ export async function DELETE(req: NextRequest) {
   const { error, authenticated, supabase, session } = await checkAuth()
   
   if (!authenticated) {
-    return error
+    return error || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   
   try {

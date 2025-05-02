@@ -1,14 +1,14 @@
 "use client"
 
-import { ReactNode, useEffect, useState, useRef } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { DashboardNav } from "@/components/wsu/dashboard/DashboardNav"
 import Head from "next/head"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/hooks/use-auth"
 import { LoadingScreen } from "@/components/wsu/home"
-import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import { NavigationProvider } from "@/context/NavigationContext"
+import { LoginRequired } from "@/components/wsu/home"
 
 // Prefetch component modules without requiring hooks
 const prefetchModules = () => {
@@ -21,16 +21,26 @@ export default function DashboardLayout({
 }: {
   children: ReactNode
 }) {
-  const { user, loading } = useAuth()
-  const { toast } = useToast()
-  const [localLoading, setLocalLoading] = useState(true)
+  // Use the unified auth hook with checkOnMount: false to prevent automatic redirects
+  const { user, loading, isAuthenticated } = useAuth({
+    requireAuth: false,
+    checkOnMount: false
+  })
+  const [readyToRender, setReadyToRender] = useState(false)
   const router = useRouter()
   
-  // Track whether we've shown the loading timeout toast
-  const hasShownTimeoutToastRef = useRef(false)
+  // Debug log for dashboard layout
+  useEffect(() => {
+    console.log("DashboardLayout: Auth state -", 
+      "user:", user?.id || "not authenticated", 
+      "loading:", loading,
+      "isAuthenticated:", isAuthenticated
+    );
+  }, [user, loading, isAuthenticated]);
   
   // Preload critical components when the dashboard layout mounts
   useEffect(() => {
+    console.log("DashboardLayout: Prefetching routes and modules");
     // Prefetch modules
     prefetchModules()
     
@@ -40,46 +50,40 @@ export default function DashboardLayout({
     router.prefetch('/dashboard/companies')
   }, [router])
   
-  // Add a timeout to ensure we don't get stuck in loading state
+  // Redirect if not authenticated after loading completes
   useEffect(() => {
-    // Flag to track component mount state for preventing memory leaks
-    let isMounted = true;
-    
-    // If auth loading is already complete, update local loading state immediately
-    if (!loading && isMounted) {
-      setLocalLoading(false);
-    }
-    
-    // Set a timeout to force loading to false after 5 seconds
-    const timeoutId = setTimeout(() => {
-      if (isMounted && localLoading) {
-        setLocalLoading(false);
-        
-        // Only show toast if we actually had to force the loading state change
-        // and we haven't shown it yet
-        if (loading && !hasShownTimeoutToastRef.current) {
-          hasShownTimeoutToastRef.current = true;
-          toast({
-            title: "Loading timeout",
-            description: "Dashboard may be partially loaded. Please refresh if needed.",
-            variant: "default"
-          });
-        }
+    // Only make decisions once loading is complete
+    if (!loading) {
+      if (!isAuthenticated) {
+        console.log("DashboardLayout: User not authenticated, redirecting to login");
+        router.push('/auth/login')
+      } else {
+        // Set ready to render when authenticated
+        console.log("DashboardLayout: User authenticated, ready to render");
+        setReadyToRender(true)
       }
-    }, 5000);
-
-    // Cleanup function to prevent memory leaks and cancel timeout
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, [loading, localLoading, toast]);
+    }
+  }, [loading, isAuthenticated, router]);
   
-  // Show loading during auth check with enhanced LoadingScreen
-  if (localLoading) {
+  // Show loading during auth check
+  if (loading) {
+    console.log("DashboardLayout: Authentication in progress, showing loading screen");
     return <LoadingScreen />
   }
   
+  // Show login required if not authenticated
+  if (!isAuthenticated && !loading) {
+    console.log("DashboardLayout: Not authenticated, showing login required");
+    return <LoginRequired />
+  }
+  
+  // Wait until we're sure we're ready to render
+  if (!readyToRender) {
+    console.log("DashboardLayout: Waiting to ensure auth is stable before rendering");
+    return <LoadingScreen />
+  }
+  
+  console.log("DashboardLayout: Rendering dashboard with authorized user");
   return (
     <NavigationProvider>
       <Head>

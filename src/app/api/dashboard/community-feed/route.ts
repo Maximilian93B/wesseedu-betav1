@@ -3,12 +3,13 @@ import { checkAuth } from '@/lib/utils/authCheck'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
-// Add this line to prevent static optimization
 export const dynamic = 'force-dynamic'
+
+// Force rebuild of this API route - profiles not user_profiles
 
 interface ProfileData {
   id: string;
-  username: string;
+  name: string;
   avatar_url: string | null;
 }
 
@@ -34,10 +35,9 @@ interface CommunityPost {
     name: string;
   };
   user_id: string;
-  user_profiles: {
+  profiles: {
     id: string;
-    username: string;
-    avatar_url: string | null;
+    name: string;
   };
 }
 
@@ -50,20 +50,30 @@ interface CommunityMember {
     name: string;
   };
   user_id: string;
-  user_profiles: {
+  profiles: {
     id: string;
-    username: string;
-    avatar_url: string | null;
-  };
+    name: string;
+  };  
 }
 
 export async function GET(req: NextRequest) {
   try {
+    console.log('Community feed API called');
+    
     // Check authentication
     const auth = await checkAuth();
     
+    // Debug auth issues
+    console.log('Auth check result:', { 
+      authenticated: auth.authenticated, 
+      hasError: !!auth.error,
+      hasSession: !!auth.session,
+      userId: auth.session?.user?.id || 'no-user-id'
+    });
+    
     // If not authenticated, return 401 with proper error message
     if (auth.error) {
+      console.log('Auth error detected in community feed API');
       return NextResponse.json({ 
         data: null,
         error: 'Unauthorized', 
@@ -75,15 +85,19 @@ export async function GET(req: NextRequest) {
     const supabase = auth.supabase;
     
     // Get user from the auth session
-    const user = auth.session.user;
+    const user = auth.session?.user;
     
     if (!user) {
+      console.log('No user in session for community feed API');
       return NextResponse.json({ 
         data: null,
         error: 'User not found', 
         status: 401 
       }, { status: 401 });
     }
+    
+    // Add user ID to log
+    console.log('Processing community feed for user:', user.id);
 
     // Fetch community posts with user and community information (last 2 weeks)
     const twoWeeksAgo = new Date();
@@ -93,12 +107,17 @@ export async function GET(req: NextRequest) {
       .from('community_posts')
       .select(`
         id,
+        title,
         content,
         created_at,
         community_id,
-        communities!community_posts_community_id_fkey(id, name),
-        user_id,
-        user_profiles!community_posts_user_id_fkey(id, username, avatar_url)
+        community:company_communities!community_posts_community_id_fkey(
+          id,
+          company_id,
+          companies(id, name)
+        ),
+        author_id,
+        profiles!community_posts_author_id_fkey(id, name)
       `)
       .gt('created_at', twoWeeksAgo.toISOString())
       .order('created_at', { ascending: false })
@@ -108,7 +127,7 @@ export async function GET(req: NextRequest) {
       console.error('Error fetching community posts:', postsError);
       return NextResponse.json({ 
         data: null,
-        error: 'Error fetching community posts', 
+        error: postsError, 
         status: 500 
       }, { status: 500 });
     }
@@ -120,9 +139,13 @@ export async function GET(req: NextRequest) {
         id,
         created_at,
         community_id,
-        communities!community_members_community_id_fkey(id, name),
+        community:company_communities!community_members_community_id_fkey(
+          id, 
+          company_id,
+          companies(id, name)
+        ),
         user_id,
-        user_profiles!community_members_user_id_fkey(id, username, avatar_url)
+        profiles!community_members_user_id_fkey(id, name)
       `)
       .gt('created_at', twoWeeksAgo.toISOString())
       .order('created_at', { ascending: false })
@@ -132,53 +155,84 @@ export async function GET(req: NextRequest) {
       console.error('Error fetching community members:', membersError);
       return NextResponse.json({ 
         data: null,
-        error: 'Error fetching community members', 
+        error: membersError, 
         status: 500 
       }, { status: 500 });
     }
     
     // Format posts data
-    const formattedPosts = postsData.map((post: any) => ({
-      id: post.id,
-      user: {
-        id: post.user_profiles.id,
-        name: post.user_profiles.username,
-        avatar: post.user_profiles.avatar_url
-      },
-      type: 'post',
-      content: post.content,
-      timestamp: post.created_at,
-      community: {
-        id: post.community_id,
-        name: post.communities.name
-      },
-      likes: 0,
-      comments: 0
-    }));
+    const formattedPosts = postsData.map((post: any) => {
+      try {
+        return {
+          id: post.id,
+          title: post.title || (post.content && post.content.substring(0, 50).replace(/<[^>]+>/g, '')) || 'Untitled Post',
+          content: post.content || '',
+          created_at: post.created_at,
+          community_id: post.community_id,
+          community_name: post.community?.companies?.name || 'Unknown Community',
+          author_id: post.author_id,
+          author_name: post.profiles?.name || 'Anonymous',
+        };
+      } catch (err) {
+        console.error('Error formatting post:', err, post);
+        // Return a minimal valid object if there's an error
+        return {
+          id: post.id || 'unknown-id',
+          title: 'Error displaying post',
+          content: 'There was an error displaying this post content',
+          created_at: post.created_at || new Date().toISOString(),
+          community_id: post.community_id || '',
+          community_name: 'Unknown Community',
+          author_id: post.author_id || '',
+          author_name: 'Unknown Author',
+        };
+      }
+    });
     
-    // Format members data
-    const formattedMembers = membersData.map((member: any) => ({
-      id: member.id,
-      user: {
-        id: member.user_profiles.id,
-        name: member.user_profiles.username,
-        avatar: member.user_profiles.avatar_url
-      },
-      type: 'join',
-      content: `Joined ${member.communities.name} community`,
-      timestamp: member.created_at,
-      community: {
-        id: member.community_id,
-        name: member.communities.name
-      },
-      likes: 0,
-      comments: 0
-    }));
+    // Format members data - convert to CommunityActivity format
+    const formattedMembers = membersData.map((member: any) => {
+      try {
+        const communityName = member.community?.companies?.name || 'Unknown Community';
+        return {
+          id: member.id,
+          title: `Joined ${communityName} community`,
+          content: `Joined ${communityName} community`,
+          created_at: member.created_at,
+          community_id: member.community_id,
+          community_name: communityName,
+          author_id: member.user_id,
+          author_name: member.profiles?.name || 'Anonymous',
+        };
+      } catch (err) {
+        console.error('Error formatting member:', err, member);
+        // Return a minimal valid object if there's an error
+        return {
+          id: member.id || 'unknown-id',
+          title: 'New community member',
+          content: 'User joined a community',
+          created_at: member.created_at || new Date().toISOString(),
+          community_id: member.community_id || '',
+          community_name: 'Unknown Community',
+          author_id: member.user_id || '',
+          author_name: 'Unknown User',
+        };
+      }
+    });
     
     // Combine and sort all activity by timestamp
     const combinedActivity = [...formattedPosts, ...formattedMembers]
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 30); // Limit to 30 most recent activities
+    
+    // Prepare response data
+    const responseData = {
+      recentActivity: combinedActivity,
+      stats: {
+        communities_joined: membersData.length,
+        posts_created: postsData.length,
+        comments_made: 0 // Add comment data when available
+      }
+    };
     
     // In development mode, you can return mock + real data for testing
     if (process.env.NODE_ENV === 'development' && req.nextUrl.searchParams.get('mock') === 'true') {
@@ -243,23 +297,31 @@ export async function GET(req: NextRequest) {
       ];
       
       return NextResponse.json({
-        data: [...mockData, ...combinedActivity],
+        data: {
+          ...responseData,
+          recentActivity: [...mockData, ...combinedActivity]
+        },
         error: null,
         status: 200
       });
     }
 
     return NextResponse.json({ 
-      data: combinedActivity,
+      data: responseData,
       error: null,
       status: 200
     }, { status: 200 });
     
-  } catch (error) {
-    console.error('Error in community feed API:', error);
+  } catch (error: any) {
+    console.error('Error in community posts/members processing:', error);
     return NextResponse.json({ 
       data: null,
-      error: 'Internal Server Error', 
+      error: {
+        message: error.message || 'Error processing community data',
+        code: error.code || 'UNKNOWN',
+        details: error.details || null,
+        hint: error.hint || null
+      }, 
       status: 500 
     }, { status: 500 });
   }

@@ -71,7 +71,7 @@ export function DashboardExplainer() {
       title: "Saved Investments",
       description: "Keep track of companies you're interested in with your personalized watchlist.",
       path: "/dashboard/saved",
-      imageSrc: "/images/dashboard/saved.png",
+      imageSrc: "/images/Screenshot 2025-02-21 200935.png",
       features: [
         "Custom watchlists",
         "Price alerts",
@@ -85,7 +85,7 @@ export function DashboardExplainer() {
       title: " WSU Communities",
       description: "Connect with like-minded investors and learn from ambassador-led sustainable investing communities.",
       path: "/dashboard/communities",
-      imageSrc:"/community_preview.png",
+      imageSrc:"/pexels-aboodi-18620005.jpg",
       features: [
         "Join thematic investment groups",
         "Expert-led discussions",

@@ -1,6 +1,12 @@
+/**
+ * @deprecated Use the unified useAuth hook instead with appropriate options
+ * Example: import { useAuth } from '@/hooks/use-auth';
+ *          const { isAuthenticated, isLoading, user } = useAuth({ requireAuth: true });
+ */
+
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/use-auth';
 
 // Public routes that don't require authentication
 const PUBLIC_ROUTES = [
@@ -26,38 +32,31 @@ interface UseAuthGuardOptions {
 }
 
 /**
- * Hook to handle authentication state for components
- * Navigates to login page if user is not authenticated and page requires auth
+ * @deprecated Use useAuth from @/hooks/use-auth instead
  */
 export function useAuthGuard({
   redirectTo = '/auth/signin',
   requireAuth = true,
 }: UseAuthGuardOptions = {}) {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
+  console.warn(
+    '[DEPRECATED] useAuthGuard is deprecated. Use the unified useAuth hook instead.\n' +
+    'Example: const { isAuthenticated, isLoading, user } = useAuth({ requireAuth: true });'
+  );
   
-  // Derive isAuthenticated from user
-  const isAuthenticated = !!user;
+  const { isAuthenticated, isLoading, user, checkAuthStatus } = useAuth({
+    redirectTo,
+    requireAuth,
+    checkOnMount: false
+  });
+  const pathname = usePathname();
 
   useEffect(() => {
-    // Skip if still loading
-    if (loading) return;
-
-    // Check if current route is public
-    const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname?.startsWith(route));
-
-    // If authentication is required and user is not authenticated
-    if (requireAuth && !isAuthenticated && !isPublicRoute) {
-      // Create URL with return path for after login
-      const returnPath = encodeURIComponent(pathname || '/');
-      router.push(`${redirectTo}?returnTo=${returnPath}`);
-    }
-  }, [loading, isAuthenticated, pathname, redirectTo, requireAuth, router, user]);
+    checkAuthStatus();
+  }, [isAuthenticated, pathname, isLoading]);
 
   return { 
     isAuthenticated, 
-    isLoading: loading,
+    isLoading, 
     user
   };
 } 

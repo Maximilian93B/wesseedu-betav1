@@ -5,6 +5,17 @@ import { checkAuth } from '@/lib/utils/authCheck'
 
 export const dynamic = 'force-dynamic'
 
+// Counter to track the number of requests within a time window
+let requestCounter = {
+  count: 0,
+  lastReset: Date.now(),
+  threshold: 10, // Maximum requests in window before throttling
+  resetInterval: 10000, // 10 seconds
+  isThrottled: false,
+  throttleDuration: 60000, // 1 minute throttle
+  throttleStart: 0
+};
+
 // Define interfaces to help with type checking
 interface Company {
   id: string
@@ -28,9 +39,58 @@ interface CommunityWithCompany extends CommunityBase {
 
 export async function GET(request: Request) {
   try {
+    // Check for request throttling
+    const now = Date.now();
+    
+    // If we're in a throttled state
+    if (requestCounter.isThrottled) {
+      const throttleTimeRemaining = requestCounter.throttleStart + requestCounter.throttleDuration - now;
+      if (throttleTimeRemaining > 0) {
+        // Still in throttle period
+        console.log(`API throttled. Try again in ${Math.round(throttleTimeRemaining / 1000)}s`);
+        return NextResponse.json(
+          { error: 'Too many requests', status: 429 },
+          { status: 429 }
+        );
+      } else {
+        // Throttle period ended
+        console.log('Throttle period ended, resetting counters');
+        requestCounter.isThrottled = false;
+        requestCounter.count = 0;
+        requestCounter.lastReset = now;
+      }
+    }
+    
+    // Check if we need to reset the counter based on time window
+    if (now - requestCounter.lastReset > requestCounter.resetInterval) {
+      requestCounter.count = 0;
+      requestCounter.lastReset = now;
+    }
+    
+    // Increment request counter
+    requestCounter.count++;
+    console.log(`Request count: ${requestCounter.count}/${requestCounter.threshold}`);
+    
+    // If over threshold, enable throttling
+    if (requestCounter.count > requestCounter.threshold) {
+      console.log(`Request threshold exceeded (${requestCounter.count}). Throttling for ${requestCounter.throttleDuration / 1000}s`);
+      requestCounter.isThrottled = true;
+      requestCounter.throttleStart = now;
+      return NextResponse.json(
+        { error: 'Too many requests', status: 429 },
+        { status: 429 }
+      );
+    }
+    
+    console.log('------ COMMUNITIES API ------');
+    console.log('Starting API request for communities');
+    
     // Check authentication
     const auth = await checkAuth()
     if (auth.error) {
+      console.log('Authentication failed in communities API');
+      // For clarity and consistency, make sure we return a proper response object
+      // with a specific status code and structured error
       return NextResponse.json(
         { data: null, error: 'Unauthorized', status: 401 },
         { status: 401 }
@@ -50,6 +110,8 @@ export async function GET(request: Request) {
     
     try {
       // Try the first approach with company_communities table
+      console.log('Attempting to query company_communities table');
+      
       let query = supabase
         .from('company_communities')
         .select(`
@@ -73,37 +135,65 @@ export async function GET(request: Request) {
       
       const { data, error } = await query
       
-      if (!error && data) {
+      if (error) {
+        console.log('Error querying company_communities:', error.message);
+        throw error;
+      }
+      
+      console.log(`Query successful. Found ${data?.length || 0} communities`);
+      
+      if (data && data.length > 0) {
+        console.log('Sample community:', JSON.stringify(data[0], null, 2));
         finalCommunities = data as unknown as CommunityWithCompany[]
       } else {
-        throw error
+        console.log('No communities found in company_communities table');
+        throw new Error('No communities found in primary table');
       }
     } catch (firstError) {
       console.log('First query approach failed:', firstError)
       
       // Fallback approach
       try {
+        console.log('Attempting fallback query to communities table');
         const { data: communities, error } = await supabase
           .from('communities')
           .select('id, description, created_at, company_id')
           
-        if (error) throw error
+        if (error) {
+          console.log('Error querying communities table:', error.message);
+          throw error;
+        }
+        
+        console.log(`Found ${communities?.length || 0} communities in fallback table`);
+        
+        if (!communities || communities.length === 0) {
+          console.log('No communities found in fallback table either');
+          throw new Error('No communities found in fallback table');
+        }
         
         // Get company data for each community
+        console.log('Fetching company data for each community');
+        
         finalCommunities = await Promise.all(
           communities.map(async (community): Promise<CommunityWithCompany> => {
             try {
-              const { data: companyData } = await supabase
+              const { data: companyData, error: companyError } = await supabase
                 .from('companies')
                 .select('id, name, description, mission_statement, score, image_url')
                 .eq('id', community.company_id)
                 .single()
+                
+              if (companyError) {
+                console.log(`Error fetching company ${community.company_id}:`, companyError.message);
+                throw companyError;
+              }
                 
               return {
                 ...community,
                 companies: companyData as Company
               }
             } catch (err) {
+              console.log(`Using default company data for community ${community.id}`);
               // If company data can't be fetched, provide default data
               return {
                 ...community,
@@ -128,6 +218,140 @@ export async function GET(request: Request) {
       }
     }
 
+    // If no communities were found, return an empty array instead of failing
+    if (!finalCommunities || finalCommunities.length === 0) {
+      console.log('No communities found, adding test community for development');
+      
+      // For development testing only - add a test community if none exist
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          // Create a test company if needed
+          const testCompanyId = 'test-company-id-for-development';
+          const { data: existingCompany, error: companyCheckError } = await supabase
+            .from('companies')
+            .select('id')
+            .eq('id', testCompanyId)
+            .single();
+            
+          if (companyCheckError || !existingCompany) {
+            console.log('Creating test company for development');
+            const { error: companyCreateError } = await supabase
+              .from('companies')
+              .upsert({
+                id: testCompanyId,
+                name: 'Test Sustainable Company',
+                description: 'This is a test company created automatically for development',
+                mission_statement: 'Our mission is to provide test data for developers',
+                score: 80,
+                image_url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1000',
+                created_at: new Date().toISOString()
+              });
+              
+            if (companyCreateError) {
+              console.log('Error creating test company:', companyCreateError);
+            }
+          }
+          
+          // Create a test community linked to the company
+          const testCommunityId = 'test-community-id-for-development';
+          const { data: existingCommunity, error: communityCheckError } = await supabase
+            .from('company_communities')
+            .select('id')
+            .eq('id', testCommunityId)
+            .single();
+            
+          if (communityCheckError || !existingCommunity) {
+            console.log('Creating test community for development');
+            const { error: communityCreateError } = await supabase
+              .from('company_communities')
+              .upsert({
+                id: testCommunityId,
+                company_id: testCompanyId,
+                description: 'This is a test community created automatically for development',
+                created_at: new Date().toISOString()
+              });
+              
+            if (communityCreateError) {
+              console.log('Error creating test community:', communityCreateError);
+            } else {
+              console.log('Test community created successfully');
+              
+              // Add a test community membership for the current user
+              const { error: membershipCreateError } = await supabase
+                .from('community_members')
+                .upsert({
+                  user_id: userId,
+                  community_id: testCommunityId,
+                  created_at: new Date().toISOString()
+                });
+                
+              if (membershipCreateError) {
+                console.log('Error creating test membership:', membershipCreateError);
+              }
+              
+              // Add the test community to our results
+              finalCommunities = [{
+                id: testCommunityId,
+                description: 'This is a test community created automatically for development',
+                created_at: new Date().toISOString(),
+                company_id: testCompanyId,
+                companies: {
+                  id: testCompanyId,
+                  name: 'Test Sustainable Company',
+                  description: 'This is a test company created automatically for development',
+                  mission_statement: 'Our mission is to provide test data for developers',
+                  score: 80,
+                  image_url: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1000'
+                }
+              }];
+            }
+          } else {
+            console.log('Test community already exists, retrieving it');
+            
+            // Fetch the existing test community with company
+            const { data: testCommunity, error: fetchError } = await supabase
+              .from('company_communities')
+              .select(`
+                id,
+                description,
+                created_at,
+                company_id,
+                companies:company_id (
+                  id,
+                  name,
+                  description,
+                  mission_statement,
+                  score,
+                  image_url
+                )
+              `)
+              .eq('id', testCommunityId)
+              .single();
+              
+            if (fetchError) {
+              console.log('Error fetching test community:', fetchError);
+            } else {
+              finalCommunities = [testCommunity as unknown as CommunityWithCompany];
+            }
+          }
+        } catch (devError) {
+          console.log('Error creating test data:', devError);
+        }
+      }
+      
+      // If still no communities after test data creation, return empty array
+      if (!finalCommunities || finalCommunities.length === 0) {
+        console.log('No communities found, returning empty array');
+        return NextResponse.json({ 
+          data: [], 
+          error: null, 
+          status: 200 
+        });
+      }
+    }
+
+    console.log(`Processing ${finalCommunities.length} communities`);
+    
     // Get the user's memberships
     const { data: memberships, error: membershipError } = await supabase
       .from('community_members')
@@ -136,6 +360,8 @@ export async function GET(request: Request) {
     
     if (membershipError) {
       console.error('Error fetching memberships:', membershipError)
+    } else {
+      console.log(`Found ${memberships?.length || 0} community memberships for user`);
     }
     
     // Create a set of community IDs the user is a member of
@@ -152,7 +378,12 @@ export async function GET(request: Request) {
     
     // Check if there are any communities to query
     if (communityIds.length === 0) {
-      return NextResponse.json({ data: [] })
+      console.log('No community IDs to query for ambassadors');
+      return NextResponse.json({ 
+        data: [], 
+        error: null, 
+        status: 200 
+      })
     }
     
     // Fetch ambassador counts - use proper count query instead of group
@@ -163,6 +394,8 @@ export async function GET(request: Request) {
     
     if (ambassadorError) {
       console.error('Error fetching ambassador counts:', ambassadorError)
+    } else {
+      console.log(`Found ${ambassadorCounts?.length || 0} ambassador relationships`);
     }
 
     // Calculate ambassador counts manually
@@ -188,6 +421,8 @@ export async function GET(request: Request) {
     
     if (ambassadorsFetchError) {
       console.error('Error fetching ambassadors:', ambassadorsFetchError)
+    } else {
+      console.log(`Found ${featuredAmbassadors?.length || 0} ambassadors`);
     }
     
     // Create a map of community_id to featured ambassador
@@ -205,23 +440,47 @@ export async function GET(request: Request) {
       const ambassadorCount = countMap.get(community.id) || 0
       const featuredAmbassador = ambassadorMap.get(community.id) || null
       
+      // Also add a 'featured' flag based on some criteria - for example, communities with high scores
+      const isFeatured = community.companies.score > 70
+      
       return {
         ...community,
         ambassadorCount,
         hasAmbassadors: ambassadorCount > 0,
-        featuredAmbassador
+        featuredAmbassador,
+        featured: isFeatured
       }
     })
 
-    return NextResponse.json({ 
+    // Count stats for log verification
+    const featuredCount = communitiesWithAmbassadors.filter(c => c.featured).length;
+    const withAmbassadorsCount = communitiesWithAmbassadors.filter(c => c.hasAmbassadors).length;
+    
+    console.log(`Final stats: ${communitiesWithAmbassadors.length} communities, ${featuredCount} featured, ${withAmbassadorsCount} with ambassadors`);
+    
+    // Reset the request counter on successful response
+    requestCounter.count = 0;
+
+    // Return the final result with consistent shape
+    const response = { 
       data: communitiesWithAmbassadors, 
       error: null, 
       status: 200 
-    })
+    };
+    
+    console.log('API response successful - returning communities data');
+    
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Error in communities route:', error)
+    
+    // Always return a consistent response shape
     return NextResponse.json(
-      { data: null, error: 'An unexpected error occurred', status: 500 },
+      { 
+        data: null, 
+        error: error instanceof Error ? error.message : 'An unexpected error occurred', 
+        status: 500 
+      },
       { status: 500 }
     )
   }

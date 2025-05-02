@@ -2,13 +2,17 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/hooks/use-auth"
 import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { useNavigation } from "@/context/NavigationContext"
 import Head from "next/head"
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth()
+  // Use the unified auth hook with checkOnMount: false to prevent automatic redirects
+  const { user, loading } = useAuth({
+    requireAuth: false,
+    checkOnMount: false
+  })
   const router = useRouter()
   const { isFirstVisit, markRouteVisited, setIsTransitioning } = useNavigation()
   const currentRoute = '/dashboard'

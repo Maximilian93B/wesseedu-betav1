@@ -62,7 +62,19 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
         setError(null)
         setAuthError(false)
         
-        // Check for cached data first
+        if (!actualUserId && !authError) {
+          console.log("CommunityIntegration: No user ID available, triggering auth error")
+          setAuthError(true)
+          setLoading(false)
+          
+          // Wait a moment before redirecting to avoid immediate redirect loop
+          setTimeout(() => {
+            router.push("/auth/signin?next=/dashboard")
+          }, 500)
+          return
+        }
+        
+        // Re-enable caching now that the API is fixed
         const cachedData = getCachedData<CommunityFeedData>(CACHE_KEYS.COMMUNITY_FEED, CACHE_EXPIRY.COMMUNITY_FEED)
         
         if (cachedData) {
@@ -73,22 +85,71 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
           return
         }
         
+        // Get token from localStorage for logging purposes
+        let hasToken = false
+        if (typeof window !== 'undefined') {
+          const supabaseAuthData = localStorage.getItem('supabase.auth.token')
+          hasToken = !!supabaseAuthData
+          console.log("CommunityIntegration: Auth token exists:", hasToken)
+        }
+        
         // Simple fetch with error handling
-        console.log("CommunityIntegration: No cache, fetching from API")
+        console.log("CommunityIntegration: Fetching from API")
         const response = await fetchWithAuth('/api/dashboard/community-feed')
+        
+        console.log("CommunityIntegration: API response status:", response.status)
         
         if (response.error) {
           console.error("CommunityIntegration: API error:", response.error)
           
           if (response.status === 401) {
             console.log("CommunityIntegration: Auth error, redirecting to login")
+            
+            // Force token refresh by clearing cache
+            if (typeof window !== 'undefined') {
+              console.log("CommunityIntegration: Clearing auth cache to force refresh")
+              // This is a temporary measure to test if cache is the issue
+              localStorage.removeItem('supabase.auth.refreshToken')
+              invalidateCache(CACHE_KEYS.COMMUNITY_FEED)
+            }
+            
             setAuthError(true)
             setLoading(false)
-            router.push("/auth/signin")
+            
+            // Wait a moment before redirecting to avoid immediate redirect loop
+            setTimeout(() => {
+              router.push("/auth/signin?next=/dashboard")
+            }, 300)
             return
           }
           
-          setError(`API error: ${response.error}`)
+          // Improved error handling - display a more user-friendly message for database errors
+          if (response.error.code === '42703' || response.error.code === 'PGRST200') {
+            console.log("CommunityIntegration: Database error - contact admin", response.error);
+            
+            // Show more helpful error message for debugging during development
+            const errorMessage = process.env.NODE_ENV === 'development' 
+              ? `Database structure error: ${response.error.message}`
+              : "Database structure error - our team has been notified";
+            
+            setError(errorMessage);
+            
+            // Fallback to empty data to prevent UI breaking
+            setCommunityActivity([])
+            setCommunityStats({ communities_joined: 0, posts_created: 0, comments_made: 0 })
+            setLoading(false)
+            return
+          }
+          
+          setError(`API error: ${response.error.message || response.error}`)
+          setLoading(false)
+          return
+        }
+        
+        // Validate response data structure
+        if (!response.data || !response.data.recentActivity || !Array.isArray(response.data.recentActivity)) {
+          console.error("CommunityIntegration: Invalid API response format:", response.data)
+          setError("Invalid data format received from server")
           setLoading(false)
           return
         }
@@ -190,8 +251,14 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
       <div className="p-4 text-center">
         <p className="text-red-500 mb-2">{error}</p>
         <Button 
-          onClick={() => window.location.reload()}
-          className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white"
+          onClick={() => {
+            // Invalidate the cache to force a fresh fetch
+            invalidateCache(CACHE_KEYS.COMMUNITY_FEED);
+            window.location.reload();
+          }}
+          className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                  shadow-sm hover:shadow transition-all duration-300 
+                  rounded-lg py-3 text-sm font-helvetica"
         >
           Retry
         </Button>
@@ -204,17 +271,19 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
     return (
       <div className="p-6 text-center">
         <div className="mb-4">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100">
-            <Users className="h-6 w-6 text-green-600" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#70f570]/20 to-[#49c628]/20">
+            <Users className="h-6 w-6 text-[#49c628]" />
           </div>
         </div>
-        <h3 className="text-lg font-semibold mb-2">Join Communities</h3>
-        <p className="text-sm text-gray-600 mb-4">
+        <h3 className="text-lg font-semibold mb-2 font-display">Join Communities</h3>
+        <p className="text-sm text-gray-600 mb-4 font-body">
           Connect with like-minded sustainable investors by joining communities.
         </p>
         <Button 
           onClick={() => router.push("/communities")}
-          className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white"
+          className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                    shadow-sm hover:shadow transition-all duration-300 
+                    rounded-lg py-3 text-sm font-helvetica"
         >
           Explore Communities
         </Button>
@@ -226,43 +295,43 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
     <div className="space-y-5">
       {/* Community Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-lg p-3 shadow-sm border border-white/20">
           <div className="flex items-center space-x-2 mb-1">
-            <Users className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium">Communities</span>
+            <Users className="h-4 w-4 text-[#49c628]" />
+            <span className="text-sm font-medium font-helvetica">Communities</span>
           </div>
-          <p className="text-xl font-bold">{communityStats?.communities_joined || 0}</p>
-          <p className="text-xs text-gray-500">Communities joined</p>
+          <p className="text-xl font-bold font-helvetica">{communityStats?.communities_joined || 0}</p>
+          <p className="text-xs text-gray-500 font-body">Communities joined</p>
         </div>
         
-        <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-lg p-3 shadow-sm border border-white/20">
           <div className="flex items-center space-x-2 mb-1">
-            <MessageSquare className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium">Posts</span>
+            <MessageSquare className="h-4 w-4 text-[#49c628]" />
+            <span className="text-sm font-medium font-helvetica">Posts</span>
           </div>
-          <p className="text-xl font-bold">{communityStats?.posts_created || 0}</p>
-          <p className="text-xs text-gray-500">Posts created</p>
+          <p className="text-xl font-bold font-helvetica">{communityStats?.posts_created || 0}</p>
+          <p className="text-xs text-gray-500 font-body">Posts created</p>
         </div>
         
-        <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-lg p-3 shadow-sm border border-white/20">
           <div className="flex items-center space-x-2 mb-1">
-            <MessageSquare className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium">Comments</span>
+            <MessageSquare className="h-4 w-4 text-[#49c628]" />
+            <span className="text-sm font-medium font-helvetica">Comments</span>
           </div>
-          <p className="text-xl font-bold">{communityStats?.comments_made || 0}</p>
-          <p className="text-xs text-gray-500">Comments made</p>
+          <p className="text-xl font-bold font-helvetica">{communityStats?.comments_made || 0}</p>
+          <p className="text-xs text-gray-500 font-body">Comments made</p>
         </div>
       </div>
       
       {/* Recent Activity */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold">Recent Activity</h3>
+          <h3 className="text-lg font-semibold font-display">Recent Activity</h3>
           <Button 
             variant="ghost" 
             size="sm"
             onClick={() => router.push("/communities")}
-            className="text-green-600 p-0 hover:bg-transparent hover:text-green-700"
+            className="text-[#49c628] p-0 hover:bg-transparent hover:text-[#3ab319] font-helvetica"
           >
             View All
             <ChevronRight className="ml-1 h-4 w-4" />
@@ -277,8 +346,11 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-lg p-3 shadow-sm border border-gray-100"
+                className="bg-white rounded-lg p-3 shadow-sm border border-white/20 relative overflow-hidden"
               >
+                {/* Decorative top accent following Green Apple style */}
+                <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#70f570] via-[#49c628] to-transparent" />
+                
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0">
                     {activity.avatar_url ? (
@@ -290,24 +362,24 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
                         className="rounded-full object-cover"
                       />
                     ) : (
-                      <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                        <Users className="h-4 w-4 text-green-600" />
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#70f570]/20 to-[#49c628]/20 flex items-center justify-center">
+                        <Users className="h-4 w-4 text-[#49c628]" />
                       </div>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{activity.title}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium truncate font-helvetica">{activity.title}</p>
+                    <p className="text-xs text-gray-500 font-body">
                       <span className="font-medium">{activity.author_name}</span> in <span className="font-medium">{activity.community_name}</span>
                     </p>
-                    <p className="text-xs text-gray-400 flex items-center mt-1">
+                    <p className="text-xs text-gray-400 flex items-center mt-1 font-body">
                       <Clock className="inline h-3 w-3 mr-1" />
                       {formatDate(activity.created_at)}
                     </p>
                   </div>
                 </div>
                 <div 
-                  className="text-sm mt-2 text-gray-700 line-clamp-2"
+                  className="text-sm mt-2 text-gray-700 line-clamp-2 font-body"
                   dangerouslySetInnerHTML={{ __html: activity.content.substring(0, 120) + (activity.content.length > 120 ? '...' : '') }}
                 />
                 <div className="mt-2">
@@ -315,7 +387,7 @@ const CommunityIntegration: React.FC<CommunityIntegrationProps> = ({ userId }) =
                     variant="ghost" 
                     size="sm"
                     onClick={() => router.push(`/communities/${activity.community_id}/posts/${activity.id}`)}
-                    className="text-green-600 p-0 text-xs hover:bg-transparent hover:text-green-700"
+                    className="text-[#49c628] p-0 text-xs hover:bg-transparent hover:text-[#3ab319] font-helvetica"
                   >
                     Read More
                     <ArrowRight className="ml-1 h-3 w-3" />

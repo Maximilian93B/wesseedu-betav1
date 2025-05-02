@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/hooks/use-auth"
 import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { Users, TrendingUp,} from 'lucide-react'
 import { useCommunities } from '@/hooks/use-communities'
@@ -11,6 +11,7 @@ import { Ambassador, Community } from '@/types/community'
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CommunityHero } from "@/components/community/CommunityHero"
+import { useDashboardAuthCheck } from "@/lib/utils/dashboardAuthCheck"
 
 // Placeholder component for lazy loading
 const LazyLoadingPlaceholder = () => (
@@ -37,16 +38,26 @@ const LazyLoadingPlaceholder = () => (
   </div>
 )
 
-// Dynamically import the communities component
+// Dynamically import the communities component with reduced loading timeout
 const CommunitiesViewDynamic = dynamic(
   () => import("@/components/community/CommunitiesView").then(mod => ({ default: mod.CommunitiesView })), 
-  { ssr: false, loading: () => <LazyLoadingPlaceholder /> }
+  { 
+    ssr: false, 
+    loading: () => <LazyLoadingPlaceholder />,
+    // This makes Next.js show the loading component for at least 300ms even if the component loads quickly
+    // to avoid content flashing
+    loadingTimeout: 300 
+  }
 )
 
 // Dynamically import ambassador showcase
 const AmbassadorShowcaseDynamic = dynamic(
   () => import("@/components/community/AmbassadorShowcase").then(mod => ({ default: mod.AmbassadorShowcase })), 
-  { ssr: false, loading: () => <LazyLoadingPlaceholder /> }
+  { 
+    ssr: false, 
+    loading: () => <LazyLoadingPlaceholder />,
+    loadingTimeout: 300
+  }
 )
 
 // Sample ambassador data (will be replaced with real data from API)
@@ -116,11 +127,15 @@ function getAllAmbassadors(communities: Community[]): Ambassador[] {
 }
 
 export default function CommunitiesPage() {
-  const { user, loading } = useAuth()
+  const { user, loading, isAuthenticated } = useAuth({
+    requireAuth: false,
+    checkOnMount: true
+  })
   const router = useRouter()
   const { communities, loading: communitiesLoading } = useCommunities()
   const { toast } = useToast()
   const [localLoading, setLocalLoading] = useState(true)
+  const { checkAuth } = useDashboardAuthCheck()
   
   // Define modules to preload
   const preloadModules = [
@@ -128,150 +143,147 @@ export default function CommunitiesPage() {
     () => import("@/components/community/AmbassadorShowcase")
   ]
   
-  // Track whether we've shown the loading timeout toast
-  const hasShownTimeoutToastRef = useRef(false)
+  // Track whether component is mounted
+  const isMountedRef = useRef(true)
   
   // Extract ambassadors from all communities if available
   const ambassadors = communitiesLoading ? sampleAmbassadors : getAllAmbassadors(communities || []);
   
+  // Perform auth check using the utility
+  const authResult = checkAuth(user, loading)
+  
+  // Handle unauthorized access
+  useEffect(() => {
+    if (!loading && !authResult.isAuthorized && authResult.redirectUrl) {
+      router.push(authResult.redirectUrl)
+    }
+  }, [loading, authResult, router]);
+  
   // Add a timeout to ensure we don't get stuck in loading state
   useEffect(() => {
-    // Flag to track component mount state for preventing memory leaks
-    let isMounted = true;
-    
-    // If auth loading is already complete, update local loading state immediately
-    if (!loading && isMounted) {
+    // If auth loading is already complete, update local loading state
+    if (!loading && isMountedRef.current) {
       setLocalLoading(false);
     }
     
-    // Set a timeout to force loading to false after 5 seconds
+    // Set a timeout to force loading to false after 3 seconds (reduced from 5)
     const timeoutId = setTimeout(() => {
-      if (isMounted && localLoading) {
+      if (isMountedRef.current) {
         setLocalLoading(false);
-        
-        // Only show toast if we actually had to force the loading state change
-        // and we haven't shown it yet
-        if (loading && !hasShownTimeoutToastRef.current) {
-          hasShownTimeoutToastRef.current = true;
-          toast({
-            title: "Loading timeout",
-            description: "Some data might not be available. Please refresh if needed.",
-            variant: "default"
-          });
-        }
       }
-    }, 5000);
+    }, 3000);
 
-    // Cleanup function to prevent memory leaks and cancel timeout
+    // Cleanup function
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
       clearTimeout(timeoutId);
     };
-  }, [loading, localLoading, toast]);
-  
-  // Show loading state
-  if (localLoading) {
-    return <LoadingPreloader preloadModules={preloadModules} />
-  }
+  }, [loading]);
 
-  // If no user after loading completes, show login message
-  if (!user) {
-    return <LoginRequired />
-  }
-  
-  return (
-    <div className="space-y-4 max-w-[2000px] mx-auto">
-      {/* Hero Section */}
-      <CommunityHero 
-        icon3DPath="/sustainability.png"
-        onDiscoverClick={() => document.getElementById('communities-list')?.scrollIntoView({ behavior: 'smooth' })}
-      />
+  // Immediately show component if auth is already completed
+  if (!loading && !localLoading) {
+    // If not authorized, show login message
+    if (!authResult.isAuthorized) {
+      return <LoginRequired />
+    }
+    
+    return (
+      <div className="space-y-4 max-w-[2000px] mx-auto">
+        {/* Hero Section */}
+        <CommunityHero 
+          icon3DPath="/sustainability.png"
+          onDiscoverClick={() => document.getElementById('communities-list')?.scrollIntoView({ behavior: 'smooth' })}
+        />
 
-      {/* Feature rows with two-column layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-        <div className="p-6 rounded-xl bg-white border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
-          <div className="flex items-center mb-4">
-            <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] p-3 rounded-md mr-4 shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
-              <Users className="h-5 w-5 text-white" />
+        {/* Feature rows with two-column layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+          <div className="p-6 rounded-xl bg-white border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
+            <div className="flex items-center mb-4">
+              <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] p-3 rounded-md mr-4 shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
+                <Users className="h-5 w-5 text-white" />
+              </div>
+              <p className="text-green-800 font-medium text-lg font-display">Regenerative Networks</p>
             </div>
-            <p className="text-green-800 font-medium text-lg font-display">Regenerative Networks</p>
+            <p className="text-green-700 font-body leading-relaxed">Collaborate with like-minded investors committed to positive environmental and social impact. Join forums, events, and discussions that align with your values.</p>
           </div>
-          <p className="text-green-700 font-body leading-relaxed">Collaborate with like-minded investors committed to positive environmental and social impact. Join forums, events, and discussions that align with your values.</p>
+          
+          <div className="p-6 rounded-xl bg-white border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
+            <div className="flex items-center mb-4">
+              <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] p-3 rounded-md mr-4 shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
+                <TrendingUp className="h-5 w-5 text-white" />
+              </div>
+              <p className="text-green-800 font-medium text-lg font-display">Sustainable Alpha</p>
+            </div>
+            <p className="text-green-700 font-body leading-relaxed">Gain access to curated investment opportunities that generate returns while accelerating positive change. Our network helps you identify high-potential sustainable opportunities.</p>
+          </div>
         </div>
         
-        <div className="p-6 rounded-xl bg-white border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
-          <div className="flex items-center mb-4">
-            <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] p-3 rounded-md mr-4 shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
-              <TrendingUp className="h-5 w-5 text-white" />
+      
+        {/* Ambassador Showcase */}
+        <div className="bg-white rounded-xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.1)] border border-green-100">
+          <h2 className="text-2xl font-black text-green-800 mb-6 font-display tracking-tight">Our Community Ambassadors</h2>
+          <Suspense fallback={<div className="space-y-6">
+            <div className="flex justify-around flex-wrap gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white rounded-xl overflow-hidden border border-green-100 shadow-sm p-4 w-60">
+                  <Skeleton className="h-24 w-24 rounded-full mx-auto mb-4" />
+                  <Skeleton className="h-6 w-3/4 mx-auto mb-1 rounded-lg" />
+                  <Skeleton className="h-4 w-5/6 mx-auto mb-1 rounded-lg" />
+                  <Skeleton className="h-4 w-1/2 mx-auto mb-4 rounded-lg" />
+                </div>
+              ))}
             </div>
-            <p className="text-green-800 font-medium text-lg font-display">Sustainable Alpha</p>
-          </div>
-          <p className="text-green-700 font-body leading-relaxed">Gain access to curated investment opportunities that generate returns while accelerating positive change. Our network helps you identify high-potential sustainable opportunities.</p>
+          </div>}>
+            <AmbassadorShowcaseDynamic ambassadors={ambassadors} />
+          </Suspense>
         </div>
-      </div>
-      
-    
-      {/* Ambassador Showcase */}
-      <div className="bg-white rounded-xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.1)] border border-green-100">
-        <h2 className="text-2xl font-black text-green-800 mb-6 font-display tracking-tight">Our Community Ambassadors</h2>
-        <Suspense fallback={<div className="space-y-6">
-          <div className="flex justify-around flex-wrap gap-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden border border-green-100 shadow-sm p-4 w-60">
-                <Skeleton className="h-24 w-24 rounded-full mx-auto mb-4" />
-                <Skeleton className="h-6 w-3/4 mx-auto mb-1 rounded-lg" />
-                <Skeleton className="h-4 w-5/6 mx-auto mb-1 rounded-lg" />
-                <Skeleton className="h-4 w-1/2 mx-auto mb-4 rounded-lg" />
+        
+     
+        
+        {/* Communities List Section */}
+        <div id="communities-list" className="bg-white rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-8 border border-green-100">
+          <div className="mb-8 relative">
+            <div className="flex items-center gap-8 mb-6">
+              <div>
+                <h2 className="text-2xl font-black text-green-800 font-display tracking-tight">
+                  Select Your <span className="text-green-700">Community</span>
+                </h2>
+                <p className="text-green-700 mt-2 font-body leading-relaxed">
+                  Find your niche where your capital can seed meaningful change
+                </p>
               </div>
-            ))}
-          </div>
-        </div>}>
-          <AmbassadorShowcaseDynamic ambassadors={ambassadors} />
-        </Suspense>
-      </div>
-      
-   
-      
-      {/* Communities List Section */}
-      <div id="communities-list" className="bg-white rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.1)] p-8 border border-green-100">
-        <div className="mb-8 relative">
-          <div className="flex items-center gap-8 mb-6">
-            <div>
-              <h2 className="text-2xl font-black text-green-800 font-display tracking-tight">
-                Select Your <span className="text-green-700">Community</span>
-              </h2>
-              <p className="text-green-700 mt-2 font-body leading-relaxed">
-                Find your niche where your capital can seed meaningful change
-              </p>
+            </div>
+            
+            {/* Feature tags with white backgrounds */}
+            <div className="flex flex-wrap gap-3 mt-4">
+              <span className="text-sm text-green-700 bg-white px-4 py-1.5 rounded-full border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica">
+                Sustainable Finance
+              </span>
+              <span className="text-sm text-green-700 bg-white px-4 py-1.5 rounded-full border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica">
+                Climate Tech
+              </span>
+              <span className="text-sm text-green-700 bg-white px-4 py-1.5 rounded-full border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica">
+                Regenerative Agriculture
+              </span>
+              <span className="text-sm text-green-700 bg-white px-4 py-1.5 rounded-full border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica">
+                Impact Ventures
+              </span>
             </div>
           </div>
           
-          {/* Feature tags with white backgrounds */}
-          <div className="flex flex-wrap gap-3 mt-4">
-            <span className="text-sm text-green-700 bg-white px-4 py-1.5 rounded-full border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica">
-              Sustainable Finance
-            </span>
-            <span className="text-sm text-green-700 bg-white px-4 py-1.5 rounded-full border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica">
-              Climate Tech
-            </span>
-            <span className="text-sm text-green-700 bg-white px-4 py-1.5 rounded-full border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica">
-              Regenerative Agriculture
-            </span>
-            <span className="text-sm text-green-700 bg-white px-4 py-1.5 rounded-full border border-green-100 shadow-[0_2px_10px_rgba(0,0,0,0.05)] font-helvetica">
-              Impact Ventures
-            </span>
-          </div>
+          {/* Community grid */}
+          <Suspense fallback={<LazyLoadingPlaceholder />}>
+            <CommunitiesViewDynamic 
+              onCommunitySelect={(id) => {
+                router.push(`/dashboard/communities/${id}`)
+              }}
+            />
+          </Suspense>
         </div>
-        
-        {/* Community grid */}
-        <Suspense fallback={<LazyLoadingPlaceholder />}>
-          <CommunitiesViewDynamic 
-            onCommunitySelect={(id) => {
-              router.push(`/dashboard/communities/${id}`)
-            }}
-          />
-        </Suspense>
       </div>
-    </div>
-  )
+    )
+  }
+  
+  // Show loading state
+  return <LoadingPreloader preloadModules={preloadModules} />
 } 

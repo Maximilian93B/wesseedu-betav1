@@ -4,14 +4,17 @@ import { Button } from "@/components/ui/button"
 import { Leaf } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/hooks/use-auth"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useNavigation } from "@/context/NavigationContext"
 
 export function DashboardNav() {
-  const { signOut } = useAuth()
+  const { signOut } = useAuth({
+    requireAuth: false,
+    checkOnMount: false
+  })
   const pathname = usePathname()
   const router = useRouter()
   const [isSigningOut, setIsSigningOut] = useState(false)

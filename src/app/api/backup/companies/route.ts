@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/utils/cookieManager';
 import { cookies } from 'next/headers';
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   console.log("API: /api/protected/companies - Request received");
   

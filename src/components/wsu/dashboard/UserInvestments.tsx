@@ -249,11 +249,14 @@ const UserInvestments = () => {
       
       // Set a timeout to exit loading state after 5 seconds
       const timeoutId = setTimeout(() => {
-        if (isLoading) {
-          console.log("UserInvestments: Loading timeout reached");
-          setIsLoading(false);
-          setHasError(true);
-        }
+        setIsLoading(currentIsLoading => {
+          if (currentIsLoading) {
+            console.log("UserInvestments: Loading timeout reached");
+            setHasError(true);
+            return false;
+          }
+          return currentIsLoading;
+        });
       }, 5000);
       
       return () => clearTimeout(timeoutId);

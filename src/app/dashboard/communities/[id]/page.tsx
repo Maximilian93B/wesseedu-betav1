@@ -66,7 +66,9 @@ const getCommunityData = async (id: string) => {
       mission_statement: null,
       score: 0,
       image_url: null
-    }
+    },
+    // Add ambassadors to match Community type
+    ambassadors: []
   }
 }
 
@@ -81,6 +83,9 @@ export default function CommunityDetailsPage({ params }: { params: { id: string 
   
   // Track whether we've shown the loading timeout toast
   const hasShownTimeoutToastRef = useRef(false)
+  
+  // Move these hooks to the top level - before any conditional returns
+  const [community, setCommunity] = useState<any>(null)
   
   // Preload modules
   const preloadModules = [
@@ -136,6 +141,30 @@ export default function CommunityDetailsPage({ params }: { params: { id: string 
     };
   }, [loading, localLoading, toast, isFirstVisit, markRouteVisited, currentRoute, isTransitioning]);
   
+  // Fetch community data - move this useEffect up before any conditional returns
+  useEffect(() => {
+    async function loadCommunity() {
+      try {
+        const data = await getCommunityData(communityId)
+        setCommunity(data)
+      } catch (error) {
+        console.error("Error loading community data:", error)
+        toast({
+          title: "Error",
+          description: "Failed to load community data",
+          variant: "destructive"
+        })
+      }
+    }
+    
+    loadCommunity()
+  }, [communityId, toast])
+
+  const handleNavigateBack = () => {
+    setIsTransitioning(true)
+    router.push('/dashboard/communities')
+  }
+  
   // Show loading state only for first visit or during transitions
   if (localLoading && (isFirstVisit(currentRoute) || isTransitioning)) {
     return <LoadingPreloader preloadModules={preloadModules} />
@@ -146,18 +175,17 @@ export default function CommunityDetailsPage({ params }: { params: { id: string 
     return <LoginRequired />
   }
 
-  const handleNavigateBack = () => {
-    setIsTransitioning(true)
-    router.push('/dashboard/communities')
-  }
-
   return (
     <div className="w-full">
       <Suspense fallback={<LazyLoadingPlaceholder />}>
-        <CommunityDetailsViewDynamic
-          community={getCommunityData(communityId)}
-          onBack={handleNavigateBack}
-        />
+        {community ? (
+          <CommunityDetailsViewDynamic
+            community={community}
+            onBack={handleNavigateBack}
+          />
+        ) : (
+          <LazyLoadingPlaceholder />
+        )}
       </Suspense>
     </div>
   )

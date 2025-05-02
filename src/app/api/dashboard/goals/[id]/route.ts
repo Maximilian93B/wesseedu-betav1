@@ -18,7 +18,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const { error, authenticated, supabase, session } = await checkAuth()
   
   if (!authenticated) {
-    return error
+    return error || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   
   try {
@@ -59,7 +59,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { error, authenticated, supabase, session } = await checkAuth()
   
   if (!authenticated) {
-    return error
+    return error || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   
   try {

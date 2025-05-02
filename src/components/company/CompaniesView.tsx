@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
-import { useAuthGuard } from "@/hooks/use-auth-guard"
+import { useAuth } from "@/hooks/use-auth"
 import { CompaniesViewHero } from "@/components/company/CompaniesViewHero"
 import { MarketplaceIntroduction } from "@/components/company/MarketplaceIntroduction"
 import { Input } from "@/components/ui/input"
@@ -40,8 +40,8 @@ interface CompaniesViewProps {
 }
 
 export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
-  // This will redirect to login if not authenticated
-  useAuthGuard()
+  // Replace deprecated useAuthGuard with the unified useAuth hook
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth({ requireAuth: true })
   
   const [companies, setCompanies] = useState<Company[]>([])
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([])

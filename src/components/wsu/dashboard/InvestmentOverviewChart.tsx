@@ -10,8 +10,8 @@ import {
   Tooltip,
   Sector 
 } from 'recharts';
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/hooks/use-auth';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { motion } from 'framer-motion';
@@ -92,7 +92,7 @@ const InvestmentOverviewChart = () => {
       }
       
       // Map the data to include colors
-      const chartData = categories.map((item, index) => ({
+      const chartData = categories.map((item: { category: string; amount: number }, index: number) => ({
         name: item.category,
         value: item.amount,
         color: MONOCHROME_COLORS[index % MONOCHROME_COLORS.length]
@@ -114,9 +114,9 @@ const InvestmentOverviewChart = () => {
       
       // Set a timeout to exit loading state after 5 seconds
       const timeoutId = setTimeout(() => {
-        if (isLoading) {
-          setIsLoading(false);
-        }
+        setIsLoading(currentIsLoading => {
+          return currentIsLoading ? false : currentIsLoading;
+        });
       }, 5000);
       
       return () => clearTimeout(timeoutId);

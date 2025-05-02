@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { Building2, Users, Award, TrendingUp, Filter, RotateCcw, Briefcase, Shield } from 'lucide-react'
 import { useCommunities } from '@/hooks/use-communities'
 import { useCompanies } from '@/hooks/use-companies'
@@ -9,6 +9,8 @@ import { CommunityWithTags, Ambassador } from '@/types'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useNavigation } from '@/context/NavigationContext'
+import { useAuth } from '@/hooks/use-auth'
+import { useToast } from '@/hooks/use-toast'
 
 export interface ExtendedCommunity extends CommunityWithTags {
   featured?: boolean
@@ -58,7 +60,14 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
   } = useCompanies()
 
   const { setIsTransitioning } = useNavigation()
+  const { toast } = useToast()
 
+  const { user, loading: authLoading, isAuthenticated, refreshSession } = useAuth({ requireAuth: true })
+  const [localLoading, setLocalLoading] = useState(true)
+  const dataInitiatedRef = useRef(false)
+  const [retryCount, setRetryCount] = useState(0)
+  const maxRetries = 2
+  
   // Use the community filters hook with empty search query
   const {
     filteredCommunities,
@@ -70,45 +79,126 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     companiesLoading 
   })
 
-  // Simplified isLoading determination - moved up before any conditional returns
-  const isLoading = communitiesLoading || companiesLoading
-
-  // Fetch data on component mount
+  // Watch for auth changes and fetch data when authenticated
   useEffect(() => {
-    let isMounted = true;
+    console.log(`CommunitiesView: Auth state changed - user: ${user?.id || 'none'}, loading: ${authLoading}, isAuthenticated: ${isAuthenticated}`);
     
-    const loadData = async () => {
-      if (isMounted) {
+    // If auth is still loading, skip
+    if (authLoading) {
+      return;
+    }
+    
+    // If user is authenticated and we haven't initiated data fetch yet
+    if (user && !dataInitiatedRef.current) {
+      console.log('CommunitiesView: User authenticated. Triggering data fetch');
+      dataInitiatedRef.current = true;
+      
+      // Small delay to ensure cookies are properly set before making API calls
+      setTimeout(() => {
         fetchCommunities();
         fetchCompanies();
-      }
-    };
-    
-    loadData();
-    
-    // Clean up transitioning state when component unmounts
-    return () => {
-      isMounted = false;
-      setIsTransitioning(false);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Intentionally omitting dependencies to prevent infinite loop
-
-  // When data loads, clear transitioning state - moved up before any conditional returns
-  useEffect(() => {
-    if (!isLoading && filteredCommunities.length > 0) {
-      setIsTransitioning(false);
+      }, 300);
+    } else if (!authLoading && !user) {
+      // If auth is complete but user is not authenticated
+      console.log('CommunitiesView: Auth complete but user not authenticated');
+      setLocalLoading(false);
     }
-  }, [isLoading, filteredCommunities.length, setIsTransitioning]);
+  }, [user, authLoading, isAuthenticated, fetchCommunities, fetchCompanies]);
+
+  // Auto-retry on error with exponential backoff
+  useEffect(() => {
+    if ((communitiesError || companiesError) && retryCount < maxRetries) {
+      const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized";
+      
+      // For unauthorized errors, try to refresh the session first
+      if (isUnauthorized) {
+        console.log(`CommunitiesView: Auth error on attempt ${retryCount + 1}, refreshing session`);
+        
+        const refreshAndRetry = async () => {
+          const success = await refreshSession();
+          if (success) {
+            console.log('CommunitiesView: Session refreshed, retrying data fetch');
+            fetchCommunities();
+            fetchCompanies();
+          } else {
+            console.log('CommunitiesView: Session refresh failed');
+          }
+        };
+        
+        refreshAndRetry();
+      } else {
+        // For other errors, retry with backoff
+        const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 8000);
+        console.log(`CommunitiesView: Error fetching data, retry ${retryCount + 1} in ${backoffTime}ms`);
+        
+        const retryId = setTimeout(() => {
+          fetchCommunities();
+          fetchCompanies();
+        }, backoffTime);
+        
+        return () => clearTimeout(retryId);
+      }
+      
+      setRetryCount(prev => prev + 1);
+    }
+  }, [communitiesError, companiesError, retryCount, fetchCommunities, fetchCompanies, refreshSession]);
+
+  // When data starts or finishes loading, update local state
+  useEffect(() => {
+    // If data loading starts, ensure local loading is true
+    if (communitiesLoading || companiesLoading) {
+      setLocalLoading(true);
+    } 
+    // When data loading finishes, update states
+    else {
+      setIsTransitioning(false);
+      setLocalLoading(false);
+      
+      // Log results for debugging
+      console.log(`CommunitiesView: Data load completed - ${communities.length} communities, ${companies.length} companies`);
+    }
+  }, [communitiesLoading, companiesLoading, communities.length, companies.length, setIsTransitioning]);
+
+  // Set a timeout to ensure we don't get stuck in loading state
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (localLoading) {
+        console.log('CommunitiesView: Forcing loading state to false after timeout');
+        setLocalLoading(false);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [localLoading]);
+
+  // Unified loading state that will eventually resolve
+  const isLoading = localLoading || (authLoading && !dataInitiatedRef.current);
 
   // Handle card selection with useCallback and transition state
   const handleCardSelect = useCallback((id: string) => {
     setIsTransitioning(true)
     onCommunitySelect(id)
   }, [onCommunitySelect, setIsTransitioning])
+  
+  // Handle refresh button click
+  const handleRefresh = useCallback(() => {
+    console.log('CommunitiesView: Manual refresh requested');
+    setRetryCount(0);
+    dataInitiatedRef.current = false;
+    
+    // Show toast for user feedback
+    toast({
+      title: "Refreshing data",
+      description: "Getting the latest communities information...",
+      variant: "default",
+    });
+    
+    fetchCommunities();
+    fetchCompanies();
+  }, [fetchCommunities, fetchCompanies, toast]);
 
   // Show error state if there's an issue with the API
-  if ((communitiesError || companiesError) && !communitiesLoading && !companiesLoading) {
+  if ((communitiesError || companiesError) && !communitiesLoading && !companiesLoading && retryCount >= maxRetries) {
     const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized"
     
     return (
@@ -145,7 +235,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
             <motion.div variants={itemVariants} className="flex justify-center">
               {isUnauthorized ? (
                 <Link 
-                  href="/auth/signin"
+                  href="/auth/login"
                   className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold inline-block shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
                 >
                   Sign In
@@ -154,10 +244,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
                 <motion.button 
                   variants={itemVariants}
                   className="px-6 py-3 rounded-lg bg-white text-green-700 border border-green-200 hover:bg-green-50 shadow-[0_2px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
-                  onClick={() => {
-                    fetchCommunities()
-                    fetchCompanies()
-                  }}
+                  onClick={handleRefresh}
                 >
                   <RotateCcw className="h-4 w-4 mr-2 inline-block" />
                   Retry
@@ -272,8 +359,18 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
               )}
             </div>
             
-            <div className="text-xs text-green-600 font-helvetica">
-              <span className="text-green-800 font-medium">WeSeedU</span> Investment Communities
+            <div className="flex items-center">
+              <button 
+                onClick={handleRefresh} 
+                className="mr-3 p-2 rounded-full hover:bg-green-50 transition-colors"
+                aria-label="Refresh data"
+                title="Refresh communities data"
+              >
+                <RotateCcw className="h-4 w-4 text-green-700" />
+              </button>
+              <div className="text-xs text-green-600 font-helvetica">
+                <span className="text-green-800 font-medium">WeSeedU</span> Investment Communities
+              </div>
             </div>
           </motion.div>
           

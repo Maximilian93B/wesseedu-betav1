@@ -38,7 +38,11 @@ const WatchlistViewDynamic = dynamic(
 )
 
 export default function SavedPage() {
-  const { loading: authLoading } = useAuth()
+  // Use the unified auth hook with checkOnMount: false to prevent automatic redirects
+  const { user, loading: authLoading, isAuthenticated } = useAuth({
+    requireAuth: false,
+    checkOnMount: false
+  })
   // Use the shared watchlist hook to avoid duplicate data fetching
   const { watchlistCompanies, loading: watchlistLoading } = useWatchlist()
   

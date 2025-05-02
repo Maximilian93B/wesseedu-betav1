@@ -176,7 +176,7 @@ export function useWatchlist() {
       setLoading(false)
       setFetchAttempted(true)
     }
-  }, [user, authLoading, fetchAttempted]);
+  }, [user, authLoading, fetchAttempted, fetchWatchlistCompanies, loading, toast]);
 
   const handleRemoveFromWatchlist = async (companyId: string) => {
     if (!user?.id) return
@@ -238,24 +238,27 @@ export function WatchlistView({
   const [dataFetchRequested, setDataFetchRequested] = useState(false)
   const isInitialRender = useRef(true);
   
-  // Use the hook if external data is not provided
+  // Create a constant hook result
+  const watchlistHook = useWatchlist();
+  
+  // Use the hook result conditionally
   const {
     watchlistCompanies: hookWatchlistCompanies,
     loading: hookLoading,
     fetchWatchlistCompanies,
     handleRemoveFromWatchlist
-  } = !externalData ? useWatchlist() : { 
+  } = externalData ? { 
     watchlistCompanies: [], 
     loading: false, 
     fetchWatchlistCompanies: () => {}, 
     handleRemoveFromWatchlist: async () => {} 
-  }
+  } : watchlistHook;
   
   // Use either external data or hook data
   const watchlistCompanies = externalData || hookWatchlistCompanies
   const loading = externalLoading !== undefined ? externalLoading : hookLoading
 
-  // Fix the useEffect to prevent infinite loops
+  // Fix for issue #1: Add missing dependencies to the useEffect dependency array (around line 179)
   useEffect(() => {
     // Only run once on initial render
     if (!externalData && isInitialRender.current) {
@@ -269,29 +272,9 @@ export function WatchlistView({
         fetchWatchlistCompanies();
       }
     }
-  }, [externalData, loading, fetchWatchlistCompanies]);
+  }, [externalData, fetchWatchlistCompanies, loading, toast]);
 
-  // Test function to check if API routes are working
-  const testApiConnection = async () => {
-    try {
-      console.log("Testing API connection...")
-      const response = await fetch('/api/test')
-      const data = await response.json()
-      console.log("Test API response:", data)
-      toast({
-        title: "API Test",
-        description: `API is ${data.success ? 'working' : 'not working'}: ${data.message}`,
-      })
-    } catch (error) {
-      console.error("Error testing API:", error)
-      toast({
-        title: "API Test Failed",
-        description: "Could not connect to API. Check console for details.",
-        variant: "destructive"
-      })
-    }
-  }
-  
+
   // Debug function to log the current state
   const debugState = () => {
     console.log("WatchlistView Debug:");
@@ -552,14 +535,3 @@ const itemVariants = {
   }
 };
 
-const getScoreColor = (score: number) => {
-  return "text-slate-700";
-};
-
-const getScoreBg = (score: number) => {
-  if (score >= 80) return "bg-slate-200";
-  if (score >= 60) return "bg-slate-100";
-  if (score >= 40) return "bg-slate-100";
-  if (score >= 20) return "bg-slate-100";
-  return "bg-slate-100";
-}; 

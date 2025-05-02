@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/hooks/use-auth"
 import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -43,7 +43,10 @@ const CompaniesViewDynamic = dynamic(
 )
 
 export default function CompaniesPage() {
-  const { user, loading } = useAuth()
+  const { user, loading, isAuthenticated } = useAuth({
+    requireAuth: false,
+    checkOnMount: false
+  })
   const router = useRouter()
   const { toast } = useToast()
   const [localLoading, setLocalLoading] = useState(true)

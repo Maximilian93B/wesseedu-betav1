@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User, Session } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
@@ -8,26 +8,42 @@ import authConfig from '@/config/auth.config';
 
 interface AuthContextType {
   user: User | null;
-  profile: any | null; // Add profile data
+  profile: any | null;
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
+  isAuthenticated: boolean;
 }
 
 // Export the context
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Simple cache for profile data to avoid repeated fetches
+const profileCache = new Map<string, any>();
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const supabase = createClientComponentClient();
   const router = useRouter();
+  
+  // Single emergency timeout to prevent infinite loading
+  const emergencyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Function to fetch user profile data
+  // Function to fetch user profile data with caching
   const fetchUserProfile = useCallback(async (userId: string) => {
+    console.log("AuthContext: Fetching profile for user:", userId);
+    
+    // Check cache first
+    if (profileCache.has(userId)) {
+      console.log("AuthContext: Using cached profile");
+      return profileCache.get(userId);
+    }
+    
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -40,6 +56,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
       
+      console.log("AuthContext: Profile fetch successful");
+      
+      // Cache the profile data
+      if (data) {
+        profileCache.set(userId, data);
+      }
+      
       return data;
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
@@ -50,10 +73,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Sign out function
   const signOut = async () => {
     try {
+      console.log("AuthContext: Signing out user");
       await supabase.auth.signOut();
+      
+      // Clear state
       setUser(null);
       setProfile(null);
       setSession(null);
+      setIsAuthenticated(false);
+      
+      // Clear cache
+      profileCache.clear();
+      
+      // Navigate to home
       router.push('/');
       router.refresh();
     } catch (error) {
@@ -65,155 +97,200 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshSession = async () => {
     try {
       console.log('AuthContext: Refreshing session');
-      const { data: { session: refreshedSession } } = await supabase.auth.getSession();
       
-      // If session exists, update the session state and verify the user
-      if (refreshedSession) {
-        setSession(refreshedSession);
-        await verifyAndSetUser();
-        return true;
+      // Force refresh the session
+      const { data: { session: refreshedSession }, error } = 
+        await supabase.auth.refreshSession();
+      
+      if (error || !refreshedSession) {
+        console.error('AuthContext: Failed to refresh session:', error);
+        return false;
       }
-      return false;
+      
+      console.log('AuthContext: Session refreshed successfully');
+      
+      setSession(refreshedSession);
+      setUser(refreshedSession.user);
+      
+      // If we have a user, fetch their profile
+      if (refreshedSession.user) {
+        const profileData = await fetchUserProfile(refreshedSession.user.id);
+        if (profileData) {
+          setProfile(profileData);
+        }
+        setIsAuthenticated(true);
+      }
+      
+      return true;
     } catch (error) {
       console.error('AuthContext: Error refreshing session:', error);
       return false;
     }
   };
 
-  // Function to verify and set user
-  const verifyAndSetUser = useCallback(async () => {
-    try {
-      // Always verify user with getUser() first
-      const { data: { user: verifiedUser }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !verifiedUser) {
-        console.log("Auth: User verification failed or no user found");
-        setUser(null);
-        setProfile(null);
-        setSession(null);
-        return false;
-      }
-
-      setUser(verifiedUser);
-      
-      // Fetch and set profile data
-      const profileData = await fetchUserProfile(verifiedUser.id);
-      if (profileData) {
-        setProfile(profileData);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error("Auth: Error verifying user:", error);
-      return false;
-    }
-  }, [supabase.auth, fetchUserProfile]);
-
+  // Initialize auth state only once on component mount
   useEffect(() => {
-    let mounted = true;
-    console.log("AuthContext: Initializing auth context");
-
-    async function initializeAuth() {
+    let isMounted = true;
+    console.log("AuthContext: Initializing auth");
+    
+    // Set emergency timeout (10 seconds)
+    emergencyTimeoutRef.current = setTimeout(() => {
+      console.log("AuthContext: EMERGENCY - Auth initialization timed out");
+      if (isMounted) {
+        setLoading(false);
+      }
+    }, 10000);
+    
+    const initializeAuth = async () => {
       try {
         // Handle dev bypass if enabled
         if (!authConfig.isAuthEnabled && authConfig.devBypassEmail) {
-          console.log(`Auth: Using dev bypass with email ${authConfig.devBypassEmail}`);
+          console.log(`Auth: DEV MODE - Using dev bypass with email ${authConfig.devBypassEmail}`);
+          
           // Set mock user for development
-          setUser({ 
+          const mockUser = {
             id: 'dev-user-id',
             email: authConfig.devBypassEmail,
             app_metadata: {},
             user_metadata: { name: 'Development User' },
             aud: 'authenticated',
             created_at: new Date().toISOString()
-          } as unknown as User);
-          // Also set a mock session for API calls
-          setSession({
+          } as unknown as User;
+          
+          // Set mock session
+          const mockSession = {
             access_token: 'dev-token',
             refresh_token: 'dev-refresh-token',
             expires_in: 3600,
-            expires_at: new Date().getTime() + 3600000,
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
             token_type: 'bearer',
-            user: {
-              id: 'dev-user-id',
-              email: authConfig.devBypassEmail
-            } as unknown as User
-          } as Session);
-          setLoading(false);
+            user: mockUser
+          } as Session;
+          
+          if (isMounted) {
+            setUser(mockUser);
+            setSession(mockSession);
+            setProfile({ id: 'dev-user-id', name: 'Development User' });
+            setIsAuthenticated(true);
+            setLoading(false);
+          }
           return;
         }
         
+        // Get current session
+        console.log("Auth: Checking for existing session");
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         
         if (currentSession) {
-          const isUserVerified = await verifyAndSetUser();
-          if (isUserVerified && mounted) {
+          console.log("Auth: Found existing session for user:", currentSession.user.id);
+          
+          if (isMounted) {
             setSession(currentSession);
-          } else if (mounted) {
-            // If user verification fails, clear session and sign out
-            setSession(null);
-            await supabase.auth.signOut();
+            setUser(currentSession.user);
+            
+            // Fetch profile data
+            const profileData = await fetchUserProfile(currentSession.user.id);
+            if (profileData) {
+              setProfile(profileData);
+            }
+            
+            setIsAuthenticated(true);
           }
-        } else if (mounted) {
-          setUser(null);
-          setProfile(null);
-          setSession(null);
-        }
-      } catch (error) {
-        console.error("Auth: Error during initialization:", error);
-        if (mounted) {
-          setUser(null);
-          setProfile(null);
-          setSession(null);
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    initializeAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log("Auth: State change event:", event);
-
-        if (event === 'SIGNED_OUT') {
-          if (mounted) {
+        } else {
+          console.log("Auth: No active session found");
+          if (isMounted) {
             setUser(null);
             setProfile(null);
             setSession(null);
-            setLoading(false);
+            setIsAuthenticated(false);
           }
-          return;
         }
-
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          if (mounted) {
-            setLoading(true); // Set loading while we verify
-          }
-          
-          const isUserVerified = await verifyAndSetUser();
-          if (mounted) {
-            if (isUserVerified && newSession) {
-              setSession(newSession);
-            } else if (newSession === null) {
-              setSession(null);
-              setUser(null);
-              setProfile(null);
+      } catch (error) {
+        console.error("Auth: Error during initialization:", error);
+        if (isMounted) {
+          setUser(null);
+          setProfile(null);
+          setSession(null);
+          setIsAuthenticated(false);
+        }
+      } finally {
+        // Clear emergency timeout
+        if (emergencyTimeoutRef.current) {
+          clearTimeout(emergencyTimeoutRef.current);
+          emergencyTimeoutRef.current = null;
+        }
+        
+        if (isMounted) {
+          console.log("Auth: Initialization complete");
+          setLoading(false);
+        }
+      }
+    };
+    
+    initializeAuth();
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log("Auth: State change event:", event);
+        
+        if (event === 'SIGNED_IN' && newSession) {
+          console.log("Auth: User signed in:", newSession.user.id);
+          if (isMounted) {
+            setSession(newSession);
+            setUser(newSession.user);
+            
+            // Fetch profile data
+            const profileData = await fetchUserProfile(newSession.user.id);
+            if (profileData) {
+              setProfile(profileData);
             }
-            setLoading(false);
+            
+            setIsAuthenticated(true);
+          }
+        } 
+        else if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+          console.log("Auth: User signed out or deleted");
+          if (isMounted) {
+            setUser(null);
+            setProfile(null);
+            setSession(null);
+            setIsAuthenticated(false);
+            profileCache.clear();
+          }
+        }
+        else if (event === 'TOKEN_REFRESHED' && newSession) {
+          console.log("Auth: Session token refreshed");
+          if (isMounted) {
+            setSession(newSession);
+            
+            // Make sure user data is up-to-date
+            if (newSession.user.id !== user?.id) {
+              setUser(newSession.user);
+              const profileData = await fetchUserProfile(newSession.user.id);
+              if (profileData) {
+                setProfile(profileData);
+              }
+              setIsAuthenticated(true);
+            }
           }
         }
       }
     );
-
+    
     return () => {
-      mounted = false;
+      console.log("AuthContext: Cleaning up");
+      isMounted = false;
+      
+      // Clear emergency timeout if it exists
+      if (emergencyTimeoutRef.current) {
+        clearTimeout(emergencyTimeoutRef.current);
+      }
+      
+      // Unsubscribe from auth state changes
       subscription.unsubscribe();
     };
-  }, [supabase.auth, router, verifyAndSetUser]);
+  }, [fetchUserProfile, supabase.auth, router]);
 
   const value = {
     user,
@@ -221,7 +298,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     loading,
     signOut,
-    refreshSession
+    refreshSession,
+    isAuthenticated
   };
 
   return (

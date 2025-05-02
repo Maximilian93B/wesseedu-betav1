@@ -2,10 +2,11 @@
 
 import { Suspense, useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { AuthProvider, useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/hooks/use-auth"
 import { useToast } from "@/hooks/use-toast"
 import dynamic from "next/dynamic"
 import Head from "next/head"
+import { useDashboardAuthCheck } from "@/lib/utils/dashboardAuthCheck"
 
 // Import modularized components
 import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
@@ -54,11 +55,15 @@ const QuickActionsDynamic = dynamic(
   { ssr: true }
 )
 
-function DashboardOverviewContent() {
-  const { user, loading } = useAuth()
+export default function DashboardOverviewPage() {
+  const { user, loading, isAuthenticated } = useAuth({
+    requireAuth: false,
+    checkOnMount: false
+  })
   const router = useRouter()
   const { toast } = useToast()
   const [localLoading, setLocalLoading] = useState(true)
+  const { checkAuth } = useDashboardAuthCheck()
   
   // Define modules to preload for better performance
   const preloadModules = [
@@ -68,6 +73,16 @@ function DashboardOverviewContent() {
   
   // Track whether we've shown the loading timeout toast
   const hasShownTimeoutToastRef = useRef(false)
+  
+  // Perform auth check using the utility
+  const authResult = checkAuth(user, loading)
+  
+  // Handle unauthorized access
+  useEffect(() => {
+    if (!loading && !authResult.isAuthorized && authResult.redirectUrl) {
+      router.push(authResult.redirectUrl)
+    }
+  }, [loading, authResult, router]);
   
   // Add a timeout to ensure we don't get stuck in loading state
   useEffect(() => {
@@ -124,8 +139,8 @@ function DashboardOverviewContent() {
     return <LoadingPreloader preloadModules={preloadModules} />
   }
 
-  // If no user after loading completes, show login message
-  if (!user) {
+  // If not authorized after loading completes, show login message
+  if (!authResult.isAuthorized && !loading) {
     return <LoginRequired />
   }
 
@@ -138,6 +153,9 @@ function DashboardOverviewContent() {
 
   return (
     <div className="space-y-8 max-w-[2000px] mx-auto">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      </Head>
       {/* Dashboard View with QuickActions */}
       <Suspense fallback={<LazyLoadingPlaceholder />}>
         <DashboardViewDynamic 
@@ -146,16 +164,5 @@ function DashboardOverviewContent() {
         />
       </Suspense>
     </div>
-  )
-}
-
-export default function DashboardOverviewPage() {
-  return (
-    <AuthProvider>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      </Head>
-      <DashboardOverviewContent />
-    </AuthProvider>
   )
 } 

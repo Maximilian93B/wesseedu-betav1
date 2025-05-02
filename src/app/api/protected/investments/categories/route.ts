@@ -50,8 +50,16 @@ export async function GET(req: NextRequest) {
     }
 
     // Process data to get categories
-    const categories = data.reduce((acc, investment) => {
-      const category = investment.companies?.sustainability_data?.primary_category || 'Uncategorized';
+    interface Investment {
+      companies: {
+        sustainability_data: any;
+      }[];
+      amount: number;
+    }
+    
+    const categories = data.reduce<Record<string, number>>((acc, investment: Investment) => {
+      // Get primary_category from the first company if available
+      const category = investment.companies?.[0]?.sustainability_data?.primary_category || 'Uncategorized';
       acc[category] = (acc[category] || 0) + investment.amount;
       return acc;
     }, {});

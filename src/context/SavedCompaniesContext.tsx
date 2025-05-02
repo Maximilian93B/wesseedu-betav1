@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useCallback } from 'react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -24,7 +24,7 @@ export function SavedCompaniesProvider({ children }: { children: React.ReactNode
   const [savedCompanyIds, setSavedCompanies] = useState<string[]>([]);
   const { user, loading: authLoading } = useAuth();
 
-  const refreshSavedCompanies = async () => {
+  const refreshSavedCompanies = useCallback(async () => {
     if (!user?.id) {
       console.log('SavedCompaniesContext: No user ID, skipping refresh');
       return;
@@ -96,14 +96,14 @@ export function SavedCompaniesProvider({ children }: { children: React.ReactNode
     } catch (error) {
       console.error('SavedCompaniesContext: Error fetching saved companies:', error);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading && user) {
       console.log('SavedCompaniesContext: Auth loading complete, refreshing saved companies');
       refreshSavedCompanies();
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, refreshSavedCompanies]);
 
   const addSavedCompany = (id: string) => {
     console.log(`SavedCompaniesContext: Adding company ${id} to saved companies`);

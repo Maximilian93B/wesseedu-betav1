@@ -46,7 +46,7 @@ export const DataVizTransition = memo(function DataVizTransition() {
             >
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
                 <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                  Reach a<br /> milestone,
+                  Reach a<br/> milestone,
                 </span>
                 <br />
                 <span className="text-white">earn a reward</span>
@@ -57,7 +57,7 @@ export const DataVizTransition = memo(function DataVizTransition() {
               </p>
               
               <p className="text-gray-300 mt-3 sm:mt-4 text-base sm:text-lg max-w-md">
-                As you advance through each stage, you'll unlock new features and benefits that enhance your investment experience.
+                As you advance through each stage, you&apos;ll unlock new features and benefits that enhance your investment experience.
               </p>
               
               <motion.div
