@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { format } from 'date-fns'
-import { Calendar, Users, Building, Award, Leaf, MessageCircle, Bell, Heart, Share2, TrendingUp, Shield, ExternalLink, Zap, LightbulbIcon, Globe } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Calendar, Users, Building, Award, Leaf, MessageCircle, Bell, Heart, Share2, TrendingUp, Zap, LightbulbIcon, Globe } from 'lucide-react'
+import { Badge, BadgeProps } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Ambassador, Community } from '@/types/community'
 import {
@@ -32,6 +32,12 @@ interface CommunityHeaderProps {
   community: Community
   variants?: any
 }
+
+const BadgeWithChildren = ({ children, className, ...props }: { children: React.ReactNode; className?: string } & Omit<React.HTMLAttributes<HTMLDivElement>, 'className'>) => (
+  <div className={className} {...props}>
+    {children}
+  </div>
+);
 
 export const CommunityHeader = ({ 
   companyData, 
@@ -103,10 +109,10 @@ export const CommunityHeader = ({
             {/* Main content header with enhanced typography and community value prop */}
             <div className="mb-6">
               <div className="flex items-center mb-3">
-                <Badge className="bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1 rounded-full text-xs font-medium mr-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                <BadgeWithChildren className="bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1 rounded-full text-xs font-medium mr-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                   <Globe className="h-3 w-3 mr-1.5" />
                   Active Community
-                </Badge>
+                </BadgeWithChildren>
                 <div className="h-px flex-grow bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
               </div>
               
@@ -158,12 +164,12 @@ export const CommunityHeader = ({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div>
-                      <Badge className={`${scoreClass} text-sm py-1.5 pl-1.5 pr-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]`}>
+                      <BadgeWithChildren className={`${scoreClass} text-sm py-1.5 pl-1.5 pr-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]`}>
                         <div className="bg-white rounded-full p-1 mr-1.5 border border-slate-200">
                           <Leaf className="h-3.5 w-3.5 text-slate-600" />
                         </div>
                         {companyData.score} Impact Score
-                      </Badge>
+                      </BadgeWithChildren>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="bg-white border border-slate-200 text-slate-800">
@@ -177,12 +183,12 @@ export const CommunityHeader = ({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
-                        <Badge className="bg-slate-50 text-slate-700 border border-slate-200 text-sm py-1.5 pl-1.5 pr-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                        <BadgeWithChildren className="bg-slate-50 text-slate-700 border border-slate-200 text-sm py-1.5 pl-1.5 pr-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                           <div className="bg-white rounded-full p-1 mr-1.5 border border-slate-200">
                             <Award className="h-3.5 w-3.5 text-slate-600" />
                           </div>
                           {ambassadors.length} Ambassador{ambassadors.length !== 1 ? 's' : ''}
-                        </Badge>
+                        </BadgeWithChildren>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="bg-white border border-slate-200 text-slate-800">
@@ -192,19 +198,19 @@ export const CommunityHeader = ({
                 </TooltipProvider>
               )}
               
-              <Badge className="bg-slate-50 text-slate-600 border border-slate-200 text-sm py-1.5 pl-1.5 pr-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+              <BadgeWithChildren className="bg-slate-50 text-slate-600 border border-slate-200 text-sm py-1.5 pl-1.5 pr-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                 <div className="bg-white rounded-full p-1 mr-1.5 border border-slate-200">
                   <Users className="h-3.5 w-3.5 text-slate-600" />
                 </div>
                 {community.ambassadorCount || 0} active members
-              </Badge>
+              </BadgeWithChildren>
               
-              <Badge className="bg-slate-50 text-slate-700 border border-slate-200 text-sm py-1.5 pl-1.5 pr-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+              <BadgeWithChildren className="bg-slate-50 text-slate-700 border border-slate-200 text-sm py-1.5 pl-1.5 pr-2.5 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                 <div className="bg-white rounded-full p-1 mr-1.5 border border-slate-200">
                   <TrendingUp className="h-3.5 w-3.5 text-slate-600" />
                 </div>
                 Market Updates
-              </Badge>
+              </BadgeWithChildren>
               
               <div className="flex items-center text-sm text-slate-600 ml-auto">
                 <div className="bg-slate-50 rounded-md px-3 py-1 border border-slate-200 flex items-center gap-2 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">

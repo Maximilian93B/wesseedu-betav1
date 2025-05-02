@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+
 import { NextResponse } from 'next/server'
 import { checkAuth } from '@/lib/utils/authCheck'
 
@@ -175,7 +174,7 @@ export async function GET(request: Request) {
         console.log('Fetching company data for each community');
         
         finalCommunities = await Promise.all(
-          communities.map(async (community): Promise<CommunityWithCompany> => {
+          communities.map(async (community: CommunityBase): Promise<CommunityWithCompany> => {
             try {
               const { data: companyData, error: companyError } = await supabase
                 .from('companies')
@@ -365,7 +364,7 @@ export async function GET(request: Request) {
     }
     
     // Create a set of community IDs the user is a member of
-    const membershipSet = new Set(memberships?.map(m => m.community_id) || [])
+    const membershipSet = new Set(memberships?.map((m: { community_id: string }) => m.community_id) || [])
     
     // Add the isMember flag to each community
     const communitiesWithMembership = finalCommunities.map(community => ({
