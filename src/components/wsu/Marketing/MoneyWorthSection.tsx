@@ -24,118 +24,6 @@ function useIsMobile() {
   return isMobile;
 }
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1,
-    transition: { 
-      staggerChildren: 0.12,
-      duration: 0.6
-    }
-  }
-}
-
-const itemVariants = {
-  hidden: { y: 15, opacity: 0 },
-  visible: { 
-    y: 0, 
-    opacity: 1,
-    transition: { type: "spring", stiffness: 200, damping: 22 }
-  }
-}
-
-// Shadow animation that follows the hover effect with enhanced realism
-const shadowVariants = {
-  initial: { opacity: 0, scale: 1 },
-  animate: {
-    opacity: [0.15, 0.25, 0.15],
-    scale: [1, 0.98, 1],
-    transition: {
-      repeat: Infinity,
-      duration: 2.5,
-      ease: "easeInOut",
-      repeatType: "reverse"
-    }
-  }
-}
-
-// Base shadow animation with improved realism
-const baseShadowVariants = {
-  initial: { opacity: 0 },
-  animate: {
-    opacity: 0.35,
-    transition: {
-      duration: 1.2
-    }
-  }
-}
-
-// Enhanced falling animation with better physics
-const fallingBounceVariants = {
-  initial: { 
-    y: -450,
-    opacity: 0,
-    rotate: 5
-  },
-  animate: { 
-    y: 0,
-    opacity: 1,
-    rotate: 0,
-    transition: {
-      type: "spring", 
-      stiffness: 150, 
-      damping: 15,
-      mass: 1.2
-    }
-  }
-}
-
-// Optimized hover effect for more natural movement
-const hoverVariants = {
-  initial: { y: 0 },
-  animate: {
-    y: [0, -10, 0],
-    transition: {
-      y: {
-        repeat: Infinity,
-        duration: 3,
-        ease: "easeInOut",
-        repeatType: "reverse"
-      }
-    }
-  }
-}
-
-// Coin shine effect animation
-const shineEffectVariants = {
-  initial: { opacity: 0 },
-  animate: {
-    opacity: [0, 0.7, 0],
-    transition: {
-      repeat: Infinity,
-      duration: 3.5,
-      ease: "easeInOut",
-      repeatDelay: 1.5
-    }
-  }
-}
-
-const shimmerAnimation = {
-  hidden: { opacity: 0 },
-  visible: { 
-    opacity: [0, 0.5, 0],
-    x: [0, 100, 200],
-    transition: {
-      repeat: Infinity,
-      repeatType: "loop",
-      duration: 3.5,
-      ease: "easeInOut",
-      delay: 1.5
-    }
-  }
-}
-
 export function MoneyWorthSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
@@ -230,19 +118,22 @@ export function MoneyWorthSection() {
           <div className="w-full flex flex-col items-center text-center relative mb-8 sm:mb-10">
             <motion.div variants={itemVariants} className="overflow-hidden relative mb-4">
               <motion.h2 
-                className="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tight leading-[1.15]"
+                className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1]"
               >
-                Show your<br /><span className="relative inline-block">
-                  money its worth
+                Grow Wealth.<br />
+                <span className="relative inline-block">
+                  Create Impact.
                 </span>
               </motion.h2>
             </motion.div>
             
+            <motion.div variants={itemVariants} className="w-20 h-0.5 bg-white/30 mb-5 rounded-full"></motion.div>
+            
             <motion.p 
               variants={itemVariants}
-              className="text-white/90 text-base sm:text-lg leading-relaxed mb-6 max-w-[280px] sm:max-w-md" 
+              className="text-white text-base sm:text-lg leading-relaxed mb-7 max-w-[280px] sm:max-w-md" 
             >
-              Join the 3 million Canadians choosing Wealthsimple as a trusted place to invest, trade, save, and more.
+              Fund sustainable innovation. Create real impact.
             </motion.p>
             
             <motion.div 
@@ -252,9 +143,9 @@ export function MoneyWorthSection() {
               <Button
                 asChild
                 size={isMobile ? "default" : "default"}
-                className="bg-white hover:bg-slate-50 text-green-700 shadow-[0_4px_10px_rgba(0,0,0,0.07)]
+                className="bg-white hover:bg-slate-50 text-black shadow-[0_4px_10px_rgba(0,0,0,0.07)]
                   hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out
-                  hover:translate-y-[-2px] rounded-lg px-4 sm:px-6 py-2 font-medium relative overflow-hidden group"
+                  hover:translate-y-[-2px] rounded-lg px-5 sm:px-7 py-2.5 font-medium relative overflow-hidden group"
               >
                 <Link href="/get-started" className="relative z-10 flex items-center justify-center">
                   Get started

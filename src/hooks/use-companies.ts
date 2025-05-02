@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 
 export interface Company {
   id: string;
@@ -35,12 +36,32 @@ export function useCompanies() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const fetchAttemptedRef = useRef(false);
+  const isFetchingRef = useRef(false);
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
-
-  const fetchCompanies = async (search?: string, filters?: Record<string, any>) => {
+  const fetchCompanies = useCallback(async (search?: string, filters?: Record<string, any>) => {
+    // Don't try to fetch if we know we're not authenticated
+    if (!isAuthenticated && !authLoading) {
+      console.log('Not authenticated, skipping companies fetch');
+      setLoading(false);
+      setError("Unauthorized");
+      return;
+    }
+    
+    // Prevent concurrent fetches and limit retry attempts
+    if (isFetchingRef.current) {
+      console.log('Companies fetch already in progress, skipping');
+      return;
+    }
+    
+    // Only attempt to fetch once if unauthorized
+    if (error === "Unauthorized" && fetchAttemptedRef.current) {
+      console.log('Already attempted companies fetch with unauthorized result, skipping');
+      return;
+    }
+    
+    isFetchingRef.current = true;
     setLoading(true);
     setError(null);
     
@@ -78,9 +99,16 @@ export function useCompanies() {
             description: 'Failed to load companies. Please try again.',
             variant: 'destructive',
           });
+        } else {
+          // Mark that we've attempted a fetch that resulted in unauthorized
+          fetchAttemptedRef.current = true;
+          console.log('Unauthorized companies fetch attempt recorded');
         }
         return;
       }
+      
+      // Reset the fetch attempted flag on successful request
+      fetchAttemptedRef.current = false;
       
       // Handle different response formats
       if (response.data && Array.isArray(response.data)) {
@@ -107,10 +135,16 @@ export function useCompanies() {
       });
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  };
+  }, [toast, error, isAuthenticated, authLoading]);
 
   const fetchCompanyById = async (id: string) => {
+    // Skip if not authenticated
+    if (!isAuthenticated && !authLoading) {
+      return null;
+    }
+    
     setLoading(true);
     setError(null);
     
@@ -148,6 +182,16 @@ export function useCompanies() {
   };
 
   const saveCompany = async (companyId: string) => {
+    // Skip if not authenticated 
+    if (!isAuthenticated) {
+      toast({
+        title: 'Error',
+        description: 'You must be signed in to save companies.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    
     try {
       const response = await fetchWithAuth('/api/companies/saveCompany', {
         method: 'POST',
@@ -192,6 +236,16 @@ export function useCompanies() {
   };
 
   const unsaveCompany = async (companyId: string) => {
+    // Skip if not authenticated
+    if (!isAuthenticated) {
+      toast({
+        title: 'Error',
+        description: 'You must be signed in to manage saved companies.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+    
     try {
       const response = await fetchWithAuth(`/api/companies/savedCompanies/${companyId}`, {
         method: 'DELETE',
@@ -235,6 +289,13 @@ export function useCompanies() {
   };
 
   const fetchSavedCompanies = async () => {
+    // Skip if not authenticated
+    if (!isAuthenticated && !authLoading) {
+      setLoading(false);
+      setError("Unauthorized");
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     

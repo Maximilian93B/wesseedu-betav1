@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/hooks/use-auth';
@@ -26,45 +26,24 @@ const InvestmentSummary = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const fetchInProgress = useRef(false);
+  const effectRan = useRef(false);
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchStats();
-      
-      // Set a timeout to exit loading state after 10 seconds
-      const timeoutId = setTimeout(() => {
-        if (isLoading) {
-          setIsLoading(false);
-          setStats({
-            totalInvested: 0,
-            investmentCount: 0
-          });
-          toast({
-            title: "Loading Timeout",
-            description: "Could not load investment data in a reasonable time. Using default values.",
-            variant: "destructive"
-          });
-        }
-      }, 5000);
-      
-      return () => clearTimeout(timeoutId);
-    } else if (!authLoading && !user) {
-      // Handle case when authentication is complete but no user is found
-      setIsLoading(false);
-      setStats({
-        totalInvested: 0,
-        investmentCount: 0
-      });
+  const fetchStats = useCallback(async () => {
+    // Prevent concurrent fetch operations
+    if (fetchInProgress.current) {
+      console.log("InvestmentSummary: Fetch already in progress, skipping duplicate call");
+      return;
     }
-  }, [authLoading, user]);
 
-  const fetchStats = async () => {
     if (!user?.id) {
       setIsLoading(false);
       return;
     }
     
     try {
+      console.log("InvestmentSummary: Starting fetchStats call");
+      fetchInProgress.current = true;
       setIsLoading(true);
       
       // Use the fetchWithAuth helper instead of direct Supabase client
@@ -74,11 +53,16 @@ const InvestmentSummary = () => {
         throw new Error(response.error.toString());
       }
       
+      // Handle both response formats for backward compatibility
+      const statsData = response.data?.data || response.data || {};
+      console.log("InvestmentSummary: Got stats data:", statsData);
+      
       // Even if there's no data, we should set default values
       setStats({
-        totalInvested: response.data?.totalInvested || 0,
-        investmentCount: response.data?.investmentCount || 0
+        totalInvested: statsData?.totalInvested || 0,
+        investmentCount: statsData?.investmentCount || 0
       });
+      console.log("InvestmentSummary: Finished fetchStats call");
     } catch (error) {
       console.error('Error fetching investment stats:', error);
       toast({
@@ -94,8 +78,55 @@ const InvestmentSummary = () => {
       });
     } finally {
       setIsLoading(false);
+      fetchInProgress.current = false;
     }
-  };
+  }, [user?.id, toast]);
+
+  useEffect(() => {
+    if (effectRan.current) {
+      return; // Only run once
+    }
+    
+    if (!authLoading && user) {
+      console.log("InvestmentSummary: Auth loaded and user found, fetching stats");
+      effectRan.current = true;
+      fetchStats();
+      
+      // Set a timeout to exit loading state after 5 seconds
+      const timeoutId = setTimeout(() => {
+        setIsLoading(currentIsLoading => {
+          if (currentIsLoading) {
+            console.log("InvestmentSummary: Loading timeout reached");
+            setStats({
+              totalInvested: 0,
+              investmentCount: 0
+            });
+            toast({
+              title: "Loading Timeout",
+              description: "Could not load investment data in a reasonable time. Using default values.",
+              variant: "destructive"
+            });
+            return false;
+          }
+          return currentIsLoading;
+        });
+      }, 5000);
+      
+      return () => clearTimeout(timeoutId);
+    } else if (!authLoading && !user) {
+      // Handle case when authentication is complete but no user is found
+      effectRan.current = true;
+      setIsLoading(false);
+      setStats({
+        totalInvested: 0,
+        investmentCount: 0
+      });
+    }
+    
+    return () => {
+      effectRan.current = true; // Mark as run on cleanup
+    };
+  }, [authLoading, user, fetchStats, toast]);
 
   // Calculate the average investment if we have stats
   const getAverageInvestment = (): string => {

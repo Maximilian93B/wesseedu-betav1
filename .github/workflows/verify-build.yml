@@ -35,10 +35,28 @@ jobs:
           sed -i 's/"next\/typescript",//g' .eslintrc.json
         fi
         
+    - name: Create devBuilds directory
+      run: mkdir -p devBuilds
+        
     - name: Run build verification
-      run: npm run verify-build
+      id: build
+      run: npm run verify-build 2>&1 | tee build-output.txt
       # Continue on error so the action doesn't fail for TypeScript warnings
       continue-on-error: true
+      
+    - name: Save build output to markdown file
+      if: always()
+      run: |
+        echo "# Build Output - $(date +"%Y-%m-%d %H:%M:%S")" > devBuilds/build-${{ github.run_id }}.md
+        echo "## Run ID: ${{ github.run_id }}" >> devBuilds/build-${{ github.run_id }}.md
+        echo "## Branch: ${{ github.ref }}" >> devBuilds/build-${{ github.run_id }}.md
+        echo "## Commit: ${{ github.sha }}" >> devBuilds/build-${{ github.run_id }}.md
+        echo "" >> devBuilds/build-${{ github.run_id }}.md
+        echo "## Build Output" >> devBuilds/build-${{ github.run_id }}.md
+        echo '```' >> devBuilds/build-${{ github.run_id }}.md
+        cat build-output.txt >> devBuilds/build-${{ github.run_id }}.md
+        echo '```' >> devBuilds/build-${{ github.run_id }}.md
+        rm build-output.txt
       
     - name: Check if .next directory was created
       run: |

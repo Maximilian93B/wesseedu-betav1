@@ -21,13 +21,13 @@ export function withAuth<P extends object>(
   } = options;
 
   const WithAuthComponent = (props: P) => {
-    const { isLoading, isAuthenticated } = useAuthGuard({
+    const { loading, isAuthenticated } = useAuthGuard({
       redirectTo,
       requireAuth: true,
     });
 
     // Show loading screen while checking authentication
-    if (isLoading) {
+    if (loading) {
       return <LoadingComponent />;
     }
 

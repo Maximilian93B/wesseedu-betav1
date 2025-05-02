@@ -20,7 +20,10 @@ const config: Config = {
 	  },
 	  extend: {
 		fontFamily: {
-			helvetica: ["Helvetica", "sans-serif"],
+			helvetica: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+			secondary: ["Georgia", "Times New Roman", "serif"],
+			display: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+			body: ["Helvetica", "Arial", "sans-serif"],
 		},
 		colors: {
 		  border: "hsl(var(--border))",
@@ -68,12 +71,12 @@ const config: Config = {
 		},
 		keyframes: {
 		  "accordion-down": {
-			from: { height: 0 },
+			from: { height: "0px" },
 			to: { height: "var(--radix-accordion-content-height)" },
 		  },
 		  "accordion-up": {
 			from: { height: "var(--radix-accordion-content-height)" },
-			to: { height: 0 },
+			to: { height: "0px" },
 		  },
 		  gradient: {
 			'0%': { backgroundPosition: '0% center' },

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { checkAuth } from '@/lib/utils/authCheck'
 
@@ -10,9 +10,18 @@ export async function GET(
   try {
     // Check authentication
     const auth = await checkAuth()
-    if (auth.error) return auth.response
+    if (!auth.authenticated) return auth.error || NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { session, supabase } = auth
+    
+    if (!session) {
+      return NextResponse.json({ error: 'No active session' }, { status: 401 })
+    }
+    
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database client not available' }, { status: 500 })
+    }
+    
     const userId = session.user.id
 
     const companyId = params.companyId

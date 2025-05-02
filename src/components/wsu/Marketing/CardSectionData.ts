@@ -28,6 +28,7 @@ export const CARDS: CardData[] = [
     description: 'Join our community of impact investors gaining early access to high-potential sustainable startups.',
     className: 'group md:col-start-2 md:col-end-3 md:row-start-1 md:z-10',
     buttonText: 'Join Our Investors',
+    imageUrl: '/eco-city.png',
     buttonHref: '/auth/signup',
     featured: true,
     stats: [
@@ -38,10 +39,10 @@ export const CARDS: CardData[] = [
   },
   {
     id: 'investment',
-    title: 'WeSeedU Communities, Growing Together',
+    title: 'WeSeedU Communities',
     description: 'Connect with ambassador-led communities where companies share sustainable innovations directly with investors and enthusiasts.',
     className: 'group md:col-start-1 md:col-end-2 md:row-start-1 md:z-0',
-    imageUrl: '/images/Screenshot 2025-02-21 200935.png',
+    imageUrl: '/earth-character-showing-money-graph-rising-up.png',
     buttonText: 'Explore Communities',
     buttonHref: '#',
     stats: [
@@ -56,20 +57,20 @@ export const CARDS: CardData[] = [
   },
   {
     id: 'security',
-    title: 'Smart Dashboard, Smart investments',
-    description: 'Track your impact investments with real-time AI analytics, sustainability metrics, and portfolio performance updates.',
+    title: 'Smart Dashboard, Data-Driven Insights',
+    description: 'Behind-the-scenes AI helps analyze your investments and sustainability metrics as we continue enhancing our platform.',
     className: 'group md:col-start-3 md:col-end-4 md:row-start-1 md:z-0',
-    imageUrl: '/images/Screenshot 2025-02-21 121434.png',
+    imageUrl: '/ai-for-environmental-monitoring.png',
     buttonText: 'Experience Dashboard',
     buttonHref: '#',
     stats: [
       { value: 'Impact', label: 'Scoring' },
-      { value: 'AI', label: 'Analytics' }
+      { value: 'Data', label: 'Analytics' }
     ],
     highlights: [
-      'Data analytics and insights to help you make better decisions',
-      'AI-powered recommendations',
-      'Track your investments and their impact',
+      'AI-enhanced analysis tools',
+      'Sustainability insights',
+      'Performance tracking',
     ]
   }
 ] 

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Community } from '@/types/community'
+import { useNavigation } from '@/context/NavigationContext'
 
 // Import sub-components
 import { CommunityHeader } from './community-parts/CommunityHeader'
@@ -36,6 +37,16 @@ export default function CommunityDetailsView({ community, onBack }: CommunityDet
   const [activeTab, setActiveTab] = useState('about')
   const [isFollowing, setIsFollowing] = useState(community.isMember || false)
   const [hasError, setHasError] = useState(false)
+  const { markRouteVisited, setIsTransitioning } = useNavigation()
+  const communityDetailsRoute = `/dashboard/communities/${community.id}`
+  
+  // Mark this route as visited to avoid loading screens when returning
+  useEffect(() => {
+    markRouteVisited(communityDetailsRoute)
+    
+    // Clean up transitioning state when component unmounts
+    return () => setIsTransitioning(false)
+  }, [markRouteVisited, communityDetailsRoute, setIsTransitioning])
   
   // Use useMemo to compute derived values
   const companyData = useMemo(() => {
@@ -66,9 +77,16 @@ export default function CommunityDetailsView({ community, onBack }: CommunityDet
     }
   }, [community.ambassadors])
   
+  // Handle follow toggle
   const handleFollowToggle = () => {
     setIsFollowing(!isFollowing)
     // Here you would typically call an API to update the follow status
+  }
+  
+  // Handle back with transition state
+  const handleBack = () => {
+    setIsTransitioning(true)
+    onBack()
   }
   
   return (
@@ -78,9 +96,10 @@ export default function CommunityDetailsView({ community, onBack }: CommunityDet
       initial="hidden"
       animate="visible"
       layout
+      onAnimationComplete={() => setIsTransitioning(false)}
     >
       {/* Back Button */}
-      <BackButton onBack={onBack} variants={itemVariants} />
+      <BackButton onBack={handleBack} variants={itemVariants} />
       
       {/* Community Header with Banner */}
       <CommunityHeader 

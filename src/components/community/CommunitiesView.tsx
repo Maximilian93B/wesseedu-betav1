@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { Building2, Users, Award, TrendingUp, Filter, RotateCcw, Briefcase, Shield } from 'lucide-react'
 import { useCommunities } from '@/hooks/use-communities'
 import { useCompanies } from '@/hooks/use-companies'
@@ -7,6 +7,10 @@ import { useCommunityFilters } from '@/hooks/use-community-filters'
 import { Badge } from '@/components/ui/badge'
 import { CommunityWithTags, Ambassador } from '@/types'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { useNavigation } from '@/context/NavigationContext'
+import { useAuth } from '@/hooks/use-auth'
+import { useToast } from '@/hooks/use-toast'
 
 export interface ExtendedCommunity extends CommunityWithTags {
   featured?: boolean
@@ -16,6 +20,27 @@ export interface ExtendedCommunity extends CommunityWithTags {
 
 interface CommunitiesViewProps {
   onCommunitySelect: (id: string) => void
+}
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.08,
+      duration: 0.5
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { y: 10, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
 }
 
 export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
@@ -34,6 +59,15 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     fetchCompanies
   } = useCompanies()
 
+  const { setIsTransitioning } = useNavigation()
+  const { toast } = useToast()
+
+  const { user, loading: authLoading, isAuthenticated, refreshSession } = useAuth({ requireAuth: true })
+  const [localLoading, setLocalLoading] = useState(true)
+  const dataInitiatedRef = useRef(false)
+  const [retryCount, setRetryCount] = useState(0)
+  const maxRetries = 2
+  
   // Use the community filters hook with empty search query
   const {
     filteredCommunities,
@@ -45,82 +79,183 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     companiesLoading 
   })
 
-  // Fetch data on component mount
+  // Watch for auth changes and fetch data when authenticated
   useEffect(() => {
-    fetchCommunities()
-    fetchCompanies()
-  }, [])
+    console.log(`CommunitiesView: Auth state changed - user: ${user?.id || 'none'}, loading: ${authLoading}, isAuthenticated: ${isAuthenticated}`);
+    
+    // If auth is still loading, skip
+    if (authLoading) {
+      return;
+    }
+    
+    // If user is authenticated and we haven't initiated data fetch yet
+    if (user && !dataInitiatedRef.current) {
+      console.log('CommunitiesView: User authenticated. Triggering data fetch');
+      dataInitiatedRef.current = true;
+      
+      // Small delay to ensure cookies are properly set before making API calls
+      setTimeout(() => {
+        fetchCommunities();
+        fetchCompanies();
+      }, 300);
+    } else if (!authLoading && !user) {
+      // If auth is complete but user is not authenticated
+      console.log('CommunitiesView: Auth complete but user not authenticated');
+      setLocalLoading(false);
+    }
+  }, [user, authLoading, isAuthenticated, fetchCommunities, fetchCompanies]);
 
-  // Handle card selection with useCallback
+  // Auto-retry on error with exponential backoff
+  useEffect(() => {
+    if ((communitiesError || companiesError) && retryCount < maxRetries) {
+      const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized";
+      
+      // For unauthorized errors, try to refresh the session first
+      if (isUnauthorized) {
+        console.log(`CommunitiesView: Auth error on attempt ${retryCount + 1}, refreshing session`);
+        
+        const refreshAndRetry = async () => {
+          const success = await refreshSession();
+          if (success) {
+            console.log('CommunitiesView: Session refreshed, retrying data fetch');
+            fetchCommunities();
+            fetchCompanies();
+          } else {
+            console.log('CommunitiesView: Session refresh failed');
+          }
+        };
+        
+        refreshAndRetry();
+      } else {
+        // For other errors, retry with backoff
+        const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 8000);
+        console.log(`CommunitiesView: Error fetching data, retry ${retryCount + 1} in ${backoffTime}ms`);
+        
+        const retryId = setTimeout(() => {
+          fetchCommunities();
+          fetchCompanies();
+        }, backoffTime);
+        
+        return () => clearTimeout(retryId);
+      }
+      
+      setRetryCount(prev => prev + 1);
+    }
+  }, [communitiesError, companiesError, retryCount, fetchCommunities, fetchCompanies, refreshSession]);
+
+  // When data starts or finishes loading, update local state
+  useEffect(() => {
+    // If data loading starts, ensure local loading is true
+    if (communitiesLoading || companiesLoading) {
+      setLocalLoading(true);
+    } 
+    // When data loading finishes, update states
+    else {
+      setIsTransitioning(false);
+      setLocalLoading(false);
+      
+      // Log results for debugging
+      console.log(`CommunitiesView: Data load completed - ${communities.length} communities, ${companies.length} companies`);
+    }
+  }, [communitiesLoading, companiesLoading, communities.length, companies.length, setIsTransitioning]);
+
+  // Set a timeout to ensure we don't get stuck in loading state
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (localLoading) {
+        console.log('CommunitiesView: Forcing loading state to false after timeout');
+        setLocalLoading(false);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [localLoading]);
+
+  // Unified loading state that will eventually resolve
+  const isLoading = localLoading || (authLoading && !dataInitiatedRef.current);
+
+  // Handle card selection with useCallback and transition state
   const handleCardSelect = useCallback((id: string) => {
+    setIsTransitioning(true)
     onCommunitySelect(id)
-  }, [onCommunitySelect])
+  }, [onCommunitySelect, setIsTransitioning])
+  
+  // Handle refresh button click
+  const handleRefresh = useCallback(() => {
+    console.log('CommunitiesView: Manual refresh requested');
+    setRetryCount(0);
+    dataInitiatedRef.current = false;
+    
+    // Show toast for user feedback
+    toast({
+      title: "Refreshing data",
+      description: "Getting the latest communities information...",
+      variant: "default",
+    });
+    
+    fetchCommunities();
+    fetchCompanies();
+  }, [fetchCommunities, fetchCompanies, toast]);
 
   // Show error state if there's an issue with the API
-  if ((communitiesError || companiesError) && !communitiesLoading && !companiesLoading) {
+  if ((communitiesError || companiesError) && !communitiesLoading && !companiesLoading && retryCount >= maxRetries) {
     const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized"
     
     return (
-      <div 
-        className="py-16 text-center border border-slate-200 rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative"
-        style={{ 
-          backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-        }}
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden"
+        onAnimationComplete={() => setIsTransitioning(false)}
       >
-        {/* Subtle texture pattern for depth */}
-        <div className="absolute inset-0 opacity-[0.02]" 
-          style={{ 
-            backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-            backgroundSize: "40px 40px"
-          }} 
-        />
-        
-        {/* Top edge shadow line for definition */}
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
-        
-        {/* Inner shadow effects for depth */}
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-50/50 to-transparent"></div>
-        
-        <div className="max-w-md mx-auto relative z-10">
-          <div className="w-16 h-16 bg-slate-50 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-            <Building2 className="h-8 w-8 text-slate-600" />
+        <div className="relative w-full">
+          <div className="px-3 py-4 pt-6 sm:pt-8 md:pt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 space-y-10">
+            <motion.div 
+              variants={itemVariants}
+              className="w-16 h-16 bg-gradient-to-r from-[#70f570] to-[#49c628] rounded-2xl mx-auto flex items-center justify-center mb-6 border-4 border-white shadow-[0_4px_20px_rgba(0,0,0,0.1)]"
+            >
+              <Building2 className="h-8 w-8 text-white" />
+            </motion.div>
+            <motion.h3 
+              variants={itemVariants}
+              className="text-xl sm:text-2xl font-bold text-green-800 mb-3 font-display text-center tracking-tight"
+            >
+              {isUnauthorized ? "Authentication Required" : "Unable to Load Communities"}
+            </motion.h3>
+            <motion.p 
+              variants={itemVariants}
+              className="text-green-700 mb-8 max-w-sm mx-auto font-body text-center leading-relaxed"
+            >
+              {isUnauthorized 
+                ? "Please sign in to view communities and investment opportunities." 
+                : "We encountered an issue loading the communities. Please try again in a moment."}
+            </motion.p>
+            
+            <motion.div variants={itemVariants} className="flex justify-center">
+              {isUnauthorized ? (
+                <Link 
+                  href="/auth/login"
+                  className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold inline-block shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
+                >
+                  Sign In
+                </Link>
+              ) : (
+                <motion.button 
+                  variants={itemVariants}
+                  className="px-6 py-3 rounded-lg bg-white text-green-700 border border-green-200 hover:bg-green-50 shadow-[0_2px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
+                  onClick={handleRefresh}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2 inline-block" />
+                  Retry
+                </motion.button>
+              )}
+            </motion.div>
           </div>
-          <h3 className="text-xl font-medium text-slate-800 mb-3">
-            {isUnauthorized ? "Authentication Required" : "Unable to Load Communities"}
-          </h3>
-          <p className="text-slate-600 mb-8 max-w-sm mx-auto">
-            {isUnauthorized 
-              ? "Please sign in to view communities and investment opportunities." 
-              : "We encountered an issue loading the communities. Please try again in a moment."}
-          </p>
-          
-          {isUnauthorized ? (
-            <Link 
-              href="/auth/signin"
-              className="px-6 py-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium inline-block shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px]"
-            >
-              Sign In
-            </Link>
-          ) : (
-            <button 
-              className="px-6 py-3 rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out hover:translate-y-[-2px]"
-              onClick={() => {
-                fetchCommunities()
-                fetchCompanies()
-              }}
-            >
-              <RotateCcw className="h-4 w-4 mr-2 inline-block" />
-              Retry
-            </button>
-          )}
         </div>
-      </div>
+      </motion.div>
     )
   }
-
-  // Simplified isLoading determination
-  const isLoading = communitiesLoading || companiesLoading
 
   // Get stats for communities
   const totalCommunities = filteredCommunities.length;
@@ -131,137 +266,123 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
   const featuredCommunities = filteredCommunities.filter(c => c.featured).length;
 
   return (
-    <div className="space-y-10">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Available Communities Card */}
-        <div 
-          className="rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative"
-          style={{ 
-            backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-          }}
-        >
-          {/* Subtle texture pattern for depth */}
-          <div className="absolute inset-0 opacity-[0.02]" 
-            style={{ 
-              backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-              backgroundSize: "40px 40px"
-            }} 
-          />
-          
-          {/* Top edge shadow line for definition */}
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
-          
-          <div className="p-6 relative z-10">
-            <div className="flex items-center">
-              <div className="bg-white h-14 w-14 rounded-xl flex items-center justify-center mr-5 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-                <Building2 className="h-6 w-6 text-slate-600" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-800 mb-1">
-                  {totalCommunities}
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden"
+      onAnimationComplete={() => setIsTransitioning(false)}
+    >
+      <div className="relative w-full">
+        <div className="px-3 py-4 pt-6 sm:pt-8 md:pt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 space-y-10">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 lg:gap-10">
+            {/* Available Communities Card */}
+            <motion.div 
+              variants={itemVariants}
+              className="rounded-xl sm:rounded-2xl border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)] overflow-hidden relative bg-white"
+            >
+              <div className="p-6 relative z-10">
+                <div className="flex items-center">
+                  <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] h-14 w-14 rounded-xl flex items-center justify-center mr-5 border-4 border-white shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
+                    <Building2 className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-3xl font-extrabold text-green-800 mb-1 font-helvetica">
+                      {totalCommunities}
+                    </div>
+                    <div className="text-xs uppercase tracking-wider text-green-700 font-medium font-helvetica">Communities</div>
+                  </div>
                 </div>
-                <div className="text-xs uppercase tracking-wider text-slate-600 font-medium">Communities</div>
+              </div>
+            </motion.div>
+            
+            {/* With Ambassadors Card */}
+            <motion.div 
+              variants={itemVariants}
+              className="rounded-xl sm:rounded-2xl border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)] overflow-hidden relative bg-white"
+            >
+              <div className="p-6 relative z-10">
+                <div className="flex items-center">
+                  <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] h-14 w-14 rounded-xl flex items-center justify-center mr-5 border-4 border-white shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
+                    <Award className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-3xl font-extrabold text-green-800 mb-1 font-helvetica">
+                      {ambassadorCommunities}
+                    </div>
+                    <div className="text-xs uppercase tracking-wider text-green-700 font-medium font-helvetica">With Ambassadors</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+            
+            {/* Premium Card */}
+            <motion.div 
+              variants={itemVariants}
+              className="rounded-xl sm:rounded-2xl border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)] overflow-hidden relative bg-white"
+            >
+              <div className="p-6 relative z-10">
+                <div className="flex items-center">
+                  <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] h-14 w-14 rounded-xl flex items-center justify-center mr-5 border-4 border-white shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
+                    <TrendingUp className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="text-3xl font-extrabold text-green-800 mb-1 font-helvetica">
+                      {featuredCommunities}
+                    </div>
+                    <div className="text-xs uppercase tracking-wider text-green-700 font-medium font-helvetica">Premium</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+          
+          {/* Filter and results indicator */}
+          <motion.div 
+            variants={itemVariants}
+            className="flex items-center justify-between bg-white rounded-xl p-5 border border-green-100 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+          >
+            <div className="flex items-center">
+              <div className="bg-gradient-to-r from-[#70f570] to-[#49c628] p-2 rounded-md mr-3 shadow-sm">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <Badge className="bg-green-50 text-green-700 border border-green-100 py-1.5 px-4 rounded-md shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
+                <Users className="h-3.5 w-3.5 mr-2 text-green-600" />
+                {filteredCommunities.length} {filteredCommunities.length === 1 ? 'community' : 'communities'}
+              </Badge>
+              {isLoading && (
+                <div className="ml-4 text-sm text-green-700 flex items-center">
+                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse mr-2"></div>
+                  Loading...
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center">
+              <button 
+                onClick={handleRefresh} 
+                className="mr-3 p-2 rounded-full hover:bg-green-50 transition-colors"
+                aria-label="Refresh data"
+                title="Refresh communities data"
+              >
+                <RotateCcw className="h-4 w-4 text-green-700" />
+              </button>
+              <div className="text-xs text-green-600 font-helvetica">
+                <span className="text-green-800 font-medium">WeSeedU</span> Investment Communities
               </div>
             </div>
-          </div>
-        </div>
-        
-        {/* With Ambassadors Card */}
-        <div 
-          className="rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative"
-          style={{ 
-            backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-          }}
-        >
-          {/* Subtle texture pattern for depth */}
-          <div className="absolute inset-0 opacity-[0.02]" 
-            style={{ 
-              backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-              backgroundSize: "40px 40px"
-            }} 
+          </motion.div>
+          
+          {/* Communities Grid */}
+          <CommunitiesGrid 
+            filteredCommunities={filteredCommunities}
+            isLoading={isLoading}
+            handleCardSelect={handleCardSelect}
+            clearFilters={clearFilters}
           />
-          
-          {/* Top edge shadow line for definition */}
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
-          
-          <div className="p-6 relative z-10">
-            <div className="flex items-center">
-              <div className="bg-white h-14 w-14 rounded-xl flex items-center justify-center mr-5 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-                <Award className="h-6 w-6 text-slate-600" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-800 mb-1">
-                  {ambassadorCommunities}
-                </div>
-                <div className="text-xs uppercase tracking-wider text-slate-600 font-medium">With Ambassadors</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Premium Card */}
-        <div 
-          className="rounded-2xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden relative"
-          style={{ 
-            backgroundImage: "linear-gradient(to right top, #ffffff, #f6f6ff, #eaefff, #dae8ff, #c8e2ff)" 
-          }}
-        >
-          {/* Subtle texture pattern for depth */}
-          <div className="absolute inset-0 opacity-[0.02]" 
-            style={{ 
-              backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-              backgroundSize: "40px 40px"
-            }} 
-          />
-          
-          {/* Top edge shadow line for definition */}
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-slate-300/30 via-slate-400/20 to-slate-300/30"></div>
-          
-          <div className="p-6 relative z-10">
-            <div className="flex items-center">
-              <div className="bg-white h-14 w-14 rounded-xl flex items-center justify-center mr-5 border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-                <TrendingUp className="h-6 w-6 text-slate-600" />
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-800 mb-1">
-                  {featuredCommunities}
-                </div>
-                <div className="text-xs uppercase tracking-wider text-slate-600 font-medium">Premium</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
-      
-      {/* Filter and results indicator */}
-      <div className="flex items-center justify-between bg-white rounded-lg p-4 border border-slate-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-        <div className="flex items-center">
-          <Shield className="h-5 w-5 text-slate-600 mr-3" />
-          <Badge className="bg-slate-50 text-slate-700 border border-slate-200 py-1.5 px-4 rounded-md shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-            <Users className="h-3.5 w-3.5 mr-2" />
-            {filteredCommunities.length} {filteredCommunities.length === 1 ? 'community' : 'communities'}
-          </Badge>
-          {isLoading && (
-            <div className="ml-4 text-sm text-slate-600 flex items-center">
-              <div className="h-2 w-2 rounded-full bg-slate-600 animate-pulse mr-2"></div>
-              Loading...
-            </div>
-          )}
-        </div>
-        
-        <div className="text-xs text-slate-500">
-          <span className="text-slate-700 font-medium">WeSeedU</span> Investment Communities
-        </div>
-      </div>
-      
-      {/* Communities Grid */}
-      <CommunitiesGrid 
-        filteredCommunities={filteredCommunities}
-        isLoading={isLoading}
-        handleCardSelect={handleCardSelect}
-        clearFilters={clearFilters}
-      />
-    </div>
+    </motion.div>
   )
 } 

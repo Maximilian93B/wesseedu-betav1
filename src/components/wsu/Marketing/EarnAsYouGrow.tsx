@@ -73,7 +73,7 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
               variants={fadeInUpVariant}
               className="max-w-md space-y-8 sm:space-y-12"
             >
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]">
                 <span className="text-white">
                   Reach a<br className="hidden xs:inline" /> milestone,
                 </span>
@@ -82,12 +82,12 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
               </h2>
               
               <div className="space-y-4 sm:space-y-6">
-                <p className="text-white/90 text-base sm:text-lg max-w-md leading-relaxed">
+                <p className="text-white/90 text-lg sm:text-xl max-w-md leading-relaxed">
                   Your investment journey passes through three growth stages: ROOT, THRIVE, and IMPACT. Each stage represents progress in your sustainable investment portfolio.
                 </p>
                 
-                <p className="text-white/80 text-base sm:text-lg max-w-md leading-relaxed">
-                  As you advance through each stage, you'll unlock new features and benefits that enhance your investment experience.
+                <p className="text-white/80 text-lg sm:text-xl max-w-md leading-relaxed">
+                  As you advance through each stage, you&apos;ll unlock new features and benefits that enhance your investment experience.
                 </p>
               </div>
               
@@ -99,14 +99,14 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
                 <Button 
                   variant="default" 
                   size={isMobile ? "default" : "lg"}
-                  className="bg-white hover:bg-slate-50 text-green-700 
+                  className="bg-white hover:bg-slate-50 text-black
                     shadow-[0_4px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.2)] 
-                    transition-all duration-300 ease-out font-medium
+                    transition-all duration-300 ease-out font-medium text-lg
                     hover:translate-y-[-3px] rounded-xl px-4 sm:px-6 py-4 sm:py-6"
                   onClick={() => window.open('/rewards', '_self')}
                 >
                   Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </motion.div>
             </motion.div>

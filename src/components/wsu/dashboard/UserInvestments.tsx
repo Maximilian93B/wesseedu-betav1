@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -58,6 +58,7 @@ import {
   YAxis
 } from 'recharts';
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 interface Company {
   id: string;
@@ -92,13 +93,13 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
+      staggerChildren: 0.08
     }
   }
 };
 
 const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
+  hidden: { y: 10, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,
@@ -117,6 +118,8 @@ const UserInvestments = () => {
   const { toast } = useToast();
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const fetchInProgress = useRef(false);
+  const effectRan = useRef(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -127,30 +130,13 @@ const UserInvestments = () => {
     },
   });
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchInvestments();
-      fetchCompanies();
-      
-      // Set a timeout to exit loading state after 5 seconds
-      const timeoutId = setTimeout(() => {
-        if (isLoading) {
-          setIsLoading(false);
-          setHasError(true);
-        }
-      }, 5000);
-      
-      return () => clearTimeout(timeoutId);
-    } else if (!authLoading && !user) {
-      setIsLoading(false);
-      setInvestments([]);
-      setTotalInvested(0);
-      // Redirect to login if not authenticated
-      router.push('/auth/signin');
+  const fetchInvestments = useCallback(async () => {
+    // Prevent concurrent fetch operations
+    if (fetchInProgress.current) {
+      console.log("Fetch already in progress, skipping duplicate call");
+      return;
     }
-  }, [authLoading, user, router]);
 
-  const fetchInvestments = async () => {
     if (!user?.id) {
       setIsLoading(false);
       setInvestments([]);
@@ -159,6 +145,8 @@ const UserInvestments = () => {
     }
     
     try {
+      console.log("UserInvestments: Starting fetchInvestments call");
+      fetchInProgress.current = true;
       setIsLoading(true);
       setHasError(false);
       
@@ -168,8 +156,9 @@ const UserInvestments = () => {
         throw new Error(response.error.toString());
       }
       
-      // Transform data for the chart - group by month
-      const investmentData = response.data || [];
+      // Handle both response formats for backward compatibility
+      const investmentData = (response.data && Array.isArray(response.data)) ? response.data : [];
+      console.log(`UserInvestments: Got ${investmentData.length} investments`);
       setInvestments(investmentData);
       
       // Process data for chart
@@ -207,28 +196,35 @@ const UserInvestments = () => {
       }, 0) || 0;
       
       setTotalInvested(total);
+      console.log("UserInvestments: Finished fetchInvestments call");
     } catch (error) {
       console.error('Error fetching investments:', error);
       setHasError(true);
     } finally {
       setIsLoading(false);
+      fetchInProgress.current = false;
     }
-  };
+  }, [user?.id]);
 
-  const fetchCompanies = async () => {
+  const fetchCompanies = useCallback(async () => {
     try {
+      console.log("UserInvestments: Starting fetchCompanies call");
       const response = await fetchWithAuth('/api/companies');
       
       if (response.error) {
         throw new Error(response.error.toString());
       }
       
-      if (!response.data) {
+      // Handle both response formats for backward compatibility
+      const companiesData = response.data?.data || response.data || [];
+      
+      if (!companiesData || companiesData.length === 0) {
         setCompanies([]);
         return;
       }
       
-      setCompanies(response.data);
+      console.log(`UserInvestments: Got ${companiesData.length} companies`);
+      setCompanies(companiesData);
     } catch (error) {
       console.error('Error fetching companies:', error);
       toast({
@@ -237,7 +233,46 @@ const UserInvestments = () => {
         variant: "destructive"
       });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    // Add a guard to prevent useEffect from running more than once
+    if (effectRan.current) {
+      return; // Only run once
+    }
+    
+    if (!authLoading && user) {
+      console.log("UserInvestments: Auth loaded and user found, fetching data");
+      effectRan.current = true;
+      fetchInvestments();
+      fetchCompanies();
+      
+      // Set a timeout to exit loading state after 5 seconds
+      const timeoutId = setTimeout(() => {
+        setIsLoading(currentIsLoading => {
+          if (currentIsLoading) {
+            console.log("UserInvestments: Loading timeout reached");
+            setHasError(true);
+            return false;
+          }
+          return currentIsLoading;
+        });
+      }, 5000);
+      
+      return () => clearTimeout(timeoutId);
+    } else if (!authLoading && !user) {
+      effectRan.current = true;
+      setIsLoading(false);
+      setInvestments([]);
+      setTotalInvested(0);
+      // Redirect to login if not authenticated
+      router.push('/auth/signin');
+    }
+    
+    return () => {
+      // No need to set effectRan.current = true here as it's already set above
+    };
+  }, [authLoading, user, router, fetchInvestments, fetchCompanies]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!user?.id) {
@@ -271,6 +306,17 @@ const UserInvestments = () => {
       form.reset();
       setOpen(false);
       fetchInvestments();
+      
+      // Emit investment_made event to trigger goal updates
+      // This custom event will be caught by GoalTracker component
+      const event = new CustomEvent('investment_made', {
+        detail: {
+          amount: parseFloat(values.amount),
+          company_id: values.company_id
+        }
+      });
+      window.dispatchEvent(event);
+      
     } catch (error) {
       console.error('Error adding investment:', error);
       toast({
@@ -298,10 +344,10 @@ const UserInvestments = () => {
   const customTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white border border-slate-200 backdrop-blur-sm p-2 rounded-lg 
-          shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-slate-800">
-          <p className="text-sm font-medium">{payload[0].payload.month}</p>
-          <p className="text-slate-700 font-semibold">
+        <div className="bg-white border border-green-100 p-2 rounded-lg 
+          shadow-[0_8px_30px_rgba(0,0,0,0.08)] text-black">
+          <p className="text-sm font-medium font-display">{payload[0].payload.month}</p>
+          <p className="text-green-700 font-semibold font-helvetica">
             ${payload[0].value.toLocaleString()}
           </p>
         </div>
@@ -316,108 +362,99 @@ const UserInvestments = () => {
       animate="visible"
       variants={containerVariants}
     >
-      <div className="rounded-xl border border-slate-200 bg-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
-        hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] transition-shadow duration-500 relative overflow-hidden">
-        {/* Decorative top accent */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-500 via-slate-400 to-transparent" />
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+        {/* Simple white background */}
+        <div className="absolute inset-0 bg-white"></div>
         
-        {/* Subtle texture pattern for depth - minimal */}
-        <div className="absolute inset-0 opacity-[0.01]" 
-          style={{ 
-            backgroundImage: `radial-gradient(circle at 30px 30px, #94a3b8 0.5px, transparent 0)`,
-            backgroundSize: "60px 60px"
-          }} 
-        />
-        
-        {/* Subtle gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-slate-50/50 opacity-90" />
-        
-        {/* Background glow effect */}
-        <div className="absolute bottom-0 right-[10%] w-[200px] h-[200px] bg-slate-100/30 rounded-full blur-[80px] pointer-events-none"></div>
-        
-        <CardHeader className="px-6 pt-6 pb-0 relative z-10">
-          <CardTitle className="text-base font-medium text-slate-800 flex items-center">
-            <LineChart className="h-4 w-4 mr-2.5 text-slate-600" />
-            Investment Activity
-          </CardTitle>
-        </CardHeader>
-        
-        <CardContent className="px-6 py-6 relative z-10">
-          {isLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-[180px] w-full bg-slate-100" />
-            </div>
-          ) : hasError ? (
-            <motion.div 
-              variants={itemVariants}
-              className="flex flex-col items-center justify-center h-[180px] text-center space-y-3"
+        {/* Card content */}
+        <div className="relative z-5 h-full">
+          <div className="p-6 pb-4 border-b border-slate-100">
+            <h3 className="text-xl font-extrabold text-black leading-tight tracking-tight font-display flex items-center">
+              <LineChart className="h-5 w-5 mr-2.5 text-green-600" />
+              Investment Activity
+            </h3>
+          </div>
+          
+          <div className="p-6">
+            {isLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-[180px] w-full bg-green-50" />
+              </div>
+            ) : hasError ? (
+              <motion.div 
+                variants={itemVariants}
+                className="flex flex-col items-center justify-center h-[180px] text-center space-y-3"
+              >
+                <AlertTriangle className="h-12 w-12 text-green-200" />
+                <p className="text-black/70 max-w-[250px] font-body">
+                  We couldn&apos;t load your investment data. Please try again later.
+                </p>
+              </motion.div>
+            ) : chartData.length === 0 ? (
+              <motion.div 
+                variants={itemVariants}
+                className="flex flex-col items-center justify-center h-[180px] text-center space-y-3"
+              >
+                <Lightbulb className="h-12 w-12 text-green-200" />
+                <p className="text-black/70 max-w-[250px] font-body">
+                  You haven&apos;t made any investments yet. Ready to start your impact journey?
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div 
+                variants={itemVariants}
+                className="h-[180px] w-full"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsBarChart data={chartData} margin={{ top: 5, right: 5, bottom: 20, left: 0 }}>
+                    <XAxis 
+                      dataKey="month" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#3a6d2e', fontSize: 12 }}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#3a6d2e', fontSize: 12 }}
+                      tickFormatter={(value) => `$${value}`}
+                    />
+                    <Tooltip 
+                      content={customTooltip}
+                      cursor={{ fill: 'rgba(112, 245, 112, 0.05)' }}
+                    />
+                    <Bar 
+                      dataKey="amount" 
+                      fill="url(#colorGradient)" 
+                      radius={[4, 4, 0, 0]}
+                      maxBarSize={50}
+                    />
+                    <defs>
+                      <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#70f570" stopOpacity={0.9}/>
+                        <stop offset="100%" stopColor="#49c628" stopOpacity={0.7}/>
+                      </linearGradient>
+                    </defs>
+                  </RechartsBarChart>
+                </ResponsiveContainer>
+              </motion.div>
+            )}
+          </div>
+          
+          <div className="px-6 py-5 border-t border-slate-100 flex justify-end">
+            <Button 
+              className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                        shadow-sm hover:shadow transition-all duration-300 
+                        rounded-lg py-2 px-4 text-sm font-helvetica"
+              onClick={navigateToInvestments}
             >
-              <AlertTriangle className="h-12 w-12 text-slate-400" />
-              <p className="text-slate-600 max-w-[250px]">
-                We couldn't load your investment data. Please try again later.
-              </p>
-            </motion.div>
-          ) : chartData.length === 0 ? (
-            <motion.div 
-              variants={itemVariants}
-              className="flex flex-col items-center justify-center h-[180px] text-center space-y-3"
-            >
-              <Lightbulb className="h-12 w-12 text-slate-400" />
-              <p className="text-slate-600 max-w-[250px]">
-                You haven't made any investments yet. Ready to start your impact journey?
-              </p>
-            </motion.div>
-          ) : (
-            <motion.div 
-              variants={itemVariants}
-              className="h-[180px] w-full"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsBarChart data={chartData} margin={{ top: 5, right: 5, bottom: 20, left: 0 }}>
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
-                    tickFormatter={(value) => `$${value}`}
-                  />
-                  <Tooltip 
-                    content={customTooltip}
-                    cursor={{ fill: 'rgba(100, 116, 139, 0.05)' }}
-                  />
-                  <Bar 
-                    dataKey="amount" 
-                    fill="url(#colorGradient)" 
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={50}
-                  />
-                  <defs>
-                    <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#94a3b8" stopOpacity={0.9}/>
-                      <stop offset="100%" stopColor="#64748b" stopOpacity={0.7}/>
-                    </linearGradient>
-                  </defs>
-                </RechartsBarChart>
-              </ResponsiveContainer>
-            </motion.div>
-          )}
-        </CardContent>
-        
-        <CardFooter className="px-6 py-5 border-t border-slate-100 bg-slate-50/30 relative z-10">
-          <Button 
-            variant="ghost" 
-            className="ml-auto text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 text-sm"
-            onClick={navigateToInvestments}
-          >
-            View All Investments
-            <ArrowRight className="ml-2 h-3.5 w-3.5" />
-          </Button>
-        </CardFooter>
+              <span className="flex items-center justify-center">
+                View All Investments
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </span>
+            </Button>
+          </div>
+        </div>
       </div>
     </motion.div>
   );

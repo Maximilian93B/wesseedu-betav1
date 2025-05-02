@@ -5,7 +5,7 @@ export default function ContactPage() {
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-4">Get in Touch</h1>
             <p className="text-xl text-green-400">
-              We're here to help you make a sustainable impact
+              We&apos;re here to help you make a sustainable impact
             </p>
           </div>
   

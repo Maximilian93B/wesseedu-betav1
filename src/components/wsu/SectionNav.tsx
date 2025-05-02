@@ -102,8 +102,8 @@ export function SectionNav({ scrollToSection }: SectionNavProps = {}) {
           key={section.id}
           variant="ghost" 
           className={`
-            relative text-gray-700 rounded-full text-sm px-4 py-1 transition-all duration-300
-            ${activeSection === section.id ? 'bg-white shadow-md scale-105 text-black' : 'bg-transparent'}
+            relative text-gray-700 rounded-full text-sm px-5 py-2 transition-all duration-300
+            ${activeSection === section.id ? 'bg-white shadow-md scale-105 text-black' : 'bg-transparent hover:bg-white/10'}
           `}
           onClick={() => handleSectionClick(section.id)}
           style={{ transitionDelay: `${(index + offset) * 50}ms` }}
@@ -120,7 +120,7 @@ export function SectionNav({ scrollToSection }: SectionNavProps = {}) {
   return (
     <motion.div 
       ref={navRef}
-      className="hidden md:flex items-center justify-center pb-2 pt-2 overflow-x-auto transition-all duration-300 w-full"
+      className="hidden md:flex items-center justify-center py-4 overflow-x-auto transition-all duration-300 w-full"
       style={{
         y: navTranslateY,
         scale: navScale,
@@ -128,13 +128,13 @@ export function SectionNav({ scrollToSection }: SectionNavProps = {}) {
       }}
     >
       <div className="flex justify-between w-full max-w-6xl px-4">
-        <div className="flex space-x-3">
+        <div className="flex space-x-5">
           {firstHalf.map((section, index) => (
             <NavButton section={section} index={index} key={section.id} />
           ))}
         </div>
         
-        <div className="flex space-x-3">
+        <div className="flex space-x-5">
           {secondHalf.map((section, index) => (
             <NavButton section={section} index={index} offset={3} key={section.id} />
           ))}
@@ -153,18 +153,18 @@ export function SectionLinks({ activeSection, handleSectionClick }: {
   const secondHalf = SECTIONS.slice(3);
 
   return (
-    <div className="mb-4">
-      <h3 className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-2 pl-1">
+    <div className="mb-6">
+      <h3 className="text-black text-xs font-medium uppercase tracking-wider mb-3 pl-1">
         Page Sections
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-1 md:gap-8">
+      <div className="grid grid-cols-1 gap-3">
         {SECTIONS.map((section, index) => (
           <Button 
             key={section.id}
             variant="ghost" 
-            className={`text-gray-400 relative transition-all duration-200 w-full justify-start p-2 pl-2
+            className={`text-black relative transition-all duration-200 w-full justify-start p-3 pl-3
               group hover:translate-y-[-1px] border-l-2 border-transparent
-              ${activeSection === section.id ? 'text-black font-medium border-l-2 border-black' : ''}`}
+              ${activeSection === section.id ? 'text-black font-medium border-l-2 border-black bg-gray-50' : ''}`}
             onClick={() => handleSectionClick(section.id)}
           >
             <div className="flex items-center w-full">

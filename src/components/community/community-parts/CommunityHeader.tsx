@@ -115,7 +115,7 @@ export const CommunityHeader = ({
               </h1>
               
               <p className="text-slate-600 text-lg max-w-2xl mb-2">
-                Connect with forward-thinking investors and industry experts focused on {companyData.name}'s sustainable growth and impact initiatives.
+                Connect with forward-thinking investors and industry experts focused on {companyData.name}&apos;s sustainable growth and impact initiatives.
               </p>
             </div>
             

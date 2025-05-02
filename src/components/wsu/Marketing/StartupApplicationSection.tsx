@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { motion, useInView, AnimatePresence } from "framer-motion"
+import { motion, useInView, } from "framer-motion"
 import { ArrowRight, Sprout, PiggyBank, LineChart } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -70,7 +70,7 @@ export function StartupApplicationSection() {
       accentColor: "from-blue-400 via-sky-400 to-cyan-500"
     },
     {
-      title: "Impact Investment",
+      title: "Impact Stage",
       description: "Strategic large-scale funding for companies with measurable sustainability impact",
       amount: "$1M-$5M",
       icon: <PiggyBank className="h-7 w-7" />,
@@ -101,43 +101,43 @@ export function StartupApplicationSection() {
   ];
   
   return (
-    <div ref={sectionRef} className="relative w-full overflow-hidden py-24 md:py-32">      
+    <div ref={sectionRef} className="relative w-full overflow-hidden py-16 md:py-24 lg:py-32">
       {/* Content container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex flex-col items-center gap-20">
-          {/* Enhanced header section with bold white text */}
+        <div className="flex flex-col items-center gap-12 md:gap-16 lg:gap-20">
+          {/* Enhanced header section */}
           <motion.div 
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
             variants={headingAnimation}
             className="w-full text-center"
           >
-            <h2 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-none mb-6">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight sm:leading-none mb-4 sm:mb-5 text-shadow-sm">
               <span className="inline-block text-white">
                 Fund Your 
               </span>
               {" "}
               <span className="relative">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white/80 to-white/20">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 drop-shadow-lg">
                   Sustainable Vision
                 </span>
               </span>
             </h2>
             
-            <p className="text-white/90 text-xl max-w-2xl mx-auto leading-relaxed mt-6">
+            <p className="text-white/90 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mt-4 sm:mt-5">
               WeSeedU connects innovative sustainable startups with impact investors and UN funding opportunities.
             </p>
           </motion.div>
           
-          {/* Enhanced funding cards section */}
+          {/* Funding cards section */}
           <motion.div 
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full"
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full"
           >
             {fundingCards.map((card, index) => (
-              <motion.div key={index} variants={fadeIn}>
+              <motion.div key={index} variants={fadeIn} className="h-full">
                 <FundingCard
                   title={card.title}
                   description={card.description}
@@ -153,23 +153,23 @@ export function StartupApplicationSection() {
             ))}
           </motion.div>
           
-          {/* Enhanced application section */}
-          <div className="flex flex-col md:flex-row items-center gap-16 mt-4">
-            {/* Enhanced image section */}
+          {/* Application section */}
+          <div className="flex flex-col md:flex-row items-center gap-8 sm:gap-12 md:gap-16 w-full">
+            {/* Image section */}
             <motion.div 
               initial="hidden"
               animate={isInView ? "visible" : "hidden"}
               variants={fadeIn}
               className="w-full md:w-1/2 flex justify-center"
             >
-              <div className="relative w-full max-w-md aspect-square">
-                {/* Enhanced glow effect */}
+              <div className="relative w-full max-w-md lg:max-w-lg aspect-square">
+                {/* Simplified glow effect */}
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
                   transition={{ duration: 1.2, delay: 0.5 }}
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] 
-                  bg-gradient-radial from-green-400/30 via-green-400/15 to-transparent rounded-full blur-3xl"
+                  bg-gradient-radial from-green-400/20 via-green-400/10 to-transparent rounded-full blur-3xl"
                 />
                 
                 {/* Animated image container */}
@@ -181,11 +181,10 @@ export function StartupApplicationSection() {
                     delay: 0.3,
                     ease: [0.22, 1, 0.36, 1]
                   }}
-                  className="relative z-10"
+                  className="relative z-10 scale-90 sm:scale-100"
                 >
-                  {/* Enhanced 3D rocket image with dynamic shadows */}
                   <motion.div
-                    animate={{ y: [0, -8, 0] }}
+                    animate={{ y: [0, -6, 0] }}
                     transition={{
                       repeat: Infinity,
                       duration: 4,
@@ -194,40 +193,40 @@ export function StartupApplicationSection() {
                     className="relative"
                   >
                     <Image
-                      src="/investment.png"
+                      src="/funding.png"
                       alt="Sustainable Business Funding"
-                      width={440}
-                      height={440}
-                      className="relative z-20 drop-shadow-[0_35px_35px_rgba(0,0,0,0.3)]"
+                      width={600}
+                      height={600}
+                      className="relative z-20 drop-shadow-[0_25px_40px_rgba(0,0,0,0.35)] hover:scale-105 transition-transform duration-300"
                       priority
                     />
                     
-                    {/* Dynamic shadow that follows the floating animation */}
+                    {/* Simplified shadow */}
                     <motion.div
                       animate={{ 
                         scale: [1, 0.9, 1],
-                        opacity: [0.7, 0.5, 0.7]
+                        opacity: [0.6, 0.4, 0.6]
                       }}
                       transition={{
                         repeat: Infinity,
                         duration: 4, 
                         ease: "easeInOut"
                       }}
-                      className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-[70%] h-8 bg-black/25 blur-xl rounded-full"
+                      className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[60%] h-6 bg-black/20 blur-xl rounded-full"
                     ></motion.div>
                   </motion.div>
                 </motion.div>
               </div>
             </motion.div>
             
-            {/* Enhanced content section with bold white headers */}
+            {/* Content section */}
             <motion.div 
               initial="hidden"
               animate={isInView ? "visible" : "hidden"}
               variants={fadeIn}
               className="w-full md:w-1/2"
             >
-              <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-8">
+              <h3 className="text-3xl sm:text-4xl font-extrabold text-white mb-5 sm:mb-6">
                 <span className="relative inline-block">
                   Why Choose WeSeedU
                   <motion.div 
@@ -239,8 +238,8 @@ export function StartupApplicationSection() {
                 </span>
               </h3>
               
-              {/* Enhanced feature list with bold headers */}
-              <div className="space-y-5 mb-12">
+              {/* Benefits list */}
+              <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 {benefits.map((benefit, index) => (
                   <motion.div 
                     key={index} 
@@ -253,20 +252,20 @@ export function StartupApplicationSection() {
                     }}
                     onMouseEnter={() => setActiveFeature(index)}
                     onMouseLeave={() => setActiveFeature(null)}
-                    className={`flex items-start p-4 rounded-xl transition-all duration-300 ${activeFeature === index ? 'bg-white/5' : ''}`}
+                    className={`flex items-start p-2 sm:p-3 rounded-xl transition-all duration-300 ${activeFeature === index ? 'bg-white/5' : ''}`}
                   >
-                    <div className={`p-2 rounded-full bg-gradient-to-br from-green-400 to-green-500 mr-4 mt-0.5 transition-all duration-300 ${activeFeature === index ? 'scale-110' : ''}`}>
-                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                    <div className={`p-1.5 sm:p-2 rounded-full bg-gradient-to-br from-green-400 to-green-500 mr-2.5 sm:mr-3 mt-1 sm:mt-0.5 transition-all duration-300 ${activeFeature === index ? 'scale-110' : ''}`}>
+                      <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-white rounded-full"></div>
                     </div>
                     <div>
-                      <h4 className="text-white text-lg font-bold mb-1">{benefit.title}</h4>
-                      <p className="text-white/80 text-base">{benefit.description}</p>
+                      <h4 className="text-white text-base font-bold mb-0.5 sm:mb-1">{benefit.title}</h4>
+                      <p className="text-white/80 text-sm sm:text-base">{benefit.description}</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
               
-              {/* Enhanced CTA button */}
+              {/* CTA button */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
@@ -279,12 +278,9 @@ export function StartupApplicationSection() {
                 <Button
                   asChild
                   size="lg"
-                  className="relative overflow-hidden group rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-                  style={{ 
-                    background: 'linear-gradient(115deg, #70f570, #49c628)'
-                  }}
+                  className="relative overflow-hidden group bg-white text-black hover:bg-white/90 hover:text-green-900 shadow-lg rounded-xl transition-all duration-300 w-full sm:w-auto"
                 >
-                  <Link href="/apply-now" className="flex items-center justify-center text-white font-bold py-7 px-10 text-lg">
+                  <Link href="/apply-now" className="flex items-center justify-center font-bold py-4 sm:py-5 px-6 sm:px-10 text-base">
                     <span className="relative z-10">Apply for Funding</span>
                     <motion.div 
                       initial={{ x: -5 }}
@@ -292,10 +288,10 @@ export function StartupApplicationSection() {
                       transition={{ duration: 0.3 }}
                       className="relative z-10 ml-2"
                     >
-                      <ArrowRight className="h-5 w-5" />
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
                     </motion.div>
                     
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-green-400 to-green-500 transition-opacity duration-300" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gray-50 transition-opacity duration-300" />
                   </Link>
                 </Button>
               </motion.div>

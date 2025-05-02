@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   PieChart, 
   Pie, 
@@ -10,8 +10,8 @@ import {
   Tooltip,
   Sector 
 } from 'recharts';
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from '@/hooks/use-auth';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { motion } from 'framer-motion';
@@ -67,24 +67,7 @@ const InvestmentOverviewChart = () => {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined);
   const { user, loading: authLoading } = useAuth();
   
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchChartData();
-      
-      // Set a timeout to exit loading state after 5 seconds
-      const timeoutId = setTimeout(() => {
-        if (isLoading) {
-          setIsLoading(false);
-        }
-      }, 5000);
-      
-      return () => clearTimeout(timeoutId);
-    } else if (!authLoading && !user) {
-      setIsLoading(false);
-    }
-  }, [authLoading, user]);
-  
-  const fetchChartData = async () => {
+  const fetchChartData = useCallback(async () => {
     if (!user?.id) {
       setIsLoading(false);
       return;
@@ -99,14 +82,17 @@ const InvestmentOverviewChart = () => {
         throw new Error(response.error.toString());
       }
       
-      if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+      // Handle different response formats (direct data or nested data.data)
+      const categories = response.data?.data || response.data || [];
+      
+      if (categories.length === 0) {
         // If no data, use default with zero values but keep the categories
         setData(DEFAULT_DATA);
         return;
       }
       
       // Map the data to include colors
-      const chartData = response.data.map((item, index) => ({
+      const chartData = categories.map((item: { category: string; amount: number }, index: number) => ({
         name: item.category,
         value: item.amount,
         color: MONOCHROME_COLORS[index % MONOCHROME_COLORS.length]
@@ -120,7 +106,24 @@ const InvestmentOverviewChart = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.id]);
+  
+  useEffect(() => {
+    if (!authLoading && user) {
+      fetchChartData();
+      
+      // Set a timeout to exit loading state after 5 seconds
+      const timeoutId = setTimeout(() => {
+        setIsLoading(currentIsLoading => {
+          return currentIsLoading ? false : currentIsLoading;
+        });
+      }, 5000);
+      
+      return () => clearTimeout(timeoutId);
+    } else if (!authLoading && !user) {
+      setIsLoading(false);
+    }
+  }, [authLoading, user, fetchChartData]);
   
   const onPieEnter = (_: any, index: number) => {
     setActiveIndex(index);

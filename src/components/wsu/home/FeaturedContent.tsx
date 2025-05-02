@@ -12,8 +12,8 @@ export function FeaturedContent() {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   
-  // Minimum swipe distance (in px)
-  const minSwipeDistance = 50;
+  // Reduce minimum swipe distance for mobile
+  const minSwipeDistance = 30;
   
   // Handle next/previous
   const nextSlide = () => {
@@ -24,7 +24,7 @@ export function FeaturedContent() {
     setActiveSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
   
-  // Touch handlers for swipe functionality
+  // Improved touch handlers for swipe functionality
   const onTouchStart = (e: TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -106,37 +106,37 @@ export function FeaturedContent() {
   return (
     <div className="flex flex-col md:flex-row h-full w-full">
       {/* LEFT SIDE - Text content that integrates with blue-50 background */}
-      <div className="w-full md:w-1/2 bg-black text-white flex items-center justify-center py-16 md:py-20 lg:py-24">
-        <div className="max-w-xl w-full px-8 sm:px-12 md:px-16 lg:px-20 xl:px-24">
+      <div className="w-full md:w-1/2 bg-black text-white flex items-center justify-center py-10 sm:py-12 md:py-16 lg:py-24">
+        <div className="max-w-xl w-full px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="space-y-8 md:space-y-10 lg:space-y-12"
+            className="space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12"
           >
-            <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full border border-slate-700 bg-slate-800/50">
+            <div className="inline-flex items-center gap-2 mb-3 sm:mb-4 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-slate-700 bg-slate-800/50">
               <span className="text-xs font-medium text-slate-300">Featured</span>
             </div>
             
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.2]">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.2]">
               <span className="text-white block mb-2">Discover</span>
               <span className="text-white block mb-2">Sustainable</span>
               <span className="text-white block mb-2">Investment</span>
               <span className="text-white block">Opportunities</span>
             </h2>
             
-            <p className="text-slate-300 text-lg md:text-xl leading-relaxed max-w-2xl">
+            <p className="text-slate-300 text-base sm:text-lg md:text-xl leading-relaxed max-w-2xl">
               Access premium insights and curated sustainable investment options that align your financial goals with positive environmental and social impact.
             </p>
             
-            <div className="pt-6 md:pt-8">
+            <div className="pt-4 sm:pt-6 md:pt-8">
               <Button
-                className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-6 h-auto text-base shadow-[0_4px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.3)]"
+                className="bg-slate-700 hover:bg-slate-600 text-white px-6 sm:px-8 py-4 sm:py-6 h-auto text-sm sm:text-base shadow-[0_4px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.3)] w-full sm:w-auto"
                 onClick={() => router.push('/dashboard')}
               >
                 Get Started
-                <ArrowUpRight className="ml-3 h-5 w-5" />
+                <ArrowUpRight className="ml-2 sm:ml-3 h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </div>
           </motion.div>
@@ -184,35 +184,37 @@ export function FeaturedContent() {
                       style={{ objectPosition: "center" }}
                       quality={85}
                     />
+                    {/* Darken overlay for better text readability on mobile */}
+                    <div className="absolute inset-0 bg-black/30 md:bg-black/20"></div>
                   </div>
                   
-                  {/* Content positioned over the image - better aligned with screenshot */}
-                  <div className="h-full flex flex-col justify-center px-12 sm:px-16 md:px-20 lg:px-24 relative z-20 text-white">
+                  {/* Content positioned over the image - mobile optimized */}
+                  <div className="h-full flex flex-col justify-center px-6 sm:px-12 md:px-16 lg:px-24 relative z-20 text-white">
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.2 }}
                     >
                       {/* Accent line */}
-                      <div className="h-1.5 w-20 bg-white mb-10"></div>
+                      <div className="h-1 sm:h-1.5 w-16 sm:w-20 bg-white mb-6 sm:mb-10"></div>
                       
-                      {/* Title - larger and more prominent */}
-                      <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 drop-shadow-lg">
+                      {/* Title - mobile optimized */}
+                      <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-8 drop-shadow-lg">
                         {cards[activeSlide].title}
                       </h3>
                       
                       {/* Description - improved readability */}
-                      <p className="text-base md:text-lg mb-12 leading-relaxed max-w-md drop-shadow-lg">
+                      <p className="text-sm sm:text-base md:text-lg mb-8 sm:mb-12 leading-relaxed max-w-md drop-shadow-lg">
                         {cards[activeSlide].description}
                       </p>
                       
                       {/* Link styled */}
                       <a 
                         href={cards[activeSlide].linkHref}
-                        className="inline-flex items-center text-white font-medium text-lg group"
+                        className="inline-flex items-center text-white font-medium text-base sm:text-lg group"
                       >
                         {cards[activeSlide].linkText}
-                        <ChevronRight className="ml-3 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                        <ChevronRight className="ml-2 sm:ml-3 h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-hover:translate-x-1" />
                       </a>
                     </motion.div>
                   </div>
@@ -220,9 +222,9 @@ export function FeaturedContent() {
               </motion.div>
             </AnimatePresence>
             
-            {/* Navigation dots */}
+            {/* Navigation dots - larger touch targets for mobile */}
             <div 
-              className="absolute bottom-10 left-0 right-0 flex justify-center space-x-4 z-30"
+              className="absolute bottom-6 sm:bottom-10 left-0 right-0 flex justify-center space-x-3 sm:space-x-4 z-30"
               role="tablist"
               aria-label="Carousel pagination"
             >
@@ -232,7 +234,7 @@ export function FeaturedContent() {
                   role="tab"
                   aria-selected={activeSlide === i}
                   aria-label={`Go to slide ${i + 1}`}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
                     activeSlide === i ? "bg-slate-400" : "bg-white/40 hover:bg-white/60"
                   }`}
                   onClick={() => setActiveSlide(i)}
@@ -240,9 +242,9 @@ export function FeaturedContent() {
               ))}
             </div>
             
-            {/* Navigation arrows */}
+            {/* Navigation arrows - larger for mobile */}
             <button 
-              className="absolute top-1/2 left-6 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm
+              className="absolute top-1/2 left-3 sm:left-6 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/30 backdrop-blur-sm
                 flex items-center justify-center text-white hover:bg-white/50 
                 transition-all duration-300 z-30 hover:scale-110 focus:outline-none"
               onClick={prevSlide}
@@ -252,7 +254,7 @@ export function FeaturedContent() {
             </button>
             
             <button 
-              className="absolute top-1/2 right-6 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm
+              className="absolute top-1/2 right-3 sm:right-6 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/30 backdrop-blur-sm
                 flex items-center justify-center text-white hover:bg-white/50
                 transition-all duration-300 z-30 hover:scale-110 focus:outline-none"
               onClick={nextSlide}

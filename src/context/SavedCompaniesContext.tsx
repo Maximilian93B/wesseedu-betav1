@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useCallback } from 'react';
 import { fetchWithAuth } from '@/lib/utils/fetchWithAuth';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -24,7 +24,7 @@ export function SavedCompaniesProvider({ children }: { children: React.ReactNode
   const [savedCompanyIds, setSavedCompanies] = useState<string[]>([]);
   const { user, loading: authLoading } = useAuth();
 
-  const refreshSavedCompanies = async () => {
+  const refreshSavedCompanies = useCallback(async () => {
     if (!user?.id) {
       console.log('SavedCompaniesContext: No user ID, skipping refresh');
       return;
@@ -56,7 +56,7 @@ export function SavedCompaniesProvider({ children }: { children: React.ReactNode
       
       // Fallback to the watchlist API if profile data doesn't have saved companies
       console.log('SavedCompaniesContext: Falling back to watchlist API');
-      const response = await fetchWithAuth('/api/protected/watchlist', {
+      const response = await fetchWithAuth('/api/watchlist', {
         // Add cache-busting to prevent caching
         cache: 'no-store',
         headers: {
@@ -71,16 +71,24 @@ export function SavedCompaniesProvider({ children }: { children: React.ReactNode
         return;
       }
       
-      if (!response.data) {
-        console.error('SavedCompaniesContext: No data returned from watchlist API');
+      // Handle different response formats
+      let watchlistData;
+      if (response.data?.data) {
+        // New format: data is in data property
+        watchlistData = response.data.data;
+      } else if (Array.isArray(response.data)) {
+        // Old format: data is directly in response
+        watchlistData = response.data;
+      } else {
+        console.error('SavedCompaniesContext: Unexpected watchlist response format', response);
         return;
       }
       
-      console.log('SavedCompaniesContext: Watchlist data received:', response.data);
+      console.log('SavedCompaniesContext: Watchlist data received:', watchlistData);
       
       // Extract company IDs from the watchlist data
-      const ids = response.data
-        .filter((item: any) => item.company_id) // Changed to use company_id directly
+      const ids = watchlistData
+        .filter((item: any) => item.company_id)
         .map((item: any) => item.company_id);
       
       console.log(`SavedCompaniesContext: Found ${ids.length} saved company IDs:`, ids);
@@ -88,14 +96,14 @@ export function SavedCompaniesProvider({ children }: { children: React.ReactNode
     } catch (error) {
       console.error('SavedCompaniesContext: Error fetching saved companies:', error);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading && user) {
       console.log('SavedCompaniesContext: Auth loading complete, refreshing saved companies');
       refreshSavedCompanies();
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, refreshSavedCompanies]);
 
   const addSavedCompany = (id: string) => {
     console.log(`SavedCompaniesContext: Adding company ${id} to saved companies`);

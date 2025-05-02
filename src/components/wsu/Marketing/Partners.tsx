@@ -73,19 +73,19 @@ export function Partners() {
           duration={0.7}
         >
           <div className="flex flex-col items-start max-w-2xl">
-            <div className="inline-flex items-center space-x-2 bg-white/5 rounded-full px-4 py-1.5 mb-10 text-xs text-teal-400 font-medium">
+            <div className="inline-flex items-center space-x-2 bg-white/5 rounded-full px-4 py-1.5 mb-10 text-xs text-teal-400 font-medium font-helvetica">
               <span>Our Global Partners</span>
               <ArrowRight className="w-3 h-3" aria-hidden="true" />
             </div>
 
             <h2 
               id="partners-heading" 
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-8 tracking-tight leading-tight"
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-8 tracking-tight leading-tight font-display"
             >
               Trusted by <span className="text-teal-400">Global Leaders</span> in Sustainability
             </h2>
 
-            <p className="text-white/70 text-lg max-w-xl leading-relaxed">
+            <p className="text-white/70 text-lg max-w-xl leading-relaxed font-body">
               From international organizations to sustainable investment funds, we collaborate with partners who share
               our vision.
             </p>
@@ -120,7 +120,7 @@ export function Partners() {
             variant="outline"
             className="text-white border-white/10 hover:border-white/20 
               bg-white/5 hover:bg-white/10
-              transition-all duration-300 py-6 px-8 h-auto text-base group"
+              transition-all duration-300 py-6 px-8 h-auto text-base group font-helvetica"
             asChild
           >
             <Link href="/partners">
@@ -254,8 +254,8 @@ function PartnerCard({ partner, index, isActive, onHover }: PartnerCardProps) {
           </div>
 
           <div className="space-y-2 flex-grow">
-            <h3 className="text-white font-medium text-lg">{partner.name}</h3>
-            <p className="text-white/60 text-sm leading-relaxed line-clamp-3">{partner.description}</p>
+            <h3 className="text-white font-medium text-lg font-display">{partner.name}</h3>
+            <p className="text-white/60 text-sm leading-relaxed line-clamp-3 font-body">{partner.description}</p>
           </div>
         </CardContent>
       </Card>

@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   if (code) {
     await supabase.auth.exchangeCodeForSession(code)
-    return NextResponse.redirect(new URL('/auth/home', request.url))
+    return NextResponse.redirect(new URL('/dashboard/home', request.url))
   }
 
   return NextResponse.redirect(new URL('/auth/auth-error', request.url))

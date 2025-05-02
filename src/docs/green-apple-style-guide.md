@@ -6,9 +6,10 @@ This document outlines the green-focused styling approach used throughout the We
 
 1. **Green Gradient Base**: Primary background uses vibrant green apple gradient `linear-gradient(115deg, #70f570, #49c628)`
 2. **High Contrast Elements**: Use white/light elements against the green background for readability and visual pop
-3. **Subtle Interactions**: Provide feedback through shadow changes and subtle animations
-4. **Clean Typography**: High contrast white text on green backgrounds with minimal shadow for readability
-5. **Consistent Rounding**: Maintain standardized border radius values throughout the application
+3. **Subtle Interactions**: Provide feedback through shadow changes, hover states, and subtle animations
+4. **Clean Typography**: High contrast text with careful font selection for each section (font-display, font-body, font-helvetica)
+5. **Consistent Rounding**: Standardized border radius values (rounded-xl, rounded-2xl) throughout the application
+6. **Animation and Motion**: Thoughtful use of animations for enhanced user experience
 
 ## Coding Guidelines
 
@@ -16,7 +17,9 @@ This document outlines the green-focused styling approach used throughout the We
 - Avoid code duplication by leveraging shared styles and components
 - Consider all environments (dev, test, prod) in styling implementation
 - Avoid adding stubbing or fake data patterns that affect production
-- Keep styling consistent across the application by using this reference
+- Use descriptive variable names for animations, styles, and components
+- Extract reusable animation variants to improve maintainability
+- Use proper tailwind classes and leverage the cn utility for conditional classNames
 
 ## Color Palette
 
@@ -27,14 +30,15 @@ This document outlines the green-focused styling approach used throughout the We
 - Very Dark Green: `#1a5e0a` - High contrast elements, shadows
 
 ### Text & UI Elements
-- Primary Text: `text-white` - Main text on green backgrounds
-- Secondary Text: `text-white/90` or `text-white/80` - Supporting information
-- Primary Buttons: `bg-white text-green-700` - For high-visibility actions
-- Secondary Buttons: `bg-green-800/80 text-white` - For alternative actions
-- Borders/Dividers: `from-white/60 to-transparent` - Subtle separators
+- Primary Text on Green: `text-white` - Main text on green backgrounds
+- Secondary Text on Green: `text-white/90` or `text-white/80` - Supporting information
+- Primary Text on White: `text-black`, `text-green-800` - For text on white/light backgrounds
+- Primary Buttons: `bg-white text-black hover:bg-white/90 hover:text-green-900` - High-visibility actions on green
+- Green Gradient Buttons: `bg-gradient-to-r from-[#70f570] to-[#49c628]` - For buttons on white backgrounds
+- Borders/Dividers: `border-white/20`, `border-white/30` - Subtle separators
 
 ### Accent/Status Elements
-- Gold/Yellow Accents: `from-[#e9d48e] to-[#c9b26d]` - For financial elements
+- Highlight Elements: `bg-white/10`, `bg-white/20` - For subtle highlights on green background
 - Success States: `bg-emerald-500` - Confirmation messages
 - Warning States: `bg-amber-500` - Alerts
 - Error States: `bg-red-500` - Critical information
@@ -44,65 +48,159 @@ This document outlines the green-focused styling approach used throughout the We
 ### Element Background Gradient
 For cards and UI elements to stand out against the green:
 ```css
-background-image: linear-gradient(to right top, rgba(255,255,255,0.95), rgba(255,255,255,0.85))
+bg-white /* For solid white backgrounds */
+bg-white/90 /* For slightly translucent white backgrounds */
 ```
 
 ### Highlight Gradient
 For elements that need special emphasis:
 ```css
-background-image: linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.7))
+bg-gradient-to-r from-white/40 via-white/60 to-white/40 /* For dividers and highlights */
+bg-gradient-to-r from-[#70f570] to-[#49c628] /* For green buttons and highlights */
+```
+
+### Button/Badge Gradient
+For buttons and special elements on white backgrounds:
+```css
+bg-gradient-to-r from-[#70f570] to-[#49c628] /* Standard green button */
 ```
 
 ### Card Component Pattern
-Apply this pattern for creating cards with depth against green background:
+White card on green background pattern:
 ```tsx
 <div 
-  className="relative overflow-hidden rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
-  style={{ 
-    backgroundImage: "linear-gradient(to right top, rgba(255,255,255,0.95), rgba(255,255,255,0.85))" 
-  }}
+  className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
 >
-  {/* Subtle texture pattern for depth */}
-  <div className="absolute inset-0 opacity-[0.03]" 
-    style={{ 
-      backgroundImage: `radial-gradient(circle at 20px 20px, black 1px, transparent 0)`,
-      backgroundSize: "40px 40px"
-    }} 
-  />
+  {/* Simple white background */}
+  <div className="absolute inset-0 bg-white"></div>
   
-  {/* Top edge highlight for definition */}
-  <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-white/40 via-white/60 to-white/40"></div>
-  
-  {/* Inner shadow effects for depth */}
-  <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white to-transparent opacity-40"></div>
-  
-  {/* Content goes here (with z-10) */}
-  <div className="relative z-10 p-6">
+  {/* Card content */}
+  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7 flex flex-col">
     {/* Content */}
+    <h3 className="text-xl sm:text-2xl font-extrabold text-black leading-tight tracking-tight font-display">
+      Card Title
+    </h3>
+    <p className="text-sm sm:text-base text-black mt-2 sm:mt-4 leading-relaxed font-body">
+      Description text
+    </p>
+    
+    {/* Button example */}
+    <Button 
+      className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                shadow-sm hover:shadow transition-all duration-300 
+                rounded-lg py-3 sm:py-5 text-sm sm:text-base font-helvetica"
+    >
+      Button Text
+    </Button>
   </div>
 </div>
 ```
 
 ## Typography
 
-- Headings: `text-white` with font-medium or font-semibold
-- Body Text: `text-white/90` for primary content on green
-- Secondary Text: `text-white/80` for supporting information on green
-- Text on White: `text-green-800` for text on white backgrounds
-- Text Shadow (if needed): `text-shadow: 0 1px 2px rgba(0,0,0,0.1)`
+### Fonts
+- Display Font (Headings): `font-display` - For titles and impactful text
+- Body Font (Content): `font-body` - For descriptions and body text
+- Helvetica Font (Buttons, Stats): `font-helvetica` - For buttons and data points
+
+### Text Styles
+- Primary Headings: `text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.2] text-white font-display`
+- Secondary Headings: `text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-[1.15] font-display`
+- Body Text on Green: `text-white text-sm sm:text-base md:text-xl leading-relaxed font-light font-body`
+- Body Text on White: `text-black text-sm sm:text-base leading-relaxed font-body`
+- Feature Titles: `text-lg sm:text-xl font-semibold text-white font-display`
+- Stats/Numbers: `font-extrabold text-black text-lg sm:text-xl md:text-2xl font-helvetica`
+- Button Text: `text-sm sm:text-base font-semibold font-helvetica`
 
 ## Shadows and Elevation
 
 ### Shadow Scale
-1. Subtle: `shadow-[0_2px_10px_rgba(0,0,0,0.05)]` - Cards, subtle elevation
-2. Medium: `shadow-[0_4px_20px_rgba(0,0,0,0.08)]` - Floating elements, dropdowns
-3. Pronounced: `shadow-[0_8px_30px_rgba(0,0,0,0.15)]` - Modal dialogs, popovers
-4. White Glow: `shadow-[0_0_20px_rgba(255,255,255,0.3)]` - Highlighted elements on green
+1. Subtle: `shadow-sm` - Minimal elevation
+2. Medium: `shadow`, `shadow-[0_4px_10px_rgba(0,0,0,0.1)]` - Cards, buttons
+3. Pronounced: `shadow-lg`, `shadow-[0_8px_30px_rgba(0,0,0,0.1)]` - Floating elements, cards
+4. Special: `shadow-[0_0_20px_rgba(255,255,255,0.3)]` - Highlighted elements, hover states
 
-### Hover Transitions
+### Hover Effects
 - Shadow Transition: `transition-shadow duration-300`
 - Complete Transition: `transition-all duration-300`
 - Hover lift effect: `hover:translate-y-[-2px]`
+- Brightness: `hover:brightness-105` - For gradient buttons
+
+## Animation Patterns
+
+### Standard Animations
+```tsx
+// Container stagger animation
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.08,
+      duration: 0.5
+    }
+  }
+}
+
+// Item animation
+const itemVariants = {
+  hidden: { y: 10, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+}
+
+// Floating animation
+const floatingVariants = {
+  initial: { y: 0 },
+  animate: { 
+    y: [0, -10, 0],
+    rotate: [0, 0.5, 0, -0.5, 0],
+    transition: {
+      y: {
+        duration: 8,
+        repeat: Infinity,
+        repeatType: "reverse", 
+        ease: "easeInOut"
+      },
+      rotate: {
+        duration: 12,
+        repeat: Infinity,
+        repeatType: "reverse",
+        ease: "easeInOut"
+      }
+    }
+  }
+}
+```
+
+### Animation Implementation
+```tsx
+<motion.div
+  initial="hidden"
+  animate="visible"
+  variants={containerVariants}
+  className="w-full max-w-7xl mx-auto px-5 sm:px-10 py-4 sm:py-8 lg:py-16" 
+>
+  <motion.h1 
+    variants={itemVariants}
+    className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.2] text-white font-display"
+  >
+    Grow a Sustainable Future
+  </motion.h1>
+  
+  <motion.div 
+    initial="initial"
+    animate="animate"
+    variants={floatingVariants}
+    className="relative"
+  >
+    {/* Content */}
+  </motion.div>
+</motion.div>
+```
 
 ## Common Component Patterns
 
@@ -110,134 +208,129 @@ Apply this pattern for creating cards with depth against green background:
 ```tsx
 {/* Primary Button (White on Green) */}
 <Button 
-  className="bg-white hover:bg-slate-50 text-green-700 shadow-[0_4px_10px_rgba(0,0,0,0.1)]
-    hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out 
-    hover:translate-y-[-2px] rounded-lg"
+  asChild
+  size="lg"
+  className="bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 shadow-lg rounded-xl px-8 py-6 font-semibold transition-all duration-300 font-helvetica"
 >
-  Primary Action
+  <Link href="/path">
+    <span className="relative z-10 flex items-center justify-center">
+      Button Text
+      <ArrowRight className="h-5 w-5 ml-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+    </span>
+  </Link>
 </Button>
 
-{/* Secondary Button (Green on White) */}
+{/* Green Gradient Button (On White) */}
 <Button 
-  variant="outline"
-  className="bg-green-800/60 hover:bg-green-800/80 text-white border-white/20
-    shadow-[0_2px_10px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.15)] 
-    transition-all duration-300 ease-out hover:translate-y-[-2px] rounded-lg"
+  asChild
+  className="w-full bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+           shadow-sm hover:shadow transition-all duration-300 
+           rounded-lg py-3 sm:py-5 text-sm sm:text-base font-helvetica"
 >
-  Secondary Action
-</Button>
-
-{/* Ghost Button */}
-<Button 
-  variant="ghost" 
-  className="text-white hover:text-white hover:bg-white/10"
->
-  Tertiary Action
+  <Link href="/path">
+    <span className="flex items-center justify-center">
+      Button Text
+      <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+    </span>
+  </Link>
 </Button>
 ```
 
-### Cards
+### Feature Blocks
 ```tsx
-<div className="bg-white/90 rounded-xl p-6 border border-white/20 
-  shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.12)] 
-  transition-shadow duration-500 relative overflow-hidden">
-  
-  {/* Optional top accent line */}
-  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-green-300/20" />
-  
-  {/* Card content */}
-  <h2 className="text-lg font-medium text-green-800">Card Title</h2>
-  <p className="text-green-700/80 text-sm">Card description text</p>
+<div className="flex flex-col group mb-8 sm:mb-0">
+  <div className="w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-4 rounded-full transition-all duration-300 group-hover:w-16"></div>
+  <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 font-display">Feature Title</h3>
+  <p className="text-white text-sm leading-relaxed font-body">Feature description text goes here.</p>
 </div>
 ```
 
-### Badges
+### Cards and Sections
 ```tsx
-{/* Status Badge */}
-<div className="inline-flex items-center bg-white px-3 py-1 rounded-full text-xs font-medium
-  text-green-700 tracking-wider shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
-  <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span>
-  STATUS TEXT
-</div>
-
-{/* Info Badge */}
-<div className="inline-flex items-center px-4 py-2 rounded-lg text-sm 
-  border border-white/20 text-white bg-white/10
-  backdrop-blur-sm shadow-[0_4px_20px_rgba(0,0,0,0.1)] 
-  hover:shadow-[0_8px_30px_rgba(0,0,0,0.15)]
-  transition-all duration-300 hover:bg-white/20 group">
-  <Icon className="h-4 w-4 mr-2.5 text-white/80 group-hover:scale-110 transition-transform duration-200" />
-  <span className="font-semibold">Value</span>
-  <span className="ml-1.5 text-white/70 text-xs uppercase tracking-wide">label</span>
-</div>
-```
-
-### Stat Cards
-```tsx
-<div className="bg-white/90 rounded-lg border border-white/20 p-4 shadow-[0_4px_20px_rgba(0,0,0,0.08)] 
-  hover:shadow-[0_10px_30px_rgba(0,0,0,0.12)] transition-all duration-300 relative overflow-hidden group">
-  
-  {/* Subtle top accent */}
-  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-green-300/20" />
-  
-  <div className="flex items-start justify-between mb-2 relative z-10">
-    <span className="text-xs text-green-700 uppercase tracking-wide font-medium">Stat Title</span>
-    <div className="p-1.5 rounded-lg bg-green-100 shadow-sm 
-      group-hover:scale-110 transition-transform duration-200">
-      <Icon className="h-3.5 w-3.5 text-green-700" />
+{/* White card on green background */}
+<div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
+  <div className="absolute inset-0 bg-white"></div>
+  <div className="relative z-5 h-full p-4 sm:p-5 md:p-7 flex flex-col">
+    <h3 className="text-xl sm:text-2xl font-extrabold text-black leading-tight tracking-tight font-display">
+      Card Title
+    </h3>
+    <p className="text-sm sm:text-base text-black mt-2 sm:mt-4 leading-relaxed font-body">
+      Card description text
+    </p>
+    
+    {/* Stats section */}
+    <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-lg overflow-hidden">
+      <div className="grid grid-cols-2 divide-x divide-green-500/10">
+        <div className="flex flex-col items-center justify-center text-center px-2 sm:px-4 py-3 sm:py-6">
+          <p className="font-extrabold text-black text-lg sm:text-xl md:text-2xl mb-1 sm:mb-2 font-helvetica">
+            92%
+          </p>
+          <p className="text-xs sm:text-sm uppercase tracking-wider font-medium text-black font-body">
+            Satisfaction
+          </p>
+        </div>
+        <div className="flex flex-col items-center justify-center text-center px-2 sm:px-4 py-3 sm:py-6">
+          <p className="font-extrabold text-black text-lg sm:text-xl md:text-2xl mb-1 sm:mb-2 font-helvetica">
+            $2.4M
+          </p>
+          <p className="text-xs sm:text-sm uppercase tracking-wider font-medium text-black font-body">
+            Invested
+          </p>
+        </div>
+      </div>
     </div>
   </div>
-  <div className="text-lg font-bold text-green-800">Stat Value</div>
-  <p className="text-xs text-green-700/80 mt-0.5">Stat description text</p>
 </div>
 ```
 
-### Data Lists
+### Highlights and Check Lists
 ```tsx
-<motion.div
-  variants={itemVariants}
-  exit={{ opacity: 0, y: -10 }}
-  whileHover={{ scale: 1.01 }}
-  className="flex items-center p-3 rounded-lg border border-white/20 bg-white/90 
-    shadow-[0_2px_10px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_15px_rgba(0,0,0,0.12)] 
-    transition-all duration-200 hover:bg-white"
+<ul className="flex flex-col gap-2 sm:gap-4">
+  <li className="flex items-start text-sm sm:text-base leading-relaxed text-black font-body">
+    <div className="flex-shrink-0 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-gradient-to-br from-[#70f570] to-[#49c628] flex items-center justify-center mt-0.5 mr-2 sm:mr-3">
+      <Check size={10} className="text-white" />
+    </div>
+    <span>Highlight item text</span>
+  </li>
+</ul>
+```
+
+### Trust Indicators
+```tsx
+<div className="flex flex-wrap justify-center gap-x-6 sm:gap-x-10 md:gap-x-16 gap-y-3 sm:gap-y-5 w-full">
+  <span className="flex items-center text-xs sm:text-sm md:text-base text-white font-body">
+    <div className="flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-white/20 text-white mr-2 sm:mr-3 border border-white/40 shadow-md">
+      <Check size={12} />
+    </div>
+    <span className="font-medium">Trust indicator text</span>
+  </span>
+</div>
+```
+
+### Status Badges
+```tsx
+<div className="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium rounded-full text-white border border-white/30 shadow-[0_4px_12px_rgba(0,0,0,0.05)]"
+  style={{ background: 'linear-gradient(115deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))' }}
 >
-  {/* Item content */}
-  <div className="flex-1 min-w-0">
-    <h3 className="text-sm font-medium text-green-800 truncate">Item Title</h3>
-    <div className="text-xs text-green-700/80">Item description text</div>
-  </div>
-</motion.div>
-```
-
-### Loading States
-```tsx
-<div className="flex flex-col items-center gap-3">
-  <div className="relative h-10 w-10">
-    <motion.div 
-      className="absolute inset-0"
-      animate={{ 
-        rotate: 360,
-        opacity: [0.5, 1, 0.5]
-      }} 
-      transition={{ 
-        duration: 1.5, 
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-    >
-      <Spinner className="h-10 w-10 text-white" />
-    </motion.div>
-  </div>
-  <p className="text-white text-sm font-medium">Loading content...</p>
+  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse mr-1.5 sm:mr-2"></span>
+  Badge Text
 </div>
 ```
+
+## Responsive Design
+- Mobile-first approach with sm, md, lg, xl breakpoints
+- Font sizing: `text-sm sm:text-base md:text-lg lg:text-xl`
+- Padding/Margin: `p-4 sm:p-5 md:p-7` or `mb-6 sm:mb-8`
+- Width control: `w-full max-w-7xl mx-auto` or `max-w-[90%] sm:max-w-[650px]`
+- Hidden/visible control: `hidden sm:flex` or `sm:hidden`
+- Adaptive layouts: `flex-col lg:flex-row` or `grid-cols-1 sm:grid-cols-2 md:grid-cols-3`
 
 ## Implementation Notes
 
-- Maintain high contrast between text and background for accessibility
-- Use white elements on the green background for maximum visibility
-- Apply subtle shadows to help elements stand out against the vibrant background
-- For text-heavy sections, consider using white card backgrounds with green text
-- Utilize frosted glass effects (backdrop-blur) for semi-transparent elements
-- Keep in mind that the vibrant background requires careful element placement to avoid visual overwhelm 
+- Maintain consistent spacing with sm/md/lg pattern across components
+- Optimize animations for performance, include reduced motion alternatives
+- Use framer-motion for animations where appropriate
+- Ensure text is properly sized and spaced for all viewport sizes
+- Apply proper image optimization with Next.js Image component
+- Employ subtle shadows and borders to create visual hierarchy
+- Use backdrop-blur for frosted glass effects where appropriate 

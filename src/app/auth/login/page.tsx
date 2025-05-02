@@ -266,7 +266,7 @@ export default function LoginPage() {
                 {/* Improved account creation link */}
                 <div className="text-center">
                   <p className="text-gray-600 mb-2">
-                    Don't have an account?
+                    Don&apos;t have an account?
                   </p>
                   <a 
                     href="/auth/register" 

@@ -43,14 +43,14 @@ export default function CompleteStep({
           </div>
         </div>
         <h2 className="text-2xl font-semibold text-center text-black mb-2">
-          You're{" "}
+          You&apos;re{" "}
           <span className="bg-gradient-to-r from-green-400 via-[#70f570] to-green-400 text-transparent bg-clip-text animate-flow">
             all set
           </span>
           !
         </h2>
         <p className="text-center text-black/70 max-w-md">
-          Let's review your profile details before we finalize your sustainable investment journey
+          Let&apos;s review your profile details before we finalize your sustainable investment journey
         </p>
       </motion.div>
 
@@ -129,7 +129,7 @@ export default function CompleteStep({
             <path d="m9 12 2 2 4-4"></path>
           </svg>
           <span>
-            By completing this setup, you'll gain access to personalized sustainable investment opportunities aligned with your interests.
+            By completing this setup, you&apos;ll gain access to personalized sustainable investment opportunities aligned with your interests.
           </span>
         </p>
       </motion.div>
