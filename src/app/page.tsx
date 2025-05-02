@@ -74,8 +74,8 @@ export default function LandingPage() {
   
   // Create smooth scrolling effect with spring physics - adjusted for better bidirectional scrolling
   const smoothScrollProgress = useSpring(scrollYProgress, {
-    damping: 70, // Increased damping for less bounce
-    stiffness: 400, // Increased stiffness for quicker response
+    damping: 80, // Increased damping for less bounce
+    stiffness: 350, // Decreased stiffness for gentler response
     restDelta: 0.0005,
     mass: 0.2 // Reduced mass for less momentum
   });

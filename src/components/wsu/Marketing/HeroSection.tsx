@@ -259,7 +259,7 @@ export function HeroSection() {
               
               {/* Card element */}
               <motion.div 
-                className="relative mt-[-100px] md:mt-[-140px] w-[220px] md:w-[280px] z-10"
+                className="relative mt-[-160px] md:mt-[-190px] w-[220px] md:w-[280px] z-10"
                 initial="initial"
                 animate="animate"
                 variants={animationVariants.card}
