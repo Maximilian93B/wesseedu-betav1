@@ -25,22 +25,20 @@ export function ScrollSection({
       return children;
     }
 
-    // Clone children and add staggered delays with easing
     return React.Children.map(children, (child, index) => {
       if (!React.isValidElement(child)) {
         return child;
       }
 
-      // Calculate a non-linear delay for more natural staggering
-      // This creates a slight acceleration effect in the staggering
-      const nonLinearDelay = Math.pow(index, 0.8) * staggerDelay;
+      // Use a cubic easing formula for more natural staggering
+      // This creates a smoother acceleration at the beginning
+      const delay = index * staggerDelay;
 
       return React.cloneElement(child, {
         ...child.props,
         style: {
           ...child.props.style,
-          animationDelay: `${nonLinearDelay}s`,
-          transitionDelay: `${nonLinearDelay}s`,
+          transitionDelay: `${delay}s`,
         },
       });
     });
@@ -49,14 +47,19 @@ export function ScrollSection({
   return (
     <section 
       id={id} 
-      className={cn('py-12 md:py-16 lg:py-20 scroll-smooth', className)}
-      style={{ scrollBehavior: 'smooth' }}
+      className={cn('py-12 md:py-16 lg:py-20 scroll-mt-16', className)}
+      style={{ 
+        scrollBehavior: 'smooth', 
+        willChange: 'transform',
+        backfaceVisibility: 'hidden',
+      }}
     >
       <ScrollReveal 
         animation={animation}
-        duration={0.8} // Slightly longer duration for mobile-like smoothness
-        threshold={0.15} // Slightly higher threshold for earlier triggering
-        rootMargin="0px 0px -80px 0px" // Show elements a bit earlier
+        duration={0.7}
+        threshold={0.1}
+        rootMargin="0px 0px -10% 0px"
+        once={true}
       >
         {renderChildren()}
       </ScrollReveal>

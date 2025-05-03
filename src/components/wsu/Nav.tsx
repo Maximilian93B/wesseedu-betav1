@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
-import { Menu,  X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import Link from "next/link"
-import { SectionNav, SectionLinks } from '@/components/wsu/SectionNav'
+import { SectionNav } from '@/components/wsu/SectionNav'
 
 // Define the props for the Navigation component
 interface MainNavProps {
@@ -19,83 +19,65 @@ const MAIN_NAV_ITEMS = [
   { href: "/contact", label: "Contact" }
 ];
 
-// Extracted common styles
+// Simplified styles
 const styles = {
-  brandLink: "flex items-center group",
-  brandIcon: "p-2 bg-green-100 rounded-full transition-all duration-300 group-hover:scale-110",
-  mainButton: "transition-all duration-300 hover:translate-y-[-2px] rounded-full py-2 px-6 hover:scale-105",
-  getStartedButton: "bg-white hover:bg-gray-100 text-black font-semibold shadow-[0_4px_15px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.1)] border border-gray-200",
-  loginButton: "bg-black hover:bg-gray-800 text-white font-semibold shadow-[0_4px_15px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.2)]",
-  menuToggle: "text-gray-700 hover:text-black hover:bg-gray-100 md:hidden p-3 rounded-full border border-gray-300 hover:scale-110 transition-all duration-300",
-  sidebarLink: "text-gray-700 hover:text-black relative transition-all duration-200 w-full justify-start p-3 group hover:translate-y-[-1px] border-l-2 border-transparent hover:border-l-2 hover:border-gray-300"
-}
-
-// Throttle function to limit execution frequency
-function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
-  let inThrottle = false;
-  return function(this: any, ...args: Parameters<T>): void {
-    if (!inThrottle) {
-      func.apply(this, args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
+  mainButton: "transition-all duration-300 rounded-full py-2 px-6 font-semibold",
+  getStartedButton: "bg-white text-black shadow-md hover:shadow-lg border border-gray-200",
+  loginButton: "bg-black text-white shadow-md hover:shadow-lg",
+  menuToggle: "text-gray-700 md:hidden p-2 rounded-full hover:bg-gray-100 transition-all",
+  sidebarLink: "text-gray-700 hover:text-black p-3 border-l-2 border-transparent hover:border-l-2 hover:border-gray-300"
 }
 
 export function MainNav({ currentPath = '/' }: MainNavProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero-section');
   const [showSectionNav, setShowSectionNav] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Fix the throttle implementation with useCallback
-  const throttledScrollHandler = useCallback(() => {
-    const currentScrollY = window.scrollY;
-    
-    // Basic scroll detection
-    setHasScrolled(currentScrollY > 10);
-    
-    // Simple check - hide on scroll down, show on scroll up or top
-    if (currentScrollY > 80) {
-      setShowSectionNav(currentScrollY <= lastScrollY);
-    } else {
-      setShowSectionNav(true);
-    }
-    
-    setLastScrollY(currentScrollY);
-  }, [lastScrollY]);
-
-  // Use throttle with the useCallback-wrapped function
+  // Simplified scroll handler
   useEffect(() => {
-    const throttledHandler = throttle(throttledScrollHandler, 100);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setHasScrolled(currentScrollY > 10);
+      
+      if (currentScrollY > 80) {
+        setShowSectionNav(currentScrollY <= lastScrollY);
+      } else {
+        setShowSectionNav(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+    
+    const throttledHandler = () => {
+      let timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(handleScroll, 100);
+    };
+    
     window.addEventListener('scroll', throttledHandler, { passive: true });
     return () => window.removeEventListener('scroll', throttledHandler);
-  }, [throttledScrollHandler]);
+  }, [lastScrollY]);
 
-  // Unified handler for sidebar events (click outside and escape key)
+  // Close sidebar on outside click or escape key
   useEffect(() => {
     if (!isSidebarOpen) return;
     
     const handleClose = (e: MouseEvent | KeyboardEvent) => {
-      // Close on escape key
       if ('key' in e && e.key === 'Escape') {
         setIsSidebarOpen(false);
         return;
       }
       
-      // Close on click outside
       if ('target' in e && sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
         setIsSidebarOpen(false);
       }
     };
     
-    // Add both event listeners
     document.addEventListener('mousedown', handleClose);
     window.addEventListener('keydown', handleClose);
     
-    // Clean up
     return () => {
       document.removeEventListener('mousedown', handleClose);
       window.removeEventListener('keydown', handleClose);
@@ -107,8 +89,7 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
-      setActiveSection(sectionId);
-      setIsSidebarOpen(false); // Close sidebar after navigation
+      setIsSidebarOpen(false);
     }
   };
 
@@ -130,28 +111,21 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
     </>
   );
 
-  // Navigation bar style
-  const navbarStyle = {
-    backgroundImage: 'linear-gradient(to right top, rgba(255,255,255,0.98), rgba(255,255,255,0.9))',
-    boxShadow: '0 8px 30px rgba(73, 198, 40, 0.1)'
-  };
-
   return (
     <>
       {/* Main navigation bar */}
       <nav 
-        className={`w-full z-50 fixed top-0 transition-all duration-300 px-2 sm:px-4 md:px-6 ${
+        className={`w-full z-50 fixed top-0 transition-all duration-300 px-4 ${
           hasScrolled 
-            ? 'backdrop-blur-md bg-white/95 border-b border-green-500/20 shadow-[0_8px_25px_rgba(0,0,0,0.1)] rounded-b-2xl' 
-            : 'backdrop-blur-sm bg-white/90 rounded-b-3xl'
+            ? 'backdrop-blur-md bg-white/95 border-b border-green-500/20 shadow-md rounded-b-xl' 
+            : 'backdrop-blur-sm bg-white/90 rounded-b-2xl'
         }`}
-        style={navbarStyle}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <Link href="/" className={styles.brandLink}>
+              <Link href="/" className="flex items-center">
                 <div className="ml-2 text-xl font-bold flex">
                   <span className="text-black">We</span>
                   <span className="text-green-800">Seed</span>
@@ -172,111 +146,78 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
               className={styles.menuToggle}
               aria-label="Toggle navigation menu"
             >
-              {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
         
         {/* Section navigation for desktop */}
         {currentPath === '/' && (
-          <>
-            {/* Divider with conditional visibility */}
-            <div 
-              className={`hidden md:block relative transition-opacity duration-300 ${
-                showSectionNav ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <div 
-                className="w-full h-[1px] bg-black/5"
-                style={{
-                  boxShadow: '0 0.5px 2px rgba(0,0,0,0.08)',
-                  position: 'relative'
-                }}
-              ></div>
-              <div 
-                className="w-full h-[1px] bg-white/30 absolute top-[1px] left-0"
-              ></div>
-            </div>
-            
-            {/* SectionNav with CSS transitions */}
-            <div 
-              className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-all duration-300 ease-in-out origin-top ${
-                showSectionNav 
-                  ? 'opacity-100 transform-none' 
-                  : 'opacity-0 transform -translate-y-4 pointer-events-none h-0 overflow-hidden'
-              }`}
-            >
+          <div className={`transition-all duration-300 ${showSectionNav ? 'opacity-100 max-h-16' : 'opacity-0 max-h-0 overflow-hidden'}`}>
+            <div className="w-full h-[1px] bg-black/5 hidden md:block"></div>
+            <div className="max-w-7xl mx-auto">
               <SectionNav />
             </div>
-          </>
+          </div>
         )}
       </nav>
 
-      {/* Sidebar overlay */}
+      {/* Simplified mobile sidebar overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
           aria-hidden="true"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
-      {/* Mobile sidebar */}
+      {/* Simplified mobile sidebar */}
       <div 
         ref={sidebarRef}
-        className={`fixed top-0 right-0 h-full w-[85%] max-w-xs bg-white shadow-[-8px_0_30px_rgba(0,0,0,0.15)] z-50 
-          border-l border-gray-200 transform transition-transform duration-300 ease-in-out 
-          rounded-l-3xl ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-[75%] max-w-xs bg-white shadow-lg z-50 
+          transform transition-transform duration-300 ease-in-out rounded-l-2xl
+          ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        <div className="p-5 pt-6 flex flex-col h-full">
+        <div className="p-5 flex flex-col h-full">
           {/* Close button */}
-          <div className="flex justify-end mb-6">
+          <div className="flex justify-end mb-4">
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => setIsSidebarOpen(false)} 
-              className="text-black hover:text-gray-700 hover:bg-gray-100 p-2 rounded-full 
-                hover:scale-110 transition-all duration-300"
+              className="p-2 rounded-full"
               aria-label="Close menu"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
           
           {/* Mobile navigation content */}
           <div className="flex-grow overflow-y-auto">
-            {/* Section links (if on home page) */}
-            {currentPath === '/' && (
-              <div className="mb-8">
-                <SectionLinks 
-                  activeSection={activeSection} 
-                  handleSectionClick={handleSectionClick} 
-                />
-              </div>
-            )}
-            
             {/* Main navigation */}
-            <h3 className="text-black text-xs font-medium uppercase tracking-wider mb-3 pl-1">
-              Main Navigation
-            </h3>
-            <div className="space-y-2 mb-8">
-              {MAIN_NAV_ITEMS.map((item) => (
-                <Button 
-                  key={item.href}
-                  variant="ghost" 
-                  className={styles.sidebarLink}
-                  asChild
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <Link href={item.href}>{item.label}</Link>
-                </Button>
-              ))}
+            <div className="mb-6">
+              <h3 className="text-black text-xs font-medium uppercase tracking-wider mb-3 pl-1">
+                Navigation
+              </h3>
+              <div className="space-y-1">
+                {MAIN_NAV_ITEMS.map((item) => (
+                  <Button 
+                    key={item.href}
+                    variant="ghost" 
+                    className={styles.sidebarLink}
+                    asChild
+                    onClick={() => setIsSidebarOpen(false)}
+                  >
+                    <Link href={item.href}>{item.label}</Link>
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
           
           {/* Auth buttons */}
-          <div className="mt-auto pt-6 border-t border-gray-200">
-            <div className="flex flex-col space-y-3">
+          <div className="pt-4 border-t border-gray-200">
+            <div className="flex flex-col space-y-2">
               <AuthButtons />
             </div>
           </div>

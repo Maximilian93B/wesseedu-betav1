@@ -55,45 +55,43 @@ export function ScrollAnimation({
     };
   }, [threshold, once]);
 
-  // Animation styles based on the animation type
-  const getAnimationStyles = () => {
-    const baseStyles = {
-      opacity: isVisible ? 1 : 0,
-      transition: `opacity ${duration}s ease, transform ${duration}s ease ${delay}s`,
-    };
+  // Get the appropriate transform based on animation type
+  const getTransform = () => {
+    if (!isVisible) {
+      switch (animation) {
+        case 'fade-up':
+          return 'translateY(20px)';
+        case 'slide-in':
+          return 'translateX(-30px)';
+        case 'slide-up':
+          return 'translateY(40px)';
+        case 'zoom-in':
+          return 'scale(0.95)';
+        case 'scale-up':
+          return 'scale(0.9)';
+        default:
+          return 'none';
+      }
+    }
+    return 'none';
+  };
 
-    const transformStyles = {
-      'fade-up': {
-        transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-      },
-      'fade-in': {
-        // No transform needed for fade-in
-      },
-      'slide-in': {
-        transform: isVisible ? 'translateX(0)' : 'translateX(-50px)',
-      },
-      'slide-up': {
-        transform: isVisible ? 'translateY(0)' : 'translateY(50px)',
-      },
-      'zoom-in': {
-        transform: isVisible ? 'scale(1)' : 'scale(0.95)',
-      },
-      'scale-up': {
-        transform: isVisible ? 'scale(1)' : 'scale(0.8)',
-      },
-    };
-
-    return {
-      ...baseStyles,
-      ...(transformStyles[animation] || {}),
-    };
+  // Simplified style object with hardware acceleration properties
+  const styles = {
+    opacity: isVisible ? 1 : 0,
+    transform: getTransform(),
+    transition: `opacity ${duration}s cubic-bezier(0.16, 1, 0.3, 1), transform ${duration}s cubic-bezier(0.16, 1, 0.3, 1)`,
+    transitionDelay: `${delay}s`,
+    willChange: 'transform, opacity',
+    backfaceVisibility: 'hidden' as const,
+    WebkitFontSmoothing: 'antialiased' as const,
   };
 
   return (
     <div 
       ref={ref} 
       className={cn(className)}
-      style={getAnimationStyles()}
+      style={styles}
     >
       {children}
     </div>

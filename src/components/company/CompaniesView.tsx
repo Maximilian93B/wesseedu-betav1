@@ -40,8 +40,11 @@ interface CompaniesViewProps {
 }
 
 export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
-  // Replace deprecated useAuthGuard with the unified useAuth hook
-  const { isAuthenticated, user } = useAuth({ requireAuth: true })
+  // Match the parent's auth settings instead of requiring auth directly
+  const { isAuthenticated, user } = useAuth({ 
+    requireAuth: false, 
+    checkOnMount: false 
+  })
   
   const [companies, setCompanies] = useState<Company[]>([])
   const [filteredCompanies, setFilteredCompanies] = useState<Company[]>([])
@@ -128,9 +131,12 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
       if (response.error) {
         console.error("Error in companies response:", response.error)
         
-        // Handle 401 error by redirecting to login
+        // Improved auth error handling - use router push instead of direct location change
+        // This will be handled by the parent component instead
         if (response.status === 401) {
-          window.location.href = '/auth/login?redirect=' + encodeURIComponent(window.location.pathname)
+          console.warn("Authentication required - notifying parent component")
+          setFetchError("Authentication required")
+          setCompanies([])
           return
         }
         
@@ -201,13 +207,18 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
     }
   }, [fetchAttempted, toast, setIsTransitioning]);
 
-  // Setup effect for component mounting/unmounting and initial fetch
+  // Only attempt to fetch if user is authenticated
   useEffect(() => {
     isMountedRef.current = true;
     
-    // Call fetchCompanies on mount (runs only once)
-    if (!fetchAttempted) {
+    // Only fetch when user is authenticated and fetch hasn't been attempted
+    if (user && !fetchAttempted) {
       fetchCompanies();
+    } else if (!user && !loading) {
+      // If no user and not loading, show empty state
+      setCompanies([]);
+      setFilteredCompanies([]);
+      setLoading(false);
     }
     
     // Cleanup function for unmounting
@@ -224,7 +235,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
         setIsTransitioning(false);
       }
     };
-  }, [setIsTransitioning, fetchAttempted, fetchCompanies]); // Add fetchAttempted to dependencies
+  }, [user, fetchAttempted, fetchCompanies, loading, setIsTransitioning]);
 
   const handleRetryFetch = useCallback(() => {
     setFetchAttempted(false);
