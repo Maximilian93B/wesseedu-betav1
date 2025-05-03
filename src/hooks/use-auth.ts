@@ -1,5 +1,5 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from './use-toast';
 import { useAuth as useAuthContext } from '@/context/AuthContext';
 
@@ -57,7 +57,7 @@ export function useAuth(options: UseAuthOptions = {}) {
   /**
    * Handle authentication errors
    */
-  const handleAuthError = (message: string = 'Session expired. Please sign in again.', options?: { redirect?: string }) => {
+  const handleAuthError = useCallback((message: string = 'Session expired. Please sign in again.', options?: { redirect?: string }) => {
     toast({
       title: "Authentication Error",
       description: message,
@@ -69,12 +69,12 @@ export function useAuth(options: UseAuthOptions = {}) {
     if (options?.redirect) {
       router.push(options.redirect);
     }
-  };
+  }, [toast, signOut, router]);
 
   /**
    * Check if user is authorized for current route
    */
-  const checkAuthStatus = () => {
+  const checkAuthStatus = useCallback(() => {
     // Skip if still loading
     if (loading) return;
 
@@ -93,12 +93,12 @@ export function useAuth(options: UseAuthOptions = {}) {
         variant: "destructive",
       });
     }
-  };
+  }, [loading, pathname, requireAuth, isAuthenticated, router, redirectTo, toast]);
 
   /**
    * Login function
    */
-  const login = async ({ email, password, onSuccess }: LoginCredentials) => {
+  const login = useCallback(async ({ email, password, onSuccess }: LoginCredentials) => {
     setLoginLoading(true);
 
     try {
@@ -120,10 +120,11 @@ export function useAuth(options: UseAuthOptions = {}) {
       onSuccess?.();
       
       // Use the redirectUrl from API response or fallback to returnUrl from URL params
-      const redirectUrl = data.redirectUrl || searchParams.get('returnTo') || '/auth/home';
+      const redirectUrl = data.redirectUrl || searchParams.get('returnTo') || '/dashboard/home';
       
-      router.push(redirectUrl);
-      router.refresh();
+      console.log(`useAuth: Login successful, redirecting to: ${redirectUrl}`);
+      // Use window.location.href for full page navigation to ensure cookies are preserved
+      window.location.href = redirectUrl;
       
       return data;
     } catch (error) {
@@ -137,7 +138,7 @@ export function useAuth(options: UseAuthOptions = {}) {
     } finally {
       setLoginLoading(false);
     }
-  };
+  }, [searchParams, toast]);
 
   // Run auth check on mount if required
   useEffect(() => {

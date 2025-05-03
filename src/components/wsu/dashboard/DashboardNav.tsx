@@ -43,42 +43,33 @@ export function DashboardNav() {
     const timeoutId = setTimeout(() => {
       console.log("Sign out timeout - resetting state")
       setIsSigningOut(false)
+      // Force navigation as last resort
+      window.location.href = '/'
     }, 5000) // 5 second maximum timeout
     
     try {
       setIsSigningOut(true)
       console.log("Sign out button clicked, attempting to sign out...")
       
-      if (typeof signOut !== 'function') {
-        console.error("signOut is not a function", signOut)
-        throw new Error("Unable to sign out: signOut is not available")
-      }
-      
       try {
+        // Try context signOut first
         await signOut()
         console.log("Sign out completed successfully")
-      } catch (contextError) {
-        console.error("Error with context signOut, trying direct Supabase auth:", contextError)
+      } catch (error) {
+        console.error("Error during sign out:", error)
         
         // Fallback to direct Supabase auth
         const supabase = createClientComponentClient()
-        const { error } = await supabase.auth.signOut()
+        await supabase.auth.signOut()
         
-        if (error) {
-          console.error("Supabase signOut error:", error)
-          throw error
-        } else {
-          console.log("Supabase signOut successful (API response)")
-          // Force navigation and refresh after signout
-          window.location.href = '/'
-        }
+        // Force navigation and refresh after signout
+        console.log("Forcing navigation to home page")
       }
+      
+      // Always redirect to home page for consistent behavior
+      window.location.href = '/'
     } catch (error) {
       console.error("Error during sign out:", error)
-      
-      // Force reset UI state on error
-      setIsSigningOut(false)
-      
       // Force navigation as last resort
       window.location.href = '/'
     } finally {

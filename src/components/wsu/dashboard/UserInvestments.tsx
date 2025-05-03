@@ -265,8 +265,9 @@ const UserInvestments = () => {
       setIsLoading(false);
       setInvestments([]);
       setTotalInvested(0);
-      // Redirect to login if not authenticated
-      router.push('/auth/signin');
+      // Don't redirect - this causes auth token loss
+      console.log("UserInvestments: No authenticated user found");
+      setHasError(true);
     }
     
     return () => {

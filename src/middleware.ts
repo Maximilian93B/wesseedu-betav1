@@ -98,7 +98,7 @@ export async function middleware(req: NextRequest) {
       }
       
       const redirectUrl = new URL('/auth/login', req.url)
-      redirectUrl.searchParams.set('redirectTo', pathname)
+      redirectUrl.searchParams.set('returnTo', pathname)
       return NextResponse.redirect(redirectUrl)
     }
   
