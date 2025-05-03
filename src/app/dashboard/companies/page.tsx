@@ -43,9 +43,10 @@ const CompaniesViewDynamic = dynamic(
 )
 
 export default function CompaniesPage() {
+  // Improve auth reliability by enabling checkOnMount
   const { user, loading, isAuthenticated } = useAuth({
-    requireAuth: false,
-    checkOnMount: false
+    requireAuth: true, // Require auth at page level
+    checkOnMount: true
   })
   const router = useRouter()
   const { toast } = useToast()
@@ -109,6 +110,15 @@ export default function CompaniesPage() {
       clearTimeout(timeoutId);
     };
   }, [loading, localLoading, toast, isFirstVisit, currentRoute, markRouteVisited, isTransitioning]);
+  
+  // Check for authentication state and redirect if needed
+  useEffect(() => {
+    if (!loading && !user) {
+      // If auth check is complete and no user, redirect to login
+      const redirectPath = encodeURIComponent(currentRoute);
+      router.push(`/auth/login?redirect=${redirectPath}`);
+    }
+  }, [loading, user, router, currentRoute]);
   
   // Only show loading for first visit or transition
   if (localLoading && (isFirstVisit(currentRoute) || isTransitioning)) {
