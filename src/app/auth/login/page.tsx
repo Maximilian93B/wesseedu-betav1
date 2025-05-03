@@ -42,11 +42,12 @@ export default function LoginPage() {
         throw new Error(typeof data.error === 'string' ? data.error : 'Login failed')
       }
       
-      // Use the redirectUrl from API response or fallback to returnUrl
-      const redirectUrl = data.redirectUrl || searchParams.get('returnUrl') || '/auth/home'
+      // Use the redirectUrl from API response or fallback to returnTo parameter
+      const redirectUrl = data.redirectUrl || searchParams.get('returnTo') || searchParams.get('returnUrl') || '/dashboard/home'
       
-      router.push(redirectUrl)
-      router.refresh()
+      console.log(`Login successful, redirecting to: ${redirectUrl}`)
+      // Use window.location.href for full page navigation to ensure cookies are properly maintained
+      window.location.href = redirectUrl
     } catch (err) {
       console.error('Login error:', err)
       setError(err instanceof Error ? err.message : 'Failed to login. Please try again.')

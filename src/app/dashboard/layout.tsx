@@ -6,9 +6,10 @@ import Head from "next/head"
 import { useAuth } from "@/hooks/use-auth"
 import { LoadingScreen } from "@/components/wsu/home"
 import { useRouter } from "next/navigation"
-import dynamic from "next/dynamic"
+
 import { NavigationProvider } from "@/context/NavigationContext"
 import { LoginRequired } from "@/components/wsu/home"
+import { usePathname } from "next/navigation"
 
 // Prefetch component modules without requiring hooks
 const prefetchModules = () => {
@@ -28,6 +29,8 @@ export default function DashboardLayout({
   })
   const [readyToRender, setReadyToRender] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+  const [redirectAttempted, setRedirectAttempted] = useState(false)
   
   // Debug log for dashboard layout
   useEffect(() => {
@@ -52,18 +55,21 @@ export default function DashboardLayout({
   
   // Redirect if not authenticated after loading completes
   useEffect(() => {
-    // Only make decisions once loading is complete
-    if (!loading) {
+    // Only make decisions once loading is complete and only redirect once
+    if (!loading && !redirectAttempted) {
       if (!isAuthenticated) {
         console.log("DashboardLayout: User not authenticated, redirecting to login");
-        router.push('/auth/login')
+        setRedirectAttempted(true) // Mark that we've attempted a redirect
+        const returnPath = encodeURIComponent(pathname || '/dashboard');
+        // Use full page navigation to preserve cookies
+        window.location.href = `/auth/login?returnTo=${returnPath}`;
       } else {
         // Set ready to render when authenticated
         console.log("DashboardLayout: User authenticated, ready to render");
         setReadyToRender(true)
       }
     }
-  }, [loading, isAuthenticated, router]);
+  }, [loading, isAuthenticated, router, pathname, redirectAttempted]);
   
   // Show loading during auth check
   if (loading) {

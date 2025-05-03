@@ -33,6 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   // Single emergency timeout to prevent infinite loading
   const emergencyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Store user ID in ref to prevent dependency issues
+  const userIdRef = useRef<string | null>(null);
 
   // Function to fetch user profile data with caching
   const fetchUserProfile = useCallback(async (userId: string) => {
@@ -81,13 +83,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
       setSession(null);
       setIsAuthenticated(false);
+      userIdRef.current = null;
       
       // Clear cache
       profileCache.clear();
       
-      // Navigate to home
-      router.push('/');
-      router.refresh();
+      // Use full page refresh for consistent auth state
+      window.location.href = '/';
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -111,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       setSession(refreshedSession);
       setUser(refreshedSession.user);
+      userIdRef.current = refreshedSession.user.id;
       
       // If we have a user, fetch their profile
       if (refreshedSession.user) {
@@ -172,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setSession(mockSession);
             setProfile({ id: 'dev-user-id', name: 'Development User' });
             setIsAuthenticated(true);
+            userIdRef.current = 'dev-user-id';
             setLoading(false);
           }
           return;
@@ -187,6 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (isMounted) {
             setSession(currentSession);
             setUser(currentSession.user);
+            userIdRef.current = currentSession.user.id;
             
             // Fetch profile data
             const profileData = await fetchUserProfile(currentSession.user.id);
@@ -202,6 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null);
             setProfile(null);
             setSession(null);
+            userIdRef.current = null;
             setIsAuthenticated(false);
           }
         }
@@ -211,6 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
           setProfile(null);
           setSession(null);
+          userIdRef.current = null;
           setIsAuthenticated(false);
         }
       } finally {
@@ -239,6 +246,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (isMounted) {
             setSession(newSession);
             setUser(newSession.user);
+            userIdRef.current = newSession.user.id;
             
             // Fetch profile data
             const profileData = await fetchUserProfile(newSession.user.id);
@@ -256,6 +264,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(null);
             setProfile(null);
             setSession(null);
+            userIdRef.current = null;
             setIsAuthenticated(false);
             profileCache.clear();
           }
@@ -266,8 +275,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setSession(newSession);
             
             // Make sure user data is up-to-date
-            if (newSession.user.id !== user?.id) {
+            const currentUserId = userIdRef.current;
+            if (newSession.user.id !== currentUserId) {
               setUser(newSession.user);
+              userIdRef.current = newSession.user.id;
               const profileData = await fetchUserProfile(newSession.user.id);
               if (profileData) {
                 setProfile(profileData);
@@ -291,7 +302,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Unsubscribe from auth state changes
       subscription.unsubscribe();
     };
-  }, [fetchUserProfile, supabase.auth, router, user]);
+  }, [fetchUserProfile, supabase.auth, router]);
 
   const value = {
     user,

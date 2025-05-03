@@ -5,12 +5,13 @@ import { useCompanies } from '@/hooks/use-companies'
 import { CommunitiesGrid } from './CommunitiesGrid'
 import { useCommunityFilters } from '@/hooks/use-community-filters'
 import { Badge } from '@/components/ui/badge'
-import { CommunityWithTags, Ambassador } from '@/types'
+import { CommunityWithTags, } from '@/types'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useNavigation } from '@/context/NavigationContext'
 import { useAuth } from '@/hooks/use-auth'
 import { useToast } from '@/hooks/use-toast'
+import { Button } from '@/components/ui/button'
 
 export interface ExtendedCommunity extends CommunityWithTags {
   featured?: boolean
@@ -62,11 +63,17 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
   const { setIsTransitioning } = useNavigation()
   const { toast } = useToast()
 
-  const { user, loading: authLoading, isAuthenticated, refreshSession } = useAuth({ requireAuth: true })
+  // Change requireAuth to false to prevent automatic redirects
+  const { user, loading: authLoading, isAuthenticated } = useAuth({ 
+    requireAuth: false,
+    checkOnMount: false 
+  })
+  
   const [localLoading, setLocalLoading] = useState(true)
   const dataInitiatedRef = useRef(false)
   const [retryCount, setRetryCount] = useState(0)
   const maxRetries = 2
+  const authAttemptedRef = useRef(false)
   
   // Use the community filters hook with empty search query
   const {
@@ -89,7 +96,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     }
     
     // If user is authenticated and we haven't initiated data fetch yet
-    if (user && !dataInitiatedRef.current) {
+    if (isAuthenticated && !dataInitiatedRef.current) {
       console.log('CommunitiesView: User authenticated. Triggering data fetch');
       dataInitiatedRef.current = true;
       
@@ -98,34 +105,48 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
         fetchCommunities();
         fetchCompanies();
       }, 300);
-    } else if (!authLoading && !user) {
+    } else if (!authLoading && !isAuthenticated) {
       // If auth is complete but user is not authenticated
       console.log('CommunitiesView: Auth complete but user not authenticated');
       setLocalLoading(false);
     }
   }, [user, authLoading, isAuthenticated, fetchCommunities, fetchCompanies]);
 
+  // Handle auth errors with safe redirect approach
+  const handleAuthError = useCallback(() => {
+    // Only redirect once to prevent loops
+    if (!authAttemptedRef.current) {
+      authAttemptedRef.current = true;
+      console.log('CommunitiesView: Authentication required, redirecting to login');
+      
+      // Use window.location.href for reliable full page navigation
+      const returnPath = encodeURIComponent('/dashboard/communities');
+      window.location.href = `/auth/login?returnTo=${returnPath}`;
+    }
+  }, []);
+
   // Auto-retry on error with exponential backoff
   useEffect(() => {
     if ((communitiesError || companiesError) && retryCount < maxRetries) {
       const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized";
       
-      // For unauthorized errors, try to refresh the session first
+      // For unauthorized errors, handle auth error directly
       if (isUnauthorized) {
-        console.log(`CommunitiesView: Auth error on attempt ${retryCount + 1}, refreshing session`);
+        console.log(`CommunitiesView: Auth error detected on attempt ${retryCount + 1}`);
         
-        const refreshAndRetry = async () => {
-          const success = await refreshSession();
-          if (success) {
-            console.log('CommunitiesView: Session refreshed, retrying data fetch');
+        // Try one more time before redirecting
+        if (retryCount === maxRetries - 1) {
+          handleAuthError();
+        } else {
+          const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 8000);
+          const retryId = setTimeout(() => {
             fetchCommunities();
             fetchCompanies();
-          } else {
-            console.log('CommunitiesView: Session refresh failed');
-          }
-        };
-        
-        refreshAndRetry();
+          }, backoffTime);
+          
+          setRetryCount(prev => prev + 1);
+          return () => clearTimeout(retryId);
+        }
       } else {
         // For other errors, retry with backoff
         const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 8000);
@@ -136,12 +157,11 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
           fetchCompanies();
         }, backoffTime);
         
+        setRetryCount(prev => prev + 1);
         return () => clearTimeout(retryId);
       }
-      
-      setRetryCount(prev => prev + 1);
     }
-  }, [communitiesError, companiesError, retryCount, fetchCommunities, fetchCompanies, refreshSession]);
+  }, [communitiesError, companiesError, retryCount, fetchCommunities, fetchCompanies, handleAuthError]);
 
   // When data starts or finishes loading, update local state
   useEffect(() => {
@@ -197,6 +217,12 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     fetchCompanies();
   }, [fetchCommunities, fetchCompanies, toast]);
 
+  // Handle login button click with direct navigation
+  const handleLogin = useCallback(() => {
+    const returnPath = encodeURIComponent('/dashboard/communities');
+    window.location.href = `/auth/login?returnTo=${returnPath}`;
+  }, []);
+
   // Show error state if there's an issue with the API
   if ((communitiesError || companiesError) && !communitiesLoading && !companiesLoading && retryCount >= maxRetries) {
     const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized"
@@ -234,12 +260,12 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
             
             <motion.div variants={itemVariants} className="flex justify-center">
               {isUnauthorized ? (
-                <Link 
-                  href="/auth/login"
+                <Button
+                  onClick={handleLogin}
                   className="px-6 py-3 rounded-lg bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold inline-block shadow-[0_4px_10px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out hover:translate-y-[-2px] font-helvetica"
                 >
                   Sign In
-                </Link>
+                </Button>
               ) : (
                 <motion.button 
                   variants={itemVariants}

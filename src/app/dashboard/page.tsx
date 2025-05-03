@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
@@ -16,10 +16,13 @@ export default function DashboardPage() {
   const router = useRouter()
   const { isFirstVisit, markRouteVisited, setIsTransitioning } = useNavigation()
   const currentRoute = '/dashboard'
+  const redirectAttemptedRef = useRef(false)
   
   // Redirect to dashboard/home after authentication check
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !redirectAttemptedRef.current) {
+      console.log("DashboardPage: Redirecting authenticated user to dashboard/home")
+      redirectAttemptedRef.current = true
       setIsTransitioning(true)
       router.replace('/dashboard/home')
     }

@@ -544,18 +544,30 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
   
   // Redirect if no user
   if (!effectiveUser) {
-    console.log("DashboardView: No user found, redirecting to signin");
-    router.push("/auth/signin");
+    console.log("DashboardView: No user found");
+    // Don't redirect automatically - this causes auth token loss
     return (
-      <div className="flex items-center justify-center p-8 min-h-[60vh]"
+      <div className="flex flex-col items-center justify-center p-8 min-h-[60vh]"
         style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
-        <motion.p 
-          className="text-white font-medium font-body"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white p-8 rounded-xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.04)]"
         >
-          Redirecting to login...
-        </motion.p>
+          <p className="text-black mb-4 font-body">Authentication required to view dashboard</p>
+          <Button 
+            onClick={() => {
+              const returnPath = encodeURIComponent("/dashboard/overview");
+              window.location.href = `/auth/signin?returnTo=${returnPath}`;
+            }}
+            className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                      shadow-sm hover:shadow transition-all duration-300 
+                      rounded-lg py-3 text-sm font-helvetica"
+          >
+            Go to Login
+          </Button>
+        </motion.div>
       </div>
     );
   }
