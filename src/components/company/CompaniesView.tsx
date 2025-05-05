@@ -285,7 +285,7 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: "100%" }}
       transition={{ type: "spring", stiffness: 80, damping: 17 }}
-      className="absolute inset-0 bg-gradient-to-r from-[#70f570] to-[#49c628] overflow-y-auto"
+      className="min-h-screen w-full bg-gradient-to-r from-[#70f570] to-[#49c628]"
       onAnimationComplete={handleAnimationComplete}
     >
       <AnimatePresence mode="wait">
@@ -301,11 +301,11 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-gradient-to-r from-[#70f570] to-[#49c628] overflow-y-auto"
+            className="min-h-screen w-full"
           >
-            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 pb-24 relative z-10">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
               {/* Top content before the white container */}
-              <div className="w-full px-4 sm:px-6 lg:px-8 py-6 pb-12 relative z-10">
+              <div className="container mx-auto py-6 pb-12">
                 {/* Hero section */}
                 <CompaniesViewHero />
                 
@@ -317,9 +317,9 @@ export default function CompaniesView({ onCompanySelect }: CompaniesViewProps) {
               {/* Main white container with rounded corners */}
               <div 
                 id="companies-section"
-                className="w-full bg-white min-h-screen rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 overflow-hidden mt-6"
+                className="w-full bg-white rounded-t-[2rem] sm:rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-8px_30px_rgba(0,0,0,0.15)] border-t border-white/20 pb-16 mt-8"
               >
-                <div className="relative w-full">
+                <div className="container mx-auto">
                   <div className="px-3 py-4 pt-6 sm:pt-8 md:pt-10 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16">
                     {/* Enhanced filter and search section */}
                     <motion.div

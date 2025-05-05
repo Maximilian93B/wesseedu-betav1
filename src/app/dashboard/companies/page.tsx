@@ -10,23 +10,23 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useNavigation } from "@/context/NavigationContext" 
 import { CurvedTransition } from "@/components/ui/CurvedTransition"
 
-// Placeholder component for lazy loading
+// Placeholder component for lazy loading - enhanced for mobile
 const LazyLoadingPlaceholder = () => (
-  <div className="w-full py-8">
-    <div className="mx-auto max-w-5xl">
-      <Skeleton className="h-16 w-3/4 mb-4 rounded-lg" />
-      <Skeleton className="h-6 w-1/2 mb-8 rounded-lg" />
+  <div className="w-full py-4 sm:py-8">
+    <div className="mx-auto max-w-5xl px-4 sm:px-6">
+      <Skeleton className="h-10 sm:h-16 w-4/5 sm:w-3/4 mb-2 sm:mb-4 rounded-lg" />
+      <Skeleton className="h-5 sm:h-6 w-2/3 sm:w-1/2 mb-6 sm:mb-8 rounded-lg" />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-10">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="rounded-xl overflow-hidden border border-gray-100 shadow-sm">
-            <Skeleton className="w-full h-48 rounded-t-xl" />
-            <div className="p-4">
-              <Skeleton className="h-6 w-3/4 mb-2 rounded-lg" />
-              <Skeleton className="h-4 w-full mb-4 rounded-lg" />
+          <div key={i} className="rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white">
+            <Skeleton className="w-full h-32 sm:h-48 rounded-t-xl" />
+            <div className="p-3 sm:p-4">
+              <Skeleton className="h-5 sm:h-6 w-3/4 mb-2 rounded-lg" />
+              <Skeleton className="h-3 sm:h-4 w-full mb-3 sm:mb-4 rounded-lg" />
               <div className="flex justify-between items-center">
-                <Skeleton className="h-8 w-24 rounded-lg" />
-                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-7 sm:h-8 w-20 sm:w-24 rounded-lg" />
+                <Skeleton className="h-7 sm:h-8 w-7 sm:w-8 rounded-full" />
               </div>
             </div>
           </div>
