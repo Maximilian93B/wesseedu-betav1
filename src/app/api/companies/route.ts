@@ -10,13 +10,18 @@ export async function GET(request: Request) {
   try {
     let supabase;
     
-    // This endpoint can work with or without authentication
-    // First try with authentication
+    // Check if we're in development mode
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    console.log('Companies API: Environment mode:', isDevelopment ? 'development' : 'production');
+    
+    // Try authentication first
     const auth = await checkAuth();
     
-    if (auth.error && process.env.NODE_ENV === 'development') {
-      // If auth failed but we're in development, create a non-auth client
+    // In development, allow fallback to unauthenticated request
+    if (auth.error && isDevelopment) {
       console.log('Development mode: Proceeding without authentication for companies endpoint');
+      
+      // Create non-authenticated client for development
       supabase = createRouteHandlerClient({ cookies });
       
       // Return mock data in development
@@ -47,7 +52,8 @@ export async function GET(request: Request) {
         status: 200
       });
     } else if (auth.error) {
-      // In production, authentication is always required
+      // In production or when explicit auth is required, return the auth error
+      console.log('Authentication required for companies endpoint');
       return auth.error;
     }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { Suspense, useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { MainNav } from "@/components/wsu/Nav"
 import { Footer } from "@/components/wsu/Footer"
 import { motion, useScroll, useTransform, useSpring, LazyMotion, domAnimation, useReducedMotion } from "framer-motion"
@@ -18,7 +18,6 @@ import { CardSection } from "@/components/wsu/Marketing/CardSection"
 import { PartnersAndVetting } from "@/components/wsu/Marketing/PartnersAndVetting/index"
 import { MoneyWorthSection } from "@/components/wsu/Marketing/MoneyWorthSection"
 import { EarnAsYouGrow } from "@/components/wsu/Marketing/EarnAsYouGrow"
-import { SustainableImpactSection } from "@/components/wsu/Marketing/WsImact"
 import { StartupApplicationSection } from "@/components/wsu/Marketing/StartupApplicationSection"
 
 // Environmental configuration to easily toggle effects

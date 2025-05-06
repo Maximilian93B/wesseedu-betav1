@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 
 type Theme = "light" | "dark";
 
@@ -13,29 +13,26 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>("light");
-
-  // Initialize theme from localStorage or system preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-    
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-    }
-  }, []);
-
-  // Update document with theme change
+  // Always set the theme to light
+  const theme: Theme = "light";
+  
+  // Force light mode on the document
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-    root.classList.add(theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+    root.classList.remove("dark");
+    root.classList.add("light");
+    localStorage.setItem("theme", "light");
+  }, []);
 
+  // Keep these functions to maintain the API, but they won't change the theme
   const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === "light" ? "dark" : "light"));
+    // Do nothing - always stay in light mode
+    console.log("Dark theme is disabled in this application");
+  };
+  
+  const setTheme = () => {
+    // Do nothing - always stay in light mode
+    console.log("Dark theme is disabled in this application");
   };
 
   return (

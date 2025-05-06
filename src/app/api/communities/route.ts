@@ -1,6 +1,8 @@
-
 import { NextResponse } from 'next/server'
 import { checkAuth } from '@/lib/utils/authCheck'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import authConfig from '@/config/auth.config'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,6 +40,10 @@ interface CommunityWithCompany extends CommunityBase {
 
 export async function GET(request: Request) {
   try {
+    // Check if we're in development mode
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    console.log('Communities API: Environment mode:', isDevelopment ? 'development' : 'production');
+    
     // Check for request throttling
     const now = Date.now();
     
@@ -85,27 +91,74 @@ export async function GET(request: Request) {
     console.log('Starting API request for communities');
     
     // Check authentication
-    const auth = await checkAuth()
-    if (auth.error) {
-      console.log('Authentication failed in communities API');
-      // For clarity and consistency, make sure we return a proper response object
-      // with a specific status code and structured error
-      return NextResponse.json(
-        { data: null, error: 'Unauthorized', status: 401 },
-        { status: 401 }
-      )
+    const auth = await checkAuth();
+    
+    // In development, allow fallback to mock data if authentication fails
+    if (auth.error && isDevelopment) {
+      console.log('Development mode: Proceeding without authentication for communities endpoint');
+      
+      // Create a non-authenticated client for development
+      const supabase = createRouteHandlerClient({ cookies });
+      
+      // Return mock communities data for development
+      return NextResponse.json({
+        data: [
+          {
+            id: 'dev-community-1',
+            description: 'A community of investors focused on renewable energy technologies',
+            created_at: new Date().toISOString(),
+            company_id: 'dev-company-1',
+            companies: {
+              id: 'dev-company-1',
+              name: 'EcoTech Solutions',
+              description: 'Developing sustainable technology solutions',
+              mission_statement: 'Creating a greener future through innovation',
+              score: 85,
+              image_url: 'https://placehold.co/100'
+            },
+            isMember: true,
+            ambassadorCount: 3,
+            hasAmbassadors: true,
+            featured: true
+          },
+          {
+            id: 'dev-community-2',
+            description: 'Sustainable agriculture investment community',
+            created_at: new Date().toISOString(),
+            company_id: 'dev-company-2',
+            companies: {
+              id: 'dev-company-2',
+              name: 'GreenGrow Farms',
+              description: 'Sustainable agricultural practices',
+              mission_statement: 'Growing food in harmony with nature',
+              score: 78,
+              image_url: 'https://placehold.co/100'
+            },
+            isMember: false,
+            ambassadorCount: 1,
+            hasAmbassadors: true,
+            featured: true
+          }
+        ],
+        error: null,
+        status: 200
+      });
+    } else if (auth.error) {
+      // In production or when explicit auth is required, return the auth error
+      console.log('Authentication required for communities endpoint');
+      return auth.error;
     }
 
-    const { session, supabase } = auth
-    const userId = session.user.id
+    const { session, supabase } = auth;
+    const userId = session.user.id;
 
-    console.log('Fetching communities for user:', userId)
+    console.log('Fetching communities for user:', userId);
 
     // Get search parameter from URL if it exists
-    const { searchParams } = new URL(request.url)
-    const search = searchParams.get('search')
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search');
     
-    let finalCommunities: CommunityWithCompany[] = []
+    let finalCommunities: CommunityWithCompany[] = [];
     
     try {
       // Try the first approach with company_communities table
@@ -222,7 +275,7 @@ export async function GET(request: Request) {
       console.log('No communities found, adding test community for development');
       
       // For development testing only - add a test community if none exist
-      if (process.env.NODE_ENV === 'development') {
+      if (isDevelopment) {
         try {
           // Create a test company if needed
           const testCompanyId = 'test-company-id-for-development';

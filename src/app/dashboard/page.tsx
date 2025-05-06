@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { LoadingPreloader, LoginRequired } from "@/components/wsu/home"
 import { useNavigation } from "@/context/NavigationContext"
-import Head from "next/head"
+
 
 export default function DashboardPage() {
   // Use the unified auth hook with checkOnMount: false to prevent automatic redirects
