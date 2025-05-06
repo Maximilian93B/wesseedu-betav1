@@ -28,7 +28,7 @@ export const CARDS: CardData[] = [
     description: 'Join our community of impact investors gaining early access to high-potential sustainable startups.',
     className: 'group md:col-start-2 md:col-end-3 md:row-start-1 md:z-10',
     buttonText: 'Join Our Investors',
-    imageUrl: '/eco-city.png',
+    imageUrl: '/home_preview.png',
     buttonHref: '/auth/signup',
     featured: true,
     stats: [
@@ -42,7 +42,7 @@ export const CARDS: CardData[] = [
     title: 'WeSeedU Communities',
     description: 'Connect with ambassador-led communities where companies share sustainable innovations directly with investors and enthusiasts.',
     className: 'group md:col-start-1 md:col-end-2 md:row-start-1 md:z-0',
-    imageUrl: '/earth-character-showing-money-graph-rising-up.png',
+    imageUrl: '/community_preview.png',
     buttonText: 'Explore Communities',
     buttonHref: '#',
     stats: [
@@ -60,7 +60,7 @@ export const CARDS: CardData[] = [
     title: 'Smart Dashboard, Data-Driven Insights',
     description: 'Behind-the-scenes AI helps analyze your investments and sustainability metrics as we continue enhancing our platform.',
     className: 'group md:col-start-3 md:col-end-4 md:row-start-1 md:z-0',
-    imageUrl: '/ai-for-environmental-monitoring.png',
+    imageUrl: '/dashboard_explainer.png',
     buttonText: 'Experience Dashboard',
     buttonHref: '#',
     stats: [

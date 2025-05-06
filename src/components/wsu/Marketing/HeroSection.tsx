@@ -6,33 +6,34 @@ import { motion, useReducedMotion } from "framer-motion"
 import { useEffect, useState, useMemo } from "react"
 import Image from "next/image"
 
-// Simplified animation variants for better performance
+// Simplified animation variants with better performance
 const animations = {
   container: {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
       transition: { 
-        staggerChildren: 0.1,
-        duration: 0.5,
+        staggerChildren: 0.07,
+        duration: 0.4, 
         ease: "easeOut"
       }
     }
   },
   
   item: {
-    hidden: { y: 10, opacity: 0 },
+    hidden: { y: 8, opacity: 0 },
     visible: { 
       y: 0, 
       opacity: 1,
-      transition: { duration: 0.3, ease: "easeOut" }
+      transition: { duration: 0.25, ease: "easeOut" }
     }
   },
   
+  // Minimal animations with reduced motion
   floating: {
     initial: { y: 0 },
     animate: { 
-      y: [0, -8, 0],
+      y: [0, -5, 0],
       transition: {
         y: {
           duration: 6,
@@ -47,7 +48,7 @@ const animations = {
   globe: {
     initial: { y: 0 },
     animate: { 
-      y: [0, -10, 0],
+      y: [0, -8, 0],
       transition: {
         y: {
           duration: 6,
@@ -77,7 +78,7 @@ const animations = {
 
 // Consolidated styling classes
 const styles = {
-  gradientButton: "group text-white shadow-[0_4px_10px_rgba(0,0,0,0.07)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out hover:translate-y-[-2px] rounded-xl px-7 sm:px-10 py-6 sm:py-7 font-medium relative overflow-hidden w-48 sm:w-auto",
+  gradientButton: "group text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:translate-y-[-2px] rounded-xl px-7 sm:px-10 py-6 sm:py-7 font-medium relative overflow-hidden w-48 sm:w-auto",
   featureBlock: "flex flex-col group mb-8 sm:mb-0",
   featureTitle: "text-lg sm:text-xl font-semibold text-white mb-3 font-display",
   featureBar: "w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-4 rounded-full transition-all duration-300 group-hover:w-16",
@@ -92,7 +93,7 @@ export function HeroSection() {
   
   // Memoize animations to prevent recreation on each render
   const animationVariants = useMemo(() => {
-    // Simplify animations when reduced motion is preferred
+    // Disable animations when reduced motion is preferred
     if (prefersReducedMotion) {
       return {
         container: {
@@ -191,7 +192,7 @@ export function HeroSection() {
                 initial="initial"
                 animate={!prefersReducedMotion ? "animate" : "initial"}
                 variants={animationVariants.globe}
-                style={{ translateZ: 0 }}
+                style={{ willChange: 'transform' }}
               >
                 {/* Globe image container with enhanced shadow */}
                 <div className="relative w-full h-full">
@@ -217,7 +218,7 @@ export function HeroSection() {
                 initial="initial"
                 animate={!prefersReducedMotion ? "animate" : "initial"}
                 variants={animationVariants.card}
-                style={{ translateZ: 0 }}
+                style={{ willChange: 'transform' }}
               >
                 {/* Simplified card glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-t from-blue-500/10 to-transparent blur-lg transform scale-110"></div>

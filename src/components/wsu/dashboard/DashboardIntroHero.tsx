@@ -58,14 +58,14 @@ export function DashboardIntroHero({ profile, onNavigate }: DashboardIntroHeroPr
               initial="hidden"
               animate="visible"
               variants={containerVariants}
-              className="text-white"
+              className="text-black"
             >
               {/* Welcome badge */}
               <motion.div variants={itemVariants} className="mb-4 sm:mb-6">
-                <div className="inline-flex items-center px-2.5 sm:px-4 py-1 sm:py-1.5 text-xs font-medium rounded-full text-white border border-white/30 shadow-[0_4px_12px_rgba(0,0,0,0.05)]"
+                <div className="inline-flex items-center px-2.5 sm:px-4 py-1 sm:py-1.5 text-xs font-medium rounded-full text-black border border-black/30 shadow-[0_4px_12px_rgba(0,0,0,0.05)]"
                   style={{ background: 'linear-gradient(115deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))' }}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse mr-1.5 sm:mr-2"></span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-black animate-pulse mr-1.5 sm:mr-2"></span>
                   {profile ? `Welcome back, ${profile.first_name || 'Investor'}` : 'Welcome to WeSeedU'}
                 </div>
               </motion.div>
@@ -75,42 +75,42 @@ export function DashboardIntroHero({ profile, onNavigate }: DashboardIntroHeroPr
                 variants={itemVariants} 
                 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-4 sm:mb-6 font-display"
               >
-                Your Sustainable <br /> Investment Dashboard
+                Your WeSeedU <br /> Investment Dashboard
               </motion.h1>
               
               {/* Description */}
-              <motion.p variants={itemVariants} className="text-white/90 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl mb-6 sm:mb-8 font-body">
+              <motion.p variants={itemVariants} className="text-black/90 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl mb-6 sm:mb-8 font-body">
                 This dashboard is your command center for sustainable investing. Track your impact, discover aligned companies, and grow your investments.
               </motion.p>
               
               {/* Trust indicators */}
               <motion.div variants={containerVariants} className="mb-6 sm:mb-8">
                 <div className="flex flex-wrap gap-x-4 sm:gap-x-6 md:gap-x-8 gap-y-2 sm:gap-y-3">
-                  <motion.span variants={itemVariants} className="flex items-center text-xs sm:text-sm text-white">
-                    <div className="flex items-center justify-center h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 rounded-full bg-white/20 text-white mr-1.5 sm:mr-2 md:mr-3 border border-white/40 shadow-md">
+                  <motion.span variants={itemVariants} className="flex items-center text-xs sm:text-sm text-black">
+                    <div className="flex items-center justify-center h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 rounded-full bg-white/20 text-black mr-1.5 sm:mr-2 md:mr-3 border border-black/40 shadow-md">
                       <Check size={10} className="sm:hidden" />
                       <Check size={12} className="hidden sm:block" />
                     </div>
                     <span className="font-medium">Personalized Insights</span>
                   </motion.span>
                   
-                  <motion.span variants={itemVariants} className="flex items-center text-xs sm:text-sm text-white">
-                    <div className="flex items-center justify-center h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 rounded-full bg-white/20 text-white mr-1.5 sm:mr-2 md:mr-3 border border-white/40 shadow-md">
+                  <motion.span variants={itemVariants} className="flex items-center text-xs sm:text-sm text-black">
+                    <div className="flex items-center justify-center h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 rounded-full bg-white/20 text-black mr-1.5 sm:mr-2 md:mr-3 border border-black/40 shadow-md">
                       <Check size={10} className="sm:hidden" />
                       <Check size={12} className="hidden sm:block" />
                     </div>
                     <span className="font-medium">Impact Tracking</span>
                   </motion.span>
                   
-                  <motion.span variants={itemVariants} className="flex items-center text-xs sm:text-sm text-white">
-                    <div className="flex items-center justify-center h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 rounded-full bg-white/20 text-white mr-1.5 sm:mr-2 md:mr-3 border border-white/40 shadow-md">
+                  <motion.span variants={itemVariants} className="flex items-center text-xs sm:text-sm text-black">
+                    <div className="flex items-center justify-center h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 rounded-full bg-white/20 text-black mr-1.5 sm:mr-2 md:mr-3 border border-black/40 shadow-md">
                       <Check size={10} className="sm:hidden" />
                       <Check size={12} className="hidden sm:block" />
                     </div>
                     <span className="font-medium">AI-Powered Analysis</span>
                   </motion.span>
                 </div>
-              </motion.div>
+              </motion.div> 
               
               {/* Action buttons */}
               <motion.div variants={containerVariants} className="flex flex-wrap gap-3 sm:gap-4">
@@ -130,7 +130,7 @@ export function DashboardIntroHero({ profile, onNavigate }: DashboardIntroHeroPr
                   <Button
                     onClick={() => handleNavigation('companies')}
                     variant="outline"
-                    className="bg-transparent hover:bg-white/15 text-white border border-white/40 hover:border-white/60 shadow-[0_4px_14px_rgba(0,0,0,0.05)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.1)] rounded-full px-5 sm:px-7 py-2.5 sm:py-3 font-medium transition-all duration-300 backdrop-blur-sm w-full sm:w-auto h-auto text-sm sm:text-base font-helvetica"
+                    className="bg-transparent hover:bg-white/15 text-black border border-black/40 hover:border-black/60 shadow-[0_4px_14px_rgba(0,0,0,0.05)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.1)] rounded-full px-5 sm:px-7 py-2.5 sm:py-3 font-medium transition-all duration-300 backdrop-blur-sm w-full sm:w-auto h-auto text-sm sm:text-base font-helvetica"
                   >
                     <span className="relative z-10 flex items-center justify-center">
                       Explore Companies
@@ -147,8 +147,8 @@ export function DashboardIntroHero({ profile, onNavigate }: DashboardIntroHeroPr
                 animate={{ opacity: 1, y: 0, transition: { delay: 1.2 } }}
                 className="mt-8 sm:mt-10 md:mt-16 hidden md:flex flex-col items-center"
               >
-                <span className="text-white/70 text-xs mb-2">Scroll to explore</span>
-                <ChevronDown className="h-5 w-5 text-white/70 animate-bounce" />
+                <span className="text-black/70 text-xs mb-2">Scroll to explore</span>
+                <ChevronDown className="h-5 w-5 text-black/70 animate-bounce" />
               </motion.div>
             </motion.div>
             

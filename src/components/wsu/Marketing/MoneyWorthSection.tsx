@@ -147,7 +147,7 @@ export function MoneyWorthSection() {
                   hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out
                   hover:translate-y-[-2px] rounded-lg px-5 sm:px-7 py-2.5 font-medium relative overflow-hidden group"
               >
-                <Link href="/get-started" className="relative z-10 flex items-center justify-center">
+                <Link href="/auth/signup" className="relative z-10 flex items-center justify-center">
                   Get started
                   <span className="relative z-10 ml-2 transform group-hover:translate-x-1 transition-transform duration-300">
                     <ArrowRight className="h-4 w-4" />
@@ -200,7 +200,6 @@ export function MoneyWorthSection() {
                     alt="Gold coins"
                     fill
                     className="object-contain"
-                    priority
                   />
                 </motion.div>
               </motion.div>
