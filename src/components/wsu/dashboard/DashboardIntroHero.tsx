@@ -47,7 +47,7 @@ export function DashboardIntroHero({ profile, onNavigate }: DashboardIntroHeroPr
 
   return (
     <>
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden bg-white">
         {/* Subtle pattern overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(black_1px,transparent_0)] bg-[length:20px_20px] opacity-[0.03] z-0"></div>
         
