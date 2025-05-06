@@ -3,10 +3,11 @@
 import React, { Suspense, useState, useEffect, useRef } from 'react'
 import { MainNav } from "@/components/wsu/Nav"
 import { Footer } from "@/components/wsu/Footer"
-import { motion, useScroll, useTransform, useSpring, LazyMotion, domAnimation } from "framer-motion"
+import { motion, useScroll, useTransform, useSpring, LazyMotion, domAnimation, useReducedMotion } from "framer-motion"
 import { useRouter, usePathname } from "next/navigation"
 import dynamic from 'next/dynamic'
 import SectionLoader from "@/components/wsu/SectionLoader"
+import { ScrollProvider } from "@/context/ScrollContext"
 
 // Dynamic imports only - remove the static imports
 const HeroSection = dynamic(() => 
@@ -65,24 +66,40 @@ export default function LandingPage() {
   const router = useRouter();
   const pathname = usePathname();
   
-  // Track scroll progress with framer-motion
+  // Check if user prefers reduced motion
+  const prefersReducedMotion = useReducedMotion();
+  
+  // Track scroll progress with framer-motion - use viewport as basis for better performance
   const { scrollYProgress } = useScroll({
-    target: mainRef,
     offset: ["start start", "end end"]
   });
   
-  // Create smooth scrolling effect with optimized spring physics
+  // Create smoother scrolling effect with optimized spring physics
   const smoothScrollProgress = useSpring(scrollYProgress, {
-    damping: 25, // Lower damping for smoother motion
-    stiffness: 100, // Reduced stiffness for less resistance
+    damping: prefersReducedMotion ? 50 : 30, // Higher damping for smoother motion on mobile
+    stiffness: prefersReducedMotion ? 200 : 80, // Lower stiffness for less resistance
     restDelta: 0.001,
-    mass: 0.1 // Lower mass for less momentum
+    mass: 0.2 // Slightly higher mass for smoother momentum
   });
   
-  // Simplified transforms with fewer interpolation points
-  const heroParallax = useTransform(smoothScrollProgress, [0, 0.3], [0, -30]);
-  const cardSectionParallax = useTransform(smoothScrollProgress, [0.1, 0.4], [30, 0]);
-  const partnersTransform = useTransform(smoothScrollProgress, [0.3, 0.5], [15, -15]);
+  // Use fewer transform points and smaller values for better performance
+  const heroParallax = useTransform(
+    smoothScrollProgress, 
+    [0, 0.2], 
+    [0, prefersReducedMotion ? -5 : -15]
+  );
+  
+  const cardSectionParallax = useTransform(
+    smoothScrollProgress, 
+    [0.1, 0.3], 
+    [prefersReducedMotion ? 5 : 15, 0]
+  );
+  
+  const partnersTransform = useTransform(
+    smoothScrollProgress, 
+    [0.25, 0.45], 
+    [prefersReducedMotion ? 5 : 10, prefersReducedMotion ? -5 : -10]
+  );
   
   // Progress indicator for the scroll bar at the top
   const scaleX = useTransform(smoothScrollProgress, [0, 1], [0, 1]);
@@ -91,29 +108,39 @@ export default function LandingPage() {
   useEffect(() => {
     setIsMounted(true);
     
+    // Clean up function
     return () => {
       setIsMounted(false);
     };
   }, []);
   
-  // Mobile detection effect
+  // Mobile detection effect with debouncing
   useEffect(() => {
     // Check if this is a mobile device on mount
     setIsMobileDevice(isMobile());
     
-    // Add event listener for orientation changes
+    // Add debounced event listener for resize
+    let timeoutId: NodeJS.Timeout;
     const handleResize = () => {
-      setIsMobileDevice(isMobile());
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsMobileDevice(isMobile());
+      }, 100); // 100ms debounce
     };
     
     window.addEventListener('resize', handleResize, { passive: true });
     
-    // Add smooth scroll behavior to document
-    document.documentElement.style.scrollBehavior = 'smooth';
+    // Add smooth scroll behavior with browser capability check
+    if ('scrollBehavior' in document.documentElement.style) {
+      document.documentElement.style.scrollBehavior = 'smooth';
+    }
     
     return () => {
       window.removeEventListener('resize', handleResize);
-      document.documentElement.style.scrollBehavior = '';
+      clearTimeout(timeoutId);
+      if ('scrollBehavior' in document.documentElement.style) {
+        document.documentElement.style.scrollBehavior = '';
+      }
     };
   }, []);
 
@@ -125,130 +152,127 @@ export default function LandingPage() {
         {/* Navigation Component */}
         {isMounted && <MainNav currentPath={pathname} />}
         
-        {/* Scroll progress indicator - hardware accelerated */}
+        {/* Scroll progress indicator - hardware accelerated with minimal transforms */}
         <motion.div
-          className="fixed top-0 left-0 right-0 h-1 bg-slate-800 z-50"
+          className="fixed top-0 left-0 right-0 h-1 bg-slate-800 z-50 origin-left"
           style={{ 
-            scaleX, 
-            transformOrigin: "0%",
-            willChange: "transform",
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden"
+            scaleX,
+            translateZ: 0
           }}
         />
         
         {/* Main content */}
-        <main 
-          ref={mainRef}
-          className="relative w-full min-h-screen overflow-x-hidden"
-          style={{
-            perspective: "1000px",
-            WebkitPerspective: "1000px"
-          }}
+        <ScrollProvider 
+          scrollYProgress={smoothScrollProgress}
+          prefersReducedMotion={prefersReducedMotion ?? false}
+          isMobileDevice={isMobileDevice}
         >
-          {/* Hero Section with proper Suspense boundaries */}
-          <motion.div 
-            id="hero-section" 
-            className={`parallax-section ${isMobileDevice ? 'min-h-fit' : 'min-h-screen'} flex items-center justify-center ${isMobileDevice ? 'pt-16 pb-8' : 'pt-20 md:pt-24 lg:pt-28 mb-20 md:mb-24 lg:mb-32'}`}
-            style={{ 
-              y: heroParallax,
-              zIndex: 20, 
-              position: 'relative',
-              willChange: "transform",
-              backfaceVisibility: "hidden"
-            }}
+          <main 
+            ref={mainRef}
+            className="relative w-full min-h-screen overflow-x-hidden"
           >
-            <Suspense fallback={<SectionLoader />}>
-              {isMobileDevice ? <MobileHero /> : <HeroSection />}
-            </Suspense>
-          </motion.div>
-       
-          {/* Card Section with Suspense boundary */}
-          <motion.section 
-            id="card-section" 
-            className="parallax-section w-full mb-20 md:mb-24 lg:mb-32 overflow-x-hidden"
-            style={{ 
-              y: cardSectionParallax,
-              zIndex: 15,
-              willChange: "transform",
-              backfaceVisibility: "hidden"
-            }}
-          >
-            <Suspense fallback={<SectionLoader />}>
-              <CardSection />
-            </Suspense>
-          </motion.section>
-
-          <motion.div 
-            className="parallax-section px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
-            id="partners-section"
-            style={{ 
-              y: partnersTransform,
-              zIndex: 10,
-              willChange: "transform",
-              backfaceVisibility: "hidden"
-            }}
-          >
-            <Suspense fallback={<SectionLoader />}>
-              <PartnersAndVetting />
-            </Suspense>
-          </motion.div>
-      
-          {/* Solution Section - Static without parallax to improve performance */}
-          <div 
-            className="w-full relative overflow-hidden" 
-            id="solution-section" 
-            style={{ zIndex: 5 }}
-          >
-            {/* Remove the motion transform from background div for clean transition */}
-            <div 
-              className="absolute inset-0 max-w-full" 
+            {/* Hero Section with proper Suspense boundaries - use conditional transform for mobile */}
+            <motion.div 
+              id="hero-section" 
+              className={`parallax-section ${isMobileDevice ? 'min-h-fit' : 'min-h-screen'} flex items-center justify-center ${isMobileDevice ? 'pt-16 pb-8' : 'pt-20 md:pt-24 lg:pt-28 mb-20 md:mb-24 lg:mb-32'}`}
               style={{ 
-                background: 'linear-gradient(to top, #00b4db, #0083b0)',
-                zIndex: 1
+                y: !isMobileDevice ? heroParallax : 0,
+                translateZ: 0,
+                zIndex: 20, 
+                position: 'relative'
               }}
             >
-              {/* Add a clean divider element */}
-              <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-[#49c628] to-transparent"></div>
+              <Suspense fallback={<SectionLoader />}>
+                {isMobileDevice ? <MobileHero /> : <HeroSection />}
+              </Suspense>
+            </motion.div>
+         
+            {/* Card Section with Suspense boundary - use conditional transform for mobile */}
+            <motion.section 
+              id="card-section" 
+              className="parallax-section w-full mb-20 md:mb-24 lg:mb-32 overflow-x-hidden"
+              style={{ 
+                y: !isMobileDevice ? cardSectionParallax : 0,
+                translateZ: 0,
+                zIndex: 15
+              }}
+            >
+              <Suspense fallback={<SectionLoader />}>
+                <CardSection />
+              </Suspense>
+            </motion.section>
+
+            {/* Partners section - use conditional transform for mobile */}
+            <motion.div 
+              className="parallax-section px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
+              id="partners-section"
+              style={{ 
+                y: !isMobileDevice ? partnersTransform : 0,
+                translateZ: 0,
+                zIndex: 10
+              }}
+            >
+              <Suspense fallback={<SectionLoader />}>
+                <PartnersAndVetting />
+              </Suspense>
+            </motion.div>
+        
+            {/* Solution Section - Static without parallax to improve performance */}
+            <div 
+              className="w-full relative overflow-hidden" 
+              id="solution-section" 
+              style={{ zIndex: 5 }}
+            >
+              {/* Remove the motion transform from background div for clean transition */}
+              <div 
+                className="absolute inset-0 max-w-full" 
+                style={{ 
+                  background: 'linear-gradient(to top, #00b4db, #0083b0)',
+                  zIndex: 1
+                }}
+              >
+                {/* Add a clean divider element */}
+                <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-[#49c628] to-transparent"></div>
+              </div>
+              <section className="w-full pt-16 pb-20 md:pb-24 lg:pb-20 mt-0 relative" 
+                style={{ zIndex: 2 }}>
+                {/* Solution sections with Suspense boundaries - no motion transforms for better performance */}
+                <div 
+                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mt-16"
+                  id="startup-section"
+                >
+                  <Suspense fallback={<SectionLoader />}>
+                    <StartupApplicationSection />
+                  </Suspense>
+                </div>
+                <div 
+                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mb-16"
+                  id="impact-section"
+                >
+                  <Suspense fallback={<SectionLoader />}>
+                    <SustainableImpactSection />
+                  </Suspense>
+                </div>
+                <div 
+                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
+                  id="earn-section"
+                >
+                  <Suspense fallback={<SectionLoader />}>
+                    <EarnAsYouGrow />
+                  </Suspense>
+                </div>
+                <div 
+                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
+                  id="money-worth-section"
+                >
+                  <Suspense fallback={<SectionLoader />}>
+                    <MoneyWorthSection />  
+                  </Suspense>
+                </div>
+              </section>
             </div>
-            <section className="w-full pt-16 pb-20 md:pb-24 lg:pb-20 mt-0 relative" 
-              style={{ zIndex: 2 }}>
-              {/* Solution sections with Suspense boundaries - no motion transforms for better performance */}
-              <div 
-                className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mt-16"
-                id="startup-section"
-              >
-                <Suspense fallback={<SectionLoader />}>
-                  <StartupApplicationSection />
-                </Suspense>
-              </div>
-              <div 
-                className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mb-16"
-                id="impact-section"
-              >
-                <Suspense fallback={<SectionLoader />}>
-                  <SustainableImpactSection />
-                </Suspense>
-              </div>
-              <div 
-                className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
-                id="earn-section"
-              >
-                <Suspense fallback={<SectionLoader />}>
-                  <EarnAsYouGrow />
-                </Suspense>
-              </div>
-              <div 
-                className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
-                id="money-worth-section"
-              >
-                <Suspense fallback={<SectionLoader />}>
-                  <MoneyWorthSection />  
-                </Suspense>
-              </div>
-            </section>
-          </div>
-        </main>
+          </main>
+        </ScrollProvider>
         
         {/* Footer */}
         {isMounted && <Footer />}
@@ -264,12 +288,12 @@ function isMobile() {
   // Check for mobile user agent
   const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   
-  // Check for mobile screen size
-  const isMobileScreen = window.innerWidth < 768;
+  // Check for mobile screen size (increased threshold for better detection)
+  const isMobileScreen = window.innerWidth < 850;
   
   // Check for touch capability
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isTouchDevice = 'ontouchstart' in window || (navigator.maxTouchPoints > 0);
   
-  // Consider it mobile if either condition is true
-  return isMobileUA || (isMobileScreen && isTouchDevice);
+  // Consider it mobile if the screen is small and either has touch or mobile UA
+  return isMobileScreen && (isTouchDevice || isMobileUA);
 }

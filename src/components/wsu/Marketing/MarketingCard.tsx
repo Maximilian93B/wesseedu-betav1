@@ -76,6 +76,7 @@ export function MarketingCard({ card, index, isActive = false }: { card: CardDat
                   src={card.imageUrl || "/eco-city.png"}
                   alt={card.title}
                   fill
+               
                   className="object-contain scale-80"
                   loading="lazy"
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"

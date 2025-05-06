@@ -3,11 +3,12 @@
 import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowRight, Shield, BarChart2, FileCheck, CheckCircle } from "lucide-react"
-import { motion, useInView, useScroll, useTransform } from "framer-motion"
+import { motion, useInView, useTransform } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { VETTING_STEPS } from "./data"
 import dynamic from "next/dynamic"
 import "./animations.css"
+import { useScrollContext } from "@/context/ScrollContext"
 
 // Import just the Lottie animation
 import iconAnimation from "@/../../public/Fintech.json"
@@ -71,46 +72,31 @@ export function BigFourVetting() {
   // Refs and animations
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.15 });
-  const [isMobile, setIsMobile] = useState(false);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   // Simplified state - only track if animation is loaded
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   
-  // Check for mobile screen size
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-    
-    // Initial check
-    checkMobile();
-    
-    // Add event listener for window resize with debounce
-    let debounceTimer: NodeJS.Timeout;
-    const handleResize = () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(checkMobile, 100);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(debounceTimer);
-    };
-  }, []);
+  // Use ScrollContext instead of local scroll implementation
+  const { scrollYProgress, prefersReducedMotion, isMobileDevice } = useScrollContext();
   
-  // Parallax scrolling effect
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"]
-  });
+  // Transform values based on scroll position - using context
+  const y1 = scrollYProgress ? useTransform(
+    scrollYProgress, 
+    [0, 1], 
+    [0, prefersReducedMotion ? -10 : -30]
+  ) : 0;
   
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, -30]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, 30]);
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, 5]);
-  const xScrollMotion = useTransform(scrollYProgress, [0, 1], [0, -50]);
+  const y2 = scrollYProgress ? useTransform(
+    scrollYProgress, 
+    [0, 1], 
+    [0, prefersReducedMotion ? 10 : 30]
+  ) : 0;
+  
+  const rotate = scrollYProgress ? useTransform(
+    scrollYProgress, 
+    [0, 1], 
+    [0, prefersReducedMotion ? 2 : 5]
+  ) : 0;
 
   // Icon mapping for the firm types
   const iconMap = {
@@ -120,10 +106,39 @@ export function BigFourVetting() {
     growth: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
   };
 
+  // Control Lottie animation with scroll position
+  useEffect(() => {
+    if (!lottieRef.current || !scrollYProgress) return;
+    
+    // Get total frames of animation to use full range
+    const totalFrames = lottieRef.current.getDuration(true) || 100;
+    
+    // Play animation on initial view
+    if (isInView && lottieRef.current && !prefersReducedMotion) {
+      lottieRef.current.play();
+    }
+    
+    const unsubscribe = scrollYProgress.onChange(value => {
+      if (isInView && isAnimationLoaded && lottieRef.current) {
+        if (prefersReducedMotion) {
+          // For reduced motion, still use scroll to control position
+          const frame = Math.floor(value * totalFrames);
+          if (frame > 0) {
+            lottieRef.current.goToAndStop(frame, true);
+          }
+        }
+      }
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [isInView, isAnimationLoaded, scrollYProgress, prefersReducedMotion]);
+
   return (
     <div 
       ref={sectionRef}
-      className="relative overflow-hidden py-14 sm:py-18 md:py-22 lg:py-28 "
+      className="relative overflow-hidden py-14 sm:py-18 md:py-22 lg:py-28"
     >
       {/* Enhanced pattern background */}
       <div className="absolute inset-0 opacity-[0.04]" 
@@ -134,7 +149,7 @@ export function BigFourVetting() {
         }}>
       </div>
       
-      {/* Abstract decorative elements */}
+      {/* Abstract decorative elements - using context scroll values */}
       <motion.div 
         className="absolute top-20 left-[5%] w-64 h-64 rounded-full bg-white/5 blur-[120px]"
         style={{ y: y1 }}
@@ -235,18 +250,20 @@ export function BigFourVetting() {
             </motion.div>
           </div>
           
-          {/* Right content - Static Lottie animation */}
+          {/* Right content - Lottie animation with scroll control */}
           <motion.div 
             className="w-full lg:w-[60%] flex justify-center lg:justify-end"
             variants={itemVariants}
-            style={{ rotate: isMobile ? 0 : rotate }}
+            style={{ rotate: isMobileDevice ? 0 : rotate }}
           >
             <div className="relative w-full h-[400px] sm:h-[460px] md:h-[540px] lg:h-[600px] flex items-center justify-center">
-              {/* Simplified static animation container */}
+              {/* Animation container with context-aware animation */}
               <motion.div 
                 className="relative w-[380px] h-[380px] sm:w-[450px] sm:h-[450px] md:w-[520px] md:h-[520px] lg:w-[600px] lg:h-[600px] z-10"
                 initial={{ y: 0 }}
-                animate={{ y: [-5, 5, -5] }}
+                animate={{ 
+                  y: prefersReducedMotion ? 0 : [-5, 5, -5] 
+                }}
                 transition={{
                   duration: 12,
                   repeat: Infinity,
@@ -254,7 +271,7 @@ export function BigFourVetting() {
                   ease: "easeInOut"
                 }}
               >
-                {/* Static Lottie animation */}
+                {/* Lottie animation with scroll control */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ 
@@ -272,8 +289,8 @@ export function BigFourVetting() {
                 >
                   <Lottie
                     animationData={iconAnimation}
-                    loop={false}
-                    autoplay={true}
+                    loop={true}
+                    autoplay={!prefersReducedMotion}
                     className="w-full h-full"
                     lottieRef={lottieRef}
                     rendererSettings={{

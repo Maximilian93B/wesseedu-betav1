@@ -1,52 +1,26 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { motion, useInView, } from "framer-motion"
+import { useState } from "react"
+import { motion } from "framer-motion"
 import { ArrowRight, Sprout, PiggyBank, LineChart } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { FundingCard } from "./FundingCard"
+import { useScrollContext } from "@/context/ScrollContext"
 
-// Enhanced animations
+// Simple fade animation that works well with scroll
 const fadeIn = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { 
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1]
-    }
-  }
-}
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.3,
-    }
-  }
-}
-
-const headingAnimation = {
   hidden: { opacity: 0, y: 20 },
   visible: { 
     opacity: 1, 
     y: 0,
-    transition: { 
-      duration: 0.7,
-      ease: [0.22, 1, 0.36, 1]
-    }
+    transition: { duration: 0.3 }
   }
 }
 
 export function StartupApplicationSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.1 });
+  const { prefersReducedMotion, isMobileDevice } = useScrollContext();
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
   
   // Funding opportunity cards with more detailed information
@@ -101,15 +75,16 @@ export function StartupApplicationSection() {
   ];
   
   return (
-    <div ref={sectionRef} className="relative w-full overflow-hidden py-16 md:py-24 lg:py-32">
+    <div className="relative w-full overflow-hidden py-16 md:py-24 lg:py-32">
       {/* Content container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col items-center gap-12 md:gap-16 lg:gap-20">
-          {/* Enhanced header section */}
+          {/* Simplified header section */}
           <motion.div 
             initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
-            variants={headingAnimation}
+            whileInView="visible"
+            viewport={{ once: true, amount: prefersReducedMotion ? 0.3 : 0.2 }}
+            variants={fadeIn}
             className="w-full text-center"
           >
             <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight sm:leading-none mb-4 sm:mb-5 text-shadow-sm">
@@ -130,14 +105,9 @@ export function StartupApplicationSection() {
           </motion.div>
           
           {/* Funding cards section */}
-          <motion.div 
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
-            variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 w-full">
             {fundingCards.map((card, index) => (
-              <motion.div key={index} variants={fadeIn} className="h-full">
+              <div key={index} className="h-full">
                 <FundingCard
                   title={card.title}
                   description={card.description}
@@ -145,111 +115,62 @@ export function StartupApplicationSection() {
                   icon={card.icon}
                   highlight={card.highlight}
                   index={index}
-                  isInView={isInView}
+                  isInView={true}
                   backgroundColor={card.backgroundColor}
                   accentColor={card.accentColor}
                 />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
           
           {/* Application section */}
           <div className="flex flex-col md:flex-row items-center gap-8 sm:gap-12 md:gap-16 w-full">
             {/* Image section */}
             <motion.div 
               initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
               variants={fadeIn}
               className="w-full md:w-1/2 flex justify-center"
             >
               <div className="relative w-full max-w-md lg:max-w-lg aspect-square">
-                {/* Simplified glow effect */}
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 1.2, delay: 0.5 }}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] 
-                  bg-gradient-radial from-green-400/20 via-green-400/10 to-transparent rounded-full blur-3xl"
-                />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] 
+                  bg-gradient-radial from-green-400/20 via-green-400/10 to-transparent rounded-full blur-3xl" />
                 
-                {/* Animated image container */}
-                <motion.div 
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={isInView ? { y: 0, opacity: 1 } : { y: 10, opacity: 0 }}
-                  transition={{ 
-                    duration: 0.8,
-                    delay: 0.3,
-                    ease: [0.22, 1, 0.36, 1]
-                  }}
-                  className="relative z-10 scale-90 sm:scale-100"
-                >
-                  <motion.div
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 4,
-                      ease: "easeInOut"
-                    }}
-                    className="relative"
-                  >
-                    <Image
-                      src="/funding.png"
-                      alt="Sustainable Business Funding"
-                      width={600}
-                      height={600}
-                      className="relative z-20 drop-shadow-[0_25px_40px_rgba(0,0,0,0.35)] hover:scale-105 transition-transform duration-300"
-                      priority
-                    />
-                    
-                    {/* Simplified shadow */}
-                    <motion.div
-                      animate={{ 
-                        scale: [1, 0.9, 1],
-                        opacity: [0.6, 0.4, 0.6]
-                      }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 4, 
-                        ease: "easeInOut"
-                      }}
-                      className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[60%] h-6 bg-black/20 blur-xl rounded-full"
-                    ></motion.div>
-                  </motion.div>
-                </motion.div>
+                <div className="relative z-10 scale-90 sm:scale-100">
+                  <Image
+                    src="/funding.png"
+                    alt="Sustainable Business Funding"
+                    width={600}
+                    height={600}
+                    className="relative z-20 drop-shadow-[0_25px_40px_rgba(0,0,0,0.35)] hover:scale-105 transition-transform duration-300"
+                    priority
+                  />
+                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[60%] h-6 bg-black/20 blur-xl rounded-full"></div>
+                </div>
               </div>
             </motion.div>
             
             {/* Content section */}
             <motion.div 
               initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
               variants={fadeIn}
               className="w-full md:w-1/2"
             >
               <h3 className="text-3xl sm:text-4xl font-extrabold text-white mb-5 sm:mb-6">
                 <span className="relative inline-block">
                   Why Choose WeSeedU
-                  <motion.div 
-                    initial={{ width: "0%" }}
-                    animate={isInView ? { width: "100%" } : { width: "0%" }}
-                    transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
-                    className="absolute -bottom-2 left-0 h-[2px] bg-gradient-to-r from-green-400 to-green-500/0"
-                  />
+                  <div className="absolute -bottom-2 left-0 h-[2px] w-full bg-gradient-to-r from-green-400 to-green-500/0" />
                 </span>
               </h3>
               
               {/* Benefits list */}
               <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 {benefits.map((benefit, index) => (
-                  <motion.div 
+                  <div 
                     key={index} 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                    transition={{ 
-                      duration: 0.5,
-                      delay: 0.5 + index * 0.1,
-                      ease: [0.22, 1, 0.36, 1]
-                    }}
                     onMouseEnter={() => setActiveFeature(index)}
                     onMouseLeave={() => setActiveFeature(null)}
                     className={`flex items-start p-2 sm:p-3 rounded-xl transition-all duration-300 ${activeFeature === index ? 'bg-white/5' : ''}`}
@@ -261,40 +182,25 @@ export function StartupApplicationSection() {
                       <h4 className="text-white text-base font-bold mb-0.5 sm:mb-1">{benefit.title}</h4>
                       <p className="text-white/80 text-sm sm:text-base">{benefit.description}</p>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
               
               {/* CTA button */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ 
-                  duration: 0.5,
-                  delay: 1,
-                  ease: [0.22, 1, 0.36, 1]
-                }}
+              <Button
+                asChild
+                size="lg"
+                className="relative overflow-hidden group bg-white text-black hover:bg-white/90 hover:text-green-900 shadow-lg rounded-xl transition-all duration-300 w-full sm:w-auto"
               >
-                <Button
-                  asChild
-                  size="lg"
-                  className="relative overflow-hidden group bg-white text-black hover:bg-white/90 hover:text-green-900 shadow-lg rounded-xl transition-all duration-300 w-full sm:w-auto"
-                >
-                  <Link href="/apply-now" className="flex items-center justify-center font-bold py-4 sm:py-5 px-6 sm:px-10 text-base">
-                    <span className="relative z-10">Apply for Funding</span>
-                    <motion.div 
-                      initial={{ x: -5 }}
-                      whileHover={{ x: 3 }}
-                      transition={{ duration: 0.3 }}
-                      className="relative z-10 ml-2"
-                    >
-                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </motion.div>
-                    
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gray-50 transition-opacity duration-300" />
-                  </Link>
-                </Button>
-              </motion.div>
+                <Link href="/apply-now" className="flex items-center justify-center font-bold py-4 sm:py-5 px-6 sm:px-10 text-base">
+                  <span className="relative z-10">Apply for Funding</span>
+                  <span className="relative z-10 ml-2 group-hover:translate-x-1 transition-transform duration-200">
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </span>
+                  
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gray-50 transition-opacity duration-300" />
+                </Link>
+              </Button>
             </motion.div>
           </div>
         </div>

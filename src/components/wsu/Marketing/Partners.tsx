@@ -3,11 +3,10 @@
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
+import { motion, useScroll, useTransform, MotionValue, useInView } from "framer-motion"
 import { useRef, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ScrollReveal } from "@/components/ui/scroll-reveal"
 
 export function Partners() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -59,6 +58,9 @@ export function Partners() {
     },
   ]
 
+  const headerRef = useRef(null)
+  const headerInView = useInView(headerRef, { once: true, amount: 0.3 })
+
   return (
     <section 
       ref={containerRef} 
@@ -66,11 +68,13 @@ export function Partners() {
       aria-labelledby="partners-heading"
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        {/* Header section */}
-        <ScrollReveal
+        {/* Header section - replaced ScrollReveal with motion.div */}
+        <motion.div
+          ref={headerRef}
           className="mb-24 md:mb-32"
-          animation="fade-up"
-          duration={0.7}
+          initial={{ opacity: 0, y: 20 }}
+          animate={headerInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="flex flex-col items-start max-w-2xl">
             <div className="inline-flex items-center space-x-2 bg-white/5 rounded-full px-4 py-1.5 mb-10 text-xs text-teal-400 font-medium font-helvetica">
@@ -90,7 +94,7 @@ export function Partners() {
               our vision.
             </p>
           </div>
-        </ScrollReveal>
+        </motion.div>
 
         {/* Partners grid section */}
         <div className="relative">
@@ -163,14 +167,21 @@ function DesktopPartnersGrid({
       {partners.map((partner, index) => {
         // Determine which parallax effect to use based on index
         const yOffset = index % 3 === 0 ? offsetY1 : index % 3 === 1 ? offsetY2 : offsetY3;
+        const cardRef = useRef(null)
+        const isInView = useInView(cardRef, { once: true, amount: 0.3 })
         
         return (
-          <ScrollReveal
+          <motion.div
             key={partner.name}
+            ref={cardRef}
             className="h-full"
-            animation="fade-up"
-            delay={index * 0.1}
-            duration={0.7}
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ 
+              duration: 0.7, 
+              delay: index * 0.1,
+              ease: [0.16, 1, 0.3, 1]
+            }}
           >
             <motion.div style={{ y: yOffset }}>
               <PartnerCard 
@@ -180,7 +191,7 @@ function DesktopPartnersGrid({
                 onHover={setActiveIndex}
               />
             </motion.div>
-          </ScrollReveal>
+          </motion.div>
         );
       })}
     </div>
@@ -194,22 +205,32 @@ function MobilePartnersScroll({
 }: Omit<PartnersGridProps, 'offsetY1' | 'offsetY2' | 'offsetY3'>) {
   return (
     <div className="flex overflow-x-auto pb-8 -mx-6 px-6 space-x-5 snap-x snap-mandatory scrollbar-hide">
-      {partners.map((partner, index) => (
-        <ScrollReveal
-          key={partner.name}
-          className="flex-shrink-0 w-[85%] snap-center"
-          animation="fade-up"
-          delay={index * 0.1}
-          duration={0.7}
-        >
-          <PartnerCard 
-            partner={partner} 
-            index={index} 
-            isActive={activeIndex === index}
-            onHover={setActiveIndex}
-          />
-        </ScrollReveal>
-      ))}
+      {partners.map((partner, index) => {
+        const cardRef = useRef(null)
+        const isInView = useInView(cardRef, { once: true, amount: 0.3 })
+        
+        return (
+          <motion.div
+            key={partner.name}
+            ref={cardRef}
+            className="flex-shrink-0 w-[85%] snap-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ 
+              duration: 0.7, 
+              delay: index * 0.1,
+              ease: [0.16, 1, 0.3, 1]
+            }}
+          >
+            <PartnerCard 
+              partner={partner} 
+              index={index} 
+              isActive={activeIndex === index}
+              onHover={setActiveIndex}
+            />
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
