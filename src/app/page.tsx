@@ -225,7 +225,7 @@ export default function LandingPage() {
                     </h2>
                     
                     <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed font-light font-body max-w-3xl mx-auto mb-10">
-                      Turn market insights into action. Join the startups that are building tomorrow's sustainable economy with strategic funding and expert guidance.
+                      Turn market insights into action. Join the startups that are building tomorrow&apos;s sustainable economy with strategic funding and expert guidance.
                     </p>
                     
                     <div className="flex flex-wrap justify-center gap-3 mb-8">

@@ -134,7 +134,7 @@ export function SustainableImpactSection() {
               <div className="p-4 sm:p-5 md:p-6">
                 <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-2.5 line-clamp-1">Your Money Changes Tomorrow</h3>
                 <p className="text-sm sm:text-base text-slate-600 mb-3 sm:mb-4 line-clamp-2">
-                  Learn how your investments can create both good returns and positive change in today's markets where sustainable companies are leading the way...
+                  Learn how your investments can create both good returns and positive change in today&apos;s markets where sustainable companies are leading the way...
                 </p>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-1 gap-2 sm:gap-0">
                   <div className="flex items-center text-sm text-slate-500">
