@@ -6,45 +6,39 @@ import { motion, useReducedMotion } from "framer-motion"
 import { useEffect, useState, useMemo } from "react"
 import Image from "next/image"
 
-// Extracted animation variants for better maintainability
+// Simplified animation variants with better performance
 const animations = {
   container: {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
       transition: { 
-        staggerChildren: 0.12,
-        duration: 0.6,
+        staggerChildren: 0.07,
+        duration: 0.4, 
         ease: "easeOut"
       }
     }
   },
   
   item: {
-    hidden: { y: 15, opacity: 0 },
+    hidden: { y: 8, opacity: 0 },
     visible: { 
       y: 0, 
       opacity: 1,
-      transition: { type: "spring", stiffness: 170, damping: 20 }
+      transition: { duration: 0.25, ease: "easeOut" }
     }
   },
   
+  // Minimal animations with reduced motion
   floating: {
     initial: { y: 0 },
     animate: { 
-      y: [0, -10, 0],
-      rotate: [0, 0.5, 0, -0.5, 0],
+      y: [0, -5, 0],
       transition: {
         y: {
-          duration: 8,
+          duration: 6,
           repeat: Infinity,
           repeatType: "reverse", 
-          ease: "easeInOut"
-        },
-        rotate: {
-          duration: 12,
-          repeat: Infinity,
-          repeatType: "reverse",
           ease: "easeInOut"
         }
       }
@@ -54,26 +48,12 @@ const animations = {
   globe: {
     initial: { y: 0 },
     animate: { 
-      y: [0, -12, 0],
-      rotate: [0, 0.8, 0, -0.8, 0],
-      scale: [1, 1.02, 1],
+      y: [0, -8, 0],
       transition: {
         y: {
           duration: 6,
           repeat: Infinity,
           repeatType: "reverse", 
-          ease: "easeInOut"
-        },
-        rotate: {
-          duration: 8,
-          repeat: Infinity,
-          repeatType: "reverse",
-          ease: "easeInOut"
-        },
-        scale: {
-          duration: 6,
-          repeat: Infinity,
-          repeatType: "reverse",
           ease: "easeInOut"
         }
       }
@@ -84,15 +64,8 @@ const animations = {
     initial: { y: 0 },
     animate: { 
       y: [0, 3, 0],
-      scale: [1, 0.98, 1],
       transition: {
         y: {
-          duration: 4,
-          repeat: Infinity,
-          repeatType: "reverse",
-          ease: "easeInOut"
-        },
-        scale: {
           duration: 4,
           repeat: Infinity,
           repeatType: "reverse",
@@ -100,24 +73,12 @@ const animations = {
         }
       }
     }
-  },
-  
-  leaf: {
-    initial: { rotate: 0 },
-    animate: {
-      rotate: [0, 5, 0, -5, 0],
-      transition: {
-        duration: 10,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
-    }
   }
 }
 
 // Consolidated styling classes
 const styles = {
-  gradientButton: "group text-white shadow-[0_4px_10px_rgba(0,0,0,0.07)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out hover:translate-y-[-2px] rounded-xl px-7 sm:px-10 py-6 sm:py-7 font-medium relative overflow-hidden w-48 sm:w-auto",
+  gradientButton: "group text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:translate-y-[-2px] rounded-xl px-7 sm:px-10 py-6 sm:py-7 font-medium relative overflow-hidden w-48 sm:w-auto",
   featureBlock: "flex flex-col group mb-8 sm:mb-0",
   featureTitle: "text-lg sm:text-xl font-semibold text-white mb-3 font-display",
   featureBar: "w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-4 rounded-full transition-all duration-300 group-hover:w-16",
@@ -132,16 +93,16 @@ export function HeroSection() {
   
   // Memoize animations to prevent recreation on each render
   const animationVariants = useMemo(() => {
-    // Simplify animations when reduced motion is preferred
+    // Disable animations when reduced motion is preferred
     if (prefersReducedMotion) {
       return {
         container: {
           hidden: { opacity: 0 },
-          visible: { opacity: 1, transition: { duration: 0.4 } }
+          visible: { opacity: 1, transition: { duration: 0.3 } }
         },
         item: {
           hidden: { opacity: 0 },
-          visible: { opacity: 1, transition: { duration: 0.3 } }
+          visible: { opacity: 1, transition: { duration: 0.2 } }
         },
         floating: {
           initial: {},
@@ -154,10 +115,6 @@ export function HeroSection() {
         card: {
           initial: {},
           animate: {}
-        },
-        leaf: {
-          initial: {},
-          animate: {}
         }
       };
     }
@@ -167,6 +124,7 @@ export function HeroSection() {
   // Only run animations after component is mounted
   useEffect(() => {
     setIsMounted(true);
+    return () => setIsMounted(false);
   }, []);
 
   // Don't render animations until component is mounted
@@ -223,20 +181,19 @@ export function HeroSection() {
           variants={animationVariants.item}
         >
           <div className="relative w-full max-w-sm md:max-w-lg h-[420px] md:h-[520px]">
-            {/* Enhanced ambient lighting */}
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-cyan-400/5 to-transparent rounded-full blur-[80px] animate-pulse"></div>
+            {/* Simplified ambient lighting */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-cyan-400/5 to-transparent rounded-full blur-[80px]"></div>
             
             {/* Separated globe and card container */}
             <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col items-center">
-              {/* Globe element */}
+              {/* Globe element with simpler animation */}
               <motion.div 
                 className="relative w-[280px] md:w-[380px] h-[280px] md:h-[380px] z-20"
                 initial="initial"
-                animate="animate"
+                animate={!prefersReducedMotion ? "animate" : "initial"}
                 variants={animationVariants.globe}
+                style={{ willChange: 'transform' }}
               >
-             
-                
                 {/* Globe image container with enhanced shadow */}
                 <div className="relative w-full h-full">
                   <Image
@@ -249,22 +206,21 @@ export function HeroSection() {
                     }}
                     priority
                   />
-           
                 </div>
                 
-                {/* Enhanced lighting effects */}
+                {/* Simplified lighting effects */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-emerald-400/5 via-transparent to-blue-400/10 rounded-full blur-lg mix-blend-screen"></div>
-                <div className="absolute top-10 right-24 w-32 h-10 bg-cyan-300/15 rounded-full blur-xl transform rotate-[30deg] mix-blend-screen"></div>
               </motion.div>
               
-              {/* Card element */}
+              {/* Card element with simpler animation */}
               <motion.div 
                 className="relative mt-[-160px] md:mt-[-190px] w-[220px] md:w-[280px] z-10"
                 initial="initial"
-                animate="animate"
+                animate={!prefersReducedMotion ? "animate" : "initial"}
                 variants={animationVariants.card}
+                style={{ willChange: 'transform' }}
               >
-                {/* Card glow effect */}
+                {/* Simplified card glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-t from-blue-500/10 to-transparent blur-lg transform scale-110"></div>
                 
                 <Image
@@ -274,18 +230,19 @@ export function HeroSection() {
                   height={120}
                   style={{ 
                     objectFit: 'contain',
+                    height: 'auto',
                     filter: 'drop-shadow(0 10px 25px rgba(0,0,0,0.15))'
                   }}
                   priority
                   className="relative"
                 />
                 
-                {/* Enhanced card shadow with gradient */}
+                {/* Simplified card shadow */}
                 <div className="absolute -bottom-6 left-0 right-0 h-12 bg-gradient-to-b from-slate-900/15 to-transparent rounded-full blur-xl transform scale-x-90"></div>
               </motion.div>
             </div>
             
-            {/* Ground reflection and shadow */}
+            {/* Ground reflection and shadow - simplified */}
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-20">
               <div className="w-full h-full bg-gradient-to-b from-slate-900/10 to-transparent rounded-[100%] blur-xl transform scale-y-50"></div>
             </div>
@@ -293,16 +250,14 @@ export function HeroSection() {
         </motion.div>
       </div>
       
-      {/* Divider - styled differently for mobile */}
+      {/* Divider - simplified for better performance */}
       <motion.div variants={animationVariants.item} className="w-full my-8 sm:my-0 sm:mb-12 sm:mt-10">
         <div className="relative w-full">
           {/* Mobile: Full width white line */}
           <div className="sm:hidden w-full h-[1px] bg-white/80"></div>
           
-          {/* Desktop: Gradient divider (hidden on mobile) */}
-          <div className="hidden sm:block w-full h-[2px] bg-gradient-to-r from-white via-white/80 to-transparent rounded-full shadow-[0_1px_2px_rgba(255,255,255,0.7)]"></div>
-          <div className="hidden sm:block absolute -top-[1px] w-full h-[1px] bg-gradient-to-r from-white/20 via-white/10 to-transparent rounded-full"></div>
-          <div className="hidden sm:block absolute top-[2px] w-3/4 h-[1px] bg-gradient-to-r from-slate-400/30 via-slate-400/10 to-transparent rounded-full"></div>
+          {/* Desktop: Simplified gradient divider (hidden on mobile) */}
+          <div className="hidden sm:block w-full h-[2px] bg-gradient-to-r from-white via-white/80 to-transparent rounded-full"></div>
         </div>
       </motion.div>
       

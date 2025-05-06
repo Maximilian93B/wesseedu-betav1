@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
 import Link from "next/link"
 import { SectionNav } from '@/components/wsu/SectionNav'
+import { MobileNav } from '@/components/wsu/MobileNav'
 
 // Define the props for the Navigation component
 interface MainNavProps {
@@ -25,12 +26,10 @@ const styles = {
   getStartedButton: "bg-white text-black shadow-md hover:shadow-lg border border-gray-200",
   loginButton: "bg-black text-white shadow-md hover:shadow-lg",
   menuToggle: "text-gray-700 md:hidden p-2 rounded-full hover:bg-gray-100 transition-all",
-  sidebarLink: "text-gray-700 hover:text-black p-3 border-l-2 border-transparent hover:border-l-2 hover:border-gray-300"
 }
 
 export function MainNav({ currentPath = '/' }: MainNavProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const sidebarRef = useRef<HTMLDivElement>(null)
   const [hasScrolled, setHasScrolled] = useState(false);
   const [showSectionNav, setShowSectionNav] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -59,39 +58,6 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
     window.addEventListener('scroll', throttledHandler, { passive: true });
     return () => window.removeEventListener('scroll', throttledHandler);
   }, [lastScrollY]);
-
-  // Close sidebar on outside click or escape key
-  useEffect(() => {
-    if (!isSidebarOpen) return;
-    
-    const handleClose = (e: MouseEvent | KeyboardEvent) => {
-      if ('key' in e && e.key === 'Escape') {
-        setIsSidebarOpen(false);
-        return;
-      }
-      
-      if ('target' in e && sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
-        setIsSidebarOpen(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClose);
-    window.addEventListener('keydown', handleClose);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClose);
-      window.removeEventListener('keydown', handleClose);
-    };
-  }, [isSidebarOpen]);
-
-  // Handle section navigation for sidebar
-  const handleSectionClick = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setIsSidebarOpen(false);
-    }
-  };
 
   // Reusable button components
   const AuthButtons = () => (
@@ -162,67 +128,12 @@ export function MainNav({ currentPath = '/' }: MainNavProps) {
         )}
       </nav>
 
-      {/* Simplified mobile sidebar overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-          aria-hidden="true"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Simplified mobile sidebar */}
-      <div 
-        ref={sidebarRef}
-        className={`fixed top-0 right-0 h-full w-[75%] max-w-xs bg-white shadow-lg z-50 
-          transform transition-transform duration-300 ease-in-out rounded-l-2xl
-          ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}
-      >
-        <div className="p-5 flex flex-col h-full">
-          {/* Close button */}
-          <div className="flex justify-end mb-4">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setIsSidebarOpen(false)} 
-              className="p-2 rounded-full"
-              aria-label="Close menu"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-          
-          {/* Mobile navigation content */}
-          <div className="flex-grow overflow-y-auto">
-            {/* Main navigation */}
-            <div className="mb-6">
-              <h3 className="text-black text-xs font-medium uppercase tracking-wider mb-3 pl-1">
-                Navigation
-              </h3>
-              <div className="space-y-1">
-                {MAIN_NAV_ITEMS.map((item) => (
-                  <Button 
-                    key={item.href}
-                    variant="ghost" 
-                    className={styles.sidebarLink}
-                    asChild
-                    onClick={() => setIsSidebarOpen(false)}
-                  >
-                    <Link href={item.href}>{item.label}</Link>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          {/* Auth buttons */}
-          <div className="pt-4 border-t border-gray-200">
-            <div className="flex flex-col space-y-2">
-              <AuthButtons />
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Mobile navigation using the new MobileNav component */}
+      <MobileNav 
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+        currentPath={currentPath}
+      />
     </>
   )
 }

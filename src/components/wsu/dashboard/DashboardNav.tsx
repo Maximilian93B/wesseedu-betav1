@@ -1,9 +1,9 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Leaf } from "lucide-react"
+import { Leaf, Menu, X } from "lucide-react"
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "@/hooks/use-auth"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
@@ -19,6 +19,7 @@ export function DashboardNav() {
   const router = useRouter()
   const [isSigningOut, setIsSigningOut] = useState(false)
   const { setIsTransitioning } = useNavigation()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Define the navigation items
   const navItems = [
@@ -33,6 +34,7 @@ export function DashboardNav() {
   const handleNavigation = (href: string) => {
     if (href !== pathname) {
       setIsTransitioning(true)
+      setMobileMenuOpen(false)
       router.push(href)
     }
   }
@@ -119,7 +121,8 @@ export function DashboardNav() {
           </Link>
         </div>
 
-        <nav className="flex-grow flex justify-center gap-4 sm:gap-6">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex flex-grow justify-center gap-4 sm:gap-6">
           {navItems.map((item) => (
             <button
               key={item.href}
@@ -144,7 +147,8 @@ export function DashboardNav() {
           ))}
         </nav>
 
-        <div className="flex-shrink-0">
+        {/* Desktop Sign Out */}
+        <div className="hidden md:block flex-shrink-0">
           <Button
             variant="ghost"
             onClick={handleSignOut}
@@ -154,7 +158,57 @@ export function DashboardNav() {
             {isSigningOut ? "Signing Out..." : "Sign Out"}
           </Button>
         </div>
+
+        {/* Mobile Menu Button */}
+        <button 
+          className="md:hidden p-2 text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-md"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
+        </button>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-slate-200 shadow-md z-40"
+          >
+            <div className="flex flex-col p-4">
+              {navItems.map((item) => (
+                <button
+                  key={item.href}
+                  onClick={() => handleNavigation(item.href)}
+                  className={`text-left py-3 px-4 text-sm font-medium ${
+                    isActive(item.href)
+                      ? 'text-slate-800 bg-slate-50'
+                      : 'text-slate-600'
+                  } hover:bg-slate-50 rounded-md transition-colors duration-300`}
+                >
+                  {item.label}
+                </button>
+              ))}
+              <Button
+                variant="ghost"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="mt-3 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-all duration-300"
+              >
+                {isSigningOut ? "Signing Out..." : "Sign Out"}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   )
 } 

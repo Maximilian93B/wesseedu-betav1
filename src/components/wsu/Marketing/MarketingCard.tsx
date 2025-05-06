@@ -3,42 +3,53 @@ import { ArrowRight, Check } from "lucide-react"
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from "@/lib/utils"
-import { useInView, motion } from "framer-motion"
+import { useInView, motion, useReducedMotion } from "framer-motion"
 import { useRef } from "react"
 import { CardData } from "./CardSectionData"
 
-// Simple entrance animation
+// Simplified entrance animation with reduced intensity
 const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 300, damping: 25 }
-  }
-};
-
-// Simple floating animation for icons
-const iconVariants = {
-  animate: {
-    y: [0, -6, 0],
-    transition: {
-      duration: 3,
-      repeat: Infinity,
-      ease: "easeInOut"
+    transition: { 
+      type: "spring", 
+      stiffness: 500, // Increased from 300
+      damping: 30,    // Increased from 25
+      mass: 0.8       // Added for faster stabilization
     }
   }
 };
 
-export function MarketingCard({ card, index, isActive = false }: { card: CardData; index: number; isActive?: boolean }) {
+// Removed floating animation for icons to improve performance
+
+interface MarketingCardProps {
+  card: CardData;
+  index: number;
+  isActive?: boolean;
+  disableAnimations?: boolean; // New prop to control animations
+}
+
+export function MarketingCard({ 
+  card, 
+  index, 
+  isActive = false,
+  disableAnimations = false
+}: MarketingCardProps) {
   const cardRef = useRef(null);
-  const isInView = useInView(cardRef, { once: true, amount: 0.3 });
+  const isInView = useInView(cardRef, { once: true, amount: 0.1 }); // Reduced from 0.3 for earlier triggering
+  const prefersReducedMotion = useReducedMotion();
+  
+  // Disable animations based on props or user preference
+  const shouldDisableAnimations = disableAnimations || !!prefersReducedMotion;
 
   return (
     <motion.div
       ref={cardRef}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
-      variants={cardVariants}
+      initial={shouldDisableAnimations ? { opacity: 1, y: 0 } : "hidden"}
+      animate={shouldDisableAnimations ? { opacity: 1, y: 0 } : (isInView ? "visible" : "hidden")}
+      variants={shouldDisableAnimations ? undefined : cardVariants}
       className={cn(
         "h-full w-full rounded-xl sm:rounded-2xl overflow-hidden",
         "relative shadow-[0_8px_30px_rgba(0,0,0,0.1)]",
@@ -67,7 +78,7 @@ export function MarketingCard({ card, index, isActive = false }: { card: CardDat
           )}
         </div>
         
-        {/* Image section - Larger and more prominent */}
+        {/* Image section - Static rendering with no animations */}
         <div className="mb-6 sm:mb-8">
           <div className="rounded-xl overflow-hidden">
             <div className="relative" style={{ aspectRatio: "3/2" }}>
@@ -77,8 +88,10 @@ export function MarketingCard({ card, index, isActive = false }: { card: CardDat
                   alt={card.title}
                   fill
                   className="object-contain scale-80"
-                  loading="lazy"
+                  loading={index <= 2 ? "eager" : "lazy"} // Load first few cards eagerly
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                  // Add priority to first card for better LCP
+                  priority={index === 0}
                 />
               </div>
             </div>
@@ -105,7 +118,7 @@ export function MarketingCard({ card, index, isActive = false }: { card: CardDat
           </div>
         )}
 
-        {/* Highlights section */}
+        {/* Highlights section - Simplified with no animations */}
         {card.highlights && (
           <div className="mb-6 sm:mb-8">
             <ul className="flex flex-col gap-2 sm:gap-4">
@@ -121,13 +134,13 @@ export function MarketingCard({ card, index, isActive = false }: { card: CardDat
           </div>
         )}
 
-        {/* Button section */}
+        {/* Button section - Simplified hover effect */}
         {card.buttonText && (
           <div className="mt-auto">
             <Button 
               asChild 
               className="w-full bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
-                       shadow-sm hover:shadow transition-all duration-300 
+                       shadow-sm hover:shadow transition-all duration-200 
                        rounded-lg py-3 sm:py-5 text-sm sm:text-base font-helvetica"
             >
               <Link href={card.buttonHref || '#'}>

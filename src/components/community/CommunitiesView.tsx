@@ -63,7 +63,7 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
   const { setIsTransitioning } = useNavigation()
   const { toast } = useToast()
 
-  // Change requireAuth to false to prevent automatic redirects
+  // Change requireAuth to false to prevent automatic redirects, matching CompaniesView approach
   const { user, loading: authLoading, isAuthenticated } = useAuth({ 
     requireAuth: false,
     checkOnMount: false 
@@ -71,9 +71,8 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
   
   const [localLoading, setLocalLoading] = useState(true)
   const dataInitiatedRef = useRef(false)
-  const [retryCount, setRetryCount] = useState(0)
-  const maxRetries = 2
-  const authAttemptedRef = useRef(false)
+  const isMountedRef = useRef(true)
+  const fetchInProgressRef = useRef(false)
   
   // Use the community filters hook with empty search query
   const {
@@ -112,56 +111,11 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     }
   }, [user, authLoading, isAuthenticated, fetchCommunities, fetchCompanies]);
 
-  // Handle auth errors with safe redirect approach
-  const handleAuthError = useCallback(() => {
-    // Only redirect once to prevent loops
-    if (!authAttemptedRef.current) {
-      authAttemptedRef.current = true;
-      console.log('CommunitiesView: Authentication required, redirecting to login');
-      
-      // Use window.location.href for reliable full page navigation
-      const returnPath = encodeURIComponent('/dashboard/communities');
-      window.location.href = `/auth/login?returnTo=${returnPath}`;
-    }
+  // Handle login button click with direct navigation, similar to DashboardView
+  const handleLogin = useCallback(() => {
+    const returnPath = encodeURIComponent('/dashboard/communities');
+    window.location.href = `/auth/login?returnTo=${returnPath}`;
   }, []);
-
-  // Auto-retry on error with exponential backoff
-  useEffect(() => {
-    if ((communitiesError || companiesError) && retryCount < maxRetries) {
-      const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized";
-      
-      // For unauthorized errors, handle auth error directly
-      if (isUnauthorized) {
-        console.log(`CommunitiesView: Auth error detected on attempt ${retryCount + 1}`);
-        
-        // Try one more time before redirecting
-        if (retryCount === maxRetries - 1) {
-          handleAuthError();
-        } else {
-          const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 8000);
-          const retryId = setTimeout(() => {
-            fetchCommunities();
-            fetchCompanies();
-          }, backoffTime);
-          
-          setRetryCount(prev => prev + 1);
-          return () => clearTimeout(retryId);
-        }
-      } else {
-        // For other errors, retry with backoff
-        const backoffTime = Math.min(1000 * Math.pow(2, retryCount), 8000);
-        console.log(`CommunitiesView: Error fetching data, retry ${retryCount + 1} in ${backoffTime}ms`);
-        
-        const retryId = setTimeout(() => {
-          fetchCommunities();
-          fetchCompanies();
-        }, backoffTime);
-        
-        setRetryCount(prev => prev + 1);
-        return () => clearTimeout(retryId);
-      }
-    }
-  }, [communitiesError, companiesError, retryCount, fetchCommunities, fetchCompanies, handleAuthError]);
 
   // When data starts or finishes loading, update local state
   useEffect(() => {
@@ -191,6 +145,15 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     return () => clearTimeout(timeoutId);
   }, [localLoading]);
 
+  // Cleanup on component unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   // Unified loading state that will eventually resolve
   const isLoading = localLoading || (authLoading && !dataInitiatedRef.current);
 
@@ -203,7 +166,6 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
   // Handle refresh button click
   const handleRefresh = useCallback(() => {
     console.log('CommunitiesView: Manual refresh requested');
-    setRetryCount(0);
     dataInitiatedRef.current = false;
     
     // Show toast for user feedback
@@ -217,16 +179,11 @@ export function CommunitiesView({ onCommunitySelect }: CommunitiesViewProps) {
     fetchCompanies();
   }, [fetchCommunities, fetchCompanies, toast]);
 
-  // Handle login button click with direct navigation
-  const handleLogin = useCallback(() => {
-    const returnPath = encodeURIComponent('/dashboard/communities');
-    window.location.href = `/auth/login?returnTo=${returnPath}`;
-  }, []);
-
   // Show error state if there's an issue with the API
-  if ((communitiesError || companiesError) && !communitiesLoading && !companiesLoading && retryCount >= maxRetries) {
-    const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized"
-    
+  const isUnauthorized = communitiesError === "Unauthorized" || companiesError === "Unauthorized";
+  const hasError = (communitiesError || companiesError) && !communitiesLoading && !companiesLoading;
+  
+  if (hasError) {
     return (
       <motion.div 
         initial="hidden"

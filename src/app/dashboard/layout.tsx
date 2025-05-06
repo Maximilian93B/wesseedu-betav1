@@ -2,7 +2,6 @@
 
 import { ReactNode, useEffect, useState } from "react"
 import { DashboardNav } from "@/components/wsu/dashboard/DashboardNav"
-import Head from "next/head"
 import { useAuth } from "@/hooks/use-auth"
 import { LoadingScreen } from "@/components/wsu/home"
 import { useRouter } from "next/navigation"
@@ -92,20 +91,11 @@ export default function DashboardLayout({
   console.log("DashboardLayout: Rendering dashboard with authorized user");
   return (
     <NavigationProvider>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      </Head>
-      <div 
-        className="min-h-screen" 
-        style={{ 
-          background: 'linear-gradient(115deg, #70f570, #49c628)',
-          backgroundAttachment: 'fixed'
-        }}
-      >
+      <div className="min-h-screen">
         <DashboardNav />
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+        <main className="w-full">
           {children}
-        </div>
+        </main>
       </div>
     </NavigationProvider>
   )

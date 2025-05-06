@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Leaf, Mail, CheckCircle2 } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function ConfirmationPage() {
   const router = useRouter()
@@ -131,56 +132,113 @@ export default function ConfirmationPage() {
     }
   }
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        duration: 0.5
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { y: 10, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background text-black">
-      <Card className="w-[400px] max-w-[90vw]">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-2">
-            <Leaf className="h-10 w-10 text-primary" />
-          </div>
-          <CardTitle className="text-2xl text-center">Email Verification</CardTitle>
-          <CardDescription className="text-center">Verify your email to continue</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          {error ? (
-            <Alert variant="destructive">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : (
-            <Alert variant="default" className={isVerified ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"}>
-              {isVerified ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-[#70f570] to-[#49c628] text-black">
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+        className="w-[400px] max-w-[90vw]"
+      >
+        <Card className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.1)]">
+          <CardHeader className="space-y-1">
+            <motion.div 
+              variants={itemVariants}
+              className="flex items-center justify-center mb-2"
+            >
+              <div className="h-12 w-12 rounded-full flex items-center justify-center bg-gradient-to-r from-[#70f570] to-[#49c628] shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                <Leaf className="h-6 w-6 text-white" />
+              </div>
+            </motion.div>
+            <motion.div variants={itemVariants}>
+              <CardTitle className="text-xl sm:text-2xl font-extrabold text-black leading-tight tracking-tight font-display text-center">
+                Email Verification
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base text-black mt-2 leading-relaxed font-body text-center">
+                Verify your email to continue
+              </CardDescription>
+            </motion.div>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <motion.div variants={itemVariants}>
+              {error ? (
+                <Alert variant="destructive" className="border border-red-200 bg-red-50">
+                  <AlertTitle className="font-semibold font-display">Error</AlertTitle>
+                  <AlertDescription className="text-sm font-body">{error}</AlertDescription>
+                </Alert>
               ) : (
-                <Mail className="h-4 w-4 text-blue-500" />
+                <Alert 
+                  variant="default" 
+                  className={isVerified 
+                    ? "bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200" 
+                    : "bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200"
+                  }
+                >
+                  {isVerified ? (
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Mail className="h-4 w-4 text-blue-500" />
+                  )}
+                  <AlertTitle className="font-semibold font-display">
+                    {isVerified ? "Verification Successful" : "Check your email"}
+                  </AlertTitle>
+                  <AlertDescription className="text-sm font-body">{message}</AlertDescription>
+                  {isVerified && (
+                    <p className="text-sm mt-2 font-body">Redirecting to onboarding...</p>
+                  )}
+                </Alert>
               )}
-              <AlertTitle>{isVerified ? "Verification Successful" : "Check your email"}</AlertTitle>
-              <AlertDescription>{message}</AlertDescription>
-              {isVerified && (
-                <p className="text-sm mt-2">Redirecting to onboarding...</p>
-              )}
-            </Alert>
-          )}
-          {error && (
-            <div className="space-y-2">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Button className="w-full" onClick={handleResendVerification} disabled={isLoading}>
-                {isLoading ? "Sending..." : "Resend Verification Email"}
-              </Button>
-            </div>
-          )}
-        </CardContent>
-        <CardFooter>
-          <p className="text-sm text-center text-muted-foreground w-full text-black">
-            If you don&apos;t see the email, please check your spam folder.
-          </p>
-        </CardFooter>
-      </Card>
+            </motion.div>
+            {error && (
+              <motion.div variants={itemVariants} className="space-y-3">
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="rounded-lg border-white/20 focus:border-white/30 focus:ring-green-500/20 font-body text-black"
+                />
+                <Button 
+                  className="w-full bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-semibold
+                  shadow-sm hover:shadow transition-all duration-300 rounded-lg py-3 font-helvetica"
+                  onClick={handleResendVerification} 
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Sending..." : "Resend Verification Email"}
+                </Button>
+              </motion.div>
+            )}
+          </CardContent>
+          <CardFooter>
+            <motion.p 
+              variants={itemVariants}
+              className="text-sm text-center w-full text-black/70 font-body"
+            >
+              If you don&apos;t see the email, please check your spam folder.
+            </motion.p>
+          </CardFooter>
+        </Card>
+      </motion.div>
     </div>
   )
 }

@@ -85,7 +85,7 @@ export function DashboardExplainer() {
       title: " WSU Communities",
       description: "Connect with like-minded investors and learn from ambassador-led sustainable investing communities.",
       path: "/dashboard/communities",
-      imageSrc:"/pexels-aboodi-18620005.jpg",
+      imageSrc:"/community_preview.png",
       features: [
         "Join thematic investment groups",
         "Expert-led discussions",
@@ -102,11 +102,11 @@ export function DashboardExplainer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 mb-3 sm:mb-4 relative inline-block font-display">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-4 sm:mb-6 font-display"> 
             Your Dashboard Tour
             <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-16 sm:w-20 md:w-24 h-[2px] bg-gradient-to-r from-[#70f570]/30 via-[#49c628] to-[#70f570]/30"></span>
-          </h2>
-          <p className="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed font-body px-2">
+          </h1>
+          <p className="text-slate-800 max-w-2xl mx-auto text-lg sm:text-xl leading-relaxed font-body px-2">
             Follow this step-by-step guide to navigate through the key sections of your sustainable investing dashboard.
           </p>
         </div>
@@ -127,7 +127,7 @@ export function DashboardExplainer() {
             >
               {/* Step number - visible on all screens */}
               <div className="flex items-center mb-4 sm:mb-6">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-[#70f570] to-[#49c628] flex items-center justify-center text-white font-bold shadow-md text-sm sm:text-base mr-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-[#70f570] to-[#49c628] flex items-center justify-center text-black font-bold shadow-md text-sm sm:text-base mr-3">
                   {index + 1}
                 </div>
                 <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 font-display">{section.title}</h3>
@@ -147,14 +147,14 @@ export function DashboardExplainer() {
                     {section.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start">
                         <div className="flex-shrink-0 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-gradient-to-br from-[#70f570] to-[#49c628] flex items-center justify-center mt-0.5 mr-2 sm:mr-3">
-                          <CircleDot className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
+                          <CircleDot className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-black" />
                         </div>
                         <span className="text-slate-700 text-xs sm:text-sm font-body">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   
-                  <Button asChild className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] rounded-full px-5 sm:px-7 py-2.5 sm:py-3 font-semibold transition-all duration-300 group w-full sm:w-auto h-auto text-xs sm:text-sm font-helvetica">
+                  <Button asChild className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-black shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] rounded-full px-5 sm:px-7 py-2.5 sm:py-3 font-semibold transition-all duration-300 group w-full sm:w-auto h-auto text-xs sm:text-sm font-helvetica">
                     <Link href={section.path} className="flex items-center justify-center">
                       {section.cta}
                       <ArrowRight className="ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4 transform -translate-x-0.5 group-hover:translate-x-1.5 transition-transform duration-300 ease-in-out" />
@@ -212,7 +212,7 @@ export function DashboardExplainer() {
         >
           <Button
             asChild
-            className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] rounded-full px-5 sm:px-8 py-2.5 sm:py-4 text-sm sm:text-base font-semibold hover:translate-y-[-2px] transition-all duration-300 group font-helvetica"
+            className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-black shadow-[0_4px_14px_rgba(0,0,0,0.1)] hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] rounded-full px-5 sm:px-8 py-2.5 sm:py-4 text-sm sm:text-base font-semibold hover:translate-y-[-2px] transition-all duration-300 group font-helvetica"
           >
             <Link href="/dashboard/overview">
               <span className="relative z-10 flex items-center justify-center">

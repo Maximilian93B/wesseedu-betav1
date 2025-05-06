@@ -1,26 +1,30 @@
 import { useRef, useEffect, useState } from "react"
-import { motion, useInView, AnimatePresence } from "framer-motion"
+import { motion, useInView, AnimatePresence, useReducedMotion } from "framer-motion"
 import { Check, ArrowRight } from "lucide-react"
 import { CARDS } from "./CardSectionData"
 import { MarketingCard } from "./MarketingCard"
 
+// Disable animations in production for better performance
+const ENABLE_ANIMATIONS = false;
+
+// Simplified variants with minimal animation
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { 
     opacity: 1,
     transition: { 
-      staggerChildren: 0.08,
-      duration: 0.5
+      staggerChildren: 0.03,
+      duration: 0.2
     }
   }
 }
 
 const itemVariants = {
-  hidden: { y: 10, opacity: 0 },
+  hidden: { y: 5, opacity: 0 },
   visible: { 
     y: 0, 
     opacity: 1,
-    transition: { type: "spring", stiffness: 300, damping: 24 }
+    transition: { type: "spring", stiffness: 500, damping: 40 }
   }
 }
 
@@ -33,46 +37,53 @@ export function CardSection() {
   const [startX, setStartX] = useState(0);
   const [isMobileView, setIsMobileView] = useState(false);
   
-  // Check for mobile view
+  // Check if user prefers reduced motion
+  const prefersReducedMotion = useReducedMotion();
+  
+  // Disable animations based on environment, user preference, or mobile
+  const disableAnimations = !ENABLE_ANIMATIONS || !!prefersReducedMotion || isMobileView;
+  
+  // Check for mobile view with debounce
   useEffect(() => {
     const checkMobile = () => {
       setIsMobileView(window.innerWidth < 768);
     };
     
-    // Check on initial load
     checkMobile();
     
-    // Add event listener for window resize
-    window.addEventListener('resize', checkMobile);
+    let timeoutId: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkMobile, 100);
+    };
     
-    // Cleanup
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('resize', handleResize, { passive: true });
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timeoutId);
+    };
   }, []);
   
   const nextSlide = () => setActiveIndex((prev) => (prev + 1) % CARDS.length);
   const prevSlide = () => setActiveIndex((prev) => (prev === 0 ? CARDS.length - 1 : prev - 1));
   
-  // Click handler for cards
+  // Card click handler - simplified
   const handleCardClick = (index: number) => {
-    if (index === activeIndex) return; // Already active card
-    
-    // Determine if we're going forward or backward
-    const normalizedPosition = (index - activeIndex + CARDS.length) % CARDS.length;
-    if (normalizedPosition <= CARDS.length / 2 && normalizedPosition !== 0) {
-      nextSlide();
-    } else if (normalizedPosition !== 0) {
-      prevSlide();
-    }
+    if (index === activeIndex) return;
+    setActiveIndex(index);
   };
   
+  // Optimized drag handlers
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    if (disableAnimations) return;
     setIsDragging(true);
     const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
     setStartX(clientX || 0);
   };
   
   const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || disableAnimations) return;
     const clientX = 'touches' in e ? e.touches[0]?.clientX : e.clientX;
     const diff = startX - (clientX || 0);
     
@@ -84,6 +95,7 @@ export function CardSection() {
   
   const handleDragEnd = () => setIsDragging(false);
   
+  // Simplified keydown handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") nextSlide();
@@ -94,24 +106,27 @@ export function CardSection() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
   
-  // Animation keyframes
+  // Remove animation styles for better performance
   useEffect(() => {
+    if (disableAnimations) return;
+    
+    // Use less resource-intensive animations
     const style = document.createElement('style');
     style.innerHTML = `
       @keyframes subtle-float {
         0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-5px); }
+        50% { transform: translateY(-2px); }
       }
       .animate-subtle-float {
-        animation: subtle-float 6s ease-in-out infinite;
+        animation: subtle-float 9s ease-in-out infinite;
       }
       
       @keyframes gentle-glow {
         0%, 100% { opacity: 0.4; }
-        50% { opacity: 0.7; }
+        50% { opacity: 0.55; }
       }
       .animate-gentle-glow {
-        animation: gentle-glow 8s ease-in-out infinite;
+        animation: gentle-glow 12s ease-in-out infinite;
       }
     `;
     document.head.appendChild(style);
@@ -119,24 +134,28 @@ export function CardSection() {
     return () => {
       document.head.removeChild(style);
     };
-  }, []);
+  }, [disableAnimations]);
   
   return (
     <div className="w-full relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden">
       {/* Green Apple gradient background */}
       
-      {/* Background pattern */}
+      {/* Background pattern - reduced opacity for better performance */}
       <div 
-        className="absolute inset-0 opacity-[0.05]"
+        className="absolute inset-0 opacity-[0.02]"
         style={{
           backgroundImage: `radial-gradient(circle at 20px 20px, white 1px, transparent 1px)`,
           backgroundSize: "40px 40px"
         }}
       ></div>
       
-      {/* Background glow effects */}
-      <div className="absolute top-1/4 right-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-gentle-glow"></div>
-      <div className="absolute bottom-1/4 left-1/4 w-[800px] h-[800px] bg-white/15 rounded-full blur-[150px] -z-10 animate-gentle-glow" style={{ animationDelay: '-4s' }}></div>
+      {/* Background glow effects - simplified and reduced for better performance */}
+      {!disableAnimations && (
+        <>
+          <div className="absolute top-1/4 right-1/4 w-[800px] h-[800px] bg-white/10 rounded-full blur-[150px] -z-10 animate-gentle-glow"></div>
+          <div className="absolute bottom-1/4 left-1/4 w-[800px] h-[800px] bg-white/10 rounded-full blur-[150px] -z-10 animate-gentle-glow" style={{ animationDelay: '-5s' }}></div>
+        </>
+      )}
       
       <div 
         ref={sectionRef} 
@@ -145,14 +164,17 @@ export function CardSection() {
       >
         {/* Header Section */}
         <motion.div 
-          variants={containerVariants}
+          variants={disableAnimations ? undefined : containerVariants}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
           className="w-full text-center mb-10 sm:mb-12 md:mb-16 max-w-3xl mx-auto"
         >
           {/* Header Badge */}
-          <motion.div variants={itemVariants} className="inline-block mb-4 sm:mb-5">
-            <span className="inline-flex items-center px-3 py-1 text-[10px] sm:text-xs font-medium rounded-full text-white border border-white/30 shadow-[0_4px_12px_rgba(0,0,0,0.05)]"
+          <motion.div 
+            variants={disableAnimations ? undefined : itemVariants}
+            className="inline-block mb-4 sm:mb-5"
+          >
+            <span className="inline-flex items-center px-3 py-1 text-[10px] sm:text-xs font-medium rounded-full text-white border border-white/30 shadow-sm"
               style={{ background: 'linear-gradient(115deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))' }}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse mr-1.5"></span>
@@ -162,15 +184,15 @@ export function CardSection() {
           
           {/* Main Heading */}
           <motion.h2 
-            variants={itemVariants} 
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-extrabold text-white tracking-tight leading-[1.15] mb-4 sm:mb-5 drop-shadow-sm font-display"
+            variants={disableAnimations ? undefined : itemVariants}
+            className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-[1.15] mb-4 sm:mb-5 drop-shadow-sm font-display"
           >
             Your Gateway to Impact Investing
           </motion.h2>
           
           {/* Subheading */}
           <motion.p 
-            variants={itemVariants}
+            variants={disableAnimations ? undefined : itemVariants}
             className="text-base sm:text-lg md:text-lg text-white/95 max-w-2xl mx-auto mb-6 sm:mb-10 font-medium font-body"
           >
             Join our community of impact investors gaining early access to high-potential sustainable startups.
@@ -178,7 +200,7 @@ export function CardSection() {
           
           {/* Trust indicators */}
           <motion.div 
-            variants={itemVariants}
+            variants={disableAnimations ? undefined : itemVariants}
             className="flex flex-wrap justify-center gap-x-4 sm:gap-x-6 md:gap-x-10 gap-y-3 sm:gap-y-4 w-full"
           >
             <span className="flex items-center text-sm sm:text-base text-white font-body">
@@ -208,14 +230,14 @@ export function CardSection() {
           <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-between items-center z-30 px-0 sm:-mx-6 md:-mx-10 lg:-mx-16">
             <button 
               onClick={prevSlide}
-              className="w-8 h-8 sm:w-9 md:w-10 sm:h-9 md:h-10 rounded-full bg-white/50 backdrop-blur-md text-black flex items-center justify-center border border-white/50 shadow-lg hover:bg-white/70 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.25)]"
+              className="w-8 h-8 sm:w-9 md:w-10 sm:h-9 md:h-10 rounded-full bg-white/50 backdrop-blur-md text-black flex items-center justify-center border border-white/50 shadow-lg hover:bg-white/70 transition-all duration-300"
               aria-label="Previous slide"
             >
               <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
             </button>
             <button 
               onClick={nextSlide}
-              className="w-8 h-8 sm:w-9 md:w-10 sm:h-9 md:h-10 rounded-full bg-white/50 backdrop-blur-md text-black flex items-center justify-center border border-white/50 shadow-lg hover:bg-white/70 transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_15px_rgba(255,255,255,0.25)]"
+              className="w-8 h-8 sm:w-9 md:w-10 sm:h-9 md:h-10 rounded-full bg-white/50 backdrop-blur-md text-black flex items-center justify-center border border-white/50 shadow-lg hover:bg-white/70 transition-all duration-300"
               aria-label="Next slide"
             >
               <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -242,12 +264,13 @@ export function CardSection() {
                 if (!visible) return null;
                 
                 const zIndex = 20 - Math.abs(normalizedPosition) * 5;
-                // Adjust scale and transforms for mobile view
-                const scale = normalizedPosition === 0 ? 1 : (isMobileView ? 0.90 : 0.88) - Math.abs(normalizedPosition) * (isMobileView ? 0.06 : 0.08);
-                const opacity = normalizedPosition === 0 ? 1 : 0.65 - Math.abs(normalizedPosition) * 0.3;
                 
-                const xPosition = normalizedPosition === 0 ? 0 : `${normalizedPosition * (isMobileView ? 45 : 70)}%`;
-                const yPosition = normalizedPosition === 0 ? 0 : (isMobileView ? 15 : 25) * Math.abs(normalizedPosition);
+                // Simplified positioning logic with reduced effects for better performance
+                const scale = normalizedPosition === 0 ? 1 : (isMobileView ? 0.96 : 0.94);
+                const opacity = normalizedPosition === 0 ? 1 : 0.8;
+                
+                const xPosition = normalizedPosition === 0 ? 0 : `${normalizedPosition * (isMobileView ? 30 : 45)}%`;
+                const yPosition = normalizedPosition === 0 ? 0 : (isMobileView ? 8 : 12);
                 
                 return (
                   <motion.div
@@ -258,29 +281,41 @@ export function CardSection() {
                       maxWidth: "100%"
                     }}
                     initial={{ opacity: 0 }}
-                    animate={{ 
-                      x: xPosition,
-                      y: yPosition,
-                      scale,
-                      opacity,
-                      zIndex,
-                      filter: normalizedPosition !== 0 ? 'brightness(0.92) blur(1px)' : 'brightness(1)'
-                    }}
-                    exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                    animate={disableAnimations ? 
+                      { 
+                        x: normalizedPosition === 0 ? 0 : (normalizedPosition * 100), 
+                        opacity: normalizedPosition === 0 ? 1 : 0,
+                        scale: 1,
+                        zIndex
+                      } : 
+                      { 
+                        x: xPosition,
+                        y: yPosition,
+                        scale,
+                        opacity,
+                        zIndex,
+                        willChange: 'transform, opacity'
+                      }
+                    }
+                    exit={{ opacity: 0, transition: { duration: 0.1 } }}
                     transition={{
                       type: "spring",
-                      stiffness: 400,
-                      damping: 30
+                      stiffness: 600,
+                      damping: 50,
+                      mass: 0.6
                     }}
                     onClick={() => handleCardClick(index)}
-                    whileHover={{
-                      scale: scale * 1.02,
-                      y: yPosition - 5,
-                      filter: normalizedPosition === 0 ? 'brightness(1.05)' : 'brightness(0.95)',
-                      transition: { duration: 0.2 }
+                    whileHover={disableAnimations ? {} : {
+                      scale: scale * 1.01,
+                      y: yPosition - 3,
+                      transition: { duration: 0.15 }
                     }}
                   >
-                    <MarketingCard card={card} index={index} isActive={normalizedPosition === 0} />
+                    <MarketingCard 
+                      card={card} 
+                      index={index} 
+                      isActive={normalizedPosition === 0} 
+                    />
                   </motion.div>
                 );
               })}
@@ -293,9 +328,9 @@ export function CardSection() {
               <button 
                 key={idx}
                 onClick={() => setActiveIndex(idx)}
-                className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 ${
+                className={`h-2 sm:h-2.5 rounded-full transition-all duration-200 ${
                   idx === activeIndex 
-                    ? 'bg-white w-5 sm:w-7 shadow-[0_0_8px_rgba(255,255,255,0.6)]'
+                    ? 'bg-white w-5 sm:w-7 shadow-sm' 
                     : 'bg-white/40 w-2 sm:w-2.5 hover:bg-white/60'
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
@@ -306,7 +341,7 @@ export function CardSection() {
         
         {/* Bottom note/footer */}
         <div className="w-full text-center mt-4 sm:mt-5 mb-2 sm:mb-3">
-          <div className="inline-flex flex-wrap justify-center items-center px-3 py-2 sm:px-4 sm:py-2.5 bg-white/10 backdrop-blur-md text-white border border-white/30 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.04)]">
+          <div className="inline-flex flex-wrap justify-center items-center px-3 py-2 sm:px-4 sm:py-2.5 bg-white/10 backdrop-blur-md text-white border border-white/30 rounded-full shadow-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-white/80 mr-2 animate-pulse"></span>
             <span className="text-xs sm:text-sm font-medium font-helvetica">Limited spots</span>
             <span className="mx-1.5 sm:mx-2.5 text-white/50">•</span>

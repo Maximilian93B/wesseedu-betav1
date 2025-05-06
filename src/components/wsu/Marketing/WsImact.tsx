@@ -97,7 +97,7 @@ export function SustainableImpactSection() {
             id="sustainable-impact-heading"
             className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white leading-tight"
           >
-            Sustainable Investing Insights
+            Better Investing, Better Impact
           </motion.h2>
           
           {/* Description */}
@@ -105,7 +105,7 @@ export function SustainableImpactSection() {
             variants={itemVariants}
             className="text-base sm:text-lg max-w-2xl mx-auto text-white/90 leading-relaxed"
           >
-            Get exclusive access to expert analysis, market trends, and investment opportunities when you join WeSeedU.
+            Get access to expert insights, market trends, and sustainable opportunities that help you invest smarter while making a positive difference.
           </motion.p>
         </div>
 
@@ -134,7 +134,7 @@ export function SustainableImpactSection() {
               <div className="p-4 sm:p-5 md:p-6">
                 <h3 className="text-lg sm:text-xl font-bold text-slate-800 mb-2 sm:mb-2.5 line-clamp-1">Your Money Changes Tomorrow</h3>
                 <p className="text-sm sm:text-base text-slate-600 mb-3 sm:mb-4 line-clamp-2">
-                  In today&apos;s rapidly changing world, where climate challenges and social inequities persist, WeSeedU offers a revolutionary approach to financial investment...
+                  Learn how your investments can create both good returns and positive change in today&apos;s markets where sustainable companies are leading the way...
                 </p>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-1 gap-2 sm:gap-0">
                   <div className="flex items-center text-sm text-slate-500">
@@ -153,14 +153,14 @@ export function SustainableImpactSection() {
                 {
                   image: "/images/pexels-pavel-danilyuk-8438975.jpg",
                   title: "2024 Sustainable Investment Trends",
-                  desc: "Discover the latest trends shaping the future of sustainable finance...",
+                  desc: "See which sustainable sectors are growing fastest this year...",
                   icon: <TrendingUp size={14} className="mr-1.5 sm:mr-2 flex-shrink-0" />,
                   label: "Market Analysis"
                 },
                 {
                   image: "/images/pexels-googledeepmind-17485678.jpg",
-                  title: "Understanding ESG Metrics",
-                  desc: "How environmental, social, and governance factors are measured...",
+                  title: "Understanding ESG: What Really Matters",
+                  desc: "Learn how successful investors identify sustainable companies...",
                   icon: <BookMarked size={14} className="mr-1.5 sm:mr-2 flex-shrink-0" />,
                   label: "Investment Guide"
                 }
@@ -203,9 +203,9 @@ export function SustainableImpactSection() {
                 </div>
               </div>
               
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] mb-3 sm:mb-4 break-words">Unlock Premium Content</h3>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)] mb-3 sm:mb-4 break-words">Join Our Community</h3>
               <p className="text-base text-white/90 font-medium mb-4 sm:mb-5 leading-relaxed">
-                Join WeSeedU today to access our complete library of sustainable investing articles, market analysis, and exclusive research.
+                Become a WeSeedU member today to access our research, analysis, and investment strategies that help members make smarter sustainable investments.
               </p>
 
               <div className="mb-5 sm:mb-6">
@@ -213,10 +213,10 @@ export function SustainableImpactSection() {
                 <ul className="space-y-2.5 sm:space-y-3">
                   {/* Benefits list */}
                   {[
-                    "Exclusive investment insights and analysis",
-                    "Weekly market trends and opportunities",
-                    "Portfolio impact tracking and reports",
-                    "Sustainable investment community access"
+                    "Access to exclusive investment research and insights",
+                    "Regular updates on sustainable investment opportunities",
+                    "Tools to track your portfolio's performance and impact",
+                    "Connect with our community of sustainable investors"
                   ].map((benefit, idx) => (
                     <li key={idx} className="flex items-start">
                       <div className="mr-2 sm:mr-2.5 mt-1 sm:mt-0.5 text-blue-300 flex-shrink-0">•</div>
@@ -259,13 +259,14 @@ export function SustainableImpactSection() {
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star key={star} size={isMobile ? 14 : 16} className="text-yellow-400 fill-yellow-400" />
                         ))}
+                        <span className="ml-1 text-white text-xs sm:text-sm font-semibold">4.8/5</span>
                       </div>
                     </div>
                     
                     {/* Testimonial */}
                     <div className="bg-white/10 rounded-lg p-3 sm:p-3.5 border border-white/10">
                       <p className="text-white/90 text-sm italic mb-1.5 sm:mb-2 leading-relaxed">
-                        &quot;WeSeedU has transformed how I approach sustainable investing. The insights and community have been invaluable to my portfolio growth.&quot;
+                        &quot;WeSeedU helped me make smarter investment choices. Their research and community support have made a real difference in my portfolio.&quot;
                       </p>
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-white text-sm font-semibold">Maxwell.B</p>
