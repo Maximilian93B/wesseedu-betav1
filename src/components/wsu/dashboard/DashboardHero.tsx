@@ -21,9 +21,47 @@ export function DashboardHero({
   const [hideBalance, setHideBalance] = useState(false)
   
   const totalInvestments = profile?.total_investments || 0
+  const previousMonthInvestments = profile?.previous_month_investments || 0
   const savedCompaniesCount = profile?.saved_companies_count || 0
   const impactScore = profile?.impact_score || 0
   const communitySize = profile?.community_size || 0
+  
+  // Calculate actual growth percentage
+  const calculateGrowthPercentage = () => {
+    if (!previousMonthInvestments || previousMonthInvestments === 0) {
+      return totalInvestments > 0 ? "New" : "0%";
+    }
+    
+    const growthPercentage = ((totalInvestments - previousMonthInvestments) / previousMonthInvestments) * 100;
+    const formattedGrowth = growthPercentage.toFixed(1);
+    
+    if (growthPercentage > 0) {
+      return `+${formattedGrowth}%`;
+    } else if (growthPercentage < 0) {
+      return `${formattedGrowth}%`;
+    } else {
+      return "0%";
+    }
+  };
+  
+  // Calculate yearly projected impact based on current growth
+  const calculateYearlyProjection = () => {
+    if (!previousMonthInvestments || previousMonthInvestments === 0) {
+      return totalInvestments > 0 ? "+100%" : "0%";
+    }
+    
+    // Simplified projection based on current month-to-month growth
+    // Annualized by applying the growth rate over 12 months
+    const growthRate = (totalInvestments - previousMonthInvestments) / previousMonthInvestments;
+    if (growthRate <= 0) return "0%";
+    
+    // Project forward for a year (simplified) - capped at 100% for reasonability
+    const projectedGrowth = Math.min(growthRate * 12 * 100, 100);
+    return `+${projectedGrowth.toFixed(0)}%`;
+  };
+  
+  const growthIndicator = calculateGrowthPercentage();
+  const yearlyProjection = calculateYearlyProjection();
   
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -173,7 +211,7 @@ export function DashboardHero({
                     <div className="ml-[3.25rem] flex items-center mt-1">
                       <div className="flex items-center bg-white/10 text-white px-2 py-0.5 rounded-full text-[10px]">
                         <TrendingUp className="h-2.5 w-2.5 mr-1" />
-                        <span>+5.2% this month</span>
+                        <span>{growthIndicator === "New" ? "New investment" : `${growthIndicator} this month`}</span>
                       </div>
                     </div>
                   </div>
@@ -206,7 +244,7 @@ export function DashboardHero({
                     {/* Projection message */}
                     <div className="mt-3 pt-2 border-t border-white/20 text-center">
                       <div className="text-white/80 text-[10px]">
-                        Projected yearly impact: <span className="font-bold">+27%</span>
+                        Projected yearly impact: <span className="font-bold">{yearlyProjection}</span>
                       </div>
                     </div>
                   </div>

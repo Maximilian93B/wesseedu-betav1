@@ -128,14 +128,14 @@ export default function LandingPage() {
   return (
     <LazyMotion features={domAnimation}>
       <div className="relative min-h-screen w-full overflow-x-hidden" 
-        style={{ background: 'linear-gradient(115deg, #49c628 0%, #49c628 100%)' }}>
+        style={{ background: 'white' }}>
         {/* Navigation Component */}
         {isMounted && <MainNav currentPath={pathname} />}
         
         {/* Scroll progress indicator - only shown if effects enabled */}
         {!disableScrollEffects && (
           <motion.div
-            className="fixed top-0 left-0 right-0 h-1 bg-slate-800 z-50 origin-left"
+            className="fixed top-0 left-0 right-0 h-1 bg-[#49c628] z-50 origin-left"
             style={{ scaleX, willChange: 'transform' }}
           />
         )}
@@ -148,14 +148,14 @@ export default function LandingPage() {
         >
           <main 
             ref={mainRef}
-            className="relative w-full min-h-screen overflow-x-hidden"
+            className="relative w-full min-h-screen overflow-x-hidden bg-white"
           >
             {/* Hero Section */}
             <ParallaxSection
               id="hero-section"
               effect={parallaxEffects.hero}
               zIndex={20}
-              className={`${isMobileDevice ? 'min-h-fit' : 'min-h-screen'} flex items-center justify-center ${isMobileDevice ? 'pt-16 pb-8' : 'pt-20 md:pt-24 lg:pt-28 mb-20 md:mb-24 lg:mb-32'}`}
+              className={`${isMobileDevice ? 'min-h-fit' : 'min-h-screen'} flex items-center justify-center ${isMobileDevice ? 'pt-16 pb-8' : 'pt-20 md:pt-24 lg:pt-28 mb-20 md:mb-24 lg:mb-32'} bg-white`}
             >
               {isMobileDevice ? <MobileHero /> : <HeroSection />}
             </ParallaxSection>
@@ -165,7 +165,7 @@ export default function LandingPage() {
               id="card-section"
               effect={parallaxEffects.card}
               zIndex={15}
-              className="w-full mb-20 md:mb-24 lg:mb-32 overflow-x-hidden"
+              className="w-full mb-20 md:mb-24 lg:mb-32 overflow-x-hidden bg-white"
             >
               <CardSection />
             </ParallaxSection>
@@ -175,100 +175,92 @@ export default function LandingPage() {
               id="partners-section"
               effect={parallaxEffects.partners}
               zIndex={10}
-              className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
+              className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto bg-white"
             >
               <PartnersAndVetting />
             </ParallaxSection>
 
             {/* Solution Section - Static */}
             <div 
-              className="w-full relative overflow-hidden" 
+              className="w-full relative overflow-hidden bg-white" 
               id="solution-section" 
               style={{ zIndex: 5 }}
             >
               <div 
-                className="absolute inset-0 max-w-full" 
+                className="absolute inset-0 max-w-full bg-white" 
                 style={{ 
-                  background: 'linear-gradient(115deg, #49c628 0%, #49c628 100%)',
                   zIndex: 1
                 }}
               >
-                {/* Add a clean divider element */}
-                <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-[#49c628] to-transparent"></div>
+              
               </div>
-              <section className="w-full pt-16 pb-20 md:pb-24 lg:pb-20 mt-0 relative" 
+              <section className="w-full pt-16 pb-20 md:pb-24 lg:pb-20 mt-0 relative bg-white" 
                 style={{ zIndex: 2 }}>
                 {/* Solution sections - no Suspense boundaries for better performance */}
            
                
-                {/* After SustainableImpactSection and before StartupApplicationSection */}
                 <div 
-                  className="px-4 sm:px-6 lg:px-8 w-full -mb-8 md:-mb-12"
+                  className="px-4 sm:px-6 lg:px-8 w-full -mb-8 md:-mb-12 bg-white"
                   id="transition-section"
-                  style={{ background: '#f9f9f7' }}
                 >
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.4 }}
-                    className="text-center max-w-4xl mx-auto py-12 md:py-16"
+                    className="text-center max-w-4xl mx-auto py-16 md:py-24"
                   >
-                    <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-[#70f570] to-[#49c628] rounded-full shadow-sm mb-5">
-                      <ArrowRight size={16} className="text-white mr-2" />
-                      <span className="text-sm font-medium text-white font-helvetica tracking-wide">FOR STARTUPS</span>
+                    <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#70f570] to-[#49c628] rounded-full shadow-lg mb-6">
+                      <ArrowRight size={18} className="text-white mr-2" />
+                      <span className="text-sm font-medium text-white font-helvetica tracking-wider">STARTUP OPPORTUNITY</span>
                     </div>
                     
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-[1.15] text-gray-800 font-display mb-6">
-                      Accelerate Your Impact Today
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] font-display mb-8 text-black">
+                      Fund Your Vision
                     </h2>
                     
-                    <p className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed font-light font-body max-w-3xl mx-auto mb-10">
-                      Turn market insights into action. Join the startups that are building tomorrow&apos;s sustainable economy with strategic funding and expert guidance.
+                    <p className="text-base sm:text-lg md:text-xl leading-relaxed font-light font-body max-w-3xl mx-auto mb-12 text-black/80">
+                      Join the next generation of sustainable startups. We provide strategic funding, expert guidance, and access to a global network of impact investors.
                     </p>
                     
-                    <div className="flex flex-wrap justify-center gap-3 mb-8">
-                      <span className="bg-gradient-to-r from-[#70f570]/10 to-[#49c628]/10 text-green-700 px-4 py-1.5 rounded-full text-sm font-medium font-body shadow-sm">85% Success Rate</span>
-                      <span className="bg-gradient-to-r from-[#70f570]/10 to-[#49c628]/10 text-green-700 px-4 py-1.5 rounded-full text-sm font-medium font-body shadow-sm">Global Network</span>
-                      <span className="bg-gradient-to-r from-[#70f570]/10 to-[#49c628]/10 text-green-700 px-4 py-1.5 rounded-full text-sm font-medium font-body shadow-sm">Founder-Friendly</span>
+                    <div className="flex flex-wrap justify-center gap-4 mb-12">
+                      <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-white px-5 py-2 rounded-full text-sm font-medium font-body shadow-lg">$2M+ Average Funding</span>
+                      <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-white px-5 py-2 rounded-full text-sm font-medium font-body shadow-lg">Expert Mentorship</span>
+                      <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-white px-5 py-2 rounded-full text-sm font-medium font-body shadow-lg">Global Network</span>
                     </div>
                     
                     <Button 
                       asChild 
-                      className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:brightness-105 text-white font-medium
-                                shadow-sm hover:shadow-md transition-all duration-300 
-                                rounded-lg py-3 sm:py-4 px-6 sm:px-8 text-sm sm:text-base font-helvetica"
+                      className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-white hover:bg-gradient-to-l hover:from-[#70f570] hover:to-[#49c628] font-semibold
+                                shadow-xl hover:shadow-2xl transition-all duration-300 
+                                rounded-xl py-4 px-8 text-base font-helvetica
+                                hover:scale-105 transform"
                     >
                       <Link href="/apply">
                         <span className="flex items-center justify-center">
-                          Apply Now
-                          <ArrowRight className="ml-3 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform duration-300" />
+                          Apply for Funding
+                          <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
                         </span>
                       </Link>
                     </Button>
-                    
-                    {/* Visual divider with subtle effect */}
-                    <div className="w-full h-14 md:h-16 flex justify-center mt-12 md:mt-14 overflow-hidden">
-                      <div className="w-20 h-1 bg-gradient-to-r from-[#70f570]/50 to-[#49c628]/50 rounded-full"></div>
-                    </div>
                   </motion.div>
                 </div>
            
                 <div 
-                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mt-16"
+                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto mt-16 bg-white"
                   id="startup-section"
                 >
                   <StartupApplicationSection />
                 </div>
            
                 <div 
-                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
+                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto bg-white"
                   id="earn-section"
                 >
                   <EarnAsYouGrow />
                 </div>
                 <div 
-                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto"
+                  className="px-4 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto bg-white"
                   id="money-worth-section"
                 >
                   <MoneyWorthSection />

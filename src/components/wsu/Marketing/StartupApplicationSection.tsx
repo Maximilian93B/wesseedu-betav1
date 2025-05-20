@@ -31,7 +31,7 @@ export function StartupApplicationSection() {
       amount: "$50K-$250K",
       icon: <Sprout className="h-7 w-7" />,
       highlight: "Accelerate your growth with purpose-built funding designed to minimize equity dilution.",
-      accentColor: "from-green-400 via-emerald-400 to-teal-500"
+      accentColor: "from-[#70f570] via-[#5DDA5D] to-[#49c628]"
     },
     {
       title: "Growth Stage",
@@ -39,7 +39,7 @@ export function StartupApplicationSection() {
       amount: "$250K-$1M",
       icon: <LineChart className="h-7 w-7" />,
       highlight: "Unlock new markets and scale operations with smart capital backed by industry expertise.",
-      accentColor: "from-blue-400 via-sky-400 to-cyan-500"
+      accentColor: "from-[#70f570] via-[#5DDA5D] to-[#49c628]"
     },
     {
       title: "Impact Stage",
@@ -47,7 +47,7 @@ export function StartupApplicationSection() {
       amount: "$1M-$5M",
       icon: <PiggyBank className="h-7 w-7" />,
       highlight: "Leverage our global network to drive transformative growth and industry leadership.",
-      accentColor: "from-violet-400 via-purple-400 to-fuchsia-500"
+      accentColor: "from-[#70f570] via-[#5DDA5D] to-[#49c628]"
     }
   ];
 
@@ -56,27 +56,27 @@ export function StartupApplicationSection() {
     {
       title: "85% Success Rate",
       description: "Our startups boast an industry-leading success rate for securing follow-on funding",
-      icon: <Award className="h-5 w-5" />
+      icon: <Award className="h-5 w-5 text-white" />
     },
     {
       title: "Global Market Access",
       description: "Immediate connections to markets across 30+ countries and 100+ distribution channels",
-      icon: <Globe className="h-5 w-5" />
+      icon: <Globe className="h-5 w-5 text-white" />
     },
     {
       title: "Expert Growth Team",
       description: "Dedicated team of 20+ industry veterans who've scaled billion-dollar ventures",
-      icon: <Users className="h-5 w-5" />
+      icon: <Users className="h-5 w-5 text-white" />
     },
     {
       title: "3x Revenue Acceleration",
       description: "Our portfolio companies average 200% revenue growth within 12 months of funding",
-      icon: <LineChart className="h-5 w-5" />
+      icon: <LineChart className="h-5 w-5 text-white" />
     }
   ];
   
   return (
-    <div className="relative w-full overflow-hidden py-16 md:py-24 lg:py-32">
+    <div className="relative w-full overflow-hidden py-16 md:py-24 lg:py-32 bg-white">
       {/* Content container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col items-center gap-12 md:gap-16 lg:gap-20">
@@ -88,26 +88,26 @@ export function StartupApplicationSection() {
             variants={fadeIn}
             className="w-full text-center"
           >
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight sm:leading-none mb-4 sm:mb-5 text-shadow-sm">
-              <span className="inline-block text-white">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-tight sm:leading-none mb-4 sm:mb-5">
+              <span className="inline-block text-black">
                 Accelerate Your 
               </span>
               {" "}
               <span className="relative">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 drop-shadow-lg">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#49c628] to-[#70f570]">
                   Market Dominance
                 </span>
               </span>
             </h2>
             
-            <p className="text-white/90 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mt-4 sm:mt-5">
+            <p className="text-black/80 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed mt-4 sm:mt-5">
               WeSeedU delivers strategic capital, market access, and growth expertise to startups ready to scale their impact and profitability.
             </p>
             
             <div className="flex flex-wrap justify-center gap-3 mt-6">
-              <span className="bg-white/10 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">30+ Markets</span>
-              <span className="bg-white/10 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">$150M+ Deployed</span>
-              <span className="bg-white/10 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">85% Success Rate</span>
+              <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-black px-3 py-1 rounded-full text-sm font-medium">30+ Markets</span>
+              <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-black px-3 py-1 rounded-full text-sm font-medium">$150M+ Deployed</span>
+              <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-black px-3 py-1 rounded-full text-sm font-medium">85% Success Rate</span>
             </div>
           </motion.div>
           
@@ -140,7 +140,7 @@ export function StartupApplicationSection() {
             >
               <div className="relative w-full max-w-md lg:max-w-lg aspect-square">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] 
-                  bg-gradient-radial from-green-400/20 via-green-400/10 to-transparent rounded-full blur-3xl" />
+                  bg-gradient-radial from-[#70f570]/20 via-[#49c628]/10 to-transparent rounded-full blur-3xl" />
                 
                 <div className="relative z-10 scale-90 sm:scale-100">
                   <Image
@@ -148,10 +148,10 @@ export function StartupApplicationSection() {
                     alt="Sustainable Business Funding"
                     width={600}
                     height={600}
-                    className="relative z-20 drop-shadow-[0_25px_40px_rgba(0,0,0,0.35)] hover:scale-105 transition-transform duration-300"
+                    className="relative z-20 drop-shadow-[0_25px_40px_rgba(0,0,0,0.15)] hover:scale-105 transition-transform duration-300"
                     priority
                   />
-                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[60%] h-6 bg-black/20 blur-xl rounded-full"></div>
+                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[60%] h-6 bg-black/10 blur-xl rounded-full"></div>
                 </div>
               </div>
             </motion.div>
@@ -164,10 +164,10 @@ export function StartupApplicationSection() {
               variants={fadeIn}
               className="w-full md:w-1/2"
             >
-              <h3 className="text-3xl sm:text-4xl font-extrabold text-white mb-5 sm:mb-6">
+              <h3 className="text-3xl sm:text-4xl font-extrabold text-black mb-5 sm:mb-6">
                 <span className="relative inline-block">
                   Market Advantages
-                  <div className="absolute -bottom-2 left-0 h-[2px] w-full bg-gradient-to-r from-green-400 to-green-500/0" />
+                  <div className="absolute -bottom-2 left-0 h-[2px] w-full bg-gradient-to-r from-[#49c628] to-[#70f570]/0" />
                 </span>
               </h3>
               
@@ -178,14 +178,14 @@ export function StartupApplicationSection() {
                     key={index} 
                     onMouseEnter={() => setActiveFeature(index)}
                     onMouseLeave={() => setActiveFeature(null)}
-                    className={`flex items-start p-2 sm:p-3 rounded-xl transition-all duration-300 ${activeFeature === index ? 'bg-white/5' : ''}`}
+                    className={`flex items-start p-2 sm:p-3 rounded-xl transition-all duration-300 ${activeFeature === index ? 'bg-black/5' : ''}`}
                   >
-                    <div className={`p-2 sm:p-2.5 rounded-full bg-gradient-to-br from-green-400 to-green-500 mr-3 sm:mr-4 transition-all duration-300 ${activeFeature === index ? 'scale-110' : ''}`}>
+                    <div className={`p-2 sm:p-2.5 rounded-full bg-gradient-to-r from-[#70f570] to-[#49c628] mr-3 sm:mr-4 transition-all duration-300 ${activeFeature === index ? 'scale-110' : ''}`}>
                       {advantage.icon}
                     </div>
                     <div>
-                      <h4 className="text-white text-base font-bold mb-0.5 sm:mb-1">{advantage.title}</h4>
-                      <p className="text-white/80 text-sm sm:text-base">{advantage.description}</p>
+                      <h4 className="text-black text-base font-bold mb-0.5 sm:mb-1">{advantage.title}</h4>
+                      <p className="text-black/70 text-sm sm:text-base">{advantage.description}</p>
                     </div>
                   </div>
                 ))}
@@ -195,15 +195,13 @@ export function StartupApplicationSection() {
               <Button
                 asChild
                 size="lg"
-                className="relative overflow-hidden group bg-white text-black hover:bg-white/90 hover:text-green-900 shadow-lg rounded-xl transition-all duration-300 w-full sm:w-auto"
+                className="relative overflow-hidden group bg-gradient-to-r from-[#70f570] to-[#49c628] text-black hover:from-[#49c628] hover:to-[#70f570] shadow-lg rounded-xl transition-all duration-300 w-full sm:w-auto"
               >
                 <Link href="/apply-now" className="flex items-center justify-center font-bold py-4 sm:py-5 px-6 sm:px-10 text-base">
                   <span className="relative z-10">Fast-Track Your Application</span>
                   <span className="relative z-10 ml-2 group-hover:translate-x-1 transition-transform duration-200">
                     <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
                   </span>
-                  
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gray-50 transition-opacity duration-300" />
                 </Link>
               </Button>
             </motion.div>
