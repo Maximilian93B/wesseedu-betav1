@@ -16,7 +16,7 @@ import type { LottieRefCurrentProps } from "lottie-react"
 // Dynamically import Lottie with SSR disabled and preload control
 const Lottie = dynamic(() => import("lottie-react"), { 
   ssr: false,
-  loading: () => <div className="w-full h-full bg-gradient-to-br from-white/10 to-green-400/20 rounded-full animate-pulse"></div>
+  loading: () => <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200/50 rounded-full animate-pulse"></div>
 })
 
 // Simplified animation variants for better performance
@@ -66,18 +66,18 @@ export function BigFourVetting() {
   return (
     <div 
       ref={sectionRef}
-      className="relative overflow-hidden py-14 sm:py-18 md:py-22 lg:py-28"
+      className="relative overflow-hidden py-14 sm:py-18 md:py-22 lg:py-28 bg-white"
     >
       {/* Simplified pattern background with reduced opacity */}
       <div className="absolute inset-0 opacity-[0.03]" 
         style={{
-          backgroundImage: `radial-gradient(circle at 20px 20px, white 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 20px 20px, #333 1px, transparent 0)`,
           backgroundSize: '40px 40px'
         }}>
       </div>
       
       {/* Reduced decorative elements */}
-      <div className="absolute top-20 left-[5%] w-64 h-64 rounded-full bg-white/5 blur-[80px]"></div>
+      <div className="absolute top-20 left-[5%] w-64 h-64 rounded-full bg-green-500/5 blur-[80px]"></div>
       <div className="absolute bottom-20 right-[10%] w-80 h-80 rounded-full bg-green-300/10 blur-[80px]"></div>
       
       <motion.div
@@ -92,11 +92,11 @@ export function BigFourVetting() {
           
           <motion.div variants={itemVariants} className="overflow-hidden relative mb-8">
               <motion.h2 className="relative">
-                <span className="block text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-1">
+                <span className="block text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-800 mb-1">
                   Vetted & Funded by
                 </span>
                 <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold 
-                  bg-clip-text text-transparent bg-gradient-to-b from-white via-white/90 to-transparent">
+                  bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(115deg, #70f570, #49c628)' }}>
                   Global Partners
                 </span>
               </motion.h2>
@@ -104,7 +104,7 @@ export function BigFourVetting() {
             
             <motion.p 
               variants={itemVariants}
-              className="text-white text-base sm:text-lg leading-relaxed mb-10 max-w-lg font-medium"
+              className="text-gray-700 text-base sm:text-lg leading-relaxed mb-10 max-w-lg font-medium"
             >
               Every startup on our platform undergoes a rigorous triple validation process: Big Four accounting firms handle compliance vetting, the UN verifies sustainability impact alignment, and the Global Sustainability Fund (GSF) provides funding access.
             </motion.p>
@@ -118,12 +118,13 @@ export function BigFourVetting() {
                     variants={itemVariants}
                     className="flex items-center gap-5 group"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/30 to-green-400/40 flex items-center justify-center flex-shrink-0 border border-white/40 shadow-md">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border border-green-300 shadow-md" 
+                      style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
                       <span className="text-white font-bold text-sm">{index + 1}</span>
                     </div>
                     <div>
-                      <h4 className="text-white font-semibold text-base sm:text-lg">{step.title}</h4>
-                      <p className="text-white text-xs sm:text-sm mt-1">{step.description}</p>
+                      <h4 className="text-gray-800 font-semibold text-base sm:text-lg">{step.title}</h4>
+                      <p className="text-gray-600 text-xs sm:text-sm mt-1">{step.description}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -132,13 +133,15 @@ export function BigFourVetting() {
             
             {/* Stats - Simplified */}
             <motion.div variants={itemVariants} className="flex gap-6 mb-10">
-              <div className="bg-gradient-to-br from-white/20 to-green-500/30 rounded-xl px-5 py-4 text-center border border-white/30 shadow-md">
+              <div className="rounded-xl px-5 py-4 text-center border border-green-200 shadow-md" 
+                style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
                 <p className="text-2xl sm:text-3xl font-extrabold text-white mb-1">13%</p>
-                <p className="text-xs sm:text-sm text-white font-medium">Approval Rate</p>
+                <p className="text-xs sm:text-sm text-white/90 font-medium">Approval Rate</p>
               </div>
-              <div className="bg-gradient-to-br from-white/20 to-green-500/30 rounded-xl px-5 py-4 text-center border border-white/30 shadow-md">
+              <div className="rounded-xl px-5 py-4 text-center border border-green-200 shadow-md"
+                style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
                 <p className="text-2xl sm:text-3xl font-extrabold text-white mb-1">100%</p>
-                <p className="text-xs sm:text-sm text-white font-medium">UN SDG Aligned</p>
+                <p className="text-xs sm:text-sm text-white/90 font-medium">UN SDG Aligned</p>
               </div>
             </motion.div>
             
@@ -146,8 +149,8 @@ export function BigFourVetting() {
             <motion.div variants={itemVariants}>
               <Button
                 asChild
-                className="bg-gradient-to-r from-white to-green-50 hover:from-green-50 hover:to-white text-green-800 shadow-md
-                  rounded-xl px-7 py-6 text-sm font-semibold group"
+                className="text-white shadow-md rounded-xl px-7 py-6 text-sm font-semibold group"
+                style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}
               >
                 <Link href="/company-vetting">
                   <span className="relative z-10 flex items-center">
@@ -191,10 +194,6 @@ export function BigFourVetting() {
                   )}
                 </motion.div>
                 
-                {/* Single simplified glow effect */}
-                <div 
-                  className="absolute inset-0 -z-10 bg-gradient-to-r from-green-300/20 to-green-600/20 rounded-full blur-[100px]"
-                ></div>
               </motion.div>
             </div>
           </motion.div>

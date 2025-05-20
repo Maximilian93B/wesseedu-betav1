@@ -80,8 +80,8 @@ const animations = {
 const styles = {
   gradientButton: "group text-white shadow-lg hover:shadow-xl transition-all duration-300 ease-out hover:translate-y-[-2px] rounded-xl px-7 sm:px-10 py-6 sm:py-7 font-medium relative overflow-hidden w-48 sm:w-auto",
   featureBlock: "flex flex-col group mb-8 sm:mb-0",
-  featureTitle: "text-lg sm:text-xl font-semibold text-white mb-3 font-display",
-  featureBar: "w-10 h-1 bg-gradient-to-r from-slate-300 to-transparent mb-4 rounded-full transition-all duration-300 group-hover:w-16",
+  featureTitle: "text-lg sm:text-xl font-semibold text-black mb-3 font-display",
+  featureBar: "w-32 h-1 bg-gradient-to-r from-[#6a5acd] to-transparent mb-4 rounded-full transition-all duration-300 group-hover:w-16",
   mobileDivider: "sm:hidden w-full h-[1px] bg-white/30 mt-8"
 }
 
@@ -143,7 +143,7 @@ export function HeroSection() {
           
           <motion.div variants={animationVariants.item} className="overflow-hidden relative mb-5 sm:mb-10">
             <motion.h1 
-              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.2] text-white font-display"
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.2] text-[#49c628] font-display"
             >
               Grow a<br className="hidden sm:block" />
               <span className="sm:hidden"> </span>Sustainable Future
@@ -152,7 +152,7 @@ export function HeroSection() {
           
           <motion.p 
             variants={animationVariants.item}
-            className="text-white text-sm sm:text-base md:text-xl leading-relaxed mb-8 sm:mb-18 max-w-xl font-light font-body"
+            className="text-black text-sm sm:text-base md:text-xl leading-relaxed mb-8 sm:mb-18 max-w-xl font-light font-body"
           >
             A Platform to build a greener tomorrow through funding sustainable projects that benefit both your finances and our planet.
           </motion.p>
@@ -161,7 +161,7 @@ export function HeroSection() {
             <Button
               asChild
               size="lg"
-              className="bg-white text-black hover:bg-white/90 hover:text-green-900 border border-white/20 shadow-lg rounded-xl px-8 py-6 font-semibold transition-all duration-300 font-helvetica"
+              className="bg-[#49c628] text-white hover:brightness-105 border border-[#49c628]/20 shadow-lg rounded-xl px-8 py-6 font-semibold transition-all duration-300 font-helvetica"
             >
               <Link href="/auth/signup">
                 <span className="relative z-10 flex items-center justify-center">
@@ -253,8 +253,7 @@ export function HeroSection() {
       {/* Divider - simplified for better performance */}
       <motion.div variants={animationVariants.item} className="w-full my-8 sm:my-0 sm:mb-12 sm:mt-10">
         <div className="relative w-full">
-          {/* Mobile: Full width white line */}
-          <div className="sm:hidden w-full h-[1px] bg-white/80"></div>
+      
           
           {/* Desktop: Simplified gradient divider (hidden on mobile) */}
           <div className="hidden sm:block w-full h-[2px] bg-gradient-to-r from-white via-white/80 to-transparent rounded-full"></div>
@@ -268,7 +267,7 @@ export function HeroSection() {
           <div className={styles.featureBlock}>
             <div className={styles.featureBar}></div>
             <h3 className={styles.featureTitle}>Exclusive access</h3>
-            <p className="text-white text-sm leading-relaxed font-body">Get sophisticated investment opportunities traditionally reserved for industry insiders.</p>
+            <p className="text-black text-sm leading-relaxed font-body">Get sophisticated investment opportunities traditionally reserved for industry insiders.</p>
             <div className={styles.mobileDivider}></div>
           </div>
           
@@ -276,7 +275,7 @@ export function HeroSection() {
           <div className={styles.featureBlock}>
             <div className={styles.featureBar}></div>
             <h3 className={styles.featureTitle}>Vetted projects by the UN and GSF</h3>
-            <p className="text-white text-sm leading-relaxed font-body">We only fund projects that are verified by the UN and GSF.</p>
+            <p className="text-black text-sm leading-relaxed font-body">We only fund projects that are verified by the UN and GSF.</p>
             <div className={styles.mobileDivider}></div>
           </div>
           
@@ -284,7 +283,7 @@ export function HeroSection() {
           <div className={styles.featureBlock}>
             <div className={styles.featureBar}></div>
             <h3 className={styles.featureTitle}>Community-driven</h3>
-            <p className="text-white text-sm leading-relaxed font-body">WeSeedU is a community-driven platform that allows you to invest with transparency and trust.</p>
+            <p className="text-black text-sm leading-relaxed font-body">WeSeedU is a community-driven platform that allows you to invest with transparency and trust.</p>
           </div>
         </div>
       </motion.div>

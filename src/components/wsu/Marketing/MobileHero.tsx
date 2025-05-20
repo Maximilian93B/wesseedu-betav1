@@ -77,17 +77,17 @@ const cardVariant = {
 // Features data
 const features = [
   {
-    icon: <BarChart3 size={20} className="text-white" />,
+    icon: <BarChart3 size={20} className="text-[#6a5acd]" />,
     title: "Low fees meet higher yields",
     description: "Your money's always making more with low-fee investing and high-interest savings."
   },
   {
-    icon: <ShieldCheck size={20} className="text-white" />,
+    icon: <ShieldCheck size={20} className="text-[#6a5acd]" />,
     title: "Unmatched access",
     description: "Get sophisticated investment opportunities traditionally reserved for industry insiders."
   },
   {
-    icon: <BarChart3 size={20} className="text-white" />,
+    icon: <BarChart3 size={20} className="text-[#6a5acd]" />,
     title: "Smart & simple",
     description: "In just a few taps, set your financial goals in motion with our easy-to-use products."
   }
@@ -142,12 +142,12 @@ export function MobileHero() {
       animate="visible"
       variants={animationVariants.container}
       className="w-full mx-auto px-6 py-10 relative"
-      style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}
+      style={{ background: 'white' }}
     >
       {/* Subtle background pattern */}
       <div className="absolute inset-0 opacity-5 z-0" 
         style={{
-          backgroundImage: `radial-gradient(circle at 25px 25px, white 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 25px 25px, #6a5acd 1px, transparent 0)`,
           backgroundSize: '50px 50px'
         }}
       />
@@ -169,13 +169,13 @@ export function MobileHero() {
             className="overflow-hidden relative mb-8"
           >
             <motion.h1 
-              className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.2] text-white font-display"
+              className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.2] text-[#49c628] font-display"
             >
               Grow a <br className="hidden xs:block" />
               <span className="relative inline-block">
                 Sustainable Future
                 <motion.div 
-                  className="absolute -bottom-1 left-0 h-[3px] bg-gradient-to-r from-white/40 via-white/60 to-white/40"
+                  className="absolute -bottom-1 left-0 h-[3px] bg-gradient-to-r from-[#49c628]/40 via-[#49c628]/60 to-[#49c628]/40"
                   initial={{ width: 0 }}
                   animate={{ width: '100%' }}
                   transition={{ delay: 0.4, duration: 0.5 }}
@@ -186,7 +186,7 @@ export function MobileHero() {
           
           <motion.p 
             variants={animationVariants.item}
-            className="text-white text-lg sm:text-xl md:text-2xl leading-relaxed mb-10 font-light font-body"
+            className="text-[#49c628] text-lg sm:text-xl md:text-2xl leading-relaxed mb-10 font-light font-body"
           >
             Join the movement to build a greener tomorrow through sustainable investments that benefit both your finances and our planet.
           </motion.p>
@@ -200,9 +200,9 @@ export function MobileHero() {
           >
             <Button
               asChild
-              className="bg-white text-black hover:bg-white/90 hover:text-green-900 font-medium px-8 sm:px-10 py-5 sm:py-6 rounded-lg text-base sm:text-lg
+              className="bg-[#49c628] text-white hover:brightness-105 hover:text-white font-medium px-8 sm:px-10 py-5 sm:py-6 rounded-lg text-base sm:text-lg
                 shadow-[0_4px_10px_rgba(0,0,0,0.07)] hover:shadow-[0_6px_15px_rgba(0,0,0,0.1)]
-                transition-all duration-300 ease-out hover:translate-y-[-2px)] border border-white/20"
+                transition-all duration-300 ease-out hover:translate-y-[-2px)] border border-[#49c628]/20"
             >
               <Link href="/auth/signup">
                 <span className="relative z-10 flex items-center justify-center">
@@ -279,7 +279,7 @@ export function MobileHero() {
         variants={animationVariants.item} 
         className="w-full my-6 relative z-10 px-1"
       >
-        <div className="w-10 h-1 bg-gradient-to-r from-white/40 to-transparent mb-4 rounded-full"></div>
+        <div className="w-10 h-2 bg-gradient-to-r from-[#6a5acd] to-transparent mb-4 rounded-full"></div>
       </motion.div>
       
       {/* Features section - simplified */}
@@ -289,17 +289,17 @@ export function MobileHero() {
             <div key={index} className="flex flex-col group mb-8 sm:mb-0">
               <div className="flex items-center mb-3">
                 <motion.div 
-                  className="flex-shrink-0 h-10 w-10 rounded-full bg-white/20 flex items-center justify-center mr-3 border border-white/40"
+                  className="flex-shrink-0 h-10 w-10 rounded-full bg-[#6a5acd]/20 flex items-center justify-center mr-3 border border-[#6a5acd]/40"
                   variants={animationVariants.icon}
                   whileHover="hover"
                 >
                   {feature.icon}
                 </motion.div>
               </div>
-              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3 font-display">{feature.title}</h3>
-              <p className="text-white text-base sm:text-lg leading-relaxed font-body">{feature.description}</p>
+              <h3 className="text-xl sm:text-2xl font-semibold text-[#49c628] mb-3 font-display">{feature.title}</h3>
+              <p className="text-black text-base sm:text-lg leading-relaxed font-body">{feature.description}</p>
               {index < features.length - 1 && (
-                <div className="w-full h-[1px] bg-white/20 mt-8"></div>
+                <div className="w-full h-[1px] bg-[#6a5acd]/20 mt-8"></div>
               )}
             </div>
           ))}
@@ -312,14 +312,14 @@ export function MobileHero() {
         className="w-full mt-10 relative z-10"
       >
         <div className="flex flex-wrap justify-center gap-x-6 sm:gap-x-10 gap-y-3 sm:gap-y-5 w-full">
-          <span className="flex items-center text-sm sm:text-base text-white font-body">
-            <div className="flex items-center justify-center h-6 w-6 rounded-full bg-white/20 text-white mr-3 border border-white/40 shadow-md">
+          <span className="flex items-center text-sm sm:text-base text-black font-body">
+            <div className="flex items-center justify-center h-6 w-6 rounded-full bg-[#6a5acd]/20 text-[#6a5acd] mr-3 border border-[#6a5acd]/40 shadow-md">
               <Check size={12} />
             </div>
             <span className="font-medium">Data-driven approach</span>
           </span>
-          <span className="flex items-center text-sm sm:text-base text-white font-body">
-            <div className="flex items-center justify-center h-6 w-6 rounded-full bg-white/20 text-white mr-3 border border-white/40 shadow-md">
+          <span className="flex items-center text-sm sm:text-base text-black font-body">
+            <div className="flex items-center justify-center h-6 w-6 rounded-full bg-[#6a5acd]/20 text-[#6a5acd] mr-3 border border-[#6a5acd]/40 shadow-md">
               <Check size={12} />
             </div>
             <span className="font-medium">Regular updates</span>

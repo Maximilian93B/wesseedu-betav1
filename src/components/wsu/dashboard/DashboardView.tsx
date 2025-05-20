@@ -207,26 +207,32 @@ export function DashboardView({ user, quickActionsComponent }: DashboardViewProp
         return dateA.getTime() - dateB.getTime();
       });
       
-      // Take last 7 months or fill with sample data if less
+      // Take last 7 months or fill with empty data if less
       const finalChartData = chartData.length >= 7 
         ? chartData.slice(-7) 
-        : [...Array(7 - chartData.length).fill(null).map((_, i) => ({
-            month: `Month ${i+1}`,
-            amount: 0
-          })), ...chartData];
+        : [...Array(7 - chartData.length).fill(null).map((_, i) => {
+            // Create empty months with zero values instead of fake data
+            const date = new Date();
+            date.setMonth(date.getMonth() - (7 - chartData.length) + i);
+            return {
+              month: date.toLocaleString('default', { month: 'short' }),
+              amount: 0
+            };
+          }), ...chartData];
           
       setInvestmentData(finalChartData);
     } else {
-      // Use sample data if no investments
-      setInvestmentData([
-        { month: "Jan", amount: 1000 },
-        { month: "Feb", amount: 2200 },
-        { month: "Mar", amount: 1800 },
-        { month: "Apr", amount: 2400 },
-        { month: "May", amount: 3200 },
-        { month: "Jun", amount: 2800 },
-        { month: "Jul", amount: 3600 },
-      ]);
+      // Use empty data instead of sample data, showing last 7 months with zero values
+      const emptyData = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        emptyData.push({
+          month: date.toLocaleString('default', { month: 'short' }),
+          amount: 0
+        });
+      }
+      setInvestmentData(emptyData);
     }
   }, []);
   

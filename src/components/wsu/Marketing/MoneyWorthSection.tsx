@@ -106,7 +106,7 @@ export function MoneyWorthSection() {
   };
 
   return (
-    <div ref={sectionRef} className="relative w-full overflow-hidden py-8 sm:py-12 md:py-16">
+    <div ref={sectionRef} className="relative w-full overflow-hidden py-8 sm:py-12 md:py-16 bg-white">
       <motion.div
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
@@ -118,20 +118,20 @@ export function MoneyWorthSection() {
           <div className="w-full flex flex-col items-center text-center relative mb-8 sm:mb-10">
             <motion.div variants={itemVariants} className="overflow-hidden relative mb-4">
               <motion.h2 
-                className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1]"
+                className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1]"
               >
-                Grow Wealth.<br />
-                <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] bg-clip-text text-transparent">Grow Wealth.</span><br />
+                <span className="relative inline-block bg-gradient-to-r from-[#70f570] to-[#49c628] bg-clip-text text-transparent">
                   Create Impact.
                 </span>
               </motion.h2>
             </motion.div>
             
-            <motion.div variants={itemVariants} className="w-20 h-0.5 bg-white/30 mb-5 rounded-full"></motion.div>
+            <motion.div variants={itemVariants} className="w-20 h-0.5 bg-gradient-to-r from-[#70f570] to-[#49c628] mb-5 rounded-full"></motion.div>
             
             <motion.p 
               variants={itemVariants}
-              className="text-white text-base sm:text-lg leading-relaxed mb-7 max-w-[280px] sm:max-w-md" 
+              className="text-black/80 text-base sm:text-lg leading-relaxed mb-7 max-w-[280px] sm:max-w-md" 
             >
               Fund sustainable innovation. Create real impact.
             </motion.p>
@@ -143,7 +143,7 @@ export function MoneyWorthSection() {
               <Button
                 asChild
                 size={isMobile ? "default" : "default"}
-                className="bg-white hover:bg-slate-50 text-black shadow-[0_4px_10px_rgba(0,0,0,0.07)]
+                className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:from-[#49c628] hover:to-[#70f570] text-white shadow-[0_4px_10px_rgba(0,0,0,0.07)]
                   hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out
                   hover:translate-y-[-2px] rounded-lg px-5 sm:px-7 py-2.5 font-medium relative overflow-hidden group"
               >
@@ -161,7 +161,7 @@ export function MoneyWorthSection() {
           <div className="relative w-full h-[280px] sm:h-[350px] md:h-[420px] flex items-center justify-center">
             {/* Base shadow for 3D depth effect - positioned for better mobile view */}
             <motion.div
-              className="absolute bottom-[-5px] left-[20%] right-[20%] sm:left-[16%] sm:right-[16%] h-20 sm:h-40 bg-gradient-to-t from-black/40 to-transparent blur-xl rounded-[50%]"
+              className="absolute bottom-[-5px] left-[20%] right-[20%] sm:left-[16%] sm:right-[16%] h-20 sm:h-40 bg-gradient-to-t from-[#49c628]/20 to-transparent blur-xl rounded-[50%]"
               initial="initial"
               animate={isInView ? "animate" : "initial"}
               variants={shadowVariants}
@@ -176,7 +176,7 @@ export function MoneyWorthSection() {
               <div className="absolute bottom-[-5px] left-1/2 -translate-x-1/2 z-0">
                 {/* Primary shadow - adaptive sizing */}
                 <motion.div 
-                  className="w-[220px] sm:w-[320px] h-[22px] sm:h-[32px] rounded-[50%] bg-slate-500/20 blur-xl"
+                  className="w-[220px] sm:w-[320px] h-[22px] sm:h-[32px] rounded-[50%] bg-[#49c628]/15 blur-xl"
                   initial="initial"
                   animate={isInView ? "animate" : "initial"}
                   variants={shadowVariants}

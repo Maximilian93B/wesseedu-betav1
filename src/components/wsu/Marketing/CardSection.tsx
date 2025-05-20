@@ -137,9 +137,7 @@ export function CardSection() {
   }, [disableAnimations]);
   
   return (
-    <div className="w-full relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden">
-      {/* Green Apple gradient background */}
-      
+    <div className="w-full relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden" style={{ background: 'linear-gradient(115deg, #70f570, #49c628)' }}>
       {/* Background pattern - reduced opacity for better performance */}
       <div 
         className="absolute inset-0 opacity-[0.02]"
@@ -175,7 +173,7 @@ export function CardSection() {
             className="inline-block mb-4 sm:mb-5"
           >
             <span className="inline-flex items-center px-3 py-1 text-[10px] sm:text-xs font-medium rounded-full text-white border border-white/30 shadow-sm"
-              style={{ background: 'linear-gradient(115deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))' }}
+              style={{ background: 'rgba(255,255,255,0.15)' }}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse mr-1.5"></span>
               Platform Testing - Now open
@@ -230,14 +228,14 @@ export function CardSection() {
           <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex justify-between items-center z-30 px-0 sm:-mx-6 md:-mx-10 lg:-mx-16">
             <button 
               onClick={prevSlide}
-              className="w-8 h-8 sm:w-9 md:w-10 sm:h-9 md:h-10 rounded-full bg-white/50 backdrop-blur-md text-black flex items-center justify-center border border-white/50 shadow-lg hover:bg-white/70 transition-all duration-300"
+              className="w-8 h-8 sm:w-9 md:w-10 sm:h-9 md:h-10 rounded-full bg-white text-[#49c628] flex items-center justify-center border border-white/70 shadow-lg hover:bg-white/90 transition-all duration-300"
               aria-label="Previous slide"
             >
               <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 rotate-180" />
             </button>
             <button 
               onClick={nextSlide}
-              className="w-8 h-8 sm:w-9 md:w-10 sm:h-9 md:h-10 rounded-full bg-white/50 backdrop-blur-md text-black flex items-center justify-center border border-white/50 shadow-lg hover:bg-white/70 transition-all duration-300"
+              className="w-8 h-8 sm:w-9 md:w-10 sm:h-9 md:h-10 rounded-full bg-white text-[#49c628] flex items-center justify-center border border-white/70 shadow-lg hover:bg-white/90 transition-all duration-300"
               aria-label="Next slide"
             >
               <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -341,7 +339,7 @@ export function CardSection() {
         
         {/* Bottom note/footer */}
         <div className="w-full text-center mt-4 sm:mt-5 mb-2 sm:mb-3">
-          <div className="inline-flex flex-wrap justify-center items-center px-3 py-2 sm:px-4 sm:py-2.5 bg-white/10 backdrop-blur-md text-white border border-white/30 rounded-full shadow-sm">
+          <div className="inline-flex flex-wrap justify-center items-center px-3 py-2 sm:px-4 sm:py-2.5 bg-white/10 backdrop-blur-sm text-white border border-white/30 rounded-full shadow-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-white/80 mr-2 animate-pulse"></span>
             <span className="text-xs sm:text-sm font-medium font-helvetica">Limited spots</span>
             <span className="mx-1.5 sm:mx-2.5 text-white/50">•</span>

@@ -53,11 +53,11 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
   ];
 
   return (
-    <div className="w-full overflow-hidden relative py-4 sm:py-6" ref={containerRef}>
+    <div className="w-full overflow-hidden relative py-4 sm:py-6 bg-white" ref={containerRef}>
       {/* Background pattern - lighter for mobile */}
       <div className="absolute inset-0 opacity-[0.03] sm:opacity-[0.04]" 
         style={{ 
-          backgroundImage: `radial-gradient(circle at 20px 20px, white 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 20px 20px, #49c628 1px, transparent 0)`,
           backgroundSize: isMobile ? "30px 30px" : "40px 40px"
         }} 
       />
@@ -73,20 +73,20 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
               variants={fadeInUpVariant}
               className="max-w-md space-y-8 sm:space-y-12"
             >
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight tracking-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]">
-                <span className="text-white">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
+                <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] bg-clip-text text-transparent">
                   Reach a<br className="hidden xs:inline" /> milestone,
                 </span>
                 <br />
-                <span className="text-white">earn a reward</span>
+                <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] bg-clip-text text-transparent">earn a reward</span>
               </h2>
               
               <div className="space-y-4 sm:space-y-6">
-                <p className="text-white/90 text-lg sm:text-xl max-w-md leading-relaxed">
+                <p className="text-black/80 text-lg sm:text-xl max-w-md leading-relaxed">
                   Your investment journey passes through three growth stages: ROOT, THRIVE, and IMPACT. Each stage represents progress in your sustainable investment portfolio.
                 </p>
                 
-                <p className="text-white/80 text-lg sm:text-xl max-w-md leading-relaxed">
+                <p className="text-black/70 text-lg sm:text-xl max-w-md leading-relaxed">
                   As you advance through each stage, you&apos;ll unlock new features and benefits that enhance your investment experience.
                 </p>
               </div>
@@ -99,7 +99,7 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
                 <Button 
                   variant="default" 
                   size={isMobile ? "default" : "lg"}
-                  className="bg-white hover:bg-slate-50 text-black
+                  className="bg-gradient-to-r from-[#70f570] to-[#49c628] hover:from-[#49c628] hover:to-[#70f570] text-white
                     shadow-[0_4px_16px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.2)] 
                     transition-all duration-300 ease-out font-medium text-lg
                     hover:translate-y-[-3px] rounded-xl px-4 sm:px-6 py-4 sm:py-6"
@@ -115,14 +115,14 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
           {/* Right side - Rewards Visualization */}
           <div className="w-full md:w-1/2 flex items-center justify-center relative mt-6 md:mt-0">
             {/* Subtle background shadow */}
-            <div className="absolute w-[80%] h-[80%] top-[10%] left-[10%] rounded-full bg-black/5 blur-3xl"></div>
+            <div className="absolute w-[80%] h-[80%] top-[10%] left-[10%] rounded-full bg-[#49c628]/5 blur-3xl"></div>
             
             <div className="relative h-[400px] sm:h-[500px] md:h-[650px] lg:h-[680px] flex items-center justify-center w-full">
               {/* Subtle back-lighting effect - reduced for mobile */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] sm:w-[550px] h-[85%] sm:h-[550px] 
-                bg-gradient-radial from-white/40 via-transparent to-transparent rounded-full blur-xl"></div>
+                bg-gradient-radial from-[#70f570]/20 via-transparent to-transparent rounded-full blur-xl"></div>
               
-              {/* Main pulsing white glow - simplified for mobile */}
+              {/* Main pulsing glow - simplified for mobile */}
               <motion.div 
                 className="absolute inset-0 pointer-events-none"
                 initial="initial"
@@ -130,7 +130,7 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
                 variants={pulseVariant}
               >
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-[580px] h-[90%] sm:h-[580px] 
-                  bg-gradient-radial from-white/45 via-white/25 to-transparent rounded-full blur-3xl"></div>
+                  bg-gradient-radial from-[#49c628]/15 via-[#70f570]/10 to-transparent rounded-full blur-3xl"></div>
               </motion.div>
               
               {/* Rewards image with refined shading and shadows - adaptive sizing */}
@@ -168,7 +168,7 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
 
       {/* Bottom gradient transition */}
       <div className="relative h-16 sm:h-28 md:h-36 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#49c628]/30 to-transparent"></div>
       </div>
     </div>
   );
