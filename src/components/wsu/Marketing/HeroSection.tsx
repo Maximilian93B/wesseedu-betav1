@@ -143,7 +143,7 @@ export function HeroSection() {
           
           <motion.div variants={animationVariants.item} className="overflow-hidden relative mb-5 sm:mb-10">
             <motion.h1 
-              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.2] text-[#49c628] font-display"
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.2] text-black font-display"
             >
               Grow a<br className="hidden sm:block" />
               <span className="sm:hidden"> </span>Sustainable Future

@@ -73,12 +73,12 @@ export const EarnAsYouGrow = memo(function EarnAsYouGrow() {
               variants={fadeInUpVariant}
               className="max-w-md space-y-8 sm:space-y-12"
             >
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] bg-clip-text text-transparent">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight">
+                <span className="text-black drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
                   Reach a<br className="hidden xs:inline" /> milestone,
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] bg-clip-text text-transparent">earn a reward</span>
+                <span className="text-black drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">earn a reward</span>
               </h2>
               
               <div className="space-y-4 sm:space-y-6">

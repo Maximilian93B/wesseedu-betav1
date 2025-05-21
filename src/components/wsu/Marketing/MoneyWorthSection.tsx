@@ -118,10 +118,10 @@ export function MoneyWorthSection() {
           <div className="w-full flex flex-col items-center text-center relative mb-8 sm:mb-10">
             <motion.div variants={itemVariants} className="overflow-hidden relative mb-4">
               <motion.h2 
-                className="text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1]"
+                className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.1]"
               >
-                <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] bg-clip-text text-transparent">Grow Wealth.</span><br />
-                <span className="relative inline-block bg-gradient-to-r from-[#70f570] to-[#49c628] bg-clip-text text-transparent">
+                <span className="text-black drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">Grow Wealth.</span><br />
+                <span className="relative inline-block text-black drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
                   Create Impact.
                 </span>
               </motion.h2>

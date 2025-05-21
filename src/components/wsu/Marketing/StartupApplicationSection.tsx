@@ -94,7 +94,7 @@ export function StartupApplicationSection() {
               </span>
               {" "}
               <span className="relative">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#49c628] to-[#70f570]">
+                <span className="text-black font-extrabold transform hover:scale-105 transition-transform duration-300 hover:rotate-1 hover:skew-y-1">
                   Market Dominance
                 </span>
               </span>
@@ -105,9 +105,9 @@ export function StartupApplicationSection() {
             </p>
             
             <div className="flex flex-wrap justify-center gap-3 mt-6">
-              <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-black px-3 py-1 rounded-full text-sm font-medium">30+ Markets</span>
-              <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-black px-3 py-1 rounded-full text-sm font-medium">$150M+ Deployed</span>
-              <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-black px-3 py-1 rounded-full text-sm font-medium">85% Success Rate</span>
+              <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-white px-3 py-1 rounded-full text-sm font-medium">30+ Markets</span>
+              <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-white px-3 py-1 rounded-full text-sm font-medium">$150M+ Deployed</span>
+              <span className="bg-gradient-to-r from-[#70f570] to-[#49c628] text-white px-3 py-1 rounded-full text-sm font-medium">85% Success Rate</span>
             </div>
           </motion.div>
           
@@ -164,40 +164,42 @@ export function StartupApplicationSection() {
               variants={fadeIn}
               className="w-full md:w-1/2"
             >
-              <h3 className="text-3xl sm:text-4xl font-extrabold text-black mb-5 sm:mb-6">
-                <span className="relative inline-block">
-                  Market Advantages
-                  <div className="absolute -bottom-2 left-0 h-[2px] w-full bg-gradient-to-r from-[#49c628] to-[#70f570]/0" />
-                </span>
-              </h3>
-              
-              {/* Market advantages list */}
-              <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-                {marketAdvantages.map((advantage, index) => (
-                  <div 
-                    key={index} 
-                    onMouseEnter={() => setActiveFeature(index)}
-                    onMouseLeave={() => setActiveFeature(null)}
-                    className={`flex items-start p-2 sm:p-3 rounded-xl transition-all duration-300 ${activeFeature === index ? 'bg-black/5' : ''}`}
-                  >
-                    <div className={`p-2 sm:p-2.5 rounded-full bg-gradient-to-r from-[#70f570] to-[#49c628] mr-3 sm:mr-4 transition-all duration-300 ${activeFeature === index ? 'scale-110' : ''}`}>
-                      {advantage.icon}
+              <div className="bg-gradient-to-br from-[#70f570] to-[#49c628] p-6 sm:p-8 rounded-2xl border border-[#49c628]/20 shadow-lg">
+                <h3 className="text-3xl sm:text-4xl font-extrabold text-white mb-5 sm:mb-6">
+                  <span className="relative inline-block">
+                    Market Advantages
+                    <div className="absolute -bottom-2 left-0 h-[2px] w-full bg-gradient-to-r from-[#49c628] to-[#70f570]/0" />
+                  </span>
+                </h3>
+                
+                {/* Market advantages list */}
+                <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                  {marketAdvantages.map((advantage, index) => (
+                    <div 
+                      key={index} 
+                      onMouseEnter={() => setActiveFeature(index)}
+                      onMouseLeave={() => setActiveFeature(null)}
+                      className={`flex items-start p-2 sm:p-3 rounded-xl transition-all duration-300 ${activeFeature === index ? 'bg-white/50 backdrop-blur-sm' : ''}`}
+                    >
+                      <div className={`p-2 sm:p-2.5 rounded-full bg-gradient-to-r from-[#70f570] to-[#49c628] mr-3 sm:mr-4 transition-all duration-300 ${activeFeature === index ? 'scale-110' : ''}`}>
+                        {advantage.icon}
+                      </div>
+                      <div>
+                        <h4 className="text-slate-900 text-base font-bold mb-0.5 sm:mb-1">{advantage.title}</h4>
+                        <p className="text-slate-900/70 text-sm sm:text-base">{advantage.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-black text-base font-bold mb-0.5 sm:mb-1">{advantage.title}</h4>
-                      <p className="text-black/70 text-sm sm:text-base">{advantage.description}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-              
+      
               {/* CTA button */}
               <Button
                 asChild
                 size="lg"
-                className="relative overflow-hidden group bg-gradient-to-r from-[#70f570] to-[#49c628] text-black hover:from-[#49c628] hover:to-[#70f570] shadow-lg rounded-xl transition-all duration-300 w-full sm:w-auto"
+                className="relative overflow-hidden group bg-gradient-to-r from-[#70f570] to-[#49c628] text-white hover:from-[#49c628] hover:to-[#70f570] shadow-lg rounded-xl transition-all duration-300 w-full sm:w-auto mt-10"
               >
-                <Link href="/apply-now" className="flex items-center justify-center font-bold py-4 sm:py-5 px-6 sm:px-10 text-base">
+                <Link href="/apply-now" className="flex items-center justify-center font-bold py-4 sm:py-5 px-6 sm:px-10 text-base ">
                   <span className="relative z-10">Fast-Track Your Application</span>
                   <span className="relative z-10 ml-2 group-hover:translate-x-1 transition-transform duration-200">
                     <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />

@@ -92,11 +92,10 @@ export function BigFourVetting() {
           
           <motion.div variants={itemVariants} className="overflow-hidden relative mb-8">
               <motion.h2 className="relative">
-                <span className="block text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-800 mb-1">
+                <span className="block text-3xl sm:text-4xl md:text-5xl font-black text-black mb-1 drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
                   Vetted & Funded by
                 </span>
-                <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold 
-                  bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(115deg, #70f570, #49c628)' }}>
+                <span className="text-3xl sm:text-4xl md:text-5xl font-black text-black drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
                   Global Partners
                 </span>
               </motion.h2>
