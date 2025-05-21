@@ -169,7 +169,7 @@ export function MobileHero() {
             className="overflow-hidden relative mb-8"
           >
             <motion.h1 
-              className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.2] text-[#49c628] font-display"
+              className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.2] text-black font-display"
             >
               Grow a <br className="hidden xs:block" />
               <span className="relative inline-block">
@@ -186,7 +186,7 @@ export function MobileHero() {
           
           <motion.p 
             variants={animationVariants.item}
-            className="text-[#49c628] text-lg sm:text-xl md:text-2xl leading-relaxed mb-10 font-light font-body"
+            className="text-black text-lg sm:text-xl md:text-2xl leading-relaxed mb-10 font-light font-body"
           >
             Join the movement to build a greener tomorrow through sustainable investments that benefit both your finances and our planet.
           </motion.p>
@@ -296,7 +296,7 @@ export function MobileHero() {
                   {feature.icon}
                 </motion.div>
               </div>
-              <h3 className="text-xl sm:text-2xl font-semibold text-[#49c628] mb-3 font-display">{feature.title}</h3>
+              <h3 className="text-xl sm:text-2xl font-semibold text-black mb-3 font-display">{feature.title}</h3>
               <p className="text-black text-base sm:text-lg leading-relaxed font-body">{feature.description}</p>
               {index < features.length - 1 && (
                 <div className="w-full h-[1px] bg-[#6a5acd]/20 mt-8"></div>
